@@ -723,7 +723,7 @@ class RewardModel:
             vlm_labels = np.array(vlm_labels).reshape(-1, 1)
             useful_indices = (np.array(useful_indices) == 1).flatten()
 
-            # Preserve all useful queries and also ALWAYS log -1 labels.
+            # Change: Preserve all useful queries and also ALWAYS log -1 labels.
             # This only changes what we write to CSV and does NOT affect
             # training indices (see unchanged good_idx below).
             log_idx = np.logical_or(useful_indices, (vlm_labels.flatten() == -1))

@@ -1,0 +1,179 @@
+#!/bin/bash
+#SBATCH --job-name=qwen_vl_run
+#SBATCH --output=/home/pkarageo/master-thesis/RL-VLM-F/logs/qwen_out_%j.txt
+#SBATCH --error=/home/pkarageo/master-thesis/RL-VLM-F/logs/qwen_err_%j.txt
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=100G
+#SBATCH --gres=gpu:2
+#SBATCH --constraint=TitanRTX
+#SBATCH --time=72:00:00  
+
+# --- 1. HOST SETUP ---
+module load cuda12.6/toolkit/12.6
+
+PROJECT_DIR="/home/pkarageo/master-thesis/RL-VLM-F"
+cd $PROJECT_DIR
+mkdir -p logs
+
+# Per-run settings (adjust for concurrent jobs)
+# Unique task and server port/log per job
+TASK_ENV=${TASK_ENV:-"metaworld_sweep-into-v2"}
+SERVER_PORT=${SERVER_PORT:-"8001"}
+SERVER_HOST=${SERVER_HOST:-"0.0.0.0"}
+SERVER_LOG=${SERVER_LOG:-"logs/server_${TASK_ENV}.log"}
+
+# UPDATE: Point to your newly built V4 container
+CONTAINER="/var/scratch/pkarageo/rl_vlm_container_v4.sif"
+
+# Scratch setup
+export SCRATCH_DIR="/var/scratch/pkarageo"
+export HF_HOME="$SCRATCH_DIR/hf_cache"
+export TMPDIR="$SCRATCH_DIR/tmp"
+mkdir -p $HF_HOME $TMPDIR
+mkdir -p $SCRATCH_DIR/master-thesis/RL-VLM-F/exp_artifacts
+
+# --- 2. CONTAINER ENVIRONMENT VARS ---
+export APPTAINERENV_HF_HOME=$HF_HOME
+export APPTAINERENV_HF_HUB_OFFLINE=1
+export APPTAINERENV_TORCH_EXTENSIONS_DIR="$TMPDIR/torch_extensions"
+export APPTAINERENV_ARTIFACT_ROOT="$SCRATCH_DIR/master-thesis/RL-VLM-F/exp_artifacts"
+export APPTAINERENV_SERVER_HOST="$SERVER_HOST"
+export APPTAINERENV_SERVER_PORT="$SERVER_PORT"
+
+# --- 3. START QWEN SERVER (GPU 1) ---
+echo "Starting Local Server on GPU 1..."
+
+# UPDATE: Since you are offline, you must point to the cached snapshot.
+# NOTE: Verify this path exists after your first cache run!
+# If you haven't cached it yet, run the cache command interactively first.
+SNAPSHOT_PATH="/var/scratch/pkarageo/hf_cache/hub/models--Qwen--Qwen3-VL-8B-Instruct/snapshots/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b"
+# For now, let's assume you will export the ID and rely on the cache
+export APPTAINERENV_LOCAL_MODEL_PATH="Qwen/Qwen3-VL-8B-Instruct"
+
+apptainer exec --nv \
+    --env LD_LIBRARY_PATH="$LD_LIBRARY_PATH" \
+    --bind /var/scratch \
+    --bind /cm \
+    $CONTAINER bash -c "
+    
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate qwen_host
+    
+    export OPENAI_API_KEY='dummy_key'
+    export CUDA_VISIBLE_DEVICES=1
+    
+    # Run Server
+    python -u local_server.py
+" > "$SERVER_LOG" 2>&1 &
+
+SERVER_PID=$!
+
+echo "Waiting for Qwen to load (PID $SERVER_PID) on port $SERVER_PORT..."
+# Increased timeout; watch the per-run server log
+timeout 1200s grep -q "Uvicorn running on http://0.0.0.0:$SERVER_PORT" <(tail -f "$SERVER_LOG")
+
+if [ $? -eq 0 ]; then
+    echo "Qwen is confirmed READY."
+else
+    echo "ERROR: Qwen failed to load. Tailing $SERVER_LOG:"
+    tail -n 50 "$SERVER_LOG"
+    kill $SERVER_PID
+    exit 1
+fi
+
+# --- 4. START RL TRAINING (GPU 0) ---
+echo "Starting RL Training on GPU 0..."
+
+# --- MUJOCO SETUP ---
+MUJOCO_DIR="/var/scratch/pkarageo/.mujoco"
+# Note: Ensure this path matches where you have mujoco key/binaries
+CONTAINER_MUJOCO_PATH="/home/pkarageo/.mujoco/mujoco210/bin"
+export APP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CONTAINER_MUJOCO_PATH:/usr/lib/nvidia"
+
+# --- WRITABLE MUJOCO-PY SETUP ---
+WRITABLE_MUJOCO_PY="$TMPDIR/mujoco_py_writable"
+mkdir -p $WRITABLE_MUJOCO_PY
+
+if [ -z "$(ls -A $WRITABLE_MUJOCO_PY)" ]; then
+    echo "Extracting mujoco-py to writable scratch space..."
+    apptainer exec --bind $WRITABLE_MUJOCO_PY:/tmp/extract_zone $CONTAINER \
+        bash -c "cp -a /opt/conda/envs/rlvlmf/lib/python3.9/site-packages/mujoco_py/* /tmp/extract_zone/"
+fi
+
+apptainer exec --nv \
+    --env LD_LIBRARY_PATH="$APP_LD_LIBRARY_PATH" \
+    --bind /var/scratch \
+    --bind /cm \
+    --bind $MUJOCO_DIR:/home/pkarageo/.mujoco \
+    --bind $WRITABLE_MUJOCO_PY:/opt/conda/envs/rlvlmf/lib/python3.9/site-packages/mujoco_py \
+    $CONTAINER bash -c "
+    
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate rlvlmf
+    
+    export CUDA_VISIBLE_DEVICES=0
+    export OPENAI_API_KEY='dummy_key'
+    # Client connects to the local server via env
+    export SERVER_HOST='localhost'
+    export SERVER_PORT='$SERVER_PORT'
+    
+    
+    # Internal Xvfb
+    DISP_NUM=\$(( ($SLURM_JOB_ID % 50) + 100 ))
+    export DISPLAY=:\$DISP_NUM
+    
+    Xvfb \$DISPLAY -screen 0 1024x768x24 +extension GLX +render -noreset > logs/xvfb_internal.log 2>&1 &
+    XVFB_PID=\$!
+    sleep 3
+    
+    echo \"Launching Training...\"
+    
+    export MUJOCO_PY_MUJOCO_PATH=/home/pkarageo/.mujoco/mujoco210
+    export MUJOCO_PY_LOCK_PATH=$TMPDIR/mujoco_lock
+    
+    python train_PEBBLE.py \
+        env=$TASK_ENV \
+        seed=0 \
+        exp_name=qwen_local_test \
+        reward=learn_from_preference \
+        vlm_label=1 \
+        vlm=gemini_free_form \
+        image_reward=1 \
+        reward_batch=40 \
+        segment=1 \
+        teacher_eps_mistake=0 \
+        reward_update=5 \
+        num_interact=4000 \
+        max_feedback=20000 \
+        reward_lr=1e-4 \
+        agent.params.actor_lr=0.0003 \
+        agent.params.critic_lr=0.0003 \
+        gradient_update=1 \
+        activation=tanh \
+        num_unsup_steps=9000 \
+        num_train_steps=1000000 \
+        agent.params.batch_size=512 \
+        double_q_critic.params.hidden_dim=256 \
+        double_q_critic.params.hidden_depth=3 \
+        diag_gaussian_actor.params.hidden_dim=256 \
+        diag_gaussian_actor.params.hidden_depth=3 \
+        feed_type=0 \
+        teacher_beta=-1 \
+        teacher_gamma=1 \
+        teacher_eps_skip=0 \
+        teacher_eps_equal=0 \
+        num_eval_episodes=1 \
+        cached_label_path=None
+        
+    kill \$XVFB_PID
+"
+
+echo "Training finished. Killing server (PID $SERVER_PID)..."
+kill $SERVER_PID
+
+
+#sbatch --export=TASK_ENV=metaworld_soccer-v2,SERVER_PORT=8002,SERVER_LOG=logs/server_soccer.log job_files/run_qwen_container.job
+#sbatch --export=TASK_ENV=metaworld_sweep-into-v2,SERVER_PORT=8001,SERVER_LOG=logs/server_sweep.log job_files/run_qwen_container.job

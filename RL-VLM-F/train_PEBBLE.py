@@ -4,6 +4,8 @@ import torch
 import os
 import time
 import pickle as pkl
+
+# Change: Added these
 import shutil
 import glob
 
@@ -17,6 +19,12 @@ from prompt import clip_env_prompts
 import utils
 import hydra
 from PIL import Image
+
+# Change: We don't need these and they also cause an error if imported
+# from vlms.blip_infer_2 import blip2_image_text_matching
+# from vlms.clip_infer import clip_infer_score as clip_image_text_matching
+
+
 import cv2
 
 class Workspace(object):
@@ -28,7 +36,7 @@ class Workspace(object):
         self.cfg.prompt = clip_env_prompts[cfg.env]
         self.cfg.clip_prompt = clip_env_prompts[cfg.env]
         self.reward = self.cfg.reward # what types of reward to use
-        # Optional scratch artifact root: heavy outputs go here
+        # Change: Optional scratch artifact root: heavy outputs go to scratch
         self.artifact_root = os.environ.get('ARTIFACT_ROOT', None)
 
         self.logger = Logger(
@@ -148,6 +156,7 @@ class Workspace(object):
             print("loading agent model at {}".format(self.cfg.agent_model_load_dir))
             self.agent.load(self.cfg.agent_model_load_dir, 1000000)
 
+    # Change: Added this function to sync models to artifact storage
     def _sync_latest_models(self, scratch_model_dir, home_model_dir, step):
         """Copy the current step's checkpoints from scratch to home and prune older ones in home."""
         # Remove previous step-specific files in home
@@ -183,7 +192,7 @@ class Workspace(object):
         average_true_episode_reward = 0
         success_rate = 0
         
-        # Send heavy eval artifacts to scratch if available
+        # Change: Send heavy eval artifacts to scratch if available
         base_eval_dir = self.logger._log_dir
         if self.artifact_root:
             tail_parent = os.path.basename(os.path.dirname(self.work_dir))
@@ -348,7 +357,7 @@ class Workspace(object):
         if not os.path.exists(model_save_dir):
             os.makedirs(model_save_dir)
 
-        # Scratch models dir (store full checkpoint history)
+        # Change: Scratch models dir (store full checkpoint history)
         scratch_model_dir = None
         if self.artifact_root:
             # Mirror two-level tail to reduce collision risk
@@ -551,7 +560,7 @@ class Workspace(object):
                     reward_hat = self.reward_model.r_hat(image)
                     self.reward_model.train()
             elif self.reward == 'blip2_image_text_matching':
-                # Lazy import to avoid network downloads during module import
+                # Change: Lazy import to avoid network downloads during module import
                 from vlms.blip_infer_2 import blip2_image_text_matching
                 query_image = rgb_image
                 query_prompt = clip_env_prompts[self.cfg.env] 
@@ -559,7 +568,7 @@ class Workspace(object):
                 if self.cfg.flip_vlm_label:
                     reward_hat = -reward_hat
             elif self.reward == 'clip_image_text_matching':
-                # Lazy import to avoid network downloads during module import
+                # Change:Lazy import to avoid network downloads during module import
                 from vlms.clip_infer import clip_infer_score as clip_image_text_matching
                 query_image = rgb_image
                 query_prompt = clip_env_prompts[self.cfg.env] 
@@ -603,7 +612,7 @@ class Workspace(object):
             interact_count += 1
             
             if self.step % self.cfg.save_interval == 0 and self.step > 0:
-                # Save checkpoints to scratch (full history)
+                # Change: Save checkpoints to scratch (full history)
                 if scratch_model_dir:
                     self.agent.save(scratch_model_dir, self.step)
                     self.reward_model.save(scratch_model_dir, self.step)
@@ -614,6 +623,7 @@ class Workspace(object):
                     self.agent.save(model_save_dir, self.step)
                     self.reward_model.save(model_save_dir, self.step)
             
+        # Change: Save final models to scratch (full history)
         if scratch_model_dir:
             self.agent.save(scratch_model_dir, self.step)
             self.reward_model.save(scratch_model_dir, self.step)

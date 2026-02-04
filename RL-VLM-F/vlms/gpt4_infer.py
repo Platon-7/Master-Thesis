@@ -10,6 +10,8 @@ global api_key_idx, cnt
 api_key_idx = 0
 cnt = 0
 os.environ['OPENAI_API_KEY'] = list_of_api_keys[api_key_idx]
+
+# Change: Don't initialize client to avoid errors if no API key is set
 #client = OpenAI()
 client = None
 
