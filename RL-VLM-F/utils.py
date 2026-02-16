@@ -45,21 +45,49 @@ def tie_weights(src, trg):
     trg.weight = src.weight
     trg.bias = src.bias
     
+class GymV5ToV4Compat(gym.Wrapper):
+    """Bridges new-gymnasium internals with old-gym TimeLimit.
+
+    NormalizedBoxEnv returns (obs, reward, terminated, truncated, info) but
+    gym.wrappers.TimeLimit expects (obs, reward, done, info).
+    Old gym Wrapper.render() also passes a mode arg that new-API envs reject.
+    Placed between NormalizedBoxEnv and TimeLimit.
+    """
+    def step(self, action):
+        result = self.env.step(action)
+        if len(result) == 5:
+            obs, reward, terminated, truncated, info = result
+            return obs, reward, terminated or truncated, info
+        return result
+
+    def render(self, *args, **kwargs):
+        # Strip the mode arg that old-gym Wrapper injects; MetaWorld uses
+        # render_mode set at construction and accepts no positional args.
+        return self.env.render()
+
 def make_metaworld_env(cfg):
     env_name = cfg.env.replace('metaworld_','')
     if env_name in _env_dict.ALL_V2_ENVIRONMENTS:
         env_cls = _env_dict.ALL_V2_ENVIRONMENTS[env_name]
     else:
         env_cls = _env_dict.ALL_V1_ENVIRONMENTS[env_name]
-    
+
     env = env_cls(render_mode='rgb_array')
-    env.camera_name = env_name
-    
+
+    # Camera: use config override or fall back to env_name
+    camera = getattr(cfg, 'metaworld_camera', None) or env_name
+    env.camera_name = camera
+
     env._freeze_rand_vec = False
     env._set_task_called = True
     env.seed(cfg.seed)
 
-    return TimeLimit(NormalizedBoxEnv(env), env.max_path_length)
+    # Episode length: use config override or fall back to env.max_path_length
+    max_steps = getattr(cfg, 'max_episode_steps', 0) or env.max_path_length
+
+    # NormalizedBoxEnv handles 5-value API natively (returns 5 values).
+    # GymV5ToV4Compat converts 5→4 so old-gym TimeLimit can consume it.
+    return TimeLimit(GymV5ToV4Compat(NormalizedBoxEnv(env)), max_steps)
 
 class eval_mode(object):
     def __init__(self, *models):

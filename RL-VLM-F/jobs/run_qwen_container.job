@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=qwen_vl_run
-#SBATCH --output=/home/pkarageo/master-thesis/RL-VLM-F/logs/qwen_out_%j.txt
-#SBATCH --error=/home/pkarageo/master-thesis/RL-VLM-F/logs/qwen_err_%j.txt
+#SBATCH --output=/home/%u/master-thesis/RL-VLM-F/logs/qwen_out_%j.txt
+#SBATCH --error=/home/%u/master-thesis/RL-VLM-F/logs/qwen_err_%j.txt
 #SBATCH --partition=defq
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -14,7 +14,7 @@
 # --- 1. HOST SETUP ---
 module load cuda12.6/toolkit/12.6
 
-PROJECT_DIR="/home/pkarageo/master-thesis/RL-VLM-F"
+PROJECT_DIR="/home/$USER/master-thesis/RL-VLM-F"
 cd $PROJECT_DIR
 mkdir -p logs
 
@@ -25,11 +25,27 @@ SERVER_PORT=${SERVER_PORT:-"8001"}
 SERVER_HOST=${SERVER_HOST:-"0.0.0.0"}
 SERVER_LOG=${SERVER_LOG:-"logs/server_${TASK_ENV}.log"}
 
-# UPDATE: Point to your newly built V4 container
-CONTAINER="/var/scratch/pkarageo/rl_vlm_container_v4.sif"
+# Scratch directory — set SCRATCH_DIR before submitting if your scratch
+# location differs from the default /var/scratch/$USER
+export SCRATCH_DIR="${SCRATCH_DIR:-/var/scratch/$USER}"
 
-# Scratch setup
-export SCRATCH_DIR="/var/scratch/pkarageo"
+if [ ! -d "$SCRATCH_DIR" ]; then
+    echo "ERROR: SCRATCH_DIR=$SCRATCH_DIR does not exist."
+    echo "Set SCRATCH_DIR to a valid path before submitting, e.g.:"
+    echo "  sbatch --export=SCRATCH_DIR=/my/scratch,TASK_ENV=... jobs/run_qwen_container.job"
+    exit 1
+fi
+
+# Container path — override with CONTAINER env var if needed
+CONTAINER="${CONTAINER:-$SCRATCH_DIR/rl_vlm_container_v4.sif}"
+
+if [ ! -f "$CONTAINER" ]; then
+    echo "ERROR: Container not found at $CONTAINER"
+    echo "Build it first:  apptainer build $CONTAINER complete_env.def"
+    exit 1
+fi
+
+# Scratch sub-directories
 export HF_HOME="$SCRATCH_DIR/hf_cache"
 export TMPDIR="$SCRATCH_DIR/tmp"
 mkdir -p $HF_HOME $TMPDIR
@@ -49,7 +65,7 @@ echo "Starting Local Server on GPU 1..."
 # UPDATE: Since you are offline, you must point to the cached snapshot.
 # NOTE: Verify this path exists after your first cache run!
 # If you haven't cached it yet, run the cache command interactively first.
-SNAPSHOT_PATH="/var/scratch/pkarageo/hf_cache/hub/models--Qwen--Qwen3-VL-8B-Instruct/snapshots/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b"
+SNAPSHOT_PATH="$HF_HOME/hub/models--Qwen--Qwen3-VL-8B-Instruct/snapshots/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b"
 # For now, let's assume you will export the ID and rely on the cache
 export APPTAINERENV_LOCAL_MODEL_PATH="Qwen/Qwen3-VL-8B-Instruct"
 
@@ -88,9 +104,9 @@ fi
 echo "Starting RL Training on GPU 0..."
 
 # --- MUJOCO SETUP ---
-MUJOCO_DIR="/var/scratch/pkarageo/.mujoco"
+MUJOCO_DIR="$SCRATCH_DIR/.mujoco"
 # Note: Ensure this path matches where you have mujoco key/binaries
-CONTAINER_MUJOCO_PATH="/home/pkarageo/.mujoco/mujoco210/bin"
+CONTAINER_MUJOCO_PATH="/home/$USER/.mujoco/mujoco210/bin"
 export APP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CONTAINER_MUJOCO_PATH:/usr/lib/nvidia"
 
 # --- WRITABLE MUJOCO-PY SETUP ---
@@ -107,7 +123,7 @@ apptainer exec --nv \
     --env LD_LIBRARY_PATH="$APP_LD_LIBRARY_PATH" \
     --bind /var/scratch \
     --bind /cm \
-    --bind $MUJOCO_DIR:/home/pkarageo/.mujoco \
+    --bind $MUJOCO_DIR:/home/$USER/.mujoco \
     --bind $WRITABLE_MUJOCO_PY:/opt/conda/envs/rlvlmf/lib/python3.9/site-packages/mujoco_py \
     $CONTAINER bash -c "
     
@@ -131,7 +147,7 @@ apptainer exec --nv \
     
     echo \"Launching Training...\"
     
-    export MUJOCO_PY_MUJOCO_PATH=/home/pkarageo/.mujoco/mujoco210
+    export MUJOCO_PY_MUJOCO_PATH=/home/$USER/.mujoco/mujoco210
     export MUJOCO_PY_LOCK_PATH=$TMPDIR/mujoco_lock
     
     python train_PEBBLE.py \
@@ -165,7 +181,11 @@ apptainer exec --nv \
         teacher_gamma=1 \
         teacher_eps_skip=0 \
         teacher_eps_equal=0 \
-        num_eval_episodes=1 \
+        num_eval_episodes=${NUM_EVAL_EPISODES:-1} \
+        metaworld_camera=${METAWORLD_CAMERA:-null} \
+        max_episode_steps=${MAX_EPISODE_STEPS:-0} \
+        eval_terminate_on_success=${EVAL_TERM_SUCCESS:-false} \
+        eval_frequency=${EVAL_FREQUENCY:-10000} \
         cached_label_path=None
         
     kill \$XVFB_PID
@@ -175,5 +195,13 @@ echo "Training finished. Killing server (PID $SERVER_PID)..."
 kill $SERVER_PID
 
 
-#sbatch --export=TASK_ENV=metaworld_soccer-v2,SERVER_PORT=8002,SERVER_LOG=logs/server_soccer.log job_files/run_qwen_container.job
-#sbatch --export=TASK_ENV=metaworld_sweep-into-v2,SERVER_PORT=8001,SERVER_LOG=logs/server_sweep.log job_files/run_qwen_container.job
+# --- Usage examples ---
+# Existing tasks (defaults: env-specific camera, env.max_path_length, no eval success termination):
+#sbatch --export=TASK_ENV=metaworld_soccer-v2,SERVER_PORT=8002,SERVER_LOG=logs/server_soccer.log jobs/run_qwen_container.job
+#sbatch --export=TASK_ENV=metaworld_sweep-into-v2,SERVER_PORT=8001,SERVER_LOG=logs/server_sweep.log jobs/run_qwen_container.job
+#
+# New MetaWorld tasks (corner2 camera, 100-step episodes, 20 eval eps, eval terminates on success, eval every 5k steps):
+#sbatch --export=TASK_ENV=metaworld_assembly-v2,SERVER_PORT=8001,METAWORLD_CAMERA=corner2,MAX_EPISODE_STEPS=100,NUM_EVAL_EPISODES=20,EVAL_TERM_SUCCESS=true,EVAL_FREQUENCY=5000 jobs/run_qwen_container.job
+#sbatch --export=TASK_ENV=metaworld_box-close-v2,SERVER_PORT=8002,METAWORLD_CAMERA=corner2,MAX_EPISODE_STEPS=100,NUM_EVAL_EPISODES=20,EVAL_TERM_SUCCESS=true,EVAL_FREQUENCY=5000 jobs/run_qwen_container.job
+#sbatch --export=TASK_ENV=metaworld_coffee-push-v2,SERVER_PORT=8003,METAWORLD_CAMERA=corner2,MAX_EPISODE_STEPS=100,NUM_EVAL_EPISODES=20,EVAL_TERM_SUCCESS=true,EVAL_FREQUENCY=5000 jobs/run_qwen_container.job
+#sbatch --export=TASK_ENV=metaworld_stick-pull-v2,SERVER_PORT=8004,METAWORLD_CAMERA=corner2,MAX_EPISODE_STEPS=100,NUM_EVAL_EPISODES=20,EVAL_TERM_SUCCESS=true,EVAL_FREQUENCY=5000 jobs/run_qwen_container.job

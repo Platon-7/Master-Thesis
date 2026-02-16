@@ -253,7 +253,11 @@ class Workspace(object):
                 true_episode_reward += reward
                 if self.log_success:
                     episode_success = max(episode_success, extra['success'])
-                    
+
+                # Terminate eval episode on success if configured
+                if getattr(self.cfg, 'eval_terminate_on_success', False) and extra.get('success', 0):
+                    done = True
+
                 t_idx += 1
                 if self.cfg.mode == 'eval' and t_idx > 50:
                     break

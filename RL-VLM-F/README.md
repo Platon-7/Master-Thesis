@@ -139,7 +139,46 @@ Processing pipeline:
 
 > **Hardware Note**: This 2-GPU split is designed for workstation GPUs (e.g., 2× TitanRTX 24GB). If using a large data-center card (A100 80GB, H100), you can run both processes on `device=0` by setting `CUDA_VISIBLE_DEVICES=0` for both and adjusting memory—the combined footprint is ~12GB (8GB VLM + 4GB RL).
 
-### 3. SLURM Job Script (`jobs/run_qwen_container.job`)
+### 3. New MetaWorld Tasks
+
+We added support for four new MetaWorld environments: **Assembly**, **BoxClose**, **CoffeePush**, and **StickPull**. Task descriptions are taken from the [MetaWorld benchmark page](https://metaworld.farama.org/benchmark/task_descriptions/) to stay consistent with other baselines (DITTO, RoboReward).
+
+| Task | Environment ID | Task Description |
+|------|---------------|-----------------|
+| Assembly | `metaworld_assembly-v2` | pick up a nut and place it onto a peg |
+| BoxClose | `metaworld_box-close-v2` | grasp the cover and close the box with it |
+| CoffeePush | `metaworld_coffee-push-v2` | push a mug under a coffee machine |
+| StickPull | `metaworld_stick-pull-v2` | grasp a stick and pull a box with the stick |
+
+**Settings for the new tasks** (differ from the original sweep/soccer tasks):
+
+| Setting | Value | Rationale |
+|---------|-------|-----------|
+| Camera | `corner2` | Consistent with other baselines |
+| Episode length | 100 steps | No action repeat |
+| Training termination | After max steps only | Episodes do NOT end on task success during training |
+| Eval termination | On task success | Episodes end early when the task is solved during evaluation |
+| Eval frequency | Every 5,000 steps | More frequent evaluation |
+| Eval episodes | 20 | Random initializations for robust success rate estimates |
+
+#### Changes made
+
+**`utils.py`** — Gym API compatibility and configurable environments:
+- `GymV5ToV4Compat` wrapper: MetaWorld v2 returns 5 values `(obs, reward, terminated, truncated, info)` but old gym's `TimeLimit` expects 4. This wrapper sits between `NormalizedBoxEnv` and `TimeLimit` to bridge the API gap. It also strips the `mode` argument from `render()` calls that old gym injects.
+- `make_metaworld_env(cfg)`: Creates MetaWorld environments with configurable camera (`metaworld_camera`), episode length (`max_episode_steps`), and random seed.
+
+**`prompt.py`** — Task descriptions for VLM queries:
+- Added entries in `clip_env_prompts` and `goal_env_prompts` for all four new tasks.
+
+**`train_PEBBLE.py`** — Eval-time success termination:
+- During evaluation, if `eval_terminate_on_success=true`, episodes end when `info['success']` is true. Training episodes are unaffected.
+
+**`config/train_PEBBLE.yaml`** — Three new config parameters with backward-compatible defaults:
+- `metaworld_camera: null` — uses env-specific camera when null
+- `max_episode_steps: 0` — uses `env.max_path_length` when 0
+- `eval_terminate_on_success: false` — no early termination when false
+
+### 4. SLURM Job Script (`jobs/run_qwen_container.job`)
 
 The job script orchestrates training on a SLURM cluster with 2 GPUs:
 - **GPU 0**: RL training (SAC agent + reward model)
@@ -150,11 +189,7 @@ Key features:
 - Configures MuJoCo with Xvfb for headless rendering
 - Supports concurrent runs with different `SERVER_PORT` values
 - Artifact storage on scratch filesystem for large checkpoints
-
-Example submission:
-```bash
-sbatch --export=TASK_ENV=metaworld_sweep-into-v2,SERVER_PORT=8001 jobs/run_qwen_container.job
-```
+- All paths are user-agnostic (uses `$USER` and `$SCRATCH_DIR`)
 
 ---
 
@@ -191,9 +226,23 @@ All modified files contain a `# Change:` comment above each modification for eas
 
 8. **Checkpoint saving** (lines ~615, ~626): Modified to save to scratch with sync to home.
 
+9. **Eval success termination** (line ~255): When `eval_terminate_on_success=true`, evaluation episodes end early on `info['success']`. Training episodes are unaffected.
+
 ### `utils.py`
 
 1. **SoftGym fallback** (line ~21): Added try/except for SoftGym imports with empty placeholders (`env_arg_dict = {}`, `SOFTGYM_ENVS = []`) so MetaWorld tasks can run without SoftGym installed.
+
+2. **`GymV5ToV4Compat` wrapper**: Bridges MetaWorld v2's new gymnasium step API (5 return values) with old gym's `TimeLimit` wrapper (4 return values). Also overrides `render()` to strip the positional `mode` argument that old gym injects.
+
+3. **`make_metaworld_env(cfg)`**: Creates MetaWorld environments with support for configurable camera name (`cfg.metaworld_camera`), episode length (`cfg.max_episode_steps`), and random seed. Wrapping order: `TimeLimit(GymV5ToV4Compat(NormalizedBoxEnv(env)))`.
+
+### `prompt.py`
+
+1. **New task descriptions**: Added `clip_env_prompts` and `goal_env_prompts` entries for Assembly, BoxClose, CoffeePush, and StickPull environments.
+
+### `config/train_PEBBLE.yaml`
+
+1. **New config parameters**: `metaworld_camera`, `max_episode_steps`, and `eval_terminate_on_success` with backward-compatible defaults (`null`, `0`, `false`).
 
 ---
 
@@ -236,7 +285,7 @@ The plot shows a stacked histogram with:
 
 1. **Build the container** (one-time):
    ```bash
-   apptainer build /var/scratch/$USER/rl_vlm_container.sif complete_env.def
+   apptainer build /var/scratch/$USER/rl_vlm_container_v4.sif complete_env.def
    ```
 
 2. **Download Qwen3-VL weights** (one-time, requires internet):
@@ -246,9 +295,33 @@ The plot shows a stacked histogram with:
    ```
 
 3. **Submit a training job**:
+
+   Original tasks (use default camera and episode length):
    ```bash
    sbatch --export=TASK_ENV=metaworld_sweep-into-v2,SERVER_PORT=8001 jobs/run_qwen_container.job
+   sbatch --export=TASK_ENV=metaworld_soccer-v2,SERVER_PORT=8002 jobs/run_qwen_container.job
    ```
+
+   New tasks (corner2 camera, 100-step episodes, 20 eval episodes, eval terminates on success, eval every 5k steps):
+   ```bash
+   sbatch --export=TASK_ENV=metaworld_assembly-v2,SERVER_PORT=8001,METAWORLD_CAMERA=corner2,MAX_EPISODE_STEPS=100,NUM_EVAL_EPISODES=20,EVAL_TERM_SUCCESS=true,EVAL_FREQUENCY=5000 jobs/run_qwen_container.job
+   sbatch --export=TASK_ENV=metaworld_box-close-v2,SERVER_PORT=8002,METAWORLD_CAMERA=corner2,MAX_EPISODE_STEPS=100,NUM_EVAL_EPISODES=20,EVAL_TERM_SUCCESS=true,EVAL_FREQUENCY=5000 jobs/run_qwen_container.job
+   sbatch --export=TASK_ENV=metaworld_coffee-push-v2,SERVER_PORT=8003,METAWORLD_CAMERA=corner2,MAX_EPISODE_STEPS=100,NUM_EVAL_EPISODES=20,EVAL_TERM_SUCCESS=true,EVAL_FREQUENCY=5000 jobs/run_qwen_container.job
+   sbatch --export=TASK_ENV=metaworld_stick-pull-v2,SERVER_PORT=8004,METAWORLD_CAMERA=corner2,MAX_EPISODE_STEPS=100,NUM_EVAL_EPISODES=20,EVAL_TERM_SUCCESS=true,EVAL_FREQUENCY=5000 jobs/run_qwen_container.job
+   ```
+
+   **Environment variables** (all optional, with defaults):
+   | Variable | Default | Description |
+   |----------|---------|-------------|
+   | `TASK_ENV` | `metaworld_sweep-into-v2` | MetaWorld environment ID |
+   | `SERVER_PORT` | `8001` | Port for Qwen3-VL server (use different ports for concurrent runs) |
+   | `SCRATCH_DIR` | `/var/scratch/$USER` | Scratch directory for large files (container, model weights, artifacts) |
+   | `CONTAINER` | `$SCRATCH_DIR/rl_vlm_container_v4.sif` | Path to the Apptainer container |
+   | `METAWORLD_CAMERA` | env-specific | Camera name (e.g., `corner2`) |
+   | `MAX_EPISODE_STEPS` | env default | Max steps per episode (e.g., `100`) |
+   | `NUM_EVAL_EPISODES` | `1` | Number of evaluation episodes |
+   | `EVAL_TERM_SUCCESS` | `false` | End eval episodes on task success |
+   | `EVAL_FREQUENCY` | `10000` | Steps between evaluations |
 
 4. **Generate figures** after training:
    ```bash

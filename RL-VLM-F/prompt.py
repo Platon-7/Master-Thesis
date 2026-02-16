@@ -5,6 +5,10 @@ clip_env_prompts = {
     "metaworld_drawer-open-v2": "The drawer is opened.", # let's try the flipped version.
     "metaworld_door-open-v2": "The safe door is opened.", # let's try the flipped version.
     "metaworld_soccer-v2": "The soccer ball is in the goal.", # not solved, there is reward issue
+    "metaworld_assembly-v2": "A nut is placed onto a peg.",
+    "metaworld_box-close-v2": "The box is closed with its cover.",
+    "metaworld_coffee-push-v2": "A mug is under a coffee machine.",
+    "metaworld_stick-pull-v2": "A box is pulled with a stick.",
 
     "CartPole-v1": "pole vertically upright on top of the cart.",
     
@@ -19,6 +23,10 @@ goal_env_prompts = {
     "metaworld_drawer-open-v2": "to open the drawer", # let's try the flipped version.
     "metaworld_door-open-v2": "to open the safe door", # let's try the flipped version.
     "metaworld_soccer-v2": "to move the soccer ball into the goal", # not solved, there is reward issue
+    "metaworld_assembly-v2": "to pick up a nut and place it onto a peg",
+    "metaworld_box-close-v2": "to grasp the cover and close the box with it",
+    "metaworld_coffee-push-v2": "to push a mug under a coffee machine",
+    "metaworld_stick-pull-v2": "to grasp a stick and pull a box with the stick",
     "CartPole-v1": "to balance the brown pole on the black cart to be upright",
     "softgym_RopeFlattenEasy": "to straighten the blue rope",
     "softgym_PassWater": "to move the container, which holds water, to be as close to the red circle as possible without causing too many water droplets to spill",

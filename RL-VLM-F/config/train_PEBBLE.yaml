@@ -69,6 +69,11 @@ conv_strides: [3, 2, 2, 2] # default
 image_size: 300
 cached_label_path: null
 
+# MetaWorld overrides (backward compatible defaults)
+metaworld_camera: null           # null = use env-specific camera (current behavior)
+max_episode_steps: 0             # 0 = use env.max_path_length (current behavior)
+eval_terminate_on_success: false # false = current behavior
+
 # exp_name
 exp_name: gemini_template_1
 prompt: ???
