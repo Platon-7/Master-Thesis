@@ -84,6 +84,33 @@ Key settings in `cfg/robomimic/dsrl_lift_vlm.yaml`:
 | `sim/success_rate` | WandB | Ground-truth success rate (trustworthy metric) |
 | `eval/sim_success_rate` | WandB | Evaluation success using simulator rewards |
 
+## Downloading RoboReward-8B
+
+If the model isn't already in your HuggingFace cache, download it on the cluster login node:
+
+```bash
+# 1. Set your permanent scratch directory
+export SCRATCH="/scratch-shared/$USER"
+export HF_HOME="$SCRATCH/hf_cache"
+
+# 2. Load the standard Snellius Python module
+module load 2023
+module load Python
+
+# 3. Create a quick virtual environment just for downloading
+python -m venv "$SCRATCH/hf_download_env"
+source "$SCRATCH/hf_download_env/bin/activate"
+
+# 4. Install the Hugging Face tool
+pip install huggingface_hub
+
+# 5. Download the model
+huggingface-cli download teetone/RoboReward-8B
+
+# 6. Align the folder structure for the container's expected cache layout
+mv "$HF_HOME/hub/models--teetone--RoboReward-8B" "$HF_HOME/"
+```
+
 ## Citation
 
 ```
