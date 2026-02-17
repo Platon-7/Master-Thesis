@@ -2,8 +2,8 @@
 #SBATCH --job-name=dsrl_vlm_lift
 #SBATCH --output=outfiles/dsrl_vlm_train_%A.out
 #SBATCH --time=96:00:00
-#SBATCH --partition=gpu_h100       # Change to gpu_h100 if preferred
-#SBATCH --gpus=1                   # Single GPU (A100 80GB fits policy + VLM)
+#SBATCH --partition=gpu_h100       
+#SBATCH --gpus=1                   
 #SBATCH --mem=80G
 #SBATCH --cpus-per-task=16
 
