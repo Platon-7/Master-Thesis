@@ -1,0 +1,1 @@
+{"train/vlm_reward": -0.75, "train/vlm_score_raw": 2.0, "train/sim_success_rate": 0.0, "train/vlm_success_rate": 0.0, "train/timesteps": 91401, "train/actor_loss": -0.06751176292697589, "train/critic_loss": 2.4685792383631147e-05, "train/ent_coef": 0.00011808488852693699, "_timestamp": 1770210502.9658108, "_runtime": 50980.59662985802, "_step": 304}

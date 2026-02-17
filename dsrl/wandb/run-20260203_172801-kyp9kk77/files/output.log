@@ -1,0 +1,60 @@
+[2026-02-03 17:28:05,655][root][INFO] - Number of network parameters: 573516
+[2026-02-03 17:28:06,023][root][INFO] - Actor weights not found. Using pre-trained weights!
+[2026-02-03 17:28:06,024][root][INFO] - Loaded base policy weights from ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+Compiling /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/cymj.pyx because it depends on /home/pkarageo/.local/lib/python3.9/site-packages/numpy/__init__.pxd.
+[1/1] Cythonizing /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/cymj.pyx
+[2026-02-03 17:28:12,202][root][INFO] - running build_ext
+[2026-02-03 17:28:12,206][root][INFO] - building 'mujoco_py.cymj' extension
+[2026-02-03 17:28:12,206][root][INFO] - creating /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/generated/_pyxbld_2.1.2.14_39_linuxcpuextensionbuilder/temp.linux-x86_64-cpython-39/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py
+[2026-02-03 17:28:12,232][root][INFO] - creating /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/generated/_pyxbld_2.1.2.14_39_linuxcpuextensionbuilder/temp.linux-x86_64-cpython-39/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/gl
+[2026-02-03 17:28:12,234][root][INFO] - gcc -pthread -B /opt/conda/envs/dsrl_env/compiler_compat -Wno-unused-result -Wsign-compare -DNDEBUG -fwrapv -O2 -Wall -fPIC -O2 -isystem /opt/conda/envs/dsrl_env/include -fPIC -O2 -isystem /opt/conda/envs/dsrl_env/include -fPIC -I/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py -I/home/pkarageo/.mujoco/mujoco210/include -I/home/pkarageo/.local/lib/python3.9/site-packages/numpy/core/include -I/opt/conda/envs/dsrl_env/include/python3.9 -c /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/cymj.c -o /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/generated/_pyxbld_2.1.2.14_39_linuxcpuextensionbuilder/temp.linux-x86_64-cpython-39/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/cymj.o -fopenmp -w
+[2026-02-03 17:28:52,816][root][INFO] - gcc -pthread -B /opt/conda/envs/dsrl_env/compiler_compat -Wno-unused-result -Wsign-compare -DNDEBUG -fwrapv -O2 -Wall -fPIC -O2 -isystem /opt/conda/envs/dsrl_env/include -fPIC -O2 -isystem /opt/conda/envs/dsrl_env/include -fPIC -I/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py -I/home/pkarageo/.mujoco/mujoco210/include -I/home/pkarageo/.local/lib/python3.9/site-packages/numpy/core/include -I/opt/conda/envs/dsrl_env/include/python3.9 -c /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/gl/osmesashim.c -o /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/generated/_pyxbld_2.1.2.14_39_linuxcpuextensionbuilder/temp.linux-x86_64-cpython-39/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/gl/osmesashim.o -fopenmp -w
+[2026-02-03 17:28:53,049][root][INFO] - creating /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/generated/_pyxbld_2.1.2.14_39_linuxcpuextensionbuilder/lib.linux-x86_64-cpython-39/mujoco_py
+[2026-02-03 17:28:53,055][root][INFO] - gcc -pthread -B /opt/conda/envs/dsrl_env/compiler_compat -shared -Wl,--allow-shlib-undefined -Wl,-rpath,/opt/conda/envs/dsrl_env/lib -Wl,-rpath-link,/opt/conda/envs/dsrl_env/lib -L/opt/conda/envs/dsrl_env/lib -Wl,--allow-shlib-undefined -Wl,-rpath,/opt/conda/envs/dsrl_env/lib -Wl,-rpath-link,/opt/conda/envs/dsrl_env/lib -L/opt/conda/envs/dsrl_env/lib /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/generated/_pyxbld_2.1.2.14_39_linuxcpuextensionbuilder/temp.linux-x86_64-cpython-39/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/cymj.o /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/generated/_pyxbld_2.1.2.14_39_linuxcpuextensionbuilder/temp.linux-x86_64-cpython-39/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/gl/osmesashim.o -L/home/pkarageo/.mujoco/mujoco210/bin -Wl,-R/home/pkarageo/.mujoco/mujoco210/bin -lmujoco210 -lglewosmesa -lOSMesa -lGL -o /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/generated/_pyxbld_2.1.2.14_39_linuxcpuextensionbuilder/lib.linux-x86_64-cpython-39/mujoco_py/cymj.cpython-39-x86_64-linux-gnu.so -fopenmp
+[2026-02-03 17:28:54,695][robosuite_logs][WARNING] - No private macro file found!
+[2026-02-03 17:28:54,695][robosuite_logs][WARNING] - It is recommended to use a private macro file
+[2026-02-03 17:28:54,695][robosuite_logs][WARNING] - To setup, run: python /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/scripts/setup_macros.py
+[2026-02-03 17:28:54,861][OpenGL.acceleratesupport][INFO] - No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+[robosuite WARNING] No private macro file found! (macros.py:53)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:54)
+[robosuite WARNING] To setup, run: python /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/scripts/setup_macros.py (macros.py:55)
+Error executing job with overrides: ['seed=1']
+Traceback (most recent call last):
+  File "/home/pkarageo/master-thesis/dsrl/train_dsrl_vlm.py", line 149, in main
+    env = make_vec_env(make_train_env, n_envs=num_env, vec_env_cls=DummyVecEnv)
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/env_util.py", line 125, in make_vec_env
+    vec_env = vec_env_cls([make_env(i + start_index) for i in range(n_envs)], **vec_env_kwargs)
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/vec_env/dummy_vec_env.py", line 31, in __init__
+    self.envs = [_patch_env(fn()) for fn in env_fns]
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/vec_env/dummy_vec_env.py", line 31, in <listcomp>
+    self.envs = [_patch_env(fn()) for fn in env_fns]
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/env_util.py", line 98, in _init
+    env = env_id(**env_kwargs)
+  File "/home/pkarageo/master-thesis/dsrl/train_dsrl_vlm.py", line 104, in make_train_env
+    env = make_vlm_robomimic_env(
+  File "/home/pkarageo/master-thesis/dsrl/vlm_reward_wrapper.py", line 319, in make_vlm_robomimic_env
+    env = EnvUtils.create_env_from_metadata(
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/utils/env_utils.py", line 218, in create_env_from_metadata
+    env = create_env(
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/utils/env_utils.py", line 168, in create_env
+    env_class = get_env_class(env_type=env_type)
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/utils/env_utils.py", line 36, in get_env_class
+    from robomimic.envs.env_robosuite import EnvRobosuite
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/envs/env_robosuite.py", line 11, in <module>
+    import robosuite
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/__init__.py", line 1, in <module>
+    from robosuite.environments.base import make
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/environments/__init__.py", line 1, in <module>
+    from .base import REGISTERED_ENVS, MujocoEnv
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/environments/base.py", line 12, in <module>
+    from robosuite.utils.binding_utils import MjRenderContextOffscreen, MjSim
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/utils/binding_utils.py", line 12, in <module>
+    import mujoco
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco/__init__.py", line 47, in <module>
+    from mujoco.gl_context import *
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco/gl_context.py", line 41, in <module>
+    from mujoco.egl import GLContext as _GLContext
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco/egl/__init__.py", line 67, in <module>
+    raise ImportError(
+ImportError: Cannot initialize a EGL device display. This likely means that your EGL driver does not support the PLATFORM_DEVICE extension, which is required for creating a headless rendering context.
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

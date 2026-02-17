@@ -1,0 +1,112 @@
+========================================
+DSRL + RoboReward VLM Training
+========================================
+Job ID: 91700
+Node: node206
+Start time: Tue Feb 17 18:44:14 CET 2026
+========================================
+=== GPU Check (outside container) ===
+Tue Feb 17 18:44:16 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 560.35.03              Driver Version: 560.35.03      CUDA Version: 12.6     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA TITAN RTX               Off |   00000000:03:00.0 Off |                  N/A |
+| 32%   35C    P0             61W /  280W |       1MiB /  24576MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA TITAN RTX               Off |   00000000:82:00.0 Off |                  N/A |
+| 28%   32C    P0             73W /  280W |       1MiB /  24576MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+CUDA_VISIBLE_DEVICES: 0,1
+LD_LIBRARY_PATH: /cm/shared/apps/cuda12.6/toolkit/12.6/extras/CUPTI/lib64:/cm/local/apps/cuda-driver/libs/current/lib64:/cm/shared/apps/cuda12.6/toolkit/12.6/targets/x86_64-linux/lib:/opt/ohpc/pub/mpi/libfabric/1.19.0/lib:/opt/ohpc/pub/mpi/ucx-ohpc/1.15.0/lib:/opt/ohpc/pub/libs/hwloc/lib:/opt/ohpc/pub/mpi/openmpi4-gnu12/4.1.6/lib:/opt/ohpc/pub/compiler/gcc/12.4.0/lib64
+=== GPU Check (inside container) ===
+Tue Feb 17 18:44:18 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 560.35.03              Driver Version: 560.35.03      CUDA Version: 12.6     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA TITAN RTX               Off |   00000000:03:00.0 Off |                  N/A |
+| 45%   35C    P0             60W /  280W |       1MiB /  24576MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA TITAN RTX               Off |   00000000:82:00.0 Off |                  N/A |
+| 46%   32C    P0             72W /  280W |       1MiB /  24576MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+PyTorch CUDA available: True
+GPU count: 2
+GPU 0: NVIDIA TITAN RTX
+GPU 1: NVIDIA TITAN RTX
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:88: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+  parse = parser.parseString(pattern)
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:92: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'
+  parser.resetCache()
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/matplotlib/_mathtext.py:30: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'
+  ParserElement.enablePackrat()
+
+============================================================
+DSRL + RoboReward VLM Training
+============================================================
+   Policy device (cuda:0): DSRL (Diffusion + SAC)
+   VLM device (cuda:1): RoboReward-8B
+============================================================
+Loading RoboReward-8B from /var/scratch/pkarageo/hf_cache/models--teetone--RoboReward-8B/snapshots/3a185b4fce2b1253643105be1f234ae618b9732f...
+   Target device: cuda:1
+   Using 4-bit quantization (NF4)
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:03<00:11,  3.80s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:07<00:07,  3.92s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:11<00:03,  3.94s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:13<00:00,  2.95s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:13<00:00,  3.30s/it]
+RoboReward-8B loaded on cuda:1
+Task: lift
+Task instruction: Pick up the red cube from the table
+============================================================
+
+Error executing job with overrides: ['seed=1']
+Traceback (most recent call last):
+  File "/home/pkarageo/master-thesis/dsrl/train_dsrl_vlm.py", line 86, in main
+    wandb.init(
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 1239, in init
+    wandb._sentry.reraise(e)
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/wandb/analytics/sentry.py", line 155, in reraise
+    raise exc.with_traceback(sys.exc_info()[2])
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 1224, in init
+    wi.setup(kwargs)
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 295, in setup
+    wandb_login._login(
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/wandb/sdk/wandb_login.py", line 346, in _login
+    wlogin.prompt_api_key()
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/wandb/sdk/wandb_login.py", line 280, in prompt_api_key
+    raise UsageError("api_key not configured (no-tty). call " + directive)
+wandb.errors.UsageError: api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+INFO:    Terminating squashfuse_ll after timeout
+INFO:    Timeouts can be caused by a running background process
+========================================
+Job finished: Tue Feb 17 18:45:00 CET 2026
+========================================

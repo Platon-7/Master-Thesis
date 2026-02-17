@@ -1,0 +1,271 @@
+2026-02-03 17:28:01,460 INFO    StreamThr :362176 [internal.py:wandb_internal():85] W&B internal server running at pid: 362176, started at: 2026-02-03 17:28:01.459271
+2026-02-03 17:28:01,461 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status
+2026-02-03 17:28:01,473 INFO    WriterThread:362176 [datastore.py:open_for_write():87] open: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/run-kyp9kk77.wandb
+2026-02-03 17:28:01,474 DEBUG   SenderThread:362176 [sender.py:send():391] send: header
+2026-02-03 17:28:01,515 DEBUG   SenderThread:362176 [sender.py:send():391] send: run
+2026-02-03 17:28:02,089 INFO    SenderThread:362176 [dir_watcher.py:__init__():211] watching files in: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files
+2026-02-03 17:28:02,089 INFO    SenderThread:362176 [sender.py:_start_run_threads():1200] run started: kyp9kk77 with start time 1770136081.459877
+2026-02-03 17:28:02,102 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: check_version
+2026-02-03 17:28:02,103 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: check_version
+2026-02-03 17:28:02,154 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: run_start
+2026-02-03 17:28:02,174 DEBUG   HandlerThread:362176 [system_info.py:__init__():26] System info init
+2026-02-03 17:28:02,174 DEBUG   HandlerThread:362176 [system_info.py:__init__():41] System info init done
+2026-02-03 17:28:02,174 INFO    HandlerThread:362176 [system_monitor.py:start():194] Starting system monitor
+2026-02-03 17:28:02,174 INFO    SystemMonitor:362176 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2026-02-03 17:28:02,174 INFO    HandlerThread:362176 [system_monitor.py:probe():214] Collecting system info
+2026-02-03 17:28:02,175 INFO    SystemMonitor:362176 [interfaces.py:start():188] Started cpu monitoring
+2026-02-03 17:28:02,176 INFO    SystemMonitor:362176 [interfaces.py:start():188] Started disk monitoring
+2026-02-03 17:28:02,177 INFO    SystemMonitor:362176 [interfaces.py:start():188] Started gpu monitoring
+2026-02-03 17:28:02,177 INFO    SystemMonitor:362176 [interfaces.py:start():188] Started memory monitoring
+2026-02-03 17:28:02,178 INFO    SystemMonitor:362176 [interfaces.py:start():188] Started network monitoring
+2026-02-03 17:28:02,196 DEBUG   HandlerThread:362176 [system_info.py:probe():152] Probing system
+2026-02-03 17:28:02,198 DEBUG   HandlerThread:362176 [system_info.py:_probe_git():137] Probing git
+2026-02-03 17:28:02,215 DEBUG   HandlerThread:362176 [system_info.py:_probe_git():145] Probing git done
+2026-02-03 17:28:02,215 DEBUG   HandlerThread:362176 [system_info.py:probe():200] Probing system done
+2026-02-03 17:28:02,215 DEBUG   HandlerThread:362176 [system_monitor.py:probe():223] {'os': 'Linux-4.18.0-553.16.1.el8_10.x86_64-x86_64-with-glibc2.35', 'python': '3.9.23', 'heartbeatAt': '2026-02-03T16:28:02.196960', 'startedAt': '2026-02-03T16:28:01.444774', 'docker': None, 'cuda': None, 'args': ('--config-path=cfg/robomimic', '--config-name=dsrl_lift_vlm.yaml', 'seed=1'), 'state': 'running', 'program': '/home/pkarageo/master-thesis/dsrl/train_dsrl_vlm.py', 'codePathLocal': 'train_dsrl_vlm.py', 'codePath': 'train_dsrl_vlm.py', 'git': {'remote': 'https://github.com/ajwagen/dsrl.git', 'commit': '8d21b9cf55459f022c0e769bca1343edd9d30e5a'}, 'email': None, 'root': '/home/pkarageo/master-thesis/dsrl', 'host': 'node206', 'username': 'pkarageo', 'executable': '/opt/conda/envs/dsrl_env/bin/python', 'cpu_count': 16, 'cpu_count_logical': 32, 'cpu_freq': {'current': 3193.7203125, 'min': 1200.0, 'max': 3200.0}, 'cpu_freq_per_core': [{'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 2999.05, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}, {'current': 3200.0, 'min': 1200.0, 'max': 3200.0}], 'disk': {'/': {'total': 0.0625, 'used': 1.52587890625e-05}}, 'gpu': 'NVIDIA TITAN RTX', 'gpu_count': 2, 'gpu_devices': [{'name': 'NVIDIA TITAN RTX', 'memory_total': 25769803776}, {'name': 'NVIDIA TITAN RTX', 'memory_total': 25769803776}], 'memory': {'total': 125.7930793762207}}
+2026-02-03 17:28:02,215 INFO    HandlerThread:362176 [system_monitor.py:probe():224] Finished collecting system info
+2026-02-03 17:28:02,215 INFO    HandlerThread:362176 [system_monitor.py:probe():227] Publishing system info
+2026-02-03 17:28:02,215 DEBUG   HandlerThread:362176 [system_info.py:_save_conda():209] Saving list of conda packages installed into the current environment
+2026-02-03 17:28:03,091 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_created():271] file/dir created: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/conda-environment.yaml
+2026-02-03 17:28:04,988 DEBUG   HandlerThread:362176 [system_info.py:_save_conda():224] Saving conda packages done
+2026-02-03 17:28:04,988 DEBUG   HandlerThread:362176 [system_info.py:_save_code():44] Saving code
+2026-02-03 17:28:04,998 DEBUG   HandlerThread:362176 [system_info.py:_save_code():67] Saving code done
+2026-02-03 17:28:04,998 DEBUG   HandlerThread:362176 [system_info.py:_save_patches():84] Saving git patches
+2026-02-03 17:28:05,092 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/conda-environment.yaml
+2026-02-03 17:28:05,092 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_created():271] file/dir created: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/code/train_dsrl_vlm.py
+2026-02-03 17:28:05,092 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_created():271] file/dir created: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/code
+2026-02-03 17:28:05,193 DEBUG   HandlerThread:362176 [system_info.py:_save_patches():126] Saving git patches done
+2026-02-03 17:28:05,195 INFO    HandlerThread:362176 [system_monitor.py:probe():229] Finished publishing system info
+2026-02-03 17:28:05,204 DEBUG   SenderThread:362176 [sender.py:send():391] send: files
+2026-02-03 17:28:05,204 INFO    SenderThread:362176 [sender.py:_save_file():1466] saving file wandb-metadata.json with policy now
+2026-02-03 17:28:05,204 INFO    SenderThread:362176 [sender.py:_save_file():1466] saving file code/train_dsrl_vlm.py with policy now
+2026-02-03 17:28:05,205 INFO    SenderThread:362176 [sender.py:_save_file():1466] saving file diff.patch with policy now
+2026-02-03 17:28:05,366 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: python_packages
+2026-02-03 17:28:05,367 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: python_packages
+2026-02-03 17:28:05,368 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: stop_status
+2026-02-03 17:28:05,371 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:05,372 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: stop_status
+2026-02-03 17:28:05,616 DEBUG   SenderThread:362176 [sender.py:send():391] send: telemetry
+2026-02-03 17:28:05,779 INFO    wandb-upload_0:362176 [upload_job.py:push():130] Uploaded file /var/scratch/pkarageo/tmp/tmpmkpg7hgiwandb/4kmtbu2l-wandb-metadata.json
+2026-02-03 17:28:05,780 INFO    wandb-upload_2:362176 [upload_job.py:push():130] Uploaded file /var/scratch/pkarageo/tmp/tmpmkpg7hgiwandb/iv591yf9-diff.patch
+2026-02-03 17:28:05,787 INFO    wandb-upload_1:362176 [upload_job.py:push():130] Uploaded file /var/scratch/pkarageo/tmp/tmpmkpg7hgiwandb/n4l70mtz-code/train_dsrl_vlm.py
+2026-02-03 17:28:06,093 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_created():271] file/dir created: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/requirements.txt
+2026-02-03 17:28:06,093 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_created():271] file/dir created: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/diff.patch
+2026-02-03 17:28:06,093 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_created():271] file/dir created: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/output.log
+2026-02-03 17:28:06,093 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_created():271] file/dir created: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/wandb-metadata.json
+2026-02-03 17:28:06,415 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:06,704 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:07,370 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:08,095 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/output.log
+2026-02-03 17:28:08,406 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:09,421 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:10,398 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:11,866 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:12,203 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:12,387 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:13,387 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:14,101 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/output.log
+2026-02-03 17:28:14,387 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:15,387 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:16,387 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:17,373 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:17,387 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:18,387 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:19,387 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:20,367 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: stop_status
+2026-02-03 17:28:20,367 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: stop_status
+2026-02-03 17:28:20,408 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:21,387 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:22,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:22,526 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:23,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:24,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:25,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:26,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:27,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:28,373 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:28,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:29,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:30,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:31,388 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:32,389 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:33,389 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:34,378 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:34,389 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:35,121 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/config.yaml
+2026-02-03 17:28:35,367 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: stop_status
+2026-02-03 17:28:35,368 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: stop_status
+2026-02-03 17:28:35,408 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:36,389 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:37,389 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:38,389 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:39,389 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:40,373 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:40,389 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:41,390 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:42,390 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:43,390 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:44,390 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:45,374 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:45,390 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:46,390 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:47,390 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:48,390 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:49,390 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:50,367 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: stop_status
+2026-02-03 17:28:50,368 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: stop_status
+2026-02-03 17:28:50,408 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:50,595 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:51,391 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:52,391 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:53,391 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:54,138 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/output.log
+2026-02-03 17:28:54,392 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:28:54,991 DEBUG   SenderThread:362176 [sender.py:send():391] send: exit
+2026-02-03 17:28:54,991 INFO    SenderThread:362176 [sender.py:send_exit():598] handling exit code: 1
+2026-02-03 17:28:54,992 INFO    SenderThread:362176 [sender.py:send_exit():600] handling runtime: 52
+2026-02-03 17:28:54,993 INFO    SenderThread:362176 [sender.py:_save_file():1466] saving file wandb-summary.json with policy end
+2026-02-03 17:28:54,993 INFO    SenderThread:362176 [sender.py:send_exit():606] send defer
+2026-02-03 17:28:54,994 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:54,994 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 0
+2026-02-03 17:28:54,994 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:54,994 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 0
+2026-02-03 17:28:54,994 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 1
+2026-02-03 17:28:54,994 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:54,994 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 1
+2026-02-03 17:28:54,994 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:54,994 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 1
+2026-02-03 17:28:54,994 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 2
+2026-02-03 17:28:54,995 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:54,995 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 2
+2026-02-03 17:28:54,995 INFO    HandlerThread:362176 [system_monitor.py:finish():203] Stopping system monitor
+2026-02-03 17:28:54,995 DEBUG   SystemMonitor:362176 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2026-02-03 17:28:54,995 DEBUG   SystemMonitor:362176 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2026-02-03 17:28:54,995 INFO    HandlerThread:362176 [interfaces.py:finish():200] Joined cpu monitor
+2026-02-03 17:28:54,996 DEBUG   SystemMonitor:362176 [system_monitor.py:_start():183] Publishing last batch of metrics
+2026-02-03 17:28:54,996 INFO    HandlerThread:362176 [interfaces.py:finish():200] Joined disk monitor
+2026-02-03 17:28:55,110 INFO    HandlerThread:362176 [interfaces.py:finish():200] Joined gpu monitor
+2026-02-03 17:28:55,110 INFO    HandlerThread:362176 [interfaces.py:finish():200] Joined memory monitor
+2026-02-03 17:28:55,110 INFO    HandlerThread:362176 [interfaces.py:finish():200] Joined network monitor
+2026-02-03 17:28:55,110 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:55,111 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 2
+2026-02-03 17:28:55,111 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 3
+2026-02-03 17:28:55,111 DEBUG   SenderThread:362176 [sender.py:send():391] send: stats
+2026-02-03 17:28:55,111 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:55,111 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 3
+2026-02-03 17:28:55,111 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:55,112 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 3
+2026-02-03 17:28:55,112 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 4
+2026-02-03 17:28:55,112 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:55,112 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 4
+2026-02-03 17:28:55,112 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:55,112 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 4
+2026-02-03 17:28:55,112 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 5
+2026-02-03 17:28:55,112 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:55,112 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 5
+2026-02-03 17:28:55,112 DEBUG   SenderThread:362176 [sender.py:send():391] send: summary
+2026-02-03 17:28:55,114 INFO    SenderThread:362176 [sender.py:_save_file():1466] saving file wandb-summary.json with policy end
+2026-02-03 17:28:55,114 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:55,114 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 5
+2026-02-03 17:28:55,114 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 6
+2026-02-03 17:28:55,114 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:55,114 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 6
+2026-02-03 17:28:55,115 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:55,115 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 6
+2026-02-03 17:28:55,115 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 7
+2026-02-03 17:28:55,115 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: status_report
+2026-02-03 17:28:55,115 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:55,115 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 7
+2026-02-03 17:28:55,115 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:55,115 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 7
+2026-02-03 17:28:55,139 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_created():271] file/dir created: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/wandb-summary.json
+2026-02-03 17:28:55,991 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: poll_exit
+2026-02-03 17:28:56,141 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/output.log
+2026-02-03 17:28:56,705 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 8
+2026-02-03 17:28:56,705 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: poll_exit
+2026-02-03 17:28:56,706 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:56,706 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 8
+2026-02-03 17:28:56,706 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:56,706 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 8
+2026-02-03 17:28:56,706 INFO    SenderThread:362176 [job_builder.py:build():443] Attempting to build job artifact
+2026-02-03 17:28:56,707 INFO    SenderThread:362176 [job_builder.py:_get_source_type():572] is repo sourced job
+2026-02-03 17:28:56,762 INFO    SenderThread:362176 [job_builder.py:build():548] adding wandb-job metadata file
+2026-02-03 17:28:56,776 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 9
+2026-02-03 17:28:56,776 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:28:56,776 DEBUG   SenderThread:362176 [sender.py:send():391] send: artifact
+2026-02-03 17:28:56,776 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 9
+2026-02-03 17:28:56,992 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: poll_exit
+2026-02-03 17:28:57,142 INFO    Thread-12 :362176 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/output.log
+2026-02-03 17:28:58,197 INFO    wandb-upload_2:362176 [upload_job.py:push():88] Uploaded file /home/pkarageo/.local/share/wandb/artifacts/staging/tmpo9sqrfjj
+2026-02-03 17:28:58,227 INFO    wandb-upload_1:362176 [upload_job.py:push():88] Uploaded file /var/scratch/pkarageo/tmp/tmp2e7pnwnt/wandb-job.json
+2026-02-03 17:28:58,237 INFO    wandb-upload_0:362176 [upload_job.py:push():88] Uploaded file /home/pkarageo/.local/share/wandb/artifacts/staging/tmpzvogk2xd
+2026-02-03 17:28:59,546 INFO    SenderThread:362176 [sender.py:send_artifact():1549] sent artifact job-https___github.com_ajwagen_dsrl.git_train_dsrl_vlm.py - {'id': 'QXJ0aWZhY3Q6MjQzMzMwMjU1NQ==', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjg2MDUwNDMzNQ==', 'latestArtifact': None}}
+2026-02-03 17:28:59,547 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:28:59,547 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 9
+2026-02-03 17:28:59,547 INFO    SenderThread:362176 [dir_watcher.py:finish():358] shutting down directory watcher
+2026-02-03 17:29:00,143 INFO    SenderThread:362176 [dir_watcher.py:finish():388] scan: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files
+2026-02-03 17:29:00,144 INFO    SenderThread:362176 [dir_watcher.py:finish():402] scan save: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/config.yaml config.yaml
+2026-02-03 17:29:00,144 INFO    SenderThread:362176 [dir_watcher.py:finish():402] scan save: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/conda-environment.yaml conda-environment.yaml
+2026-02-03 17:29:00,147 INFO    SenderThread:362176 [dir_watcher.py:finish():402] scan save: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/diff.patch diff.patch
+2026-02-03 17:29:00,148 INFO    SenderThread:362176 [dir_watcher.py:finish():402] scan save: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/wandb-metadata.json wandb-metadata.json
+2026-02-03 17:29:00,148 INFO    SenderThread:362176 [dir_watcher.py:finish():402] scan save: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/requirements.txt requirements.txt
+2026-02-03 17:29:00,149 INFO    SenderThread:362176 [dir_watcher.py:finish():402] scan save: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/output.log output.log
+2026-02-03 17:29:00,155 INFO    SenderThread:362176 [dir_watcher.py:finish():402] scan save: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/wandb-summary.json wandb-summary.json
+2026-02-03 17:29:00,162 INFO    SenderThread:362176 [dir_watcher.py:finish():402] scan save: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/code/train_dsrl_vlm.py code/train_dsrl_vlm.py
+2026-02-03 17:29:00,162 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 10
+2026-02-03 17:29:00,162 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: poll_exit
+2026-02-03 17:29:00,162 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:29:00,162 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 10
+2026-02-03 17:29:00,163 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:29:00,163 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 10
+2026-02-03 17:29:00,163 INFO    SenderThread:362176 [file_pusher.py:finish():169] shutting down file pusher
+2026-02-03 17:29:00,556 INFO    wandb-upload_1:362176 [upload_job.py:push():130] Uploaded file /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/requirements.txt
+2026-02-03 17:29:00,569 INFO    wandb-upload_3:362176 [upload_job.py:push():130] Uploaded file /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/output.log
+2026-02-03 17:29:00,570 INFO    wandb-upload_2:362176 [upload_job.py:push():130] Uploaded file /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/config.yaml
+2026-02-03 17:29:00,660 INFO    wandb-upload_0:362176 [upload_job.py:push():130] Uploaded file /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/conda-environment.yaml
+2026-02-03 17:29:00,798 INFO    wandb-upload_4:362176 [upload_job.py:push():130] Uploaded file /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/files/wandb-summary.json
+2026-02-03 17:29:00,993 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: poll_exit
+2026-02-03 17:29:00,994 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: poll_exit
+2026-02-03 17:29:00,999 INFO    Thread-11 :362176 [sender.py:transition_state():626] send defer: 11
+2026-02-03 17:29:00,999 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:29:00,999 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 11
+2026-02-03 17:29:00,999 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:29:01,000 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 11
+2026-02-03 17:29:01,000 INFO    SenderThread:362176 [file_pusher.py:join():175] waiting for file pusher
+2026-02-03 17:29:01,001 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 12
+2026-02-03 17:29:01,002 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:29:01,002 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 12
+2026-02-03 17:29:01,002 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:29:01,002 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 12
+2026-02-03 17:29:01,002 INFO    SenderThread:362176 [file_stream.py:finish():601] file stream finish called
+2026-02-03 17:29:01,223 INFO    SenderThread:362176 [file_stream.py:finish():605] file stream finish is done
+2026-02-03 17:29:01,223 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 13
+2026-02-03 17:29:01,223 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:29:01,223 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 13
+2026-02-03 17:29:01,224 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:29:01,224 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 13
+2026-02-03 17:29:01,224 INFO    SenderThread:362176 [sender.py:transition_state():626] send defer: 14
+2026-02-03 17:29:01,224 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: defer
+2026-02-03 17:29:01,225 DEBUG   SenderThread:362176 [sender.py:send():391] send: final
+2026-02-03 17:29:01,225 INFO    HandlerThread:362176 [handler.py:handle_request_defer():184] handle defer: 14
+2026-02-03 17:29:01,225 DEBUG   SenderThread:362176 [sender.py:send():391] send: footer
+2026-02-03 17:29:01,225 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: defer
+2026-02-03 17:29:01,225 INFO    SenderThread:362176 [sender.py:send_request_defer():622] handle sender defer: 14
+2026-02-03 17:29:01,226 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: poll_exit
+2026-02-03 17:29:01,226 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: poll_exit
+2026-02-03 17:29:01,227 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: server_info
+2026-02-03 17:29:01,227 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: server_info
+2026-02-03 17:29:01,230 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: poll_exit
+2026-02-03 17:29:01,230 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: get_summary
+2026-02-03 17:29:01,231 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: sampled_history
+2026-02-03 17:29:01,231 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: internal_messages
+2026-02-03 17:29:01,385 DEBUG   SenderThread:362176 [sender.py:send_request():418] send_request: poll_exit
+2026-02-03 17:29:01,385 INFO    MainThread:362176 [wandb_run.py:_footer_history_summary_info():4076] rendering history
+2026-02-03 17:29:01,386 INFO    MainThread:362176 [wandb_run.py:_footer_history_summary_info():4108] rendering summary
+2026-02-03 17:29:01,386 INFO    MainThread:362176 [wandb_run.py:_footer_sync_info():4035] logging synced files
+2026-02-03 17:29:01,386 DEBUG   HandlerThread:362176 [handler.py:handle_request():158] handle_request: shutdown
+2026-02-03 17:29:01,386 INFO    HandlerThread:362176 [handler.py:finish():880] shutting down handler
+2026-02-03 17:29:02,230 INFO    WriterThread:362176 [datastore.py:close():296] close: /home/pkarageo/master-thesis/dsrl/wandb/run-20260203_172801-kyp9kk77/run-kyp9kk77.wandb
+2026-02-03 17:29:02,385 INFO    SenderThread:362176 [sender.py:finish():1631] shutting down sender
+2026-02-03 17:29:02,386 INFO    SenderThread:362176 [file_pusher.py:finish():169] shutting down file pusher
+2026-02-03 17:29:02,386 INFO    SenderThread:362176 [file_pusher.py:join():175] waiting for file pusher

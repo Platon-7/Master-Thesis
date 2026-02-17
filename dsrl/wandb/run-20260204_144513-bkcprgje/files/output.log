@@ -1,0 +1,158 @@
+[2026-02-04 14:45:17,361][root][INFO] - Number of network parameters: 573516
+[2026-02-04 14:45:17,777][root][INFO] - Actor weights not found. Using pre-trained weights!
+[2026-02-04 14:45:17,777][root][INFO] - Loaded base policy weights from ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/Cython/Distutils/old_build_ext.py:15: DeprecationWarning: dep_util is Deprecated. Use functions from setuptools instead.
+  from distutils.dep_util import newer, newer_group
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/pkg_resources/__init__.py:3148: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+[2026-02-04 14:45:19,161][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-04 14:45:19,162][root][INFO] - Device 0 is not available for rendering
+[2026-02-04 14:45:19,208][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-04 14:45:19,208][root][INFO] - Device 1 is not available for rendering
+[2026-02-04 14:45:19,250][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-04 14:45:19,250][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-04 14:45:21,068][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-04 14:45:21,069][root][INFO] - Device 0 is not available for rendering
+[2026-02-04 14:45:21,113][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-04 14:45:21,114][root][INFO] - Device 1 is not available for rendering
+[2026-02-04 14:45:21,158][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-04 14:45:21,158][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-04 14:45:22,499][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-04 14:45:22,499][root][INFO] - Device 0 is not available for rendering
+[2026-02-04 14:45:22,546][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-04 14:45:22,547][root][INFO] - Device 1 is not available for rendering
+[2026-02-04 14:45:22,592][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-04 14:45:22,593][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-04 14:45:23,626][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-04 14:45:23,627][root][INFO] - Device 0 is not available for rendering
+[2026-02-04 14:45:23,681][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-04 14:45:23,682][root][INFO] - Device 1 is not available for rendering
+[2026-02-04 14:45:23,729][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-04 14:45:23,729][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+Using cuda device
+[2026-02-04 14:45:25,790][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-04 14:45:25,790][root][INFO] - Device 0 is not available for rendering
+[2026-02-04 14:45:25,844][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-04 14:45:25,844][root][INFO] - Device 1 is not available for rendering
+[2026-02-04 14:45:25,895][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-04 14:45:25,896][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-04 14:45:26,929][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-04 14:45:26,930][root][INFO] - Device 0 is not available for rendering
+[2026-02-04 14:45:26,988][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-04 14:45:26,989][root][INFO] - Device 1 is not available for rendering
+[2026-02-04 14:45:27,040][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-04 14:45:27,041][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-04 14:45:28,510][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-04 14:45:28,511][root][INFO] - Device 0 is not available for rendering
+[2026-02-04 14:45:28,570][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-04 14:45:28,571][root][INFO] - Device 1 is not available for rendering
+[2026-02-04 14:45:28,623][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-04 14:45:28,623][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-04 14:45:29,668][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-04 14:45:29,669][root][INFO] - Device 0 is not available for rendering
+[2026-02-04 14:45:29,723][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-04 14:45:29,724][root][INFO] - Device 1 is not available for rendering
+[2026-02-04 14:45:29,777][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-04 14:45:29,778][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/gym/core.py:43: DeprecationWarning: [33mWARN: The argument mode in render method is deprecated; use render_mode during environment initialization instead.
+[33mSee here for more information: https://www.gymlibrary.ml/content/api/
+  deprecation(
+Eval episode 0 at timestep 0
+Eval episode 1 at timestep 0
+Eval episode 2 at timestep 0
+Eval episode 3 at timestep 0
+Eval episode 4 at timestep 0
+Eval episode 5 at timestep 0
+Eval episode 6 at timestep 0
+Eval episode 7 at timestep 0
+Eval episode 8 at timestep 0
+Eval episode 9 at timestep 0
+Eval episode 10 at timestep 0
+Eval episode 11 at timestep 0
+Eval episode 12 at timestep 0
+Eval episode 13 at timestep 0
+Eval episode 14 at timestep 0
+Eval episode 15 at timestep 0
+Eval episode 16 at timestep 0
+Eval episode 17 at timestep 0

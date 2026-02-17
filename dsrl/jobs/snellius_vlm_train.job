@@ -66,10 +66,9 @@ echo "=== GPU Check (outside container) ==="
 nvidia-smi
 echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
 
-# --- 4. MUJOCO SETUP --- (not needed for Snellius)
-# MUJOCO_DIR="$SCRATCH/.mujoco"
-# CONTAINER_MUJOCO_PATH="$HOME/.mujoco/mujoco210/bin"
-# export APP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CONTAINER_MUJOCO_PATH:/usr/lib/nvidia"
+--- 4. MUJOCO SETUP ---
+CONTAINER_MUJOCO_PATH="$HOME/.mujoco/mujoco210/bin"
+export APP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CONTAINER_MUJOCO_PATH:/usr/lib/nvidia"
 
 # Writable mujoco-py setup (for compilation)
 WRITABLE_MUJOCO_PY="$TMPDIR/mujoco_py_writable_dsrl"

@@ -1,0 +1,1 @@
+{"vlm/reward": -0.1875, "vlm/score_raw": 4.25, "vlm/success_rate": 0.75, "sim/success_rate": 0.5, "timestep": 337200, "_timestamp": 1770450030.450273, "_runtime": 64064.23670911789, "_step": 337200, "loss/actor": -0.005215784069150686, "loss/critic": 2.875853153246529e-06, "loss/noise_critic": 6.624771558563224e-05, "loss/ent_coef": 3.6239051799687634e-06}

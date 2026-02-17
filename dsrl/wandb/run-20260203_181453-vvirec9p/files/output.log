@@ -1,0 +1,62 @@
+[2026-02-03 18:14:57,734][root][INFO] - Number of network parameters: 573516
+[2026-02-03 18:14:58,050][root][INFO] - Actor weights not found. Using pre-trained weights!
+[2026-02-03 18:14:58,051][root][INFO] - Loaded base policy weights from ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/Cython/Distutils/old_build_ext.py:15: DeprecationWarning: dep_util is Deprecated. Use functions from setuptools instead.
+  from distutils.dep_util import newer, newer_group
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/llvmlite/binding/ffi.py:175: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  from pkg_resources import resource_filename
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/pkg_resources/__init__.py:2832: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+Error executing job with overrides: ['seed=1']
+Traceback (most recent call last):
+  File "/home/pkarageo/master-thesis/dsrl/train_dsrl_vlm.py", line 149, in main
+    env = make_vec_env(make_train_env, n_envs=num_env, vec_env_cls=DummyVecEnv)
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/env_util.py", line 125, in make_vec_env
+    vec_env = vec_env_cls([make_env(i + start_index) for i in range(n_envs)], **vec_env_kwargs)
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/vec_env/dummy_vec_env.py", line 31, in __init__
+    self.envs = [_patch_env(fn()) for fn in env_fns]
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/vec_env/dummy_vec_env.py", line 31, in <listcomp>
+    self.envs = [_patch_env(fn()) for fn in env_fns]
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/env_util.py", line 98, in _init
+    env = env_id(**env_kwargs)
+  File "/home/pkarageo/master-thesis/dsrl/train_dsrl_vlm.py", line 104, in make_train_env
+    env = make_vlm_robomimic_env(
+  File "/home/pkarageo/master-thesis/dsrl/vlm_reward_wrapper.py", line 319, in make_vlm_robomimic_env
+    env = EnvUtils.create_env_from_metadata(
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/utils/env_utils.py", line 184, in create_env_from_metadata
+    env = create_env(
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/utils/env_utils.py", line 134, in create_env
+    env_class = get_env_class(env_type=env_type)
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/utils/env_utils.py", line 35, in get_env_class
+    from robomimic.envs.env_robosuite import EnvRobosuite
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/envs/env_robosuite.py", line 11, in <module>
+    import robosuite
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/__init__.py", line 4, in <module>
+    from robosuite.environments.manipulation.lift import Lift
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/environments/manipulation/lift.py", line 5, in <module>
+    from robosuite.environments.manipulation.single_arm_env import SingleArmEnv
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/environments/manipulation/single_arm_env.py", line 3, in <module>
+    from robosuite.environments.manipulation.manipulation_env import ManipulationEnv
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/environments/manipulation/manipulation_env.py", line 3, in <module>
+    from robosuite.environments.robot_env import RobotEnv
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/environments/robot_env.py", line 7, in <module>
+    from robosuite.controllers import reset_controllers
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/controllers/__init__.py", line 1, in <module>
+    from .controller_factory import controller_factory, load_controller_config, reset_controllers, get_pybullet_server
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/controllers/controller_factory.py", line 10, in <module>
+    from .interpolators.linear_interpolator import LinearInterpolator
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/controllers/interpolators/linear_interpolator.py", line 3, in <module>
+    import robosuite.utils.transform_utils as T
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/utils/transform_utils.py", line 11, in <module>
+    from robosuite.utils.numba import jit_decorator
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robosuite/utils/numba.py", line 4, in <module>
+    import numba
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/numba/__init__.py", line 43, in <module>
+    from numba.np.ufunc import (vectorize, guvectorize, threading_layer,
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/numba/np/ufunc/__init__.py", line 3, in <module>
+    from numba.np.ufunc.decorators import Vectorize, GUVectorize, vectorize, guvectorize
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/numba/np/ufunc/decorators.py", line 3, in <module>
+    from numba.np.ufunc import _internal
+SystemError: initialization of _internal failed without raising an exception
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

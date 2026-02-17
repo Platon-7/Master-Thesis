@@ -1,0 +1,9 @@
+[2026-02-04 15:06:17,264][root][INFO] - Number of network parameters: 573516
+[2026-02-04 15:06:17,595][root][INFO] - Actor weights not found. Using pre-trained weights!
+[2026-02-04 15:06:17,596][root][INFO] - Loaded base policy weights from ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+[2026-02-04 15:06:34,798][urllib3.connectionpool][WARNING] - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(FileNotFoundError(2, 'No such file or directory'))': /api/4504800232407040/envelope/
+[2026-02-04 15:06:34,802][urllib3.connectionpool][WARNING] - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(FileNotFoundError(2, 'No such file or directory'))': /api/4504800232407040/envelope/
+[2026-02-04 15:06:34,807][urllib3.connectionpool][WARNING] - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(FileNotFoundError(2, 'No such file or directory'))': /api/4504800232407040/envelope/
+[2026-02-04 15:06:34,817][urllib3.connectionpool][WARNING] - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(FileNotFoundError(2, 'No such file or directory'))': /api/4504800232407040/envelope/
+[2026-02-04 15:06:34,822][urllib3.connectionpool][WARNING] - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(FileNotFoundError(2, 'No such file or directory'))': /api/4504800232407040/envelope/
+[2026-02-04 15:06:34,826][urllib3.connectionpool][WARNING] - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(FileNotFoundError(2, 'No such file or directory'))': /api/4504800232407040/envelope/

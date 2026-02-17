@@ -1,0 +1,19 @@
+[2026-02-04 15:06:17,264][root][INFO] - Number of network parameters: 573516
+[2026-02-04 15:06:17,595][root][INFO] - Actor weights not found. Using pre-trained weights!
+[2026-02-04 15:06:17,596][root][INFO] - Loaded base policy weights from ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+Error executing job with overrides: ['seed=1']
+Traceback (most recent call last):
+  File "/home/pkarageo/master-thesis/dsrl/train_dsrl.py", line 71, in main
+    env = make_vec_env(make_env, n_envs=num_env, vec_env_cls=SubprocVecEnv)
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/env_util.py", line 125, in make_vec_env
+    vec_env = vec_env_cls([make_env(i + start_index) for i in range(n_envs)], **vec_env_kwargs)
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/vec_env/subproc_vec_env.py", line 127, in __init__
+    observation_space, action_space = self.remotes[0].recv()
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/multiprocessing/connection.py", line 250, in recv
+    buf = self._recv_bytes()
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/multiprocessing/connection.py", line 414, in _recv_bytes
+    buf = self._recv(4)
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/multiprocessing/connection.py", line 379, in _recv
+    chunk = read(handle, remaining)
+ConnectionResetError: [Errno 104] Connection reset by peer
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

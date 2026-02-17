@@ -1,0 +1,186 @@
+wandb_version: 1
+
+name:
+  desc: null
+  value: robomimic_lift_dsrl_vlm_2026-02-03_17-35-46_1
+logdir:
+  desc: null
+  value: /var/scratch/pkarageo/dsrl_logs/robomimic-dsrl-vlm/robomimic_lift_dsrl_vlm_2026-02-03_17-35-46_1/2026-02-03_17-35-46_1
+base_policy_path:
+  desc: null
+  value: ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+normalization_path:
+  desc: null
+  value: ./dppo/log/robomimic-pretrain/lift/normalization.npz
+dppo_path:
+  desc: null
+  value: ./dppo
+algorithm:
+  desc: null
+  value: dsrl_na
+seed:
+  desc: null
+  value: 1
+device:
+  desc: null
+  value: cuda:0
+use_wandb:
+  desc: null
+  value: true
+env_name:
+  desc: null
+  value: lift
+log_dir:
+  desc: null
+  value: /var/scratch/pkarageo/dsrl_logs
+obs_dim:
+  desc: null
+  value: 19
+action_dim:
+  desc: null
+  value: 7
+cond_steps:
+  desc: null
+  value: 1
+act_steps:
+  desc: null
+  value: 4
+load_offline_data:
+  desc: null
+  value: false
+deterministic_eval:
+  desc: null
+  value: false
+use_vlm_reward:
+  desc: null
+  value: true
+eval_interval:
+  desc: null
+  value: 3000
+num_evals:
+  desc: null
+  value: 200
+save_model_interval:
+  desc: null
+  value: 100000
+save_replay_buffer:
+  desc: null
+  value: false
+env:
+  desc: null
+  value:
+    n_envs: 1
+    n_eval_envs: 4
+    name: lift
+    max_episode_steps: 300
+    reset_at_iteration: false
+    save_video: false
+    best_reward_threshold_for_success: 1
+    reward_offset: 1
+    wrappers:
+      robomimic_lowdim:
+        normalization_path: ./dppo/log/robomimic-pretrain/lift/normalization.npz
+        low_dim_keys:
+        - robot0_eef_pos
+        - robot0_eef_quat
+        - robot0_gripper_qpos
+        - object
+      multi_step:
+        n_obs_steps: 1
+        n_action_steps: 4
+        max_episode_steps: 300
+        reset_within_step: true
+wandb:
+  desc: null
+  value:
+    project: dsrl_roboreward
+    run: 17-35-46_robomimic_lift_dsrl_vlm_2026-02-03_17-35-46_1
+    group: robomimic-lift-vlm
+train:
+  desc: null
+  value:
+    tau: 0.005
+    actor_lr: 0.0003
+    batch_size: 256
+    train_freq: 1
+    utd: 30
+    noise_critic_grad_steps: 10
+    use_layer_norm: true
+    layer_size: 2048
+    num_layers: 3
+    discount: 0.99
+    ent_coef: -1
+    target_ent: 0.0
+    init_rollout_steps: 501
+    action_magnitude: 1.5
+    n_critics: 2
+    critic_backup_combine_type: min
+model:
+  desc: null
+  value:
+    _target_: model.diffusion.diffusion_eval.DiffusionEval
+    ft_denoising_steps: 0
+    predict_epsilon: true
+    denoised_clip_value: 1.0
+    randn_clip_value: 3
+    network_path: ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+    network:
+      _target_: model.diffusion.mlp_diffusion.DiffusionMLP
+      time_dim: 16
+      mlp_dims:
+      - 512
+      - 512
+      - 512
+      residual_style: true
+      cond_dim: 19
+      horizon_steps: 4
+      action_dim: 7
+    horizon_steps: 4
+    obs_dim: 19
+    action_dim: 7
+    denoising_steps: 20
+    device: cuda:0
+    use_ddim: true
+    ddim_steps: 8
+    controllable_noise: true
+reward_type:
+  desc: null
+  value: vlm_roboreward
+_wandb:
+  desc: null
+  value:
+    code_path: code/train_dsrl_vlm.py
+    python_version: 3.9.23
+    cli_version: 0.17.7
+    framework: huggingface
+    huggingface_version: 4.57.6
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1770136570
+    t:
+      1:
+      - 1
+      - 11
+      - 41
+      - 49
+      - 50
+      - 55
+      - 71
+      2:
+      - 1
+      - 11
+      - 41
+      - 49
+      - 50
+      - 55
+      - 71
+      3:
+      - 13
+      - 16
+      - 23
+      4: 3.9.23
+      5: 0.17.7
+      6: 4.57.6
+      8:
+      - 5
+      13: linux-x86_64

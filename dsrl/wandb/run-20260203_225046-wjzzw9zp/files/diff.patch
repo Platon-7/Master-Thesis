@@ -1,0 +1,332 @@
+diff --git a/env_utils.py b/env_utils.py
+index 7ddbacc..2945163 100644
+--- a/env_utils.py
++++ b/env_utils.py
+@@ -166,6 +166,7 @@ class ActionChunkWrapper(gymnasium.Env):
+ 		done_ = []
+ 		info_ = []
+ 		done_i = False
++		episode_end_info = None  # Track info from when episode actually ended
+ 		for i in range(action.shape[0]):
+ 			self.count += 1
+ 			obs_i, reward_i, done_i, info_i = self.env.step(action[i])
+@@ -173,15 +174,35 @@ class ActionChunkWrapper(gymnasium.Env):
+ 			reward_.append(reward_i)
+ 			done_.append(done_i)
+ 			info_.append(info_i)
++			# Preserve info from the step where episode ended (contains vlm_reward)
++			if done_i and episode_end_info is None:
++				episode_end_info = info_i.copy()
+ 		obs = obs_[-1]
+ 		reward = sum(reward_)
+-		done = np.max(done_)
++		done = np.max(done_)  # True if task succeeded/failed during action chunk
+ 		info = info_[-1]
++		
++		# Merge episode end info (vlm_reward, etc.) into final info
++		if episode_end_info is not None:
++			for key in ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored']:
++				if key in episode_end_info:
++					info[key] = episode_end_info[key]
++		
++		# Handle TimeLimit truncation properly for Q-value calculation
++		# terminated = task actually ended (success or failure)
++		# truncated = episode ended due to time limit (should bootstrap Q-value)
++		truncated = False
+ 		if self.count >= self.max_episode_steps:
++			if not done:  # Time ran out, but task didn't naturally end
++				truncated = True
+ 			done = True
++		
+ 		if done:
+ 			info['terminal_observation'] = obs
+-		return obs, reward, done, False, info
++			# SB3 uses this key to handle timeout termination in replay buffer
++			info['TimeLimit.truncated'] = truncated
++			
++		return obs, reward, done, truncated, info
+ 
+ 	def render(self):
+ 		return self.env.render()
+diff --git a/utils.py b/utils.py
+index 5ef8d48..5cd13eb 100644
+--- a/utils.py
++++ b/utils.py
+@@ -3,6 +3,9 @@ import wandb
+ import numpy as np
+ from stable_baselines3.common.callbacks import BaseCallback
+ import hydra
++import csv
++import os
++from datetime import datetime
+ 
+ 
+ class DPPOBasePolicyWrapper:
+@@ -160,6 +163,267 @@ class LoggingCallback(BaseCallback):
+ 		self.total_timesteps = timesteps
+ 
+ 
++class VLMLoggingCallback(BaseCallback):
++	"""
++	Callback specifically designed for VLM reward training.
++	Logs both simulator success and VLM scores for proper plotting.
++	
++	Logged metrics for plotting:
++	- train/vlm_reward: Mean VLM reward per episode [-1, 0]
++	- train/vlm_score_raw: Mean raw VLM score [1-5]
++	- train/sim_success_rate: Success rate based on simulator reward
++	- train/vlm_success_rate: Success rate based on VLM score >= 4
++	- eval/vlm_reward: Mean VLM reward during evaluation
++	- eval/sim_success_rate: Simulator success rate during evaluation
++	- eval/vlm_success_rate: VLM-based success rate during evaluation
++	"""
++	
++	def __init__(
++		self,
++		action_chunk=4,
++		log_freq=1000,
++		use_wandb=True,
++		eval_env=None,
++		eval_freq=70,
++		eval_episodes=2,
++		verbose=0,
++		num_train_env=1,
++		num_eval_env=1,
++		algorithm='dsrl_sac',
++		max_steps=-1,
++		deterministic_eval=False,
++		csv_log_path=None,  # Path to save CSV logs
++		vlm_success_threshold=4,  # VLM score >= this = success
++	):
++		super().__init__(verbose)
++		self.action_chunk = action_chunk
++		self.log_freq = log_freq
++		self.use_wandb = use_wandb
++		self.eval_env = eval_env
++		self.eval_episodes = eval_episodes
++		self.eval_freq = eval_freq
++		self.log_count = 0
++		self.num_train_env = num_train_env
++		self.num_eval_env = num_eval_env
++		self.algorithm = algorithm
++		self.max_steps = max_steps
++		self.deterministic_eval = deterministic_eval
++		self.csv_log_path = csv_log_path
++		self.vlm_success_threshold = vlm_success_threshold
++		
++		# VLM-specific tracking
++		self.episode_vlm_rewards = []
++		self.episode_vlm_scores = []
++		self.episode_sim_rewards = []
++		self.episode_sim_success = []  # Track simulator success per episode
++		self.total_timesteps = 0
++		
++		# CSV logging setup
++		self.csv_data = []
++		if csv_log_path:
++			self._setup_csv(csv_log_path)
++	
++	def _setup_csv(self, path):
++		"""Setup CSV file with headers."""
++		os.makedirs(os.path.dirname(path) if os.path.dirname(path) else '.', exist_ok=True)
++		with open(path, 'w', newline='') as f:
++			writer = csv.writer(f)
++			writer.writerow([
++				'timestep', 'log_step', 'datetime',
++				'train_vlm_reward', 'train_vlm_score_raw', 
++				'train_sim_success_rate', 'train_vlm_success_rate',
++				'train_actor_loss', 'train_critic_loss', 'train_ent_coef',
++				'eval_vlm_reward', 'eval_sim_success_rate', 'eval_vlm_success_rate'
++			])
++	
++	def _log_to_csv(self, data_dict):
++		"""Append data to CSV file."""
++		if self.csv_log_path:
++			with open(self.csv_log_path, 'a', newline='') as f:
++				writer = csv.writer(f)
++				writer.writerow([
++					data_dict.get('timestep', ''),
++					data_dict.get('log_step', ''),
++					datetime.now().isoformat(),
++					data_dict.get('train_vlm_reward', ''),
++					data_dict.get('train_vlm_score_raw', ''),
++					data_dict.get('train_sim_success_rate', ''),
++					data_dict.get('train_vlm_success_rate', ''),
++					data_dict.get('train_actor_loss', ''),
++					data_dict.get('train_critic_loss', ''),
++					data_dict.get('train_ent_coef', ''),
++					data_dict.get('eval_vlm_reward', ''),
++					data_dict.get('eval_sim_success_rate', ''),
++					data_dict.get('eval_vlm_success_rate', ''),
++				])
++	
++	def _on_step(self):
++		# Extract info from episode ends
++		for info in self.locals['infos']:
++			# DEBUG: Print info keys on episode end
++			dones = self.locals.get('dones', [])
++			if any(dones):
++				print(f"[DEBUG] Episode ended. Info keys: {list(info.keys())}")
++				if 'vlm_reward' in info:
++					print(f"[DEBUG] Found vlm_reward: {info['vlm_reward']}")
++				else:
++					print(f"[DEBUG] vlm_reward NOT in info!")
++			
++			if 'vlm_reward' in info:
++				# Episode ended with VLM reward
++				self.episode_vlm_rewards.append(info['vlm_reward'])
++				if 'vlm_raw_score' in info:
++					self.episode_vlm_scores.append(info['vlm_raw_score'])
++				if 'sim_reward' in info:
++					self.episode_sim_rewards.append(info['sim_reward'])
++					# Sim success: positive cumulative reward
++					self.episode_sim_success.append(1 if info['sim_reward'] > 0 else 0)
++		
++		self.total_timesteps += self.action_chunk * self.model.n_envs
++		
++		# Log at intervals
++		if self.n_calls % self.log_freq == 0 and len(self.episode_vlm_rewards) > 0:
++			self.log_count += 1
++			
++			# Compute metrics
++			mean_vlm_reward = np.mean(self.episode_vlm_rewards)
++			mean_vlm_score = np.mean(self.episode_vlm_scores) if self.episode_vlm_scores else 0
++			sim_success_rate = np.mean(self.episode_sim_success) if self.episode_sim_success else 0
++			# VLM success: score >= threshold
++			vlm_success_rate = np.mean([1 if s >= self.vlm_success_threshold else 0 
++									   for s in self.episode_vlm_scores]) if self.episode_vlm_scores else 0
++			
++			# Get loss values
++			try:
++				actor_loss = self.locals['self'].logger.name_to_value.get('train/actor_loss', 0)
++				critic_loss = self.locals['self'].logger.name_to_value.get('train/critic_loss', 0)
++				ent_coef = self.locals['self'].logger.name_to_value.get('train/ent_coef', 0)
++			except:
++				actor_loss, critic_loss, ent_coef = 0, 0, 0
++			
++			csv_data = {
++				'timestep': self.total_timesteps,
++				'log_step': self.log_count,
++				'train_vlm_reward': mean_vlm_reward,
++				'train_vlm_score_raw': mean_vlm_score,
++				'train_sim_success_rate': sim_success_rate,
++				'train_vlm_success_rate': vlm_success_rate,
++				'train_actor_loss': actor_loss,
++				'train_critic_loss': critic_loss,
++				'train_ent_coef': ent_coef,
++			}
++			
++			if self.use_wandb:
++				wandb.log({
++					"train/vlm_reward": mean_vlm_reward,
++					"train/vlm_score_raw": mean_vlm_score,
++					"train/sim_success_rate": sim_success_rate,
++					"train/vlm_success_rate": vlm_success_rate,
++					"train/timesteps": self.total_timesteps,
++					"train/actor_loss": actor_loss,
++					"train/critic_loss": critic_loss,
++					"train/ent_coef": ent_coef,
++				}, step=self.log_count)
++			
++			print(f"[Step {self.total_timesteps}] VLM Score: {mean_vlm_score:.2f}, "
++				  f"VLM Success: {vlm_success_rate*100:.1f}%, Sim Success: {sim_success_rate*100:.1f}%")
++			
++			# Reset buffers
++			self.episode_vlm_rewards = []
++			self.episode_vlm_scores = []
++			self.episode_sim_rewards = []
++			self.episode_sim_success = []
++			
++			# Log to CSV
++			self._log_to_csv(csv_data)
++		
++		# Evaluation
++		if self.n_calls % self.eval_freq == 0:
++			eval_data = self.evaluate(self.locals['self'], deterministic=False)
++			if self.deterministic_eval:
++				self.evaluate(self.locals['self'], deterministic=True)
++		
++		return True
++	
++	def evaluate(self, agent, deterministic=False):
++		"""
++		Evaluate agent using SIMULATOR rewards (ground-truth).
++		
++		This is the TRUSTWORTHY metric - it measures whether the agent
++		actually completes the task according to the simulator, not the VLM.
++		"""
++		if self.eval_episodes <= 0 or self.eval_env is None:
++			return {}
++		
++		env = self.eval_env
++		eval_vlm_rewards = []
++		eval_vlm_scores = []
++		eval_sim_success = []
++		
++		with torch.no_grad():
++			for i in range(self.eval_episodes):
++				obs = env.reset()
++				episode_done = np.zeros(obs.shape[0], dtype=bool)
++				
++				for _ in range(self.max_steps):
++					if self.algorithm == 'dsrl_sac':
++						action, _ = agent.predict(obs, deterministic=deterministic)
++					elif self.algorithm == 'dsrl_na':
++						action, _ = agent.predict_diffused(obs, deterministic=deterministic)
++					
++					next_obs, reward, done, infos = env.step(action)
++					obs = next_obs
++					
++					# Collect metrics from completed episodes
++					for j, (d, info) in enumerate(zip(done, infos)):
++						if d and not episode_done[j]:
++							episode_done[j] = True
++							# VLM metrics (for comparison/logging only)
++							if 'vlm_reward' in info:
++								eval_vlm_rewards.append(info['vlm_reward'])
++							if 'vlm_raw_score' in info:
++								eval_vlm_scores.append(info['vlm_raw_score'])
++							# SIMULATOR SUCCESS - This is the TRUSTWORTHY metric!
++							if 'sim_success' in info:
++								eval_sim_success.append(info['sim_success'])
++							elif 'sim_reward' in info:
++								eval_sim_success.append(1 if info['sim_reward'] > 0 else 0)
++				
++				print(f'Eval episode {i} at timestep {self.total_timesteps}')
++		
++		# Compute eval metrics
++		eval_data = {}
++		if eval_sim_success:  # Primary metric is sim success
++			eval_data['eval_sim_success_rate'] = np.mean(eval_sim_success)
++			eval_data['eval_vlm_reward'] = np.mean(eval_vlm_rewards) if eval_vlm_rewards else 0
++			eval_data['eval_vlm_score_raw'] = np.mean(eval_vlm_scores) if eval_vlm_scores else 0
++			eval_data['eval_vlm_success_rate'] = np.mean([
++				1 if s >= self.vlm_success_threshold else 0 for s in eval_vlm_scores
++			]) if eval_vlm_scores else 0
++			
++			if self.use_wandb:
++				name = 'eval_det' if deterministic else 'eval'
++				wandb.log({
++					f"{name}/sim_success_rate": eval_data['eval_sim_success_rate'],  # PRIMARY METRIC
++					f"{name}/vlm_reward": eval_data['eval_vlm_reward'],
++					f"{name}/vlm_score_raw": eval_data['eval_vlm_score_raw'],
++					f"{name}/vlm_success_rate": eval_data['eval_vlm_success_rate'],
++					f"{name}/timesteps": self.total_timesteps,
++				}, step=self.log_count)
++			
++			# Emphasize that sim_success is the trustworthy metric
++			print(f"[Eval] ★ SIM SUCCESS: {eval_data['eval_sim_success_rate']*100:.1f}% ★ | "
++				  f"VLM Score: {eval_data['eval_vlm_score_raw']:.2f}, "
++				  f"VLM Success: {eval_data['eval_vlm_success_rate']*100:.1f}%")
++			
++			# Log to CSV
++			self._log_to_csv(eval_data)
++		
++		return eval_data
++	
++	def set_timesteps(self, timesteps):
++		self.total_timesteps = timesteps
++
+ 
+ def collect_rollouts(model, env, num_steps, base_policy, cfg):
+ 	obs = env.reset()

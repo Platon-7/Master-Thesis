@@ -1,0 +1,360 @@
+[2026-02-03 19:12:03,401][root][INFO] - Number of network parameters: 573516
+[2026-02-03 19:12:03,736][root][INFO] - Actor weights not found. Using pre-trained weights!
+[2026-02-03 19:12:03,737][root][INFO] - Loaded base policy weights from ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/Cython/Distutils/old_build_ext.py:15: DeprecationWarning: dep_util is Deprecated. Use functions from setuptools instead.
+  from distutils.dep_util import newer, newer_group
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/pkg_resources/__init__.py:3148: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+[2026-02-03 19:12:05,209][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 19:12:05,210][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 19:12:05,248][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 19:12:05,249][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 19:12:05,286][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 19:12:05,286][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+Using cuda device
+[2026-02-03 19:12:07,930][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 19:12:07,930][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 19:12:07,972][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 19:12:07,973][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 19:12:08,013][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 19:12:08,013][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-03 19:12:09,340][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 19:12:09,340][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 19:12:09,384][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 19:12:09,385][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 19:12:09,426][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 19:12:09,427][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-03 19:12:10,449][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 19:12:10,449][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 19:12:10,498][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 19:12:10,498][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 19:12:10,544][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 19:12:10,544][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-03 19:12:11,939][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 19:12:11,940][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 19:12:11,986][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 19:12:11,987][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 19:12:12,031][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 19:12:12,032][root][INFO] - Device 2 is not available for rendering
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/gym/core.py:43: DeprecationWarning: [33mWARN: The argument mode in render method is deprecated; use render_mode during environment initialization instead.
+[33mSee here for more information: https://www.gymlibrary.ml/content/api/
+  deprecation(
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+Eval episode 0 at timestep 0
+Eval episode 1 at timestep 0
+Eval episode 2 at timestep 0
+Eval episode 3 at timestep 0
+Eval episode 4 at timestep 0
+Eval episode 5 at timestep 0
+Eval episode 6 at timestep 0
+Eval episode 7 at timestep 0
+Eval episode 8 at timestep 0
+Eval episode 9 at timestep 0
+Eval episode 10 at timestep 0
+Eval episode 11 at timestep 0
+Eval episode 12 at timestep 0
+Eval episode 13 at timestep 0
+Eval episode 14 at timestep 0
+Eval episode 15 at timestep 0
+Eval episode 16 at timestep 0
+Eval episode 17 at timestep 0
+Eval episode 18 at timestep 0
+Eval episode 19 at timestep 0
+Eval episode 20 at timestep 0
+Eval episode 21 at timestep 0
+Eval episode 22 at timestep 0
+Eval episode 23 at timestep 0
+Eval episode 24 at timestep 0
+Eval episode 25 at timestep 0
+Eval episode 26 at timestep 0
+Eval episode 27 at timestep 0
+Eval episode 28 at timestep 0
+Eval episode 29 at timestep 0
+Eval episode 30 at timestep 0
+Eval episode 31 at timestep 0
+Eval episode 32 at timestep 0
+Eval episode 33 at timestep 0
+Eval episode 34 at timestep 0
+Eval episode 35 at timestep 0
+Eval episode 36 at timestep 0
+Eval episode 37 at timestep 0
+Eval episode 38 at timestep 0
+Eval episode 39 at timestep 0
+Eval episode 40 at timestep 0
+Eval episode 41 at timestep 0
+Eval episode 42 at timestep 0
+Eval episode 43 at timestep 0
+Eval episode 44 at timestep 0
+Eval episode 45 at timestep 0
+Eval episode 46 at timestep 0
+Eval episode 47 at timestep 0
+Eval episode 48 at timestep 0
+Eval episode 49 at timestep 0
+============================================================
+🚀 Starting DSRL Training
+   Algorithm: dsrl_na
+   Reward: RoboReward VLM
+   Environment: lift
+   Parallel envs: 1
+============================================================
+Logging to /var/scratch/pkarageo/dsrl_logs/robomimic-dsrl-vlm/robomimic_lift_dsrl_vlm_2026-02-03_19-11-34_1/2026-02-03_19-11-34_1/SAC_1
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 4        |
+|    fps               | 0        |
+|    time_elapsed      | 362      |
+|    total_timesteps   | 300      |
+| train/               |          |
+|    actor_loss        | -203     |
+|    critic_loss       | 1.69     |
+|    ent_coef          | 0.0968   |
+|    ent_coef_loss     | -7.7     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 8940     |
+|    noise_critic_loss | 124      |
+-----------------------------------
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 8        |
+|    fps               | 0        |
+|    time_elapsed      | 728      |
+|    total_timesteps   | 600      |
+| train/               |          |
+|    actor_loss        | -154     |
+|    critic_loss       | 8.71     |
+|    ent_coef          | 0.0659   |
+|    ent_coef_loss     | 4.33     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 17940    |
+|    noise_critic_loss | 52.1     |
+-----------------------------------
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 12       |
+|    fps               | 0        |
+|    time_elapsed      | 1095     |
+|    total_timesteps   | 900      |
+| train/               |          |
+|    actor_loss        | -125     |
+|    critic_loss       | 0.927    |
+|    ent_coef          | 0.0511   |
+|    ent_coef_loss     | 3.12     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 26940    |
+|    noise_critic_loss | 34.7     |
+-----------------------------------
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 16       |
+|    fps               | 0        |
+|    time_elapsed      | 1461     |
+|    total_timesteps   | 1200     |
+| train/               |          |
+|    actor_loss        | -99.1    |
+|    critic_loss       | 0.726    |
+|    ent_coef          | 0.0562   |
+|    ent_coef_loss     | 3.21     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 35940    |
+|    noise_critic_loss | 23.3     |
+-----------------------------------
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 20       |
+|    fps               | 0        |
+|    time_elapsed      | 1827     |
+|    total_timesteps   | 1500     |
+| train/               |          |
+|    actor_loss        | -86.6    |
+|    critic_loss       | 2.9      |
+|    ent_coef          | 0.0481   |
+|    ent_coef_loss     | -1.57    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 44940    |
+|    noise_critic_loss | 12.9     |
+-----------------------------------
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 24       |
+|    fps               | 0        |
+|    time_elapsed      | 2193     |
+|    total_timesteps   | 1800     |
+| train/               |          |
+|    actor_loss        | -74.7    |
+|    critic_loss       | 0.441    |
+|    ent_coef          | 0.044    |
+|    ent_coef_loss     | -0.516   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 53940    |
+|    noise_critic_loss | 13.2     |
+-----------------------------------
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 28       |
+|    fps               | 0        |
+|    time_elapsed      | 2559     |
+|    total_timesteps   | 2100     |
+| train/               |          |
+|    actor_loss        | -65.1    |
+|    critic_loss       | 1.58     |
+|    ent_coef          | 0.0387   |
+|    ent_coef_loss     | -0.904   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 62940    |
+|    noise_critic_loss | 9.84     |
+-----------------------------------
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 32       |
+|    fps               | 0        |
+|    time_elapsed      | 2925     |
+|    total_timesteps   | 2400     |
+| train/               |          |
+|    actor_loss        | -58.1    |
+|    critic_loss       | 1.44     |
+|    ent_coef          | 0.0395   |
+|    ent_coef_loss     | -0.612   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 71940    |
+|    noise_critic_loss | 7.14     |
+-----------------------------------
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 36       |
+|    fps               | 0        |
+|    time_elapsed      | 3290     |
+|    total_timesteps   | 2700     |
+| train/               |          |
+|    actor_loss        | -53.6    |
+|    critic_loss       | 0.288    |
+|    ent_coef          | 0.0333   |
+|    ent_coef_loss     | 0.186    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 80940    |
+|    noise_critic_loss | 4.78     |
+-----------------------------------
+Eval episode 0 at timestep 12501
+Eval episode 1 at timestep 12501
+Eval episode 2 at timestep 12501
+Eval episode 3 at timestep 12501
+Eval episode 4 at timestep 12501
+Eval episode 5 at timestep 12501
+Eval episode 6 at timestep 12501
+Eval episode 7 at timestep 12501
+Eval episode 8 at timestep 12501
+Eval episode 9 at timestep 12501
+Eval episode 10 at timestep 12501
+Eval episode 11 at timestep 12501
+Eval episode 12 at timestep 12501
+Eval episode 13 at timestep 12501
+Eval episode 14 at timestep 12501
+Eval episode 15 at timestep 12501
+Eval episode 16 at timestep 12501
+Eval episode 17 at timestep 12501
+Eval episode 18 at timestep 12501
+Eval episode 19 at timestep 12501
+Eval episode 20 at timestep 12501
+Eval episode 21 at timestep 12501
+Eval episode 22 at timestep 12501
+Eval episode 23 at timestep 12501
+Eval episode 24 at timestep 12501
+Eval episode 25 at timestep 12501
+Eval episode 26 at timestep 12501
+Eval episode 27 at timestep 12501
+Eval episode 28 at timestep 12501
+Eval episode 29 at timestep 12501
+Eval episode 30 at timestep 12501
+Eval episode 31 at timestep 12501
+Eval episode 32 at timestep 12501
+Eval episode 33 at timestep 12501
+Eval episode 34 at timestep 12501
+Eval episode 35 at timestep 12501
+Eval episode 36 at timestep 12501
+Eval episode 37 at timestep 12501
+Eval episode 38 at timestep 12501
+Eval episode 39 at timestep 12501
+Eval episode 40 at timestep 12501
+Eval episode 41 at timestep 12501
+Eval episode 42 at timestep 12501
+Eval episode 43 at timestep 12501
+Eval episode 44 at timestep 12501
+Eval episode 45 at timestep 12501
+Eval episode 46 at timestep 12501
+Eval episode 47 at timestep 12501

@@ -1,0 +1,216 @@
+{
+    "os": "Linux-4.18.0-553.16.1.el8_10.x86_64-x86_64-with-glibc2.35",
+    "python": "3.9.23",
+    "heartbeatAt": "2026-02-04T13:45:14.008667",
+    "startedAt": "2026-02-04T13:45:13.278354",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--config-path=cfg/robomimic",
+        "--config-name=dsrl_lift_vlm.yaml",
+        "seed=1"
+    ],
+    "state": "running",
+    "program": "/home/pkarageo/master-thesis/dsrl/train_dsrl_vlm.py",
+    "codePathLocal": "train_dsrl_vlm.py",
+    "codePath": "train_dsrl_vlm.py",
+    "git": {
+        "remote": "https://github.com/ajwagen/dsrl.git",
+        "commit": "8d21b9cf55459f022c0e769bca1343edd9d30e5a"
+    },
+    "email": null,
+    "root": "/home/pkarageo/master-thesis/dsrl",
+    "host": "node206",
+    "username": "pkarageo",
+    "executable": "/opt/conda/envs/dsrl_env/bin/python",
+    "cpu_count": 16,
+    "cpu_count_logical": 32,
+    "cpu_freq": {
+        "current": 3194.5207812500003,
+        "min": 1200.0,
+        "max": 3200.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3024.665,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        },
+        {
+            "current": 3200.0,
+            "min": 1200.0,
+            "max": 3200.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 0.0625,
+            "used": 1.52587890625e-05
+        }
+    },
+    "gpu": "NVIDIA TITAN RTX",
+    "gpu_count": 2,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA TITAN RTX",
+            "memory_total": 25769803776
+        },
+        {
+            "name": "NVIDIA TITAN RTX",
+            "memory_total": 25769803776
+        }
+    ],
+    "memory": {
+        "total": 125.7930793762207
+    }
+}

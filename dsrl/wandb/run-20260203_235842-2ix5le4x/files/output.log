@@ -1,0 +1,2780 @@
+[2026-02-03 23:58:46,374][root][INFO] - Number of network parameters: 573516
+[2026-02-03 23:58:46,621][root][INFO] - Actor weights not found. Using pre-trained weights!
+[2026-02-03 23:58:46,622][root][INFO] - Loaded base policy weights from ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/Cython/Distutils/old_build_ext.py:15: DeprecationWarning: dep_util is Deprecated. Use functions from setuptools instead.
+  from distutils.dep_util import newer, newer_group
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/pkg_resources/__init__.py:3148: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('mpl_toolkits')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+[2026-02-03 23:58:48,003][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 23:58:48,004][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 23:58:48,046][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 23:58:48,046][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 23:58:48,084][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 23:58:48,085][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+Using cuda device
+[2026-02-03 23:58:50,575][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 23:58:50,576][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 23:58:50,620][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 23:58:50,620][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 23:58:50,663][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 23:58:50,663][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-03 23:58:52,001][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 23:58:52,001][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 23:58:52,049][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 23:58:52,049][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 23:58:52,094][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 23:58:52,095][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-03 23:58:53,134][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 23:58:53,135][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 23:58:53,185][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 23:58:53,186][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 23:58:53,234][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 23:58:53,235][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+[2026-02-03 23:58:54,621][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '0']' returned non-zero exit status 1.
+[2026-02-03 23:58:54,621][root][INFO] - Device 0 is not available for rendering
+[2026-02-03 23:58:54,674][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '1']' returned non-zero exit status 1.
+[2026-02-03 23:58:54,674][root][INFO] - Device 1 is not available for rendering
+[2026-02-03 23:58:54,721][root][INFO] - Command '['/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/egl_probe/build/test_device', '2']' returned non-zero exit status 1.
+[2026-02-03 23:58:54,722][root][INFO] - Device 2 is not available for rendering
+Created environment with name Lift
+Action size is 7
+env class: <class 'env_utils.ActionChunkWrapper'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'env_utils.ActionChunkWrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+env class: <class 'stable_baselines3.common.monitor.Monitor'>
+gymnasium.Env class: <class 'gymnasium.core.Env'>
+MRO: (<class 'stable_baselines3.common.monitor.Monitor'>, <class 'gymnasium.core.Wrapper'>, <class 'gymnasium.core.Env'>, <class 'typing.Generic'>, <class 'object'>)
+Is instance: True
+/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/gym/core.py:43: DeprecationWarning: [33mWARN: The argument mode in render method is deprecated; use render_mode during environment initialization instead.
+[33mSee here for more information: https://www.gymlibrary.ml/content/api/
+  deprecation(
+Eval episode 0 at timestep 0
+Eval episode 1 at timestep 0
+Eval episode 2 at timestep 0
+Eval episode 3 at timestep 0
+Eval episode 4 at timestep 0
+Eval episode 5 at timestep 0
+Eval episode 6 at timestep 0
+Eval episode 7 at timestep 0
+Eval episode 8 at timestep 0
+Eval episode 9 at timestep 0
+Eval episode 10 at timestep 0
+Eval episode 11 at timestep 0
+Eval episode 12 at timestep 0
+Eval episode 13 at timestep 0
+Eval episode 14 at timestep 0
+Eval episode 15 at timestep 0
+Eval episode 16 at timestep 0
+Eval episode 17 at timestep 0
+Eval episode 18 at timestep 0
+Eval episode 19 at timestep 0
+Eval episode 20 at timestep 0
+Eval episode 21 at timestep 0
+Eval episode 22 at timestep 0
+Eval episode 23 at timestep 0
+Eval episode 24 at timestep 0
+Eval episode 25 at timestep 0
+Eval episode 26 at timestep 0
+Eval episode 27 at timestep 0
+Eval episode 28 at timestep 0
+Eval episode 29 at timestep 0
+Eval episode 30 at timestep 0
+Eval episode 31 at timestep 0
+Eval episode 32 at timestep 0
+Eval episode 33 at timestep 0
+Eval episode 34 at timestep 0
+Eval episode 35 at timestep 0
+Eval episode 36 at timestep 0
+Eval episode 37 at timestep 0
+Eval episode 38 at timestep 0
+Eval episode 39 at timestep 0
+Eval episode 40 at timestep 0
+Eval episode 41 at timestep 0
+Eval episode 42 at timestep 0
+Eval episode 43 at timestep 0
+Eval episode 44 at timestep 0
+Eval episode 45 at timestep 0
+Eval episode 46 at timestep 0
+Eval episode 47 at timestep 0
+Eval episode 48 at timestep 0
+Eval episode 49 at timestep 0
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+============================================================
+🚀 Starting DSRL Training
+   Algorithm: dsrl_na
+   Reward: RoboReward VLM
+   Environment: lift
+   Parallel envs: 1
+============================================================
+Logging to /var/scratch/pkarageo/dsrl_logs/robomimic-dsrl-vlm/robomimic_lift_dsrl_vlm_2026-02-03_23-58-17_1/2026-02-03_23-58-17_1/SAC_1
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 1101] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 1401] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 1701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 4        |
+|    fps               | 0        |
+|    time_elapsed      | 384      |
+|    total_timesteps   | 300      |
+| train/               |          |
+|    actor_loss        | -200     |
+|    critic_loss       | 42.7     |
+|    ent_coef          | 0.1      |
+|    ent_coef_loss     | -13      |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 8940     |
+|    noise_critic_loss | 72.3     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 2001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 2301] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 2601] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 2901] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 8        |
+|    fps               | 0        |
+|    time_elapsed      | 774      |
+|    total_timesteps   | 600      |
+| train/               |          |
+|    actor_loss        | -162     |
+|    critic_loss       | 2.76     |
+|    ent_coef          | 0.0509   |
+|    ent_coef_loss     | 0.954    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 17940    |
+|    noise_critic_loss | 52.9     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 3201] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 3501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 3801] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 4101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 12       |
+|    fps               | 0        |
+|    time_elapsed      | 1163     |
+|    total_timesteps   | 900      |
+| train/               |          |
+|    actor_loss        | -120     |
+|    critic_loss       | 1.47     |
+|    ent_coef          | 0.051    |
+|    ent_coef_loss     | -1.29    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 26940    |
+|    noise_critic_loss | 53       |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 4401] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 4701] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 5001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 5301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 16       |
+|    fps               | 0        |
+|    time_elapsed      | 1553     |
+|    total_timesteps   | 1200     |
+| train/               |          |
+|    actor_loss        | -98.1    |
+|    critic_loss       | 1.04     |
+|    ent_coef          | 0.0584   |
+|    ent_coef_loss     | -3.54    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 35940    |
+|    noise_critic_loss | 24.5     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 5601] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 5901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 6201] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 6501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 20       |
+|    fps               | 0        |
+|    time_elapsed      | 1942     |
+|    total_timesteps   | 1500     |
+| train/               |          |
+|    actor_loss        | -80.4    |
+|    critic_loss       | 1.6      |
+|    ent_coef          | 0.0538   |
+|    ent_coef_loss     | 1.1      |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 44940    |
+|    noise_critic_loss | 15.3     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 6801] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 7101] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 7401] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 7701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 24       |
+|    fps               | 0        |
+|    time_elapsed      | 2332     |
+|    total_timesteps   | 1800     |
+| train/               |          |
+|    actor_loss        | -79.1    |
+|    critic_loss       | 1.26     |
+|    ent_coef          | 0.065    |
+|    ent_coef_loss     | -0.796   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 53940    |
+|    noise_critic_loss | 18.6     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 8001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 8301] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 8601] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 8901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 28       |
+|    fps               | 0        |
+|    time_elapsed      | 2721     |
+|    total_timesteps   | 2100     |
+| train/               |          |
+|    actor_loss        | -79.5    |
+|    critic_loss       | 1.26     |
+|    ent_coef          | 0.0523   |
+|    ent_coef_loss     | 0.362    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 62940    |
+|    noise_critic_loss | 9.57     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 9201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 9501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 9801] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 10101] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 32       |
+|    fps               | 0        |
+|    time_elapsed      | 3111     |
+|    total_timesteps   | 2400     |
+| train/               |          |
+|    actor_loss        | -76.6    |
+|    critic_loss       | 0.683    |
+|    ent_coef          | 0.0491   |
+|    ent_coef_loss     | -0.183   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 71940    |
+|    noise_critic_loss | 10.5     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 10401] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 10701] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 11001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 11301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 36       |
+|    fps               | 0        |
+|    time_elapsed      | 3500     |
+|    total_timesteps   | 2700     |
+| train/               |          |
+|    actor_loss        | -67.6    |
+|    critic_loss       | 1.42     |
+|    ent_coef          | 0.0488   |
+|    ent_coef_loss     | -0.198   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 80940    |
+|    noise_critic_loss | 7.76     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 11601] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 11901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 12201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 12501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 100.0%
+Eval episode 0 at timestep 12501
+Eval episode 1 at timestep 12501
+Eval episode 2 at timestep 12501
+Eval episode 3 at timestep 12501
+Eval episode 4 at timestep 12501
+Eval episode 5 at timestep 12501
+Eval episode 6 at timestep 12501
+Eval episode 7 at timestep 12501
+Eval episode 8 at timestep 12501
+Eval episode 9 at timestep 12501
+Eval episode 10 at timestep 12501
+Eval episode 11 at timestep 12501
+Eval episode 12 at timestep 12501
+Eval episode 13 at timestep 12501
+Eval episode 14 at timestep 12501
+Eval episode 15 at timestep 12501
+Eval episode 16 at timestep 12501
+Eval episode 17 at timestep 12501
+Eval episode 18 at timestep 12501
+Eval episode 19 at timestep 12501
+Eval episode 20 at timestep 12501
+Eval episode 21 at timestep 12501
+Eval episode 22 at timestep 12501
+Eval episode 23 at timestep 12501
+Eval episode 24 at timestep 12501
+Eval episode 25 at timestep 12501
+Eval episode 26 at timestep 12501
+Eval episode 27 at timestep 12501
+Eval episode 28 at timestep 12501
+Eval episode 29 at timestep 12501
+Eval episode 30 at timestep 12501
+Eval episode 31 at timestep 12501
+Eval episode 32 at timestep 12501
+Eval episode 33 at timestep 12501
+Eval episode 34 at timestep 12501
+Eval episode 35 at timestep 12501
+Eval episode 36 at timestep 12501
+Eval episode 37 at timestep 12501
+Eval episode 38 at timestep 12501
+Eval episode 39 at timestep 12501
+Eval episode 40 at timestep 12501
+Eval episode 41 at timestep 12501
+Eval episode 42 at timestep 12501
+Eval episode 43 at timestep 12501
+Eval episode 44 at timestep 12501
+Eval episode 45 at timestep 12501
+Eval episode 46 at timestep 12501
+Eval episode 47 at timestep 12501
+Eval episode 48 at timestep 12501
+Eval episode 49 at timestep 12501
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 40       |
+|    fps               | 0        |
+|    time_elapsed      | 6576     |
+|    total_timesteps   | 3000     |
+| train/               |          |
+|    actor_loss        | -63.5    |
+|    critic_loss       | 0.722    |
+|    ent_coef          | 0.0453   |
+|    ent_coef_loss     | -1.9     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 89940    |
+|    noise_critic_loss | 7.11     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 12801] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 13101] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 13401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 13701] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 44       |
+|    fps               | 0        |
+|    time_elapsed      | 6977     |
+|    total_timesteps   | 3300     |
+| train/               |          |
+|    actor_loss        | -58.5    |
+|    critic_loss       | 0.301    |
+|    ent_coef          | 0.0398   |
+|    ent_coef_loss     | 0.313    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 98940    |
+|    noise_critic_loss | 5.61     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 14001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 14301] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 14601] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 14901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 48       |
+|    fps               | 0        |
+|    time_elapsed      | 7365     |
+|    total_timesteps   | 3600     |
+| train/               |          |
+|    actor_loss        | -49.5    |
+|    critic_loss       | 0.25     |
+|    ent_coef          | 0.0345   |
+|    ent_coef_loss     | 2.95     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 107940   |
+|    noise_critic_loss | 4.38     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 15201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 15501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 15801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 16101] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 52       |
+|    fps               | 0        |
+|    time_elapsed      | 7753     |
+|    total_timesteps   | 3900     |
+| train/               |          |
+|    actor_loss        | -42.8    |
+|    critic_loss       | 0.205    |
+|    ent_coef          | 0.0308   |
+|    ent_coef_loss     | 0.636    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 116940   |
+|    noise_critic_loss | 3.43     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 16401] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 16701] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 17001] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 17301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 56       |
+|    fps               | 0        |
+|    time_elapsed      | 8141     |
+|    total_timesteps   | 4200     |
+| train/               |          |
+|    actor_loss        | -39.5    |
+|    critic_loss       | 0.409    |
+|    ent_coef          | 0.0319   |
+|    ent_coef_loss     | -1.43    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 125940   |
+|    noise_critic_loss | 3.15     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 17601] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 17901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 18201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 18501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 60       |
+|    fps               | 0        |
+|    time_elapsed      | 8530     |
+|    total_timesteps   | 4500     |
+| train/               |          |
+|    actor_loss        | -38.9    |
+|    critic_loss       | 0.228    |
+|    ent_coef          | 0.031    |
+|    ent_coef_loss     | -0.431   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 134940   |
+|    noise_critic_loss | 2.69     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 18801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 19101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 19401] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 19701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 64       |
+|    fps               | 0        |
+|    time_elapsed      | 8919     |
+|    total_timesteps   | 4800     |
+| train/               |          |
+|    actor_loss        | -39.8    |
+|    critic_loss       | 0.219    |
+|    ent_coef          | 0.0297   |
+|    ent_coef_loss     | -1.12    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 143940   |
+|    noise_critic_loss | 2.8      |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 20001] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 20301] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -1.0
+[Step 20601] VLM Score: 1.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 20901] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 68       |
+|    fps               | 0        |
+|    time_elapsed      | 9308     |
+|    total_timesteps   | 5100     |
+| train/               |          |
+|    actor_loss        | -36.6    |
+|    critic_loss       | 0.682    |
+|    ent_coef          | 0.026    |
+|    ent_coef_loss     | -0.242   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 152940   |
+|    noise_critic_loss | 2.87     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 21201] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 21501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 21801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 22101] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 72       |
+|    fps               | 0        |
+|    time_elapsed      | 9696     |
+|    total_timesteps   | 5400     |
+| train/               |          |
+|    actor_loss        | -34.6    |
+|    critic_loss       | 0.173    |
+|    ent_coef          | 0.0252   |
+|    ent_coef_loss     | -0.157   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 161940   |
+|    noise_critic_loss | 2.16     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 22401] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 22701] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 23001] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 23301] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 76       |
+|    fps               | 0        |
+|    time_elapsed      | 10091    |
+|    total_timesteps   | 5700     |
+| train/               |          |
+|    actor_loss        | -32.5    |
+|    critic_loss       | 0.139    |
+|    ent_coef          | 0.0238   |
+|    ent_coef_loss     | 0.413    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 170940   |
+|    noise_critic_loss | 1.92     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 23601] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 23901] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 24201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 24501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+Eval episode 0 at timestep 24501
+Eval episode 1 at timestep 24501
+Eval episode 2 at timestep 24501
+Eval episode 3 at timestep 24501
+Eval episode 4 at timestep 24501
+Eval episode 5 at timestep 24501
+Eval episode 6 at timestep 24501
+Eval episode 7 at timestep 24501
+Eval episode 8 at timestep 24501
+Eval episode 9 at timestep 24501
+Eval episode 10 at timestep 24501
+Eval episode 11 at timestep 24501
+Eval episode 12 at timestep 24501
+Eval episode 13 at timestep 24501
+Eval episode 14 at timestep 24501
+Eval episode 15 at timestep 24501
+Eval episode 16 at timestep 24501
+Eval episode 17 at timestep 24501
+Eval episode 18 at timestep 24501
+Eval episode 19 at timestep 24501
+Eval episode 20 at timestep 24501
+Eval episode 21 at timestep 24501
+Eval episode 22 at timestep 24501
+Eval episode 23 at timestep 24501
+Eval episode 24 at timestep 24501
+Eval episode 25 at timestep 24501
+Eval episode 26 at timestep 24501
+Eval episode 27 at timestep 24501
+Eval episode 28 at timestep 24501
+Eval episode 29 at timestep 24501
+Eval episode 30 at timestep 24501
+Eval episode 31 at timestep 24501
+Eval episode 32 at timestep 24501
+Eval episode 33 at timestep 24501
+Eval episode 34 at timestep 24501
+Eval episode 35 at timestep 24501
+Eval episode 36 at timestep 24501
+Eval episode 37 at timestep 24501
+Eval episode 38 at timestep 24501
+Eval episode 39 at timestep 24501
+Eval episode 40 at timestep 24501
+Eval episode 41 at timestep 24501
+Eval episode 42 at timestep 24501
+Eval episode 43 at timestep 24501
+Eval episode 44 at timestep 24501
+Eval episode 45 at timestep 24501
+Eval episode 46 at timestep 24501
+Eval episode 47 at timestep 24501
+Eval episode 48 at timestep 24501
+Eval episode 49 at timestep 24501
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 80       |
+|    fps               | 0        |
+|    time_elapsed      | 13147    |
+|    total_timesteps   | 6000     |
+| train/               |          |
+|    actor_loss        | -29.3    |
+|    critic_loss       | 0.151    |
+|    ent_coef          | 0.0208   |
+|    ent_coef_loss     | 1.73     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 179940   |
+|    noise_critic_loss | 1.33     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 24801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 25101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 25401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 25701] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 84       |
+|    fps               | 0        |
+|    time_elapsed      | 13532    |
+|    total_timesteps   | 6300     |
+| train/               |          |
+|    actor_loss        | -26.4    |
+|    critic_loss       | 0.115    |
+|    ent_coef          | 0.0212   |
+|    ent_coef_loss     | -1.83    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 188940   |
+|    noise_critic_loss | 1.31     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 26001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 26301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 26601] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 26901] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 88       |
+|    fps               | 0        |
+|    time_elapsed      | 13921    |
+|    total_timesteps   | 6600     |
+| train/               |          |
+|    actor_loss        | -24      |
+|    critic_loss       | 0.0745   |
+|    ent_coef          | 0.0182   |
+|    ent_coef_loss     | 0.469    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 197940   |
+|    noise_critic_loss | 0.944    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 27201] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 27501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 27801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 28101] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 92       |
+|    fps               | 0        |
+|    time_elapsed      | 14307    |
+|    total_timesteps   | 6900     |
+| train/               |          |
+|    actor_loss        | -22.1    |
+|    critic_loss       | 0.0761   |
+|    ent_coef          | 0.0171   |
+|    ent_coef_loss     | -0.344   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 206940   |
+|    noise_critic_loss | 1.13     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 28401] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 28701] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 29001] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 29301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 96       |
+|    fps               | 0        |
+|    time_elapsed      | 14693    |
+|    total_timesteps   | 7200     |
+| train/               |          |
+|    actor_loss        | -21.3    |
+|    critic_loss       | 0.0674   |
+|    ent_coef          | 0.016    |
+|    ent_coef_loss     | 1.55     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 215940   |
+|    noise_critic_loss | 0.829    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 29601] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 29901] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 30201] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 30501] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 100.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 100      |
+|    fps               | 0        |
+|    time_elapsed      | 15078    |
+|    total_timesteps   | 7500     |
+| train/               |          |
+|    actor_loss        | -19      |
+|    critic_loss       | 0.066    |
+|    ent_coef          | 0.0138   |
+|    ent_coef_loss     | -0.749   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 224940   |
+|    noise_critic_loss | 0.771    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 30801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 31101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 31401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 31701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 104      |
+|    fps               | 0        |
+|    time_elapsed      | 15465    |
+|    total_timesteps   | 7800     |
+| train/               |          |
+|    actor_loss        | -16.1    |
+|    critic_loss       | 0.0327   |
+|    ent_coef          | 0.0115   |
+|    ent_coef_loss     | 1.89     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 233940   |
+|    noise_critic_loss | 0.391    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 32001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 32301] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 32601] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 32901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 108      |
+|    fps               | 0        |
+|    time_elapsed      | 15850    |
+|    total_timesteps   | 8100     |
+| train/               |          |
+|    actor_loss        | -13.3    |
+|    critic_loss       | 0.0316   |
+|    ent_coef          | 0.00991  |
+|    ent_coef_loss     | -1.41    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 242940   |
+|    noise_critic_loss | 0.297    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 33201] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 33501] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 33801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 34101] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 112      |
+|    fps               | 0        |
+|    time_elapsed      | 16237    |
+|    total_timesteps   | 8400     |
+| train/               |          |
+|    actor_loss        | -11.5    |
+|    critic_loss       | 0.0271   |
+|    ent_coef          | 0.00872  |
+|    ent_coef_loss     | -1.37    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 251940   |
+|    noise_critic_loss | 0.224    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 34401] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 34701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 35001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 35301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 116      |
+|    fps               | 0        |
+|    time_elapsed      | 16623    |
+|    total_timesteps   | 8700     |
+| train/               |          |
+|    actor_loss        | -9.64    |
+|    critic_loss       | 0.0129   |
+|    ent_coef          | 0.00718  |
+|    ent_coef_loss     | -0.0267  |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 260940   |
+|    noise_critic_loss | 0.156    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 35601] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 35901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 36201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 36501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+Eval episode 0 at timestep 36501
+Eval episode 1 at timestep 36501
+Eval episode 2 at timestep 36501
+Eval episode 3 at timestep 36501
+Eval episode 4 at timestep 36501
+Eval episode 5 at timestep 36501
+Eval episode 6 at timestep 36501
+Eval episode 7 at timestep 36501
+Eval episode 8 at timestep 36501
+Eval episode 9 at timestep 36501
+Eval episode 10 at timestep 36501
+Eval episode 11 at timestep 36501
+Eval episode 12 at timestep 36501
+Eval episode 13 at timestep 36501
+Eval episode 14 at timestep 36501
+Eval episode 15 at timestep 36501
+Eval episode 16 at timestep 36501
+Eval episode 17 at timestep 36501
+Eval episode 18 at timestep 36501
+Eval episode 19 at timestep 36501
+Eval episode 20 at timestep 36501
+Eval episode 21 at timestep 36501
+Eval episode 22 at timestep 36501
+Eval episode 23 at timestep 36501
+Eval episode 24 at timestep 36501
+Eval episode 25 at timestep 36501
+Eval episode 26 at timestep 36501
+Eval episode 27 at timestep 36501
+Eval episode 28 at timestep 36501
+Eval episode 29 at timestep 36501
+Eval episode 30 at timestep 36501
+Eval episode 31 at timestep 36501
+Eval episode 32 at timestep 36501
+Eval episode 33 at timestep 36501
+Eval episode 34 at timestep 36501
+Eval episode 35 at timestep 36501
+Eval episode 36 at timestep 36501
+Eval episode 37 at timestep 36501
+Eval episode 38 at timestep 36501
+Eval episode 39 at timestep 36501
+Eval episode 40 at timestep 36501
+Eval episode 41 at timestep 36501
+Eval episode 42 at timestep 36501
+Eval episode 43 at timestep 36501
+Eval episode 44 at timestep 36501
+Eval episode 45 at timestep 36501
+Eval episode 46 at timestep 36501
+Eval episode 47 at timestep 36501
+Eval episode 48 at timestep 36501
+Eval episode 49 at timestep 36501
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 120      |
+|    fps               | 0        |
+|    time_elapsed      | 19709    |
+|    total_timesteps   | 9000     |
+| train/               |          |
+|    actor_loss        | -7.57    |
+|    critic_loss       | 0.0146   |
+|    ent_coef          | 0.00577  |
+|    ent_coef_loss     | -0.682   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 269940   |
+|    noise_critic_loss | 0.13     |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 36801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 37101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 37401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 37701] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 124      |
+|    fps               | 0        |
+|    time_elapsed      | 20095    |
+|    total_timesteps   | 9300     |
+| train/               |          |
+|    actor_loss        | -5.88    |
+|    critic_loss       | 0.00766  |
+|    ent_coef          | 0.00443  |
+|    ent_coef_loss     | 1.19     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 278940   |
+|    noise_critic_loss | 0.0735   |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 38001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 38301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 38601] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 38901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 128      |
+|    fps               | 0        |
+|    time_elapsed      | 20483    |
+|    total_timesteps   | 9600     |
+| train/               |          |
+|    actor_loss        | -4.57    |
+|    critic_loss       | 0.00448  |
+|    ent_coef          | 0.00369  |
+|    ent_coef_loss     | -1.47    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 287940   |
+|    noise_critic_loss | 0.0459   |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 39201] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 39501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 39801] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 40101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 132      |
+|    fps               | 0        |
+|    time_elapsed      | 20870    |
+|    total_timesteps   | 9900     |
+| train/               |          |
+|    actor_loss        | -3.68    |
+|    critic_loss       | 0.00332  |
+|    ent_coef          | 0.00283  |
+|    ent_coef_loss     | -0.0307  |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 296940   |
+|    noise_critic_loss | 0.033    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 40401] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 40701] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 41001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 41301] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 136      |
+|    fps               | 0        |
+|    time_elapsed      | 21256    |
+|    total_timesteps   | 10200    |
+| train/               |          |
+|    actor_loss        | -2.92    |
+|    critic_loss       | 0.0027   |
+|    ent_coef          | 0.00229  |
+|    ent_coef_loss     | -0.438   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 305940   |
+|    noise_critic_loss | 0.022    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 41601] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 41901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 42201] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 42501] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 140      |
+|    fps               | 0        |
+|    time_elapsed      | 21643    |
+|    total_timesteps   | 10500    |
+| train/               |          |
+|    actor_loss        | -2.51    |
+|    critic_loss       | 0.00185  |
+|    ent_coef          | 0.002    |
+|    ent_coef_loss     | 0.892    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 314940   |
+|    noise_critic_loss | 0.0223   |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 42801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 43101] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 43401] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 43701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 144      |
+|    fps               | 0        |
+|    time_elapsed      | 22028    |
+|    total_timesteps   | 10800    |
+| train/               |          |
+|    actor_loss        | -2.12    |
+|    critic_loss       | 0.00316  |
+|    ent_coef          | 0.00178  |
+|    ent_coef_loss     | -0.0213  |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 323940   |
+|    noise_critic_loss | 0.0176   |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 44001] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 44301] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 44601] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 44901] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 148      |
+|    fps               | 0        |
+|    time_elapsed      | 22414    |
+|    total_timesteps   | 11100    |
+| train/               |          |
+|    actor_loss        | -1.87    |
+|    critic_loss       | 0.00132  |
+|    ent_coef          | 0.00174  |
+|    ent_coef_loss     | -3.19    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 332940   |
+|    noise_critic_loss | 0.011    |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 45201] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 45501] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 45801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 46101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 152      |
+|    fps               | 0        |
+|    time_elapsed      | 22801    |
+|    total_timesteps   | 11400    |
+| train/               |          |
+|    actor_loss        | -1.63    |
+|    critic_loss       | 0.00108  |
+|    ent_coef          | 0.00138  |
+|    ent_coef_loss     | -1.74    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 341940   |
+|    noise_critic_loss | 0.00841  |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 46401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 46701] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 47001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 47301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 156      |
+|    fps               | 0        |
+|    time_elapsed      | 23187    |
+|    total_timesteps   | 11700    |
+| train/               |          |
+|    actor_loss        | -1.37    |
+|    critic_loss       | 0.00101  |
+|    ent_coef          | 0.00118  |
+|    ent_coef_loss     | 0.156    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 350940   |
+|    noise_critic_loss | 0.00716  |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 47601] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 47901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 48201] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 48501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+Eval episode 0 at timestep 48501
+Eval episode 1 at timestep 48501
+Eval episode 2 at timestep 48501
+Eval episode 3 at timestep 48501
+Eval episode 4 at timestep 48501
+Eval episode 5 at timestep 48501
+Eval episode 6 at timestep 48501
+Eval episode 7 at timestep 48501
+Eval episode 8 at timestep 48501
+Eval episode 9 at timestep 48501
+Eval episode 10 at timestep 48501
+Eval episode 11 at timestep 48501
+Eval episode 12 at timestep 48501
+Eval episode 13 at timestep 48501
+Eval episode 14 at timestep 48501
+Eval episode 15 at timestep 48501
+Eval episode 16 at timestep 48501
+Eval episode 17 at timestep 48501
+Eval episode 18 at timestep 48501
+Eval episode 19 at timestep 48501
+Eval episode 20 at timestep 48501
+Eval episode 21 at timestep 48501
+Eval episode 22 at timestep 48501
+Eval episode 23 at timestep 48501
+Eval episode 24 at timestep 48501
+Eval episode 25 at timestep 48501
+Eval episode 26 at timestep 48501
+Eval episode 27 at timestep 48501
+Eval episode 28 at timestep 48501
+Eval episode 29 at timestep 48501
+Eval episode 30 at timestep 48501
+Eval episode 31 at timestep 48501
+Eval episode 32 at timestep 48501
+Eval episode 33 at timestep 48501
+Eval episode 34 at timestep 48501
+Eval episode 35 at timestep 48501
+Eval episode 36 at timestep 48501
+Eval episode 37 at timestep 48501
+Eval episode 38 at timestep 48501
+Eval episode 39 at timestep 48501
+Eval episode 40 at timestep 48501
+Eval episode 41 at timestep 48501
+Eval episode 42 at timestep 48501
+Eval episode 43 at timestep 48501
+Eval episode 44 at timestep 48501
+Eval episode 45 at timestep 48501
+Eval episode 46 at timestep 48501
+Eval episode 47 at timestep 48501
+Eval episode 48 at timestep 48501
+Eval episode 49 at timestep 48501
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 160      |
+|    fps               | 0        |
+|    time_elapsed      | 26243    |
+|    total_timesteps   | 12000    |
+| train/               |          |
+|    actor_loss        | -1.18    |
+|    critic_loss       | 0.000554 |
+|    ent_coef          | 0.00104  |
+|    ent_coef_loss     | 0.471    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 359940   |
+|    noise_critic_loss | 0.00455  |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 48801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 49101] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 49401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 49701] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 164      |
+|    fps               | 0        |
+|    time_elapsed      | 26631    |
+|    total_timesteps   | 12300    |
+| train/               |          |
+|    actor_loss        | -0.996   |
+|    critic_loss       | 0.00056  |
+|    ent_coef          | 0.000844 |
+|    ent_coef_loss     | -1.02    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 368940   |
+|    noise_critic_loss | 0.00433  |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 50001] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 50301] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 50601] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 50901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 168      |
+|    fps               | 0        |
+|    time_elapsed      | 27018    |
+|    total_timesteps   | 12600    |
+| train/               |          |
+|    actor_loss        | -0.776   |
+|    critic_loss       | 0.000303 |
+|    ent_coef          | 0.000639 |
+|    ent_coef_loss     | -0.165   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 377940   |
+|    noise_critic_loss | 0.00202  |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 51201] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 51501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 51801] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 52101] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 172      |
+|    fps               | 0        |
+|    time_elapsed      | 27405    |
+|    total_timesteps   | 12900    |
+| train/               |          |
+|    actor_loss        | -0.598   |
+|    critic_loss       | 0.000258 |
+|    ent_coef          | 0.000534 |
+|    ent_coef_loss     | -14.2    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 386940   |
+|    noise_critic_loss | 0.00203  |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 52401] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 52701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 53001] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 53301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 176      |
+|    fps               | 0        |
+|    time_elapsed      | 27791    |
+|    total_timesteps   | 13200    |
+| train/               |          |
+|    actor_loss        | -0.479   |
+|    critic_loss       | 0.000149 |
+|    ent_coef          | 0.000449 |
+|    ent_coef_loss     | -2.69    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 395940   |
+|    noise_critic_loss | 0.00127  |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 53601] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 53901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 54201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 54501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 180      |
+|    fps               | 0        |
+|    time_elapsed      | 28178    |
+|    total_timesteps   | 13500    |
+| train/               |          |
+|    actor_loss        | -0.407   |
+|    critic_loss       | 0.000212 |
+|    ent_coef          | 0.000426 |
+|    ent_coef_loss     | 2.93     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 404940   |
+|    noise_critic_loss | 0.000915 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 54801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 55101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 55401] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 55701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 184      |
+|    fps               | 0        |
+|    time_elapsed      | 28566    |
+|    total_timesteps   | 13800    |
+| train/               |          |
+|    actor_loss        | -0.404   |
+|    critic_loss       | 0.000178 |
+|    ent_coef          | 0.000468 |
+|    ent_coef_loss     | -0.828   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 413940   |
+|    noise_critic_loss | 0.000921 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 56001] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 56301] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 56601] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 56901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 188      |
+|    fps               | 0        |
+|    time_elapsed      | 28955    |
+|    total_timesteps   | 14100    |
+| train/               |          |
+|    actor_loss        | -0.364   |
+|    critic_loss       | 0.000188 |
+|    ent_coef          | 0.000385 |
+|    ent_coef_loss     | -2.11    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 422940   |
+|    noise_critic_loss | 0.00114  |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 57201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 57501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 57801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 58101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 192      |
+|    fps               | 0        |
+|    time_elapsed      | 29342    |
+|    total_timesteps   | 14400    |
+| train/               |          |
+|    actor_loss        | -0.345   |
+|    critic_loss       | 0.000111 |
+|    ent_coef          | 0.000354 |
+|    ent_coef_loss     | -4.74    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 431940   |
+|    noise_critic_loss | 0.000732 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 58401] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 58701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 59001] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 59301] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 196      |
+|    fps               | 0        |
+|    time_elapsed      | 29729    |
+|    total_timesteps   | 14700    |
+| train/               |          |
+|    actor_loss        | -0.304   |
+|    critic_loss       | 0.000106 |
+|    ent_coef          | 0.000314 |
+|    ent_coef_loss     | 2.46     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 440940   |
+|    noise_critic_loss | 0.000833 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 59601] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 59901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 60201] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 60501] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+Eval episode 0 at timestep 60501
+Eval episode 1 at timestep 60501
+Eval episode 2 at timestep 60501
+Eval episode 3 at timestep 60501
+Eval episode 4 at timestep 60501
+Eval episode 5 at timestep 60501
+Eval episode 6 at timestep 60501
+Eval episode 7 at timestep 60501
+Eval episode 8 at timestep 60501
+Eval episode 9 at timestep 60501
+Eval episode 10 at timestep 60501
+Eval episode 11 at timestep 60501
+Eval episode 12 at timestep 60501
+Eval episode 13 at timestep 60501
+Eval episode 14 at timestep 60501
+Eval episode 15 at timestep 60501
+Eval episode 16 at timestep 60501
+Eval episode 17 at timestep 60501
+Eval episode 18 at timestep 60501
+Eval episode 19 at timestep 60501
+Eval episode 20 at timestep 60501
+Eval episode 21 at timestep 60501
+Eval episode 22 at timestep 60501
+Eval episode 23 at timestep 60501
+Eval episode 24 at timestep 60501
+Eval episode 25 at timestep 60501
+Eval episode 26 at timestep 60501
+Eval episode 27 at timestep 60501
+Eval episode 28 at timestep 60501
+Eval episode 29 at timestep 60501
+Eval episode 30 at timestep 60501
+Eval episode 31 at timestep 60501
+Eval episode 32 at timestep 60501
+Eval episode 33 at timestep 60501
+Eval episode 34 at timestep 60501
+Eval episode 35 at timestep 60501
+Eval episode 36 at timestep 60501
+Eval episode 37 at timestep 60501
+Eval episode 38 at timestep 60501
+Eval episode 39 at timestep 60501
+Eval episode 40 at timestep 60501
+Eval episode 41 at timestep 60501
+Eval episode 42 at timestep 60501
+Eval episode 43 at timestep 60501
+Eval episode 44 at timestep 60501
+Eval episode 45 at timestep 60501
+Eval episode 46 at timestep 60501
+Eval episode 47 at timestep 60501
+Eval episode 48 at timestep 60501
+Eval episode 49 at timestep 60501
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 200      |
+|    fps               | 0        |
+|    time_elapsed      | 32811    |
+|    total_timesteps   | 15000    |
+| train/               |          |
+|    actor_loss        | -0.288   |
+|    critic_loss       | 9.47e-05 |
+|    ent_coef          | 0.000297 |
+|    ent_coef_loss     | 3.15     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 449940   |
+|    noise_critic_loss | 0.000445 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 60801] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 61101] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 61401] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 61701] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 204      |
+|    fps               | 0        |
+|    time_elapsed      | 33200    |
+|    total_timesteps   | 15300    |
+| train/               |          |
+|    actor_loss        | -0.274   |
+|    critic_loss       | 9.74e-05 |
+|    ent_coef          | 0.00026  |
+|    ent_coef_loss     | -4.18    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 458940   |
+|    noise_critic_loss | 0.000412 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 62001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 62301] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 62601] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 62901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 208      |
+|    fps               | 0        |
+|    time_elapsed      | 33587    |
+|    total_timesteps   | 15600    |
+| train/               |          |
+|    actor_loss        | -0.232   |
+|    critic_loss       | 6.79e-05 |
+|    ent_coef          | 0.000227 |
+|    ent_coef_loss     | 0.25     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 467940   |
+|    noise_critic_loss | 0.000362 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 63201] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 63501] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 63801] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 64101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 212      |
+|    fps               | 0        |
+|    time_elapsed      | 33974    |
+|    total_timesteps   | 15900    |
+| train/               |          |
+|    actor_loss        | -0.185   |
+|    critic_loss       | 7.25e-05 |
+|    ent_coef          | 0.000207 |
+|    ent_coef_loss     | 1.9      |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 476940   |
+|    noise_critic_loss | 0.000847 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 64401] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 64701] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 65001] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 65301] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 216      |
+|    fps               | 0        |
+|    time_elapsed      | 34362    |
+|    total_timesteps   | 16200    |
+| train/               |          |
+|    actor_loss        | -0.161   |
+|    critic_loss       | 4.75e-05 |
+|    ent_coef          | 0.000199 |
+|    ent_coef_loss     | 0.0947   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 485940   |
+|    noise_critic_loss | 0.000386 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 65601] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 65901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 66201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 66501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 220      |
+|    fps               | 0        |
+|    time_elapsed      | 34750    |
+|    total_timesteps   | 16500    |
+| train/               |          |
+|    actor_loss        | -0.138   |
+|    critic_loss       | 0.000101 |
+|    ent_coef          | 0.000186 |
+|    ent_coef_loss     | 7.65     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 494940   |
+|    noise_critic_loss | 0.000285 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 66801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 67101] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 67401] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 67701] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 100.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 224      |
+|    fps               | 0        |
+|    time_elapsed      | 35139    |
+|    total_timesteps   | 16800    |
+| train/               |          |
+|    actor_loss        | -0.14    |
+|    critic_loss       | 5.63e-05 |
+|    ent_coef          | 0.000174 |
+|    ent_coef_loss     | -2.12    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 503940   |
+|    noise_critic_loss | 0.000463 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 68001] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 68301] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 68601] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 68901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 228      |
+|    fps               | 0        |
+|    time_elapsed      | 35528    |
+|    total_timesteps   | 17100    |
+| train/               |          |
+|    actor_loss        | -0.138   |
+|    critic_loss       | 3.33e-05 |
+|    ent_coef          | 0.00017  |
+|    ent_coef_loss     | -0.761   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 512940   |
+|    noise_critic_loss | 0.000229 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 69201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 69501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 69801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 70101] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 232      |
+|    fps               | 0        |
+|    time_elapsed      | 35916    |
+|    total_timesteps   | 17400    |
+| train/               |          |
+|    actor_loss        | -0.133   |
+|    critic_loss       | 5.87e-05 |
+|    ent_coef          | 0.000163 |
+|    ent_coef_loss     | -3.41    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 521940   |
+|    noise_critic_loss | 0.000304 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 70401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 70701] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 71001] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 71301] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 236      |
+|    fps               | 0        |
+|    time_elapsed      | 36304    |
+|    total_timesteps   | 17700    |
+| train/               |          |
+|    actor_loss        | -0.102   |
+|    critic_loss       | 3.33e-05 |
+|    ent_coef          | 0.00016  |
+|    ent_coef_loss     | -1.63    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 530940   |
+|    noise_critic_loss | 0.000318 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 71601] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 71901] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 72201] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 72501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+Eval episode 0 at timestep 72501
+Eval episode 1 at timestep 72501
+Eval episode 2 at timestep 72501
+Eval episode 3 at timestep 72501
+Eval episode 4 at timestep 72501
+Eval episode 5 at timestep 72501
+Eval episode 6 at timestep 72501
+Eval episode 7 at timestep 72501
+Eval episode 8 at timestep 72501
+Eval episode 9 at timestep 72501
+Eval episode 10 at timestep 72501
+Eval episode 11 at timestep 72501
+Eval episode 12 at timestep 72501
+Eval episode 13 at timestep 72501
+Eval episode 14 at timestep 72501
+Eval episode 15 at timestep 72501
+Eval episode 16 at timestep 72501
+Eval episode 17 at timestep 72501
+Eval episode 18 at timestep 72501
+Eval episode 19 at timestep 72501
+Eval episode 20 at timestep 72501
+Eval episode 21 at timestep 72501
+Eval episode 22 at timestep 72501
+Eval episode 23 at timestep 72501
+Eval episode 24 at timestep 72501
+Eval episode 25 at timestep 72501
+Eval episode 26 at timestep 72501
+Eval episode 27 at timestep 72501
+Eval episode 28 at timestep 72501
+Eval episode 29 at timestep 72501
+Eval episode 30 at timestep 72501
+Eval episode 31 at timestep 72501
+Eval episode 32 at timestep 72501
+Eval episode 33 at timestep 72501
+Eval episode 34 at timestep 72501
+Eval episode 35 at timestep 72501
+Eval episode 36 at timestep 72501
+Eval episode 37 at timestep 72501
+Eval episode 38 at timestep 72501
+Eval episode 39 at timestep 72501
+Eval episode 40 at timestep 72501
+Eval episode 41 at timestep 72501
+Eval episode 42 at timestep 72501
+Eval episode 43 at timestep 72501
+Eval episode 44 at timestep 72501
+Eval episode 45 at timestep 72501
+Eval episode 46 at timestep 72501
+Eval episode 47 at timestep 72501
+Eval episode 48 at timestep 72501
+Eval episode 49 at timestep 72501
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 240      |
+|    fps               | 0        |
+|    time_elapsed      | 39321    |
+|    total_timesteps   | 18000    |
+| train/               |          |
+|    actor_loss        | -0.119   |
+|    critic_loss       | 4.57e-05 |
+|    ent_coef          | 0.000161 |
+|    ent_coef_loss     | -4.99    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 539940   |
+|    noise_critic_loss | 0.000264 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 72801] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 73101] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 73401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 73701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 244      |
+|    fps               | 0        |
+|    time_elapsed      | 39708    |
+|    total_timesteps   | 18300    |
+| train/               |          |
+|    actor_loss        | -0.0902  |
+|    critic_loss       | 5.15e-05 |
+|    ent_coef          | 0.000156 |
+|    ent_coef_loss     | -0.0881  |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 548940   |
+|    noise_critic_loss | 0.000413 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 74001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 74301] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 74601] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 74901] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 248      |
+|    fps               | 0        |
+|    time_elapsed      | 40095    |
+|    total_timesteps   | 18600    |
+| train/               |          |
+|    actor_loss        | -0.0782  |
+|    critic_loss       | 8.66e-05 |
+|    ent_coef          | 0.000162 |
+|    ent_coef_loss     | -7.04    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 557940   |
+|    noise_critic_loss | 0.000711 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 75201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 75501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 75801] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 76101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 252      |
+|    fps               | 0        |
+|    time_elapsed      | 40482    |
+|    total_timesteps   | 18900    |
+| train/               |          |
+|    actor_loss        | -0.126   |
+|    critic_loss       | 4.24e-05 |
+|    ent_coef          | 0.000173 |
+|    ent_coef_loss     | 4.15     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 566940   |
+|    noise_critic_loss | 0.000209 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 76401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 76701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 77001] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 77301] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 100.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 256      |
+|    fps               | 0        |
+|    time_elapsed      | 40870    |
+|    total_timesteps   | 19200    |
+| train/               |          |
+|    actor_loss        | -0.13    |
+|    critic_loss       | 5.74e-05 |
+|    ent_coef          | 0.000194 |
+|    ent_coef_loss     | -0.997   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 575940   |
+|    noise_critic_loss | 0.000292 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 77601] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 77901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 78201] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 78501] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 100.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 260      |
+|    fps               | 0        |
+|    time_elapsed      | 41258    |
+|    total_timesteps   | 19500    |
+| train/               |          |
+|    actor_loss        | -0.147   |
+|    critic_loss       | 6.49e-05 |
+|    ent_coef          | 0.000213 |
+|    ent_coef_loss     | -2.6     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 584940   |
+|    noise_critic_loss | 0.000293 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 78801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 79101] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 79401] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 79701] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 100.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 264      |
+|    fps               | 0        |
+|    time_elapsed      | 41647    |
+|    total_timesteps   | 19800    |
+| train/               |          |
+|    actor_loss        | -0.144   |
+|    critic_loss       | 3.77e-05 |
+|    ent_coef          | 0.000183 |
+|    ent_coef_loss     | -1.27    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 593940   |
+|    noise_critic_loss | 0.000206 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 80001] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 80301] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 80601] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 80901] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 268      |
+|    fps               | 0        |
+|    time_elapsed      | 42036    |
+|    total_timesteps   | 20100    |
+| train/               |          |
+|    actor_loss        | -0.145   |
+|    critic_loss       | 4.82e-05 |
+|    ent_coef          | 0.000178 |
+|    ent_coef_loss     | 1.68     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 602940   |
+|    noise_critic_loss | 0.000359 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 81201] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 81501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 81801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 100.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 82101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 272      |
+|    fps               | 0        |
+|    time_elapsed      | 42425    |
+|    total_timesteps   | 20400    |
+| train/               |          |
+|    actor_loss        | -0.115   |
+|    critic_loss       | 4.17e-05 |
+|    ent_coef          | 0.000164 |
+|    ent_coef_loss     | -3.56    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 611940   |
+|    noise_critic_loss | 0.000212 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 82401] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 82701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 83001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 83301] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 276      |
+|    fps               | 0        |
+|    time_elapsed      | 42812    |
+|    total_timesteps   | 20700    |
+| train/               |          |
+|    actor_loss        | -0.0953  |
+|    critic_loss       | 3.7e-05  |
+|    ent_coef          | 0.000168 |
+|    ent_coef_loss     | 8.28     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 620940   |
+|    noise_critic_loss | 0.00022  |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 83601] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 83901] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 84201] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 84501] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+Eval episode 0 at timestep 84501
+Eval episode 1 at timestep 84501
+Eval episode 2 at timestep 84501
+Eval episode 3 at timestep 84501
+Eval episode 4 at timestep 84501
+Eval episode 5 at timestep 84501
+Eval episode 6 at timestep 84501
+Eval episode 7 at timestep 84501
+Eval episode 8 at timestep 84501
+Eval episode 9 at timestep 84501
+Eval episode 10 at timestep 84501
+Eval episode 11 at timestep 84501
+Eval episode 12 at timestep 84501
+Eval episode 13 at timestep 84501
+Eval episode 14 at timestep 84501
+Eval episode 15 at timestep 84501
+Eval episode 16 at timestep 84501
+Eval episode 17 at timestep 84501
+Eval episode 18 at timestep 84501
+Eval episode 19 at timestep 84501
+Eval episode 20 at timestep 84501
+Eval episode 21 at timestep 84501
+Eval episode 22 at timestep 84501
+Eval episode 23 at timestep 84501
+Eval episode 24 at timestep 84501
+Eval episode 25 at timestep 84501
+Eval episode 26 at timestep 84501
+Eval episode 27 at timestep 84501
+Eval episode 28 at timestep 84501
+Eval episode 29 at timestep 84501
+Eval episode 30 at timestep 84501
+Eval episode 31 at timestep 84501
+Eval episode 32 at timestep 84501
+Eval episode 33 at timestep 84501
+Eval episode 34 at timestep 84501
+Eval episode 35 at timestep 84501
+Eval episode 36 at timestep 84501
+Eval episode 37 at timestep 84501
+Eval episode 38 at timestep 84501
+Eval episode 39 at timestep 84501
+Eval episode 40 at timestep 84501
+Eval episode 41 at timestep 84501
+Eval episode 42 at timestep 84501
+Eval episode 43 at timestep 84501
+Eval episode 44 at timestep 84501
+Eval episode 45 at timestep 84501
+Eval episode 46 at timestep 84501
+Eval episode 47 at timestep 84501
+Eval episode 48 at timestep 84501
+Eval episode 49 at timestep 84501
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 280      |
+|    fps               | 0        |
+|    time_elapsed      | 45858    |
+|    total_timesteps   | 21000    |
+| train/               |          |
+|    actor_loss        | -0.102   |
+|    critic_loss       | 6.31e-05 |
+|    ent_coef          | 0.000159 |
+|    ent_coef_loss     | -7.61    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 629940   |
+|    noise_critic_loss | 0.000362 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 84801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 85101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 85401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 85701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 284      |
+|    fps               | 0        |
+|    time_elapsed      | 46246    |
+|    total_timesteps   | 21300    |
+| train/               |          |
+|    actor_loss        | -0.0976  |
+|    critic_loss       | 4.39e-05 |
+|    ent_coef          | 0.000146 |
+|    ent_coef_loss     | -3.22    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 638940   |
+|    noise_critic_loss | 0.000152 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 86001] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: 0.0
+[Step 86301] VLM Score: 5.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 86601] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 86901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 288      |
+|    fps               | 0        |
+|    time_elapsed      | 46633    |
+|    total_timesteps   | 21600    |
+| train/               |          |
+|    actor_loss        | -0.0808  |
+|    critic_loss       | 2.3e-05  |
+|    ent_coef          | 0.000132 |
+|    ent_coef_loss     | 1.53     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 647940   |
+|    noise_critic_loss | 0.000152 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 87201] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 87501] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 87801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 88101] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 292      |
+|    fps               | 0        |
+|    time_elapsed      | 47021    |
+|    total_timesteps   | 21900    |
+| train/               |          |
+|    actor_loss        | -0.0688  |
+|    critic_loss       | 4.77e-05 |
+|    ent_coef          | 0.000132 |
+|    ent_coef_loss     | 5.32     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 656940   |
+|    noise_critic_loss | 0.000187 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.25
+[Step 88401] VLM Score: 4.00, VLM Success: 100.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 88701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 89001] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 89301] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 296      |
+|    fps               | 0        |
+|    time_elapsed      | 47410    |
+|    total_timesteps   | 22200    |
+| train/               |          |
+|    actor_loss        | -0.0617  |
+|    critic_loss       | 2.76e-05 |
+|    ent_coef          | 0.00012  |
+|    ent_coef_loss     | -5.18    |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 665940   |
+|    noise_critic_loss | 0.000165 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 89601] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 89901] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 90201] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 90501] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 300      |
+|    fps               | 0        |
+|    time_elapsed      | 47798    |
+|    total_timesteps   | 22500    |
+| train/               |          |
+|    actor_loss        | -0.0492  |
+|    critic_loss       | 4.47e-05 |
+|    ent_coef          | 0.000116 |
+|    ent_coef_loss     | 1.72     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 674940   |
+|    noise_critic_loss | 0.000293 |
+-----------------------------------
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.5
+[Step 90801] VLM Score: 3.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 91101] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 91401] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+[DEBUG] Episode ended. Info keys: ['vlm_reward', 'vlm_raw_score', 'sim_reward', 'sim_success', 'num_frames_scored', 'terminal_observation', 'TimeLimit.truncated', 'episode']
+[DEBUG] Found vlm_reward: -0.75
+[Step 91701] VLM Score: 2.00, VLM Success: 0.0%, Sim Success: 0.0%
+-----------------------------------
+| rollout/             |          |
+|    ep_len_mean       | 75       |
+|    ep_rew_mean       | 0        |
+| time/                |          |
+|    episodes          | 304      |
+|    fps               | 0        |
+|    time_elapsed      | 48186    |
+|    total_timesteps   | 22800    |
+| train/               |          |
+|    actor_loss        | -0.0673  |
+|    critic_loss       | 7.88e-05 |
+|    ent_coef          | 0.000112 |
+|    ent_coef_loss     | 3.49     |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 683940   |
+|    noise_critic_loss | 0.000169 |

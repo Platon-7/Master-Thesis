@@ -1,0 +1,47 @@
+[2026-02-03 17:14:45,213][root][INFO] - Number of network parameters: 573516
+[2026-02-03 17:14:45,936][root][INFO] - Actor weights not found. Using pre-trained weights!
+[2026-02-03 17:14:45,937][root][INFO] - Loaded base policy weights from ./dppo/log/robomimic-pretrain/lift/lift_pre_diffusion_mlp_ta4_td20/2024-06-28_14-47-58/checkpoint/state_5000.pt
+You appear to be missing MuJoCo.  We expected to find the file here: /home/pkarageo/.mujoco/mujoco210
+This package only provides python bindings, the library must be installed separately.
+Please follow the instructions on the README to install MuJoCo
+    https://github.com/openai/mujoco-py#install-mujoco
+Which can be downloaded from the website
+    https://www.roboti.us/index.html
+Error executing job with overrides: ['seed=1']
+Traceback (most recent call last):
+  File "/home/pkarageo/master-thesis/dsrl/train_dsrl_vlm.py", line 149, in main
+    env = make_vec_env(make_train_env, n_envs=num_env, vec_env_cls=DummyVecEnv)
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/env_util.py", line 125, in make_vec_env
+    vec_env = vec_env_cls([make_env(i + start_index) for i in range(n_envs)], **vec_env_kwargs)
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/vec_env/dummy_vec_env.py", line 31, in __init__
+    self.envs = [_patch_env(fn()) for fn in env_fns]
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/vec_env/dummy_vec_env.py", line 31, in <listcomp>
+    self.envs = [_patch_env(fn()) for fn in env_fns]
+  File "/home/pkarageo/master-thesis/dsrl/stable-baselines3/stable_baselines3/common/env_util.py", line 98, in _init
+    env = env_id(**env_kwargs)
+  File "/home/pkarageo/master-thesis/dsrl/train_dsrl_vlm.py", line 104, in make_train_env
+    env = make_vlm_robomimic_env(
+  File "/home/pkarageo/master-thesis/dsrl/vlm_reward_wrapper.py", line 319, in make_vlm_robomimic_env
+    env = EnvUtils.create_env_from_metadata(
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/utils/env_utils.py", line 218, in create_env_from_metadata
+    env = create_env(
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/utils/env_utils.py", line 168, in create_env
+    env_class = get_env_class(env_type=env_type)
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/utils/env_utils.py", line 36, in get_env_class
+    from robomimic.envs.env_robosuite import EnvRobosuite
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/robomimic/envs/env_robosuite.py", line 10, in <module>
+    import mujoco_py
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/__init__.py", line 2, in <module>
+    from mujoco_py.builder import cymj, ignore_mujoco_warnings, functions, MujocoException
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/builder.py", line 503, in <module>
+    mujoco_path = discover_mujoco()
+  File "/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/utils.py", line 78, in discover_mujoco
+    raise Exception(message)
+Exception:
+You appear to be missing MuJoCo.  We expected to find the file here: /home/pkarageo/.mujoco/mujoco210
+This package only provides python bindings, the library must be installed separately.
+Please follow the instructions on the README to install MuJoCo
+    https://github.com/openai/mujoco-py#install-mujoco
+Which can be downloaded from the website
+    https://www.roboti.us/index.html
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
