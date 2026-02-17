@@ -96,6 +96,9 @@ apptainer exec --nv \
     source /opt/conda/etc/profile.d/conda.sh && \
     conda activate dsrl_env && \
 
+    pip install --target=$TMPDIR/pip_fix 'setuptools<71' 2>/dev/null
+    export PYTHONPATH=$TMPDIR/pip_fix:$PYTHONPATH
+
     # Xvfb for headless rendering
     DISP_NUM=\$(( (\$SLURM_JOB_ID % 50) + 100 ))
     export DISPLAY=:\$DISP_NUM
