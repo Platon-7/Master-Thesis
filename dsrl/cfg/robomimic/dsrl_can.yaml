@@ -9,7 +9,7 @@ logdir: ${log_dir}/robomimic-dsrl/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed
 base_policy_path: ./dppo/log/robomimic-pretrain/can/can_pre_diffusion_mlp_ta4_td20/2024-06-28_13-29-54/checkpoint/state_5000.pt
 offline_data_path: ./dppo/log/robomimic/can_test/train_offline.npz
 dppo_path: ./dppo
-normalization_path: ./dppo/log/robomimic/${env_name}/normalization.npz
+normalization_path: ./dppo/log/robomimic-pretrain/${env_name}/normalization.npz
 
 algorithm: dsrl_na # options are: dsrl_na, dsrl_sac
 

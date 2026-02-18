@@ -8,7 +8,7 @@ name: robomimic_square_dsrl_${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
 logdir: ${log_dir}/robomimic-dsrl/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
 base_policy_path: ./dppo/log/robomimic-pretrain/square/square_pre_diffusion_mlp_ta4_td100_ddim-100steps/2025-04-11_19-13-26_44/checkpoint/state_3000.pt
 offline_data_path: ./dppo/log/robomimic/square_traj_data/train_offline.npz
-normalization_path: ./dppo/log/robomimic/${env_name}/normalization.npz
+normalization_path: ./dppo/log/robomimic-pretrain/${env_name}/normalization.npz
 dppo_path: ./dppo
 
 algorithm: dsrl_na
