@@ -1,23 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=dsrl_gt_lift
-#SBATCH --output=%x_%j.out
-#SBATCH --error=%x_%j.out
-#SBATCH --time=48:00:00
-#SBATCH --partition=gpu_a100       # Change to gpu_h100 if preferred
-#SBATCH --gpus=1                   # Single GPU sufficient for GT rewards
+#SBATCH --output=outfiles/dsrl_gt_train_%A.out
+#SBATCH --time=96:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
 #SBATCH --mem=40G
 #SBATCH --cpus-per-task=12
 
 # =========================================================
 # DSRL Training with Ground Truth Rewards (Snellius)
-# =========================================================
-# Standard DSRL pipeline without VLM rewards.
-# Uses ground truth rewards from the Robomimic environment.
-#
-# CUSTOMIZE BEFORE RUNNING:
-#   - Set WANDB_API_KEY in your environment (or ~/.bashrc)
-#   - Update CONTAINER path if your .sif is elsewhere
-#   - Update REPO_DIR if your repo is elsewhere
 # =========================================================
 
 echo "========================================"
@@ -32,6 +23,17 @@ echo "========================================"
 module load 2024
 module load CUDA/12.6.0
 
+# --- CUSTOMIZE THESE ---
+export SCRATCH="path_of_large_files"
+WANDB_API_KEY="YOUR_KEY"
+REPO_DIR="your_path/Master-Thesis"
+
+# Optional: Set WANDB_ENTITY
+export APPTAINERENV_WANDB_ENTITY="your_entity"
+
+
+# -----------------------------------------------------------------------
+
 # Scratch setup (Snellius standard)
 export HF_HOME="$SCRATCH/hf_cache"
 export TMPDIR="$SCRATCH/tmp"
@@ -40,15 +42,14 @@ mkdir -p "$HF_HOME" "$TMPDIR"
 # Output directories
 mkdir -p "$SCRATCH/dsrl_logs/robomimic-dsrl"
 
-# --- 2. CUSTOMIZE THESE PATHS ---
-REPO_DIR="$HOME/master-thesis"
+# --- 2. (OPTIONAL) CUSTOMIZE THIS PATH ---
 CONTAINER="$SCRATCH/dsrl_roboreward.sif"
 
 # --- 3. CONTAINER ENVIRONMENT VARS ---
 export APPTAINERENV_HF_HOME="$HF_HOME"
-# Set WANDB_API_KEY in your environment before submitting
 export APPTAINERENV_WANDB_API_KEY="$WANDB_API_KEY"
-export APPTAINERENV_WANDB_ENTITY="nlp-squad"
+
+
 
 # Check GPU visibility
 echo "=== GPU Check (outside container) ==="
@@ -56,7 +57,6 @@ nvidia-smi
 echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
 
 # --- 4. MUJOCO SETUP ---
-MUJOCO_DIR="$SCRATCH/.mujoco"
 CONTAINER_MUJOCO_PATH="$HOME/.mujoco/mujoco210/bin"
 export APP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CONTAINER_MUJOCO_PATH:/usr/lib/nvidia"
 
@@ -77,7 +77,6 @@ apptainer exec --nv \
     --env LD_LIBRARY_PATH="$APP_LD_LIBRARY_PATH" \
     --env PYTHONNOUSERSITE=1 \
     --bind "$SCRATCH" \
-    --bind "$MUJOCO_DIR:$HOME/.mujoco" \
     --bind "$WRITABLE_MUJOCO_PY:/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py" \
     "$CONTAINER" bash -c "
 
@@ -86,6 +85,9 @@ apptainer exec --nv \
 
     source /opt/conda/etc/profile.d/conda.sh && \
     conda activate dsrl_env && \
+
+    pip install --target=$TMPDIR/pip_fix 'setuptools<71' 2>/dev/null
+    export PYTHONPATH=$TMPDIR/pip_fix:$PYTHONPATH
 
     # Xvfb for headless rendering
     DISP_NUM=\$(( (\$SLURM_JOB_ID % 50) + 100 ))
