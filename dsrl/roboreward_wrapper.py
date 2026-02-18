@@ -169,19 +169,13 @@ Rubric for end-of-episode progress (judge only the final state without time limi
             messages, return_video_kwargs=True
         )
         
-        # Process video inputs
-        if video_inputs:
-            videos, video_metadatas = zip(*video_inputs)
-            videos = list(videos)
-            video_metadatas = list(video_metadatas)
-        else:
-            videos, video_metadatas = None, None
-        
+        # Process video inputs - video_inputs is a list of videos (each a list of PIL frames)
+        videos = video_inputs if video_inputs else None
+
         inputs = self.processor(
             text=[text],
             images=image_inputs,
             videos=videos,
-            video_metadata=video_metadatas,
             padding=True,
             return_tensors="pt",
             **video_kwargs,
