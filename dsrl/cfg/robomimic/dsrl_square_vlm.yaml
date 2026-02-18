@@ -75,7 +75,7 @@ train:
   discount: 0.999
   ent_coef: -1
   target_ent: 0.0
-  init_rollout_steps: 2001
+  init_rollout_steps: 32000
   action_magnitude: 1.5
   n_critics: 2
   critic_backup_combine_type: min
