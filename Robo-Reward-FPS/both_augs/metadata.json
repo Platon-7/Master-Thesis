@@ -1,0 +1,56 @@
+{
+  "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_0.mp4": {
+    "hf_path": "austin_buds_dataset_converted_externally_to_rlds/austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_0.mp4",
+    "task": "Take the lid off the pot, put the pot on the plate, and use the tool to push the pot to the front of the table.",
+    "reward": 5,
+    "gpt5_mini_check": "The robot successfully removed the lid from the pot, placed the (now-unlidded) pot onto the plate, and then used the tool (spatula) to push the pot forward on the table. All three core requirements are visible and satisfied in the final frames, so the provided score of 5 (Perfect Completion) matches the rubric.\n\nANSWER: TRUE",
+    "file_size_bytes": 735554,
+    "augmentation": "none (original)",
+    "note": "Full unmodified episode"
+  },
+  "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_0_attempt_1_score_2.mp4": {
+    "hf_path": "austin_buds_dataset_converted_externally_to_rlds/austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_0_attempt_1_score_2.mp4",
+    "task": "Take the lid off the pot, put the pot on the plate, and use the tool to push the pot to the front of the table.",
+    "reward": 2,
+    "gpt5_mini_check": "The task description is coherent with the video (the pot, its lid, plates, and a pushing tool are all visible). The robot removes the lid (clear progress) but does not place the pot onto a plate nor successfully push the pot to the front of the table \u2014 at best a small movement is made. This is a small but insufficient change toward the full task, matching \"Minimal Progress\" (score 2). Therefore the PROVIDED SCORE is correct.\n\nANSWER: TRUE",
+    "file_size_bytes": 217272,
+    "augmentation": "temporal_clip",
+    "note": "Same task as original, video truncated"
+  },
+  "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_0_attempt_1_score_3.mp4": {
+    "hf_path": "austin_buds_dataset_converted_externally_to_rlds/austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_0_attempt_1_score_3.mp4",
+    "task": "Take the lid off the pot, put the pot on the plate, and use the tool to push the pot to the front of the table.",
+    "reward": 3,
+    "gpt5_mini_check": "The task description matches visible objects (pot with lid, plate, and a separate tool/spatula) and is coherent. In the video the robot removes the lid and moves the pot onto the plate, but it does not use the separate tool to push the pot to the front of the table (the robot itself moves/pushes the pot). Missing the explicit \"use the tool\" step is a major requirement, so the outcome is best scored as Partial Completion (3). Therefore the PROVIDED SCORE 3 is correct.\n\nANSWER: TRUE",
+    "file_size_bytes": 373029,
+    "augmentation": "temporal_clip",
+    "note": "Same task as original, video truncated"
+  },
+  "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_44.mp4": {
+    "hf_path": "austin_buds_dataset_converted_externally_to_rlds/austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_44.mp4",
+    "task": "Move the large light-colored bowl from the brown placemat to the center of the workspace.",
+    "reward": 1,
+    "gpt5_mini_check": "The task description is coherent with the video (the large light-colored bowl is on the brown placemat at start). The robot never moves that large bowl \u2014 it instead manipulates smaller round pieces and a spatula, leaving the large bowl on the brown placemat. That is no success toward the specified goal, which matches a rubric score of 1. Therefore the PROVIDED SCORE is correct.\n\nANSWER: TRUE",
+    "file_size_bytes": 899491,
+    "augmentation": "none (original)",
+    "note": "Full unmodified episode"
+  },
+  "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_44_attempt_1_score_2.mp4": {
+    "hf_path": "austin_buds_dataset_converted_externally_to_rlds/austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_44_attempt_1_score_2.mp4",
+    "task": "Take the lid off the pot, put the pot on the plate, and use the tool to push the pot to the front of the table.",
+    "reward": 2,
+    "gpt5_mini_check": "The task description is coherent with the video (pot, lid, plate, and a tool/spatula are visible). The robot removes the lid from the pot (a small but relevant change) but does not place the pot onto the plate nor uses the tool to push the pot to the front of the table. This is only minimal progress toward the full task, which matches rubric score 2.\n\nANSWER: TRUE",
+    "file_size_bytes": 269103,
+    "augmentation": "counterfactual_relabel + temporal_clip",
+    "note": "Task relabeled (original task: \"Move the large light-colored bowl from the brown placemat to the center of the workspace.\"), video also truncated"
+  },
+  "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_44_attempt_1_score_3.mp4": {
+    "hf_path": "austin_buds_dataset_converted_externally_to_rlds/austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_44_attempt_1_score_3.mp4",
+    "task": "Take the lid off the pot, put the pot on the plate, and use the tool to push the pot to the front of the table.",
+    "reward": 3,
+    "gpt5_mini_check": "The task description matches the scene (a lidded pot, a plate, and a tool/spatula are visible). The robot successfully lifts the lid and places the pot onto the plate, but it does not use the tool to push the pot to the front of the table (the final placement remains on the plate away from the front). Missing this required tool-use/front push is a major requirement, so the episode shows good progress but fails a central step \u2014 score 3 (Partial Completion) is appropriate.\n\nANSWER: TRUE",
+    "file_size_bytes": 456591,
+    "augmentation": "counterfactual_relabel + temporal_clip",
+    "note": "Task relabeled (original task: \"Move the large light-colored bowl from the brown placemat to the center of the workspace.\"), video also truncated"
+  }
+}

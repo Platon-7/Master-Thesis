@@ -1,0 +1,4835 @@
+{
+  "experiment_info": {
+    "dataset": "DROID_pillows",
+    "task_instruction": "rearrange pillows on sofa",
+    "score_threshold": 3.5,
+    "timestamp": "2026-02-04T21:03:04.445444",
+    "default_fps_note": "qwen_vl_utils defaults to 2.0 FPS when not specified"
+  },
+  "results": {
+    "default (2.0)": {
+      "fps_value": 2.0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fn": 50,
+        "fp": 0,
+        "tn": 15,
+        "accuracy": 0.23076923076923078,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "specificity": 1.0
+      },
+      "predictions": [
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_18:59:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 22,
+          "video_duration": 11.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_19:01:24_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:29:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 28,
+          "video_duration": 14.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:31:19_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 26,
+          "video_duration": 13.716666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:35:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 8,
+          "video_duration": 4.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:36:14_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 14,
+          "video_duration": 7.616666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:37:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:38:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:39:25_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 8,
+          "video_duration": 4.083333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 10,
+          "video_duration": 5.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:52:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 18,
+          "video_duration": 9.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:54:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 32,
+          "video_duration": 16.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:56:10_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 20,
+          "video_duration": 10.383333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:59:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 24,
+          "video_duration": 12.516666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:02:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 42,
+          "video_duration": 21.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:08:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:10:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 22,
+          "video_duration": 11.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:29:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 16,
+          "video_duration": 8.95
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:30:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.45
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:43:50_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:46:34_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:48:49_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 26,
+          "video_duration": 13.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 14,
+          "video_duration": 7.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:52:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 6,
+          "video_duration": 3.5166666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:53:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:54:55_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 26,
+          "video_duration": 13.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:56:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.35
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:58:28_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 22,
+          "video_duration": 11.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:00:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:05:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 34,
+          "video_duration": 17.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:07:03_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 24,
+          "video_duration": 12.216666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:08:15_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 36,
+          "video_duration": 18.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:10:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.966666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:11:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 24,
+          "video_duration": 12.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:17:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:19:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 28,
+          "video_duration": 14.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:20:29_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 24,
+          "video_duration": 12.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:23:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 26,
+          "video_duration": 13.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:24:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 32,
+          "video_duration": 16.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:26:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:27:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 28,
+          "video_duration": 14.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:30:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.6
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:31:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.666666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:34:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:35:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 28,
+          "video_duration": 14.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:37:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 32,
+          "video_duration": 16.083333333333332
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:39:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 22,
+          "video_duration": 11.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:45:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 22,
+          "video_duration": 11.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:47:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 20,
+          "video_duration": 10.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:29:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 8,
+          "video_duration": 4.566666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 32,
+          "video_duration": 16.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:34:51_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 12,
+          "video_duration": 6.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:51:46_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 20,
+          "video_duration": 10.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 10,
+          "video_duration": 5.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:41_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 14,
+          "video_duration": 7.7
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:07:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 24,
+          "video_duration": 12.033333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:29:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 12,
+          "video_duration": 6.016666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:43:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 4,
+          "video_duration": 1.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:05_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 10,
+          "video_duration": 5.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 4,
+          "video_duration": 0.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:52:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 20,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:21:37_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 20,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:29:04_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 8,
+          "video_duration": 4.783333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:45:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.466666666666667
+        }
+      ]
+    },
+    "2.0": {
+      "fps_value": 2.0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fn": 50,
+        "fp": 0,
+        "tn": 15,
+        "accuracy": 0.23076923076923078,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "specificity": 1.0
+      },
+      "predictions": [
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_18:59:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 22,
+          "video_duration": 11.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_19:01:24_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:29:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 28,
+          "video_duration": 14.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:31:19_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 26,
+          "video_duration": 13.716666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:35:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 8,
+          "video_duration": 4.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:36:14_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 14,
+          "video_duration": 7.616666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:37:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:38:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:39:25_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 8,
+          "video_duration": 4.083333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 10,
+          "video_duration": 5.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:52:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:54:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 32,
+          "video_duration": 16.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:56:10_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 20,
+          "video_duration": 10.383333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:59:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 24,
+          "video_duration": 12.516666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:02:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 42,
+          "video_duration": 21.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:08:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:10:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 22,
+          "video_duration": 11.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:29:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.95
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:30:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.45
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:43:50_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:46:34_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:48:49_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 26,
+          "video_duration": 13.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 14,
+          "video_duration": 7.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:52:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 6,
+          "video_duration": 3.5166666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:53:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 18,
+          "video_duration": 9.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:54:55_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 26,
+          "video_duration": 13.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:56:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.35
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:58:28_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 22,
+          "video_duration": 11.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:00:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:05:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 34,
+          "video_duration": 17.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:07:03_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 24,
+          "video_duration": 12.216666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:08:15_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 36,
+          "video_duration": 18.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:10:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.966666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:11:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 24,
+          "video_duration": 12.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:17:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 9.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:19:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 28,
+          "video_duration": 14.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:20:29_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 24,
+          "video_duration": 12.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:23:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 26,
+          "video_duration": 13.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:24:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 32,
+          "video_duration": 16.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:26:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:27:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 28,
+          "video_duration": 14.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:30:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.6
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:31:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.666666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:34:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:35:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 28,
+          "video_duration": 14.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:37:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 32,
+          "video_duration": 16.083333333333332
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:39:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 22,
+          "video_duration": 11.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:45:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 22,
+          "video_duration": 11.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:47:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 20,
+          "video_duration": 10.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:29:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 8,
+          "video_duration": 4.566666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 32,
+          "video_duration": 16.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:34:51_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 12,
+          "video_duration": 6.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:51:46_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 20,
+          "video_duration": 10.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 10,
+          "video_duration": 5.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:41_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 14,
+          "video_duration": 7.7
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:07:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 24,
+          "video_duration": 12.033333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:29:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 12,
+          "video_duration": 6.016666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:43:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 4,
+          "video_duration": 1.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:05_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 10,
+          "video_duration": 5.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 4,
+          "video_duration": 0.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:52:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 20,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:21:37_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 20,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:29:04_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 8,
+          "video_duration": 4.783333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:45:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 8.466666666666667
+        }
+      ]
+    },
+    "5.0": {
+      "fps_value": 5.0,
+      "confusion_matrix": {
+        "tp": 2,
+        "fn": 48,
+        "fp": 0,
+        "tn": 15,
+        "accuracy": 0.26153846153846155,
+        "precision": 1.0,
+        "recall": 0.04,
+        "f1_score": 0.07692307692307693,
+        "specificity": 1.0
+      },
+      "predictions": [
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_18:59:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 54,
+          "video_duration": 11.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_19:01:24_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 78,
+          "video_duration": 15.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:29:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 70,
+          "video_duration": 14.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:31:19_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 68,
+          "video_duration": 13.716666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:35:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 20,
+          "video_duration": 4.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:36:14_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 38,
+          "video_duration": 7.616666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:37:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 76,
+          "video_duration": 15.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:38:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 42,
+          "video_duration": 8.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:39:25_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 20,
+          "video_duration": 4.083333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 28,
+          "video_duration": 5.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:52:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 46,
+          "video_duration": 9.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:54:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 84,
+          "video_duration": 16.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:56:10_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 50,
+          "video_duration": 10.383333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:59:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 62,
+          "video_duration": 12.516666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:02:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 104,
+          "video_duration": 21.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:08:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 76,
+          "video_duration": 15.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:10:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 56,
+          "video_duration": 11.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:29:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 44,
+          "video_duration": 8.95
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:30:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 42,
+          "video_duration": 8.45
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:43:50_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 40,
+          "video_duration": 8.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:46:34_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 76,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:48:49_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 66,
+          "video_duration": 13.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 36,
+          "video_duration": 7.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:52:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 16,
+          "video_duration": 3.5166666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:53:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 48,
+          "video_duration": 9.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:54:55_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 64,
+          "video_duration": 13.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:56:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 46,
+          "video_duration": 9.35
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:58:28_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 56,
+          "video_duration": 11.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:00:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 44,
+          "video_duration": 9.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:05:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 88,
+          "video_duration": 17.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:07:03_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 60,
+          "video_duration": 12.216666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:08:15_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 94,
+          "video_duration": 18.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:10:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 48,
+          "video_duration": 9.966666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:11:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 60,
+          "video_duration": 12.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:17:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 48,
+          "video_duration": 9.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:19:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 70,
+          "video_duration": 14.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:20:29_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 62,
+          "video_duration": 12.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:23:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 68,
+          "video_duration": 13.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:24:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 80,
+          "video_duration": 16.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:26:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 74,
+          "video_duration": 15.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:27:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 70,
+          "video_duration": 14.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:30:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 42,
+          "video_duration": 8.6
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:31:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 78,
+          "video_duration": 15.666666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 42,
+          "video_duration": 8.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:34:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 76,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:35:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 72,
+          "video_duration": 14.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:37:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 80,
+          "video_duration": 16.083333333333332
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:39:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 56,
+          "video_duration": 11.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:45:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 56,
+          "video_duration": 11.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:47:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 50,
+          "video_duration": 10.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:29:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 22,
+          "video_duration": 4.566666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 80,
+          "video_duration": 16.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:34:51_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 6.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:51:46_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 50,
+          "video_duration": 10.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 26,
+          "video_duration": 5.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:41_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 38,
+          "video_duration": 7.7
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:07:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 60,
+          "video_duration": 12.033333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:29:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 30,
+          "video_duration": 6.016666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:43:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 8,
+          "video_duration": 1.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:05_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 24,
+          "video_duration": 5.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 4,
+          "video_duration": 0.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:52:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 50,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:21:37_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 50,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:29:04_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 22,
+          "video_duration": 4.783333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:45:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 42,
+          "video_duration": 8.466666666666667
+        }
+      ]
+    },
+    "10.0": {
+      "fps_value": 10.0,
+      "confusion_matrix": {
+        "tp": 3,
+        "fn": 47,
+        "fp": 0,
+        "tn": 15,
+        "accuracy": 0.27692307692307694,
+        "precision": 1.0,
+        "recall": 0.06,
+        "f1_score": 0.11320754716981131,
+        "specificity": 1.0
+      },
+      "predictions": [
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_18:59:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 110,
+          "video_duration": 11.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_19:01:24_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 156,
+          "video_duration": 15.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:29:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 140,
+          "video_duration": 14.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:31:19_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 136,
+          "video_duration": 13.716666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:35:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 42,
+          "video_duration": 4.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:36:14_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 76,
+          "video_duration": 7.616666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:37:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 154,
+          "video_duration": 15.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:38:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 84,
+          "video_duration": 8.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:39:25_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 40,
+          "video_duration": 4.083333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 56,
+          "video_duration": 5.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:52:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 94,
+          "video_duration": 9.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:54:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 168,
+          "video_duration": 16.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:56:10_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 102,
+          "video_duration": 10.383333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:59:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 124,
+          "video_duration": 12.516666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:02:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 210,
+          "video_duration": 21.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:08:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 154,
+          "video_duration": 15.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:10:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 114,
+          "video_duration": 11.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:29:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 88,
+          "video_duration": 8.95
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:30:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 84,
+          "video_duration": 8.45
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:43:50_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 82,
+          "video_duration": 8.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:46:34_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 152,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:48:49_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 132,
+          "video_duration": 13.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 74,
+          "video_duration": 7.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:52:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 34,
+          "video_duration": 3.5166666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:53:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 96,
+          "video_duration": 9.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:54:55_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 130,
+          "video_duration": 13.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:56:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 92,
+          "video_duration": 9.35
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:58:28_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 112,
+          "video_duration": 11.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:00:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 90,
+          "video_duration": 9.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:05:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 178,
+          "video_duration": 17.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:07:03_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 122,
+          "video_duration": 12.216666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:08:15_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 188,
+          "video_duration": 18.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:10:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 98,
+          "video_duration": 9.966666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:11:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 122,
+          "video_duration": 12.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:17:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 98,
+          "video_duration": 9.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:19:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 140,
+          "video_duration": 14.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:20:29_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 124,
+          "video_duration": 12.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:23:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 138,
+          "video_duration": 13.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:24:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 160,
+          "video_duration": 16.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:26:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 150,
+          "video_duration": 15.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:27:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 142,
+          "video_duration": 14.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:30:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 86,
+          "video_duration": 8.6
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:31:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 156,
+          "video_duration": 15.666666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 84,
+          "video_duration": 8.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:34:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 152,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:35:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 146,
+          "video_duration": 14.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:37:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 160,
+          "video_duration": 16.083333333333332
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:39:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 114,
+          "video_duration": 11.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:45:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 112,
+          "video_duration": 11.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:47:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 100,
+          "video_duration": 10.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:29:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 44,
+          "video_duration": 4.566666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 162,
+          "video_duration": 16.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:34:51_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 62,
+          "video_duration": 6.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:51:46_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 100,
+          "video_duration": 10.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 54,
+          "video_duration": 5.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:41_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 76,
+          "video_duration": 7.7
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:07:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 120,
+          "video_duration": 12.033333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:29:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 60,
+          "video_duration": 6.016666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:43:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 18,
+          "video_duration": 1.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:05_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 50,
+          "video_duration": 5.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 4,
+          "video_duration": 0.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:52:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 100,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:21:37_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 100,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:29:04_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 46,
+          "video_duration": 4.783333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:45:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 84,
+          "video_duration": 8.466666666666667
+        }
+      ]
+    },
+    "15.0": {
+      "fps_value": 15.0,
+      "confusion_matrix": {
+        "tp": 3,
+        "fn": 47,
+        "fp": 0,
+        "tn": 15,
+        "accuracy": 0.27692307692307694,
+        "precision": 1.0,
+        "recall": 0.06,
+        "f1_score": 0.11320754716981131,
+        "specificity": 1.0
+      },
+      "predictions": [
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_18:59:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 166,
+          "video_duration": 11.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_19:01:24_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 236,
+          "video_duration": 15.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:29:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 210,
+          "video_duration": 14.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:31:19_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 204,
+          "video_duration": 13.716666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:35:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 64,
+          "video_duration": 4.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:36:14_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 114,
+          "video_duration": 7.616666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:37:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 232,
+          "video_duration": 15.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:38:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 126,
+          "video_duration": 8.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:39:25_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 60,
+          "video_duration": 4.083333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 84,
+          "video_duration": 5.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:52:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 142,
+          "video_duration": 9.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:54:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 252,
+          "video_duration": 16.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:56:10_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 154,
+          "video_duration": 10.383333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:59:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 186,
+          "video_duration": 12.516666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:02:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 314,
+          "video_duration": 21.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:08:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 232,
+          "video_duration": 15.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:10:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 170,
+          "video_duration": 11.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:29:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 134,
+          "video_duration": 8.95
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:30:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 126,
+          "video_duration": 8.45
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:43:50_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 124,
+          "video_duration": 8.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:46:34_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 228,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:48:49_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 198,
+          "video_duration": 13.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 110,
+          "video_duration": 7.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:52:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 52,
+          "video_duration": 3.5166666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:53:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 146,
+          "video_duration": 9.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:54:55_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 196,
+          "video_duration": 13.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:56:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 140,
+          "video_duration": 9.35
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:58:28_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 168,
+          "video_duration": 11.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:00:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 136,
+          "video_duration": 9.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:05:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 268,
+          "video_duration": 17.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:07:03_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 182,
+          "video_duration": 12.216666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:08:15_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 282,
+          "video_duration": 18.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:10:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 148,
+          "video_duration": 9.966666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:11:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 184,
+          "video_duration": 12.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:17:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 148,
+          "video_duration": 9.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:19:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 212,
+          "video_duration": 14.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:20:29_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 186,
+          "video_duration": 12.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:23:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 208,
+          "video_duration": 13.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:24:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 242,
+          "video_duration": 16.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:26:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 226,
+          "video_duration": 15.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:27:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 214,
+          "video_duration": 14.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:30:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 128,
+          "video_duration": 8.6
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:31:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 234,
+          "video_duration": 15.666666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 128,
+          "video_duration": 8.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:34:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 228,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:35:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 220,
+          "video_duration": 14.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:37:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 240,
+          "video_duration": 16.083333333333332
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:39:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 172,
+          "video_duration": 11.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:45:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 170,
+          "video_duration": 11.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:47:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 150,
+          "video_duration": 10.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:29:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 68,
+          "video_duration": 4.566666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 244,
+          "video_duration": 16.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:34:51_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 94,
+          "video_duration": 6.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:51:46_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 150,
+          "video_duration": 10.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 82,
+          "video_duration": 5.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:41_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 114,
+          "video_duration": 7.7
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:07:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 180,
+          "video_duration": 12.033333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:29:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 90,
+          "video_duration": 6.016666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:43:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 28,
+          "video_duration": 1.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:05_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 74,
+          "video_duration": 5.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 4,
+          "video_duration": 0.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:52:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 150,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:21:37_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 150,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:29:04_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 70,
+          "video_duration": 4.783333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:45:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 126,
+          "video_duration": 8.466666666666667
+        }
+      ]
+    },
+    "20.0": {
+      "fps_value": 20.0,
+      "confusion_matrix": {
+        "tp": 10,
+        "fn": 40,
+        "fp": 0,
+        "tn": 15,
+        "accuracy": 0.38461538461538464,
+        "precision": 1.0,
+        "recall": 0.2,
+        "f1_score": 0.33333333333333337,
+        "specificity": 1.0
+      },
+      "predictions": [
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_18:59:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 222,
+          "video_duration": 11.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_19:01:24_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 314,
+          "video_duration": 15.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:29:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 282,
+          "video_duration": 14.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:31:19_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 274,
+          "video_duration": 13.716666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:35:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 84,
+          "video_duration": 4.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:36:14_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 152,
+          "video_duration": 7.616666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:37:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 308,
+          "video_duration": 15.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:38:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 170,
+          "video_duration": 8.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:39:25_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 80,
+          "video_duration": 4.083333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 112,
+          "video_duration": 5.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:52:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 190,
+          "video_duration": 9.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:54:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 338,
+          "video_duration": 16.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:56:10_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 206,
+          "video_duration": 10.383333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:59:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 250,
+          "video_duration": 12.516666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:02:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 420,
+          "video_duration": 21.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:08:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 310,
+          "video_duration": 15.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:10:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 228,
+          "video_duration": 11.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:29:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 178,
+          "video_duration": 8.95
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:30:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 168,
+          "video_duration": 8.45
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:43:50_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 166,
+          "video_duration": 8.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:46:34_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 304,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:48:49_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 264,
+          "video_duration": 13.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 148,
+          "video_duration": 7.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:52:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 70,
+          "video_duration": 3.5166666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:53:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 194,
+          "video_duration": 9.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:54:55_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 262,
+          "video_duration": 13.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:56:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 186,
+          "video_duration": 9.35
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:58:28_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 226,
+          "video_duration": 11.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:00:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 182,
+          "video_duration": 9.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:05:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 356,
+          "video_duration": 17.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:07:03_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 244,
+          "video_duration": 12.216666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:08:15_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 376,
+          "video_duration": 18.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:10:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 198,
+          "video_duration": 9.966666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:11:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 246,
+          "video_duration": 12.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:17:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 196,
+          "video_duration": 9.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:19:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 282,
+          "video_duration": 14.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:20:29_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 250,
+          "video_duration": 12.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:23:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 278,
+          "video_duration": 13.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:24:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 322,
+          "video_duration": 16.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:26:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 300,
+          "video_duration": 15.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:27:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 286,
+          "video_duration": 14.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:30:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 172,
+          "video_duration": 8.6
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:31:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 312,
+          "video_duration": 15.666666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 170,
+          "video_duration": 8.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:34:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 304,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:35:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 292,
+          "video_duration": 14.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:37:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 320,
+          "video_duration": 16.083333333333332
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:39:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 228,
+          "video_duration": 11.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:45:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 226,
+          "video_duration": 11.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:47:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 200,
+          "video_duration": 10.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:29:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 90,
+          "video_duration": 4.566666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 326,
+          "video_duration": 16.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:34:51_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 126,
+          "video_duration": 6.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:51:46_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 200,
+          "video_duration": 10.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 108,
+          "video_duration": 5.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:41_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 154,
+          "video_duration": 7.7
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:07:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 240,
+          "video_duration": 12.033333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:29:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 120,
+          "video_duration": 6.016666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:43:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 38,
+          "video_duration": 1.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:05_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 100,
+          "video_duration": 5.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 4,
+          "video_duration": 0.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:52:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 202,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:21:37_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 202,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:29:04_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 94,
+          "video_duration": 4.783333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:45:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 168,
+          "video_duration": 8.466666666666667
+        }
+      ]
+    },
+    "30.0": {
+      "fps_value": 30.0,
+      "confusion_matrix": {
+        "tp": 28,
+        "fn": 22,
+        "fp": 2,
+        "tn": 13,
+        "accuracy": 0.6307692307692307,
+        "precision": 0.9333333333333333,
+        "recall": 0.56,
+        "f1_score": 0.7000000000000001,
+        "specificity": 0.8666666666666667
+      },
+      "predictions": [
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_18:59:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 332,
+          "video_duration": 11.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_19:01:24_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 472,
+          "video_duration": 15.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:29:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 422,
+          "video_duration": 14.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:31:19_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 410,
+          "video_duration": 13.716666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:35:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 128,
+          "video_duration": 4.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:36:14_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 228,
+          "video_duration": 7.616666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:37:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 464,
+          "video_duration": 15.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:38:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 254,
+          "video_duration": 8.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:39:25_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 122,
+          "video_duration": 4.083333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 170,
+          "video_duration": 5.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:52:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 286,
+          "video_duration": 9.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:54:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 506,
+          "video_duration": 16.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:56:10_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 310,
+          "video_duration": 10.383333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:59:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 374,
+          "video_duration": 12.516666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:02:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 630,
+          "video_duration": 21.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:08:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 466,
+          "video_duration": 15.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:10:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 342,
+          "video_duration": 11.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:29:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 268,
+          "video_duration": 8.95
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:30:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 252,
+          "video_duration": 8.45
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:43:50_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 248,
+          "video_duration": 8.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:46:34_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 456,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:48:49_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 398,
+          "video_duration": 13.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 222,
+          "video_duration": 7.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:52:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 104,
+          "video_duration": 3.5166666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:53:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 292,
+          "video_duration": 9.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:54:55_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 392,
+          "video_duration": 13.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:56:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 280,
+          "video_duration": 9.35
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:58:28_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 338,
+          "video_duration": 11.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:00:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 274,
+          "video_duration": 9.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:05:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 536,
+          "video_duration": 17.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:07:03_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 366,
+          "video_duration": 12.216666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:08:15_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 566,
+          "video_duration": 18.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:10:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 298,
+          "video_duration": 9.966666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:11:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 368,
+          "video_duration": 12.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:17:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 296,
+          "video_duration": 9.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:19:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 424,
+          "video_duration": 14.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:20:29_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 374,
+          "video_duration": 12.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:23:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 416,
+          "video_duration": 13.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:24:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 484,
+          "video_duration": 16.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:26:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 452,
+          "video_duration": 15.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:27:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 430,
+          "video_duration": 14.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:30:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 258,
+          "video_duration": 8.6
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:31:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 470,
+          "video_duration": 15.666666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 256,
+          "video_duration": 8.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:34:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 456,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:35:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 440,
+          "video_duration": 14.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:37:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 482,
+          "video_duration": 16.083333333333332
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:39:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 344,
+          "video_duration": 11.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:45:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 340,
+          "video_duration": 11.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:47:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 302,
+          "video_duration": 10.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:29:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 136,
+          "video_duration": 4.566666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 488,
+          "video_duration": 16.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:34:51_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 188,
+          "video_duration": 6.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:51:46_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 300,
+          "video_duration": 10.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 164,
+          "video_duration": 5.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:41_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 230,
+          "video_duration": 7.7
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:07:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 360,
+          "video_duration": 12.033333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:29:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 180,
+          "video_duration": 6.016666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:43:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 56,
+          "video_duration": 1.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:05_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 150,
+          "video_duration": 5.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 4,
+          "video_duration": 0.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:52:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 302,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:21:37_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 302,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:29:04_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 142,
+          "video_duration": 4.783333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:45:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 254,
+          "video_duration": 8.466666666666667
+        }
+      ]
+    },
+    "60.0": {
+      "fps_value": 60.0,
+      "confusion_matrix": {
+        "tp": 40,
+        "fn": 10,
+        "fp": 6,
+        "tn": 9,
+        "accuracy": 0.7538461538461538,
+        "precision": 0.8695652173913043,
+        "recall": 0.8,
+        "f1_score": 0.8333333333333333,
+        "specificity": 0.6
+      },
+      "predictions": [
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_18:59:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 666,
+          "video_duration": 11.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_19:01:24_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:29:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 14.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:31:19_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 13.716666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:35:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 256,
+          "video_duration": 4.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:36:14_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 456,
+          "video_duration": 7.616666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:37:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 768,
+          "video_duration": 15.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:38:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 510,
+          "video_duration": 8.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:39:25_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 244,
+          "video_duration": 4.083333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 340,
+          "video_duration": 5.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:52:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 572,
+          "video_duration": 9.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:54:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 16.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:56:10_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 622,
+          "video_duration": 10.383333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:59:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 750,
+          "video_duration": 12.516666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:02:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 768,
+          "video_duration": 21.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:08:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:10:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 684,
+          "video_duration": 11.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:29:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 536,
+          "video_duration": 8.95
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:30:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 506,
+          "video_duration": 8.45
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:43:50_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 498,
+          "video_duration": 8.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:46:34_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:48:49_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 13.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 444,
+          "video_duration": 7.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:52:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 210,
+          "video_duration": 3.5166666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:53:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 584,
+          "video_duration": 9.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:54:55_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 13.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:56:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 560,
+          "video_duration": 9.35
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:58:28_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 678,
+          "video_duration": 11.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:00:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 550,
+          "video_duration": 9.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:05:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 17.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:07:03_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 732,
+          "video_duration": 12.216666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:08:15_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 18.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:10:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 598,
+          "video_duration": 9.966666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:11:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 738,
+          "video_duration": 12.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:17:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 592,
+          "video_duration": 9.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:19:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 14.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:20:29_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 750,
+          "video_duration": 12.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:23:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 13.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:24:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 16.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:26:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:27:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 14.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:30:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 516,
+          "video_duration": 8.6
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:31:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.666666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 512,
+          "video_duration": 8.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:34:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:35:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 14.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:37:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 16.083333333333332
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:39:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 688,
+          "video_duration": 11.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:45:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 682,
+          "video_duration": 11.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:47:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 604,
+          "video_duration": 10.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:29:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 274,
+          "video_duration": 4.566666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 16.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:34:51_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 378,
+          "video_duration": 6.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:51:46_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 602,
+          "video_duration": 10.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 328,
+          "video_duration": 5.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:41_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 462,
+          "video_duration": 7.7
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:07:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 722,
+          "video_duration": 12.033333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:29:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 360,
+          "video_duration": 6.016666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:43:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 114,
+          "video_duration": 1.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:05_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 302,
+          "video_duration": 5.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 8,
+          "video_duration": 0.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:52:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 606,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:21:37_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 606,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:29:04_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 286,
+          "video_duration": 4.783333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:45:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 508,
+          "video_duration": 8.466666666666667
+        }
+      ]
+    },
+    "70.0": {
+      "fps_value": 70.0,
+      "confusion_matrix": {
+        "tp": 39,
+        "fn": 11,
+        "fp": 5,
+        "tn": 10,
+        "accuracy": 0.7538461538461538,
+        "precision": 0.8863636363636364,
+        "recall": 0.78,
+        "f1_score": 0.8297872340425532,
+        "specificity": 0.6666666666666666
+      },
+      "predictions": [
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_18:59:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 666,
+          "video_duration": 11.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Sun_Jul__9_19:01:24_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:29:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 14.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:31:19_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 13.716666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:35:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 256,
+          "video_duration": 4.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:36:14_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 456,
+          "video_duration": 7.616666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:37:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 768,
+          "video_duration": 15.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:38:30_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 510,
+          "video_duration": 8.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:39:25_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 244,
+          "video_duration": 4.083333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 340,
+          "video_duration": 5.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:52:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 572,
+          "video_duration": 9.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:54:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 16.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:56:10_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 622,
+          "video_duration": 10.383333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_09:59:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 750,
+          "video_duration": 12.516666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:02:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 768,
+          "video_duration": 21.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:08:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:10:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 684,
+          "video_duration": 11.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:29:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 536,
+          "video_duration": 8.95
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:30:57_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 506,
+          "video_duration": 8.45
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:43:50_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 498,
+          "video_duration": 8.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:46:34_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:48:49_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 13.266666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:50:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 444,
+          "video_duration": 7.4
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:52:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 210,
+          "video_duration": 3.5166666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:53:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 584,
+          "video_duration": 9.75
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:54:55_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 13.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:56:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 560,
+          "video_duration": 9.35
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_10:58:28_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 678,
+          "video_duration": 11.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:00:06_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 550,
+          "video_duration": 9.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:05:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 17.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:07:03_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 732,
+          "video_duration": 12.216666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:08:15_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 18.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:10:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 598,
+          "video_duration": 9.966666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:11:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 738,
+          "video_duration": 12.316666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:17:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 592,
+          "video_duration": 9.866666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:19:08_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 14.183333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:20:29_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 750,
+          "video_duration": 12.5
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:23:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 13.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:24:40_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 16.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:26:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:27:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 14.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:30:43_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 516,
+          "video_duration": 8.6
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:31:48_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.666666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 512,
+          "video_duration": 8.55
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:34:23_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 15.2
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:35:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 14.683333333333334
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:37:54_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 16.083333333333332
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:39:21_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 688,
+          "video_duration": 11.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:45:58_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 682,
+          "video_duration": 11.366666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_success_case/Mon_Jul_10_11:47:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "success",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 604,
+          "video_duration": 10.066666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:29:13_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 274,
+          "video_duration": 4.566666666666666
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:33:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 768,
+          "video_duration": 16.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:34:51_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 378,
+          "video_duration": 6.3
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_09:51:46_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 602,
+          "video_duration": 10.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:02_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 328,
+          "video_duration": 5.483333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:01:41_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 462,
+          "video_duration": 7.7
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:07:27_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 722,
+          "video_duration": 12.033333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:29:17_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 360,
+          "video_duration": 6.016666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:43:11_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 114,
+          "video_duration": 1.9
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:05_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 302,
+          "video_duration": 5.05
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:50:44_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 1.0,
+          "frames_used": 8,
+          "video_duration": 0.15
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_10:52:47_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 606,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:21:37_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "success",
+          "score": 4.0,
+          "frames_used": 606,
+          "video_duration": 10.116666666666667
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:29:04_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 2.0,
+          "frames_used": 286,
+          "video_duration": 4.783333333333333
+        },
+        {
+          "video": "/var/scratch/pkarageo/my_failure_case/Mon_Jul_10_11:45:07_2023/recordings/MP4/22246076.mp4",
+          "actual": "failure",
+          "predicted": "failure",
+          "score": 3.0,
+          "frames_used": 508,
+          "video_duration": 8.466666666666667
+        }
+      ]
+    }
+  }
+}

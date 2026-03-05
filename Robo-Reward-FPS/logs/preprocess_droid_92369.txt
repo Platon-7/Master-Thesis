@@ -1,0 +1,338 @@
+============================================
+Preprocessing DROID Failure Videos
+============================================
+Job ID: 92369
+Node: node207
+Date: Thu Mar  5 00:19:41 CET 2026
+CPUs: 16
+============================================
+ffmpeg version 7.1 Copyright (c) 2000-2024 the FFmpeg developers
+============================================================
+Preprocessing DROID Failure Videos
+============================================================
+Input: /var/scratch/pkarageo/droid_failures_raw
+Output: /var/scratch/pkarageo/droid_failures_processed
+Episodes: 15156
+Workers: 16
+============================================================
+
+  Progress: 50/15156 episodes | 150 videos OK, 0 failed
+  Progress: 100/15156 episodes | 300 videos OK, 0 failed
+  Progress: 150/15156 episodes | 450 videos OK, 0 failed
+  Progress: 200/15156 episodes | 600 videos OK, 0 failed
+  Progress: 250/15156 episodes | 750 videos OK, 0 failed
+  Progress: 300/15156 episodes | 900 videos OK, 0 failed
+  Progress: 350/15156 episodes | 1050 videos OK, 0 failed
+  Progress: 400/15156 episodes | 1200 videos OK, 0 failed
+  Progress: 450/15156 episodes | 1350 videos OK, 0 failed
+  Progress: 500/15156 episodes | 1500 videos OK, 0 failed
+  Progress: 550/15156 episodes | 1650 videos OK, 0 failed
+  Progress: 600/15156 episodes | 1800 videos OK, 0 failed
+  Progress: 650/15156 episodes | 1950 videos OK, 0 failed
+  Progress: 700/15156 episodes | 2100 videos OK, 0 failed
+  Progress: 750/15156 episodes | 2250 videos OK, 0 failed
+  Progress: 800/15156 episodes | 2381 videos OK, 0 failed
+  Progress: 850/15156 episodes | 2516 videos OK, 0 failed
+  Progress: 900/15156 episodes | 2666 videos OK, 0 failed
+  Progress: 950/15156 episodes | 2816 videos OK, 0 failed
+  Progress: 1000/15156 episodes | 2966 videos OK, 0 failed
+  Progress: 1050/15156 episodes | 3116 videos OK, 0 failed
+  Progress: 1100/15156 episodes | 3266 videos OK, 0 failed
+  Progress: 1150/15156 episodes | 3416 videos OK, 0 failed
+  Progress: 1200/15156 episodes | 3551 videos OK, 0 failed
+  Progress: 1250/15156 episodes | 3551 videos OK, 0 failed
+  Progress: 1300/15156 episodes | 3551 videos OK, 0 failed
+  Progress: 1350/15156 episodes | 3659 videos OK, 0 failed
+  Progress: 1400/15156 episodes | 3809 videos OK, 0 failed
+  Progress: 1450/15156 episodes | 3959 videos OK, 0 failed
+  Progress: 1500/15156 episodes | 4109 videos OK, 0 failed
+  Progress: 1550/15156 episodes | 4259 videos OK, 0 failed
+  Progress: 1600/15156 episodes | 4409 videos OK, 0 failed
+  Progress: 1650/15156 episodes | 4559 videos OK, 0 failed
+  Progress: 1700/15156 episodes | 4709 videos OK, 0 failed
+  Progress: 1750/15156 episodes | 4859 videos OK, 0 failed
+  Progress: 1800/15156 episodes | 5009 videos OK, 0 failed
+  Progress: 1850/15156 episodes | 5159 videos OK, 0 failed
+  Progress: 1900/15156 episodes | 5309 videos OK, 0 failed
+  Progress: 1950/15156 episodes | 5456 videos OK, 0 failed
+  Progress: 2000/15156 episodes | 5588 videos OK, 0 failed
+  Progress: 2050/15156 episodes | 5738 videos OK, 0 failed
+  Progress: 2100/15156 episodes | 5888 videos OK, 0 failed
+  Progress: 2150/15156 episodes | 6038 videos OK, 0 failed
+  Progress: 2200/15156 episodes | 6188 videos OK, 0 failed
+  Progress: 2250/15156 episodes | 6338 videos OK, 0 failed
+  Progress: 2300/15156 episodes | 6488 videos OK, 0 failed
+  Progress: 2350/15156 episodes | 6635 videos OK, 0 failed
+  Progress: 2400/15156 episodes | 6785 videos OK, 0 failed
+  Progress: 2450/15156 episodes | 6935 videos OK, 0 failed
+  Progress: 2500/15156 episodes | 7085 videos OK, 0 failed
+  Progress: 2550/15156 episodes | 7235 videos OK, 0 failed
+  Progress: 2600/15156 episodes | 7385 videos OK, 0 failed
+  Progress: 2650/15156 episodes | 7535 videos OK, 0 failed
+  Progress: 2700/15156 episodes | 7685 videos OK, 0 failed
+  Progress: 2750/15156 episodes | 7835 videos OK, 0 failed
+  Progress: 2800/15156 episodes | 7985 videos OK, 0 failed
+  Progress: 2850/15156 episodes | 8063 videos OK, 0 failed
+  Progress: 2900/15156 episodes | 8129 videos OK, 0 failed
+  Progress: 2950/15156 episodes | 8261 videos OK, 0 failed
+  Progress: 3000/15156 episodes | 8411 videos OK, 0 failed
+  Progress: 3050/15156 episodes | 8561 videos OK, 0 failed
+  Progress: 3100/15156 episodes | 8711 videos OK, 0 failed
+  Progress: 3150/15156 episodes | 8852 videos OK, 0 failed
+  Progress: 3200/15156 episodes | 8984 videos OK, 0 failed
+  Progress: 3250/15156 episodes | 9134 videos OK, 0 failed
+  Progress: 3300/15156 episodes | 9284 videos OK, 0 failed
+  Progress: 3350/15156 episodes | 9434 videos OK, 0 failed
+  Progress: 3400/15156 episodes | 9584 videos OK, 0 failed
+  Progress: 3450/15156 episodes | 9734 videos OK, 0 failed
+  Progress: 3500/15156 episodes | 9884 videos OK, 0 failed
+  Progress: 3550/15156 episodes | 10034 videos OK, 0 failed
+  Progress: 3600/15156 episodes | 10184 videos OK, 0 failed
+  Progress: 3650/15156 episodes | 10334 videos OK, 0 failed
+  Progress: 3700/15156 episodes | 10484 videos OK, 0 failed
+  Progress: 3750/15156 episodes | 10628 videos OK, 0 failed
+  Progress: 3800/15156 episodes | 10706 videos OK, 0 failed
+  Progress: 3850/15156 episodes | 10802 videos OK, 0 failed
+  Progress: 3900/15156 episodes | 10952 videos OK, 0 failed
+  Progress: 3950/15156 episodes | 11102 videos OK, 0 failed
+  Progress: 4000/15156 episodes | 11252 videos OK, 0 failed
+  Progress: 4050/15156 episodes | 11390 videos OK, 0 failed
+  Progress: 4100/15156 episodes | 11540 videos OK, 0 failed
+  Progress: 4150/15156 episodes | 11690 videos OK, 0 failed
+  Progress: 4200/15156 episodes | 11838 videos OK, 0 failed
+  Progress: 4250/15156 episodes | 11988 videos OK, 0 failed
+  Progress: 4300/15156 episodes | 12108 videos OK, 0 failed
+  Progress: 4350/15156 episodes | 12258 videos OK, 0 failed
+  Progress: 4400/15156 episodes | 12405 videos OK, 0 failed
+  Progress: 4450/15156 episodes | 12498 videos OK, 0 failed
+  Progress: 4500/15156 episodes | 12648 videos OK, 0 failed
+  Progress: 4550/15156 episodes | 12798 videos OK, 0 failed
+  Progress: 4600/15156 episodes | 12945 videos OK, 0 failed
+  Progress: 4650/15156 episodes | 12990 videos OK, 0 failed
+  Progress: 4700/15156 episodes | 13140 videos OK, 0 failed
+  Progress: 4750/15156 episodes | 13290 videos OK, 0 failed
+  Progress: 4800/15156 episodes | 13440 videos OK, 0 failed
+  Progress: 4850/15156 episodes | 13545 videos OK, 0 failed
+  Progress: 4900/15156 episodes | 13695 videos OK, 0 failed
+  Progress: 4950/15156 episodes | 13845 videos OK, 0 failed
+  Progress: 5000/15156 episodes | 13992 videos OK, 0 failed
+  Progress: 5050/15156 episodes | 14112 videos OK, 0 failed
+  Progress: 5100/15156 episodes | 14262 videos OK, 0 failed
+  Progress: 5150/15156 episodes | 14412 videos OK, 0 failed
+  FAILED: ILIAD_2023-06-27_Tue_Jun_27_15-14-47_2023_ext1: ffmpeg timeout (120s)
+  FAILED: ILIAD_2023-06-27_Tue_Jun_27_15-14-47_2023_ext2: ffmpeg timeout (120s)
+  FAILED: ILIAD_2023-06-27_Tue_Jun_27_15-14-47_2023_wrist: ffmpeg timeout (120s)
+  Progress: 5200/15156 episodes | 14559 videos OK, 3 failed
+  Progress: 5250/15156 episodes | 14709 videos OK, 3 failed
+  Progress: 5300/15156 episodes | 14838 videos OK, 3 failed
+  Progress: 5350/15156 episodes | 14967 videos OK, 3 failed
+  Progress: 5400/15156 episodes | 15108 videos OK, 3 failed
+  Progress: 5450/15156 episodes | 15258 videos OK, 3 failed
+  Progress: 5500/15156 episodes | 15381 videos OK, 3 failed
+  Progress: 5550/15156 episodes | 15483 videos OK, 3 failed
+  Progress: 5600/15156 episodes | 15633 videos OK, 3 failed
+  Progress: 5650/15156 episodes | 15783 videos OK, 3 failed
+  Progress: 5700/15156 episodes | 15933 videos OK, 3 failed
+  Progress: 5750/15156 episodes | 16083 videos OK, 3 failed
+  Progress: 5800/15156 episodes | 16233 videos OK, 3 failed
+  Progress: 5850/15156 episodes | 16383 videos OK, 3 failed
+  Progress: 5900/15156 episodes | 16533 videos OK, 3 failed
+  Progress: 5950/15156 episodes | 16683 videos OK, 3 failed
+  Progress: 6000/15156 episodes | 16833 videos OK, 3 failed
+  Progress: 6050/15156 episodes | 16983 videos OK, 3 failed
+  Progress: 6100/15156 episodes | 17133 videos OK, 3 failed
+  Progress: 6150/15156 episodes | 17283 videos OK, 3 failed
+  Progress: 6200/15156 episodes | 17433 videos OK, 3 failed
+  Progress: 6250/15156 episodes | 17583 videos OK, 3 failed
+  Progress: 6300/15156 episodes | 17733 videos OK, 3 failed
+  Progress: 6350/15156 episodes | 17883 videos OK, 3 failed
+  Progress: 6400/15156 episodes | 18033 videos OK, 3 failed
+  Progress: 6450/15156 episodes | 18183 videos OK, 3 failed
+  Progress: 6500/15156 episodes | 18333 videos OK, 3 failed
+  Progress: 6550/15156 episodes | 18483 videos OK, 3 failed
+  Progress: 6600/15156 episodes | 18633 videos OK, 3 failed
+  Progress: 6650/15156 episodes | 18783 videos OK, 3 failed
+  Progress: 6700/15156 episodes | 18933 videos OK, 3 failed
+  Progress: 6750/15156 episodes | 19083 videos OK, 3 failed
+  Progress: 6800/15156 episodes | 19233 videos OK, 3 failed
+  Progress: 6850/15156 episodes | 19383 videos OK, 3 failed
+  Progress: 6900/15156 episodes | 19533 videos OK, 3 failed
+  Progress: 6950/15156 episodes | 19683 videos OK, 3 failed
+  Progress: 7000/15156 episodes | 19785 videos OK, 3 failed
+  Progress: 7050/15156 episodes | 19905 videos OK, 3 failed
+  Progress: 7100/15156 episodes | 20055 videos OK, 3 failed
+  Progress: 7150/15156 episodes | 20196 videos OK, 3 failed
+  Progress: 7200/15156 episodes | 20346 videos OK, 3 failed
+  Progress: 7250/15156 episodes | 20496 videos OK, 3 failed
+  FAILED: IRIS_2023-12-06_Wed_Dec__6_16-32-15_2023_ext1: ffmpeg timeout (120s)
+  FAILED: IRIS_2023-12-06_Wed_Dec__6_16-32-15_2023_ext2: ffmpeg timeout (120s)
+  FAILED: IRIS_2023-12-06_Wed_Dec__6_16-32-15_2023_wrist: ffmpeg timeout (120s)
+  Progress: 7300/15156 episodes | 20643 videos OK, 6 failed
+  Progress: 7350/15156 episodes | 20706 videos OK, 6 failed
+  Progress: 7400/15156 episodes | 20853 videos OK, 6 failed
+  Progress: 7450/15156 episodes | 21003 videos OK, 6 failed
+  Progress: 7500/15156 episodes | 21153 videos OK, 6 failed
+  Progress: 7550/15156 episodes | 21303 videos OK, 6 failed
+  Progress: 7600/15156 episodes | 21453 videos OK, 6 failed
+  Progress: 7650/15156 episodes | 21563 videos OK, 6 failed
+  Progress: 7700/15156 episodes | 21713 videos OK, 6 failed
+  Progress: 7750/15156 episodes | 21863 videos OK, 6 failed
+  Progress: 7800/15156 episodes | 21998 videos OK, 6 failed
+  Progress: 7850/15156 episodes | 22148 videos OK, 6 failed
+  Progress: 7900/15156 episodes | 22298 videos OK, 6 failed
+  Progress: 7950/15156 episodes | 22448 videos OK, 6 failed
+  Progress: 8000/15156 episodes | 22598 videos OK, 6 failed
+  Progress: 8050/15156 episodes | 22748 videos OK, 6 failed
+  Progress: 8100/15156 episodes | 22898 videos OK, 6 failed
+  Progress: 8150/15156 episodes | 23048 videos OK, 6 failed
+  Progress: 8200/15156 episodes | 23198 videos OK, 6 failed
+  Progress: 8250/15156 episodes | 23348 videos OK, 6 failed
+  Progress: 8300/15156 episodes | 23498 videos OK, 6 failed
+  Progress: 8350/15156 episodes | 23648 videos OK, 6 failed
+  Progress: 8400/15156 episodes | 23663 videos OK, 6 failed
+  Progress: 8450/15156 episodes | 23672 videos OK, 6 failed
+  Progress: 8500/15156 episodes | 23804 videos OK, 6 failed
+  Progress: 8550/15156 episodes | 23954 videos OK, 6 failed
+  Progress: 8600/15156 episodes | 24104 videos OK, 6 failed
+  Progress: 8650/15156 episodes | 24251 videos OK, 6 failed
+  Progress: 8700/15156 episodes | 24401 videos OK, 6 failed
+  Progress: 8750/15156 episodes | 24551 videos OK, 6 failed
+  Progress: 8800/15156 episodes | 24701 videos OK, 6 failed
+  Progress: 8850/15156 episodes | 24851 videos OK, 6 failed
+  Progress: 8900/15156 episodes | 25001 videos OK, 6 failed
+  Progress: 8950/15156 episodes | 25151 videos OK, 6 failed
+  Progress: 9000/15156 episodes | 25301 videos OK, 6 failed
+  Progress: 9050/15156 episodes | 25451 videos OK, 6 failed
+  Progress: 9100/15156 episodes | 25601 videos OK, 6 failed
+  Progress: 9150/15156 episodes | 25742 videos OK, 6 failed
+  Progress: 9200/15156 episodes | 25874 videos OK, 6 failed
+  Progress: 9250/15156 episodes | 26024 videos OK, 6 failed
+  Progress: 9300/15156 episodes | 26174 videos OK, 6 failed
+  Progress: 9350/15156 episodes | 26324 videos OK, 6 failed
+  Progress: 9400/15156 episodes | 26474 videos OK, 6 failed
+  Progress: 9450/15156 episodes | 26624 videos OK, 6 failed
+  Progress: 9500/15156 episodes | 26774 videos OK, 6 failed
+  Progress: 9550/15156 episodes | 26924 videos OK, 6 failed
+  Progress: 9600/15156 episodes | 27074 videos OK, 6 failed
+  Progress: 9650/15156 episodes | 27224 videos OK, 6 failed
+  Progress: 9700/15156 episodes | 27374 videos OK, 6 failed
+  Progress: 9750/15156 episodes | 27524 videos OK, 6 failed
+  Progress: 9800/15156 episodes | 27647 videos OK, 6 failed
+  Progress: 9850/15156 episodes | 27683 videos OK, 6 failed
+  Progress: 9900/15156 episodes | 27737 videos OK, 6 failed
+  Progress: 9950/15156 episodes | 27887 videos OK, 6 failed
+  Progress: 10000/15156 episodes | 28037 videos OK, 6 failed
+  Progress: 10050/15156 episodes | 28187 videos OK, 6 failed
+  Progress: 10100/15156 episodes | 28337 videos OK, 6 failed
+  Progress: 10150/15156 episodes | 28487 videos OK, 6 failed
+  Progress: 10200/15156 episodes | 28637 videos OK, 6 failed
+  Progress: 10250/15156 episodes | 28787 videos OK, 6 failed
+  Progress: 10300/15156 episodes | 28937 videos OK, 6 failed
+  Progress: 10350/15156 episodes | 29087 videos OK, 6 failed
+  Progress: 10400/15156 episodes | 29237 videos OK, 6 failed
+  Progress: 10450/15156 episodes | 29387 videos OK, 6 failed
+  Progress: 10500/15156 episodes | 29537 videos OK, 6 failed
+  Progress: 10550/15156 episodes | 29687 videos OK, 6 failed
+  Progress: 10600/15156 episodes | 29837 videos OK, 6 failed
+  Progress: 10650/15156 episodes | 29987 videos OK, 6 failed
+  Progress: 10700/15156 episodes | 30137 videos OK, 6 failed
+  Progress: 10750/15156 episodes | 30287 videos OK, 6 failed
+  Progress: 10800/15156 episodes | 30350 videos OK, 6 failed
+  Progress: 10850/15156 episodes | 30491 videos OK, 6 failed
+  Progress: 10900/15156 episodes | 30641 videos OK, 6 failed
+  Progress: 10950/15156 episodes | 30791 videos OK, 6 failed
+  Progress: 11000/15156 episodes | 30941 videos OK, 6 failed
+  Progress: 11050/15156 episodes | 31091 videos OK, 6 failed
+  Progress: 11100/15156 episodes | 31241 videos OK, 6 failed
+  Progress: 11150/15156 episodes | 31391 videos OK, 6 failed
+  Progress: 11200/15156 episodes | 31541 videos OK, 6 failed
+  Progress: 11250/15156 episodes | 31691 videos OK, 6 failed
+  Progress: 11300/15156 episodes | 31841 videos OK, 6 failed
+  Progress: 11350/15156 episodes | 31991 videos OK, 6 failed
+  Progress: 11400/15156 episodes | 32141 videos OK, 6 failed
+  Progress: 11450/15156 episodes | 32291 videos OK, 6 failed
+  Progress: 11500/15156 episodes | 32441 videos OK, 6 failed
+  Progress: 11550/15156 episodes | 32591 videos OK, 6 failed
+  Progress: 11600/15156 episodes | 32741 videos OK, 6 failed
+  Progress: 11650/15156 episodes | 32888 videos OK, 6 failed
+  Progress: 11700/15156 episodes | 33038 videos OK, 6 failed
+  Progress: 11750/15156 episodes | 33188 videos OK, 6 failed
+  Progress: 11800/15156 episodes | 33338 videos OK, 6 failed
+  Progress: 11850/15156 episodes | 33488 videos OK, 6 failed
+  Progress: 11900/15156 episodes | 33638 videos OK, 6 failed
+  Progress: 11950/15156 episodes | 33788 videos OK, 6 failed
+  Progress: 12000/15156 episodes | 33938 videos OK, 6 failed
+  Progress: 12050/15156 episodes | 34088 videos OK, 6 failed
+  Progress: 12100/15156 episodes | 34232 videos OK, 6 failed
+  Progress: 12150/15156 episodes | 34352 videos OK, 6 failed
+  Progress: 12200/15156 episodes | 34448 videos OK, 6 failed
+  Progress: 12250/15156 episodes | 34598 videos OK, 6 failed
+  Progress: 12300/15156 episodes | 34748 videos OK, 6 failed
+  Progress: 12350/15156 episodes | 34898 videos OK, 6 failed
+  Progress: 12400/15156 episodes | 35048 videos OK, 6 failed
+  Progress: 12450/15156 episodes | 35198 videos OK, 6 failed
+  Progress: 12500/15156 episodes | 35348 videos OK, 6 failed
+  Progress: 12550/15156 episodes | 35498 videos OK, 6 failed
+  Progress: 12600/15156 episodes | 35648 videos OK, 6 failed
+  Progress: 12650/15156 episodes | 35798 videos OK, 6 failed
+  Progress: 12700/15156 episodes | 35885 videos OK, 6 failed
+  Progress: 12750/15156 episodes | 36035 videos OK, 6 failed
+  Progress: 12800/15156 episodes | 36167 videos OK, 6 failed
+  Progress: 12850/15156 episodes | 36292 videos OK, 6 failed
+  Progress: 12900/15156 episodes | 36442 videos OK, 6 failed
+  Progress: 12950/15156 episodes | 36592 videos OK, 6 failed
+  Progress: 13000/15156 episodes | 36742 videos OK, 6 failed
+  Progress: 13050/15156 episodes | 36892 videos OK, 6 failed
+  Progress: 13100/15156 episodes | 37042 videos OK, 6 failed
+  Progress: 13150/15156 episodes | 37192 videos OK, 6 failed
+  Progress: 13200/15156 episodes | 37342 videos OK, 6 failed
+  Progress: 13250/15156 episodes | 37492 videos OK, 6 failed
+  Progress: 13300/15156 episodes | 37642 videos OK, 6 failed
+  Progress: 13350/15156 episodes | 37792 videos OK, 6 failed
+  Progress: 13400/15156 episodes | 37942 videos OK, 6 failed
+  Progress: 13450/15156 episodes | 38092 videos OK, 6 failed
+  Progress: 13500/15156 episodes | 38242 videos OK, 6 failed
+  Progress: 13550/15156 episodes | 38392 videos OK, 6 failed
+  Progress: 13600/15156 episodes | 38542 videos OK, 6 failed
+  Progress: 13650/15156 episodes | 38692 videos OK, 6 failed
+  Progress: 13700/15156 episodes | 38833 videos OK, 6 failed
+  Progress: 13750/15156 episodes | 38938 videos OK, 6 failed
+  Progress: 13800/15156 episodes | 39088 videos OK, 6 failed
+  Progress: 13850/15156 episodes | 39238 videos OK, 6 failed
+  Progress: 13900/15156 episodes | 39388 videos OK, 6 failed
+  Progress: 13950/15156 episodes | 39538 videos OK, 6 failed
+  Progress: 14000/15156 episodes | 39688 videos OK, 6 failed
+  Progress: 14050/15156 episodes | 39838 videos OK, 6 failed
+  Progress: 14100/15156 episodes | 39988 videos OK, 6 failed
+  Progress: 14150/15156 episodes | 40138 videos OK, 6 failed
+  Progress: 14200/15156 episodes | 40288 videos OK, 6 failed
+  Progress: 14250/15156 episodes | 40438 videos OK, 6 failed
+  Progress: 14300/15156 episodes | 40588 videos OK, 6 failed
+  Progress: 14350/15156 episodes | 40738 videos OK, 6 failed
+  Progress: 14400/15156 episodes | 40888 videos OK, 6 failed
+  Progress: 14450/15156 episodes | 41038 videos OK, 6 failed
+  Progress: 14500/15156 episodes | 41188 videos OK, 6 failed
+  Progress: 14550/15156 episodes | 41338 videos OK, 6 failed
+  Progress: 14600/15156 episodes | 41482 videos OK, 6 failed
+  Progress: 14650/15156 episodes | 41632 videos OK, 6 failed
+  Progress: 14700/15156 episodes | 41782 videos OK, 6 failed
+  Progress: 14750/15156 episodes | 41932 videos OK, 6 failed
+  Progress: 14800/15156 episodes | 42082 videos OK, 6 failed
+  Progress: 14850/15156 episodes | 42232 videos OK, 6 failed
+  Progress: 14900/15156 episodes | 42382 videos OK, 6 failed
+  Progress: 14950/15156 episodes | 42532 videos OK, 6 failed
+  Progress: 15000/15156 episodes | 42682 videos OK, 6 failed
+  Progress: 15050/15156 episodes | 42832 videos OK, 6 failed
+  Progress: 15100/15156 episodes | 42982 videos OK, 6 failed
+  Progress: 15150/15156 episodes | 43132 videos OK, 6 failed
+
+============================================================
+PREPROCESSING COMPLETE
+============================================================
+Videos processed: 43150
+Videos failed: 6
+Report: /var/scratch/pkarageo/droid_failures_processed/preprocess_report.json
+============================================================
+============================================
+Preprocessing completed at: Thu Mar  5 04:09:16 CET 2026
+============================================

@@ -1,0 +1,144 @@
+============================================
+Bulk Downloading DROID Failure Episodes
+============================================
+Job ID: 92368
+Node: node207
+Date: Wed Mar  4 22:20:10 CET 2026
+============================================
+/var/scratch/pkarageo/conda_envs/roboreward/bin/gsutil
+============================================================
+DROID Failure Download (Bulk rsync)
+============================================================
+Labs: ['AUTOLab', 'CLVR', 'GuptaLab', 'ILIAD', 'IPRL', 'IRIS', 'PennPAL', 'RAD', 'RAIL', 'REAL', 'RPL', 'TRI', 'WEIRD']
+Output: /var/scratch/pkarageo/droid_failures_raw
+Already completed labs: []
+============================================================
+
+
+========================================
+[AUTOLab] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 13893
+  Reorganizing into episode directories...
+  Episodes organized: 3617
+  Sample tasks: ['Do anything you like that takes multiple steps to complete.', 'pour circular tokens into a bowl', 'Do any three tasks consecutively.\n\nSuggested tasks:\t\t\n* Use cup to pour something granular (ex: nuts, rice, dried pasta, coffee beans)\n* Use cup to pour something granular (ex: nuts, rice, dried pasta, coffee beans)\n* Use cup to pour something granular (ex: nuts, rice, dried pasta, coffee beans)', 'Use cup to pour something granular (ex: nuts, rice, dried pasta, coffee beans)']
+
+========================================
+[CLVR] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 1619
+  Reorganizing into episode directories...
+  Episodes organized: 433
+  Sample tasks: ['Move object to a new position and orientation (ex: grasping, relocating, flipping)', 'Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)', 'Do any three tasks consecutively.\n\nSuggested tasks:\t\t\n* Move object to a new position and orientation (ex: grasping, relocating, flipping)\n* Move object to a new position and orientation (ex: grasping, relocating, flipping)\n* Move object to a new position and orientation (ex: grasping, relocating, flipping)', 'Do any task, and then reset the scene.\n\nSuggested task:\n* Move object to a new position and orientation (ex: grasping, relocating, flipping)']
+
+========================================
+[GuptaLab] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 737
+  Reorganizing into episode directories...
+  Episodes organized: 187
+  Sample tasks: ['Move object to a new position and orientation (ex: grasping, relocating, flipping)', 'Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)', 'Do any task, and then reset the scene.\n\nSuggested task:\n* Move object to a new position and orientation (ex: grasping, relocating, flipping)']
+
+========================================
+[ILIAD] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 4831
+  Reorganizing into episode directories...
+  Episodes organized: 1303
+  Sample tasks: ['Move object to a new position and orientation (ex: grasping, relocating, flipping)', 'Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)']
+
+========================================
+[IPRL] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 5193
+  Reorganizing into episode directories...
+  Episodes organized: 1298
+  Sample tasks: ['Move object to a new position and orientation (ex: grasping, relocating, flipping)', 'Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)', 'Do any two tasks consecutively.\n\nSuggested tasks:\n* Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)\n* Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)']
+
+========================================
+[IRIS] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 790
+  Reorganizing into episode directories...
+  Episodes organized: 217
+  Sample tasks: ['Move object to a new position and orientation (ex: grasping, relocating, flipping)', 'Press button (ex: light switch, elevators, microwave button)', 'Turn twistable object (ex: faucets, lamps, stove knobs)', 'Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)']
+
+========================================
+[PennPAL] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 403
+  Reorganizing into episode directories...
+  Episodes organized: 103
+  Sample tasks: ['Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)', 'Move lid on or off of container (ex: pot, cup, pill bottle)', 'Fold, spread out, or clump object (ex: cloth, charging cord, clothes)']
+
+========================================
+[RAD] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 1918
+  Reorganizing into episode directories...
+  Episodes organized: 512
+  Sample tasks: ['Do any two tasks consecutively.\n\nSuggested tasks:\n* Move object to a new position and orientation (ex: grasping, relocating, flipping)\n* Move object to a new position and orientation (ex: grasping, relocating, flipping)', 'Do anything you like that takes multiple steps to complete.', 'Do any task, and then reset the scene.\n\nSuggested task:\n* Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)', 'Move object to a new position and orientation (ex: grasping, relocating, flipping)', 'Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)']
+
+========================================
+[RAIL] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 13430
+  Reorganizing into episode directories...
+  Episodes organized: 2961
+  Sample tasks: ['Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)', 'Fold, spread out, or clump object (ex: cloth, charging cord, clothes)']
+
+========================================
+[REAL] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 6115
+  Reorganizing into episode directories...
+  Episodes organized: 1574
+  Sample tasks: ['pen in cup', 'put pen in cup', 'pen in a cup', 'put lid on bottle and screw lid', 'pen in a cup with box in scene']
+
+========================================
+[RPL] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 2289
+  Reorganizing into episode directories...
+  Episodes organized: 588
+  Sample tasks: ['pnp-table-to-cab-cans', 'testing', 'pnp-redbull']
+
+========================================
+[TRI] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 6927
+  Reorganizing into episode directories...
+  Episodes organized: 1756
+  Sample tasks: ['Press button (ex: light switch, elevators, microwave button)', 'Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)', 'Move lid on or off of container (ex: pot, cup, pill bottle)', 'Use object to stir something (ex: almonds in a bowl, dried pasta in a pot)', 'Fold, spread out, or clump object (ex: cloth, charging cord, clothes)']
+
+========================================
+[WEIRD] Bulk downloading failures...
+========================================
+  Running: gsutil -m rsync -r -x .*(-stereo\.mp4|\.svo|\.h5|svo_names\.json)$...
+  Files downloaded: 2422
+  Reorganizing into episode directories...
+  Episodes organized: 607
+  Sample tasks: ['Do anything you like that takes multiple steps to complete.', 'Do any two tasks consecutively.\n\nSuggested tasks:\n* Press button (ex: light switch, elevators, microwave button)\n* Press button (ex: light switch, elevators, microwave button)', 'Move object to a new position and orientation (ex: grasping, relocating, flipping)', 'Press button (ex: light switch, elevators, microwave button)', 'Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)']
+
+============================================================
+DOWNLOAD COMPLETE
+============================================================
+Total episodes: 15156
+Total files: 60567
+Output: /var/scratch/pkarageo/droid_failures_raw
+============================================================
+============================================
+Download completed at: Wed Mar  4 23:04:59 CET 2026
+============================================

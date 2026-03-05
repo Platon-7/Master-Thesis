@@ -1,0 +1,22 @@
+============================================
+Downloading DROID Failure Episodes from GCS
+============================================
+Job ID: 92366
+Node: node207
+Date: Wed Mar  4 18:33:38 CET 2026
+============================================
+/var/scratch/pkarageo/conda_envs/roboreward/bin/gsutil
+Enumerating failure episodes on GCS...
+Bucket: gs://gresearch/robotics/droid_raw/1.0.1
+Error listing GCS bucket: CommandException: One or more URLs matched no objects.
+
+============================================
+Starting full download...
+============================================
+Enumerating failure episodes on GCS...
+Bucket: gs://gresearch/robotics/droid_raw/1.0.1
+Error listing GCS bucket: CommandException: One or more URLs matched no objects.
+
+============================================
+Download completed at: Wed Mar  4 18:33:44 CET 2026
+============================================
