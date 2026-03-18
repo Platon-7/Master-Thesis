@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --job-name=plot_fig6
+#SBATCH --output=/home/pkarageo/master-thesis/RL-VLM-F/logs/plot_fig6_out_%j.txt
+#SBATCH --error=/home/pkarageo/master-thesis/RL-VLM-F/logs/plot_fig6_err_%j.txt
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=8G
+#SBATCH --time=00:20:00
+
+set -euo pipefail
+
+cd /home/pkarageo/master-thesis/RL-VLM-F
+mkdir -p logs
+
+EXP_ROOT="/home/pkarageo/master-thesis/RL-VLM-F/exp/qwen_local_test/metaworld_soccer-v2/2026-01-25-23-30-37/vlm_1gemini_free_form_rewardlearn_from_preference_H256_L3_lr0.0003/teacher_b-1_g1_m0_s0_e0/label_smooth_0.0/schedule_0/PEBBLE_init1000_unsup9000_inter4000_maxfeed20000_seg1_acttanh_Rlr0.0001_Rbatch40_Rupdate5_en3_sample0_large_batch10_seed0"
+LOG_CSV="$EXP_ROOT/vlm_query_log.csv"
+OUTPUT_PNG="/home/pkarageo/master-thesis/RL-VLM-F/figures/soccer_figure6.png"
+NUM_BINS=10
+PLOT_TITLE="Soccer – VLM Accuracy vs. Difficulty"
+
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate rlvlmf
+
+python scripts/plot_figure6.py "$LOG_CSV" \
+    --output "$OUTPUT_PNG" \
+    --num-bins "$NUM_BINS" \
+    --title "$PLOT_TITLE"
+
+echo "Figure 6 saved to $OUTPUT_PNG"

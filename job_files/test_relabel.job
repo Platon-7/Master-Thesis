@@ -1,0 +1,37 @@
+#!/bin/bash
+#SBATCH --job-name=test_relabel
+#SBATCH --output=/home/pkarageo/master-thesis/Robo-Reward-FPS/logs/test_relabel_%j.txt
+#SBATCH --partition=defq
+#SBATCH --constraint=TitanRTX
+#SBATCH --gres=gpu:1
+#SBATCH --mem=48G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=02:00:00
+
+module load cuda12.6/toolkit/12.6
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate /var/scratch/pkarageo/conda_envs/roboreward
+
+export HF_HOME="/var/scratch/pkarageo/hf_cache"
+export TORCH_HOME="/var/scratch/pkarageo/torch_cache"
+export TRANSFORMERS_OFFLINE=1
+export PYTHONUNBUFFERED=1
+export FORCE_QWENVL_VIDEO_READER=decord
+
+echo "============================================"
+echo "Test: Reverse Counterfactual Relabeling"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $(hostname)"
+echo "Date: $(date)"
+echo "============================================"
+
+nvidia-smi
+
+python /home/pkarageo/master-thesis/Robo-Reward-FPS/droid_failures/test_relabel.py \
+    --video-dir /home/pkarageo/master-thesis/Robo-Reward-FPS/test_relabel \
+    --device cuda:0
+
+echo "============================================"
+echo "Done at: $(date)"
+echo "============================================"

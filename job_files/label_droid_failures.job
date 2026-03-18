@@ -1,0 +1,61 @@
+#!/bin/bash
+#SBATCH --job-name=label_droid
+#SBATCH --output=/home/pkarageo/master-thesis/Robo-Reward-FPS/logs/label_droid_%j.txt
+#SBATCH --partition=defq
+#SBATCH --constraint=TitanRTX
+#SBATCH --gres=gpu:1
+#SBATCH --mem=64G
+#SBATCH --cpus-per-task=8
+#SBATCH --time=24:00:00
+
+# =========================================================
+# Label DROID Failures with VLM Scores (2 GPUs)
+# GPU 0: Qwen3-4B-Instruct (task cleanup)
+# GPU 1: Qwen3-VL-8B / RoboReward-8B (video scoring)
+# =========================================================
+
+module load cuda12.6/toolkit/12.6
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate /var/scratch/pkarageo/conda_envs/roboreward
+
+export HF_HOME="/var/scratch/pkarageo/hf_cache"
+export TORCH_HOME="/var/scratch/pkarageo/torch_cache"
+export TRANSFORMERS_OFFLINE=1
+export PYTHONUNBUFFERED=1
+export FORCE_QWENVL_VIDEO_READER=decord
+
+echo "============================================"
+echo "Labeling DROID Failure Videos"
+echo "============================================"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $(hostname)"
+echo "Date: $(date)"
+echo "============================================"
+
+nvidia-smi
+
+# Run both phases
+python /home/pkarageo/master-thesis/Robo-Reward-FPS/droid_failures/label_droid_failures.py \
+    --phase 2 \
+    --input-dir /var/scratch/pkarageo/droid_failures_raw \
+    --video-dir /var/scratch/pkarageo/droid_failures_processed \
+    --output-dir /var/scratch/pkarageo/droid_failures_labeled \
+    --text-device cuda:0 \
+    --vlm-device cuda:0 \
+    --max-frames 32
+
+echo "============================================"
+echo "Labeling completed at: $(date)"
+echo "============================================"
+
+# Package results
+echo "Packaging results..."
+python /home/pkarageo/master-thesis/Robo-Reward-FPS/droid_failures/package_droid_failures.py \
+    --scored-results /var/scratch/pkarageo/droid_failures_labeled/scored_results.jsonl \
+    --video-dir /var/scratch/pkarageo/droid_failures_processed \
+    --output /var/scratch/pkarageo/droid_failures_packaged/metadata.jsonl
+
+echo "============================================"
+echo "All done at: $(date)"
+echo "============================================"
