@@ -67,35 +67,45 @@ Uses ffmpeg one-liner per video, parallelized across CPUs:
 ffmpeg -i input.mp4 -vf "scale=320:180,pad=320:192:0:6:black" -r 10 -c:v libx264 output.mp4
 ```
 
-### Step 3: Clean Task Descriptions
+### Step 3: Reverse Counterfactual Relabeling (Task Description Generation)
 
-**Script:** Part of `Robo-Reward-FPS/scripts/label_droid_failures.py`, Phase 1
-**Model:** Qwen3-4B-Instruct (text-only, runs locally)
+**Script:** `Robo-Reward-FPS/droid_failures/label_droid_failures.py`, Phase 1
+**Model:** Qwen3-VL-8B-Instruct (base, NOT RoboReward fine-tuned) — cached at `/var/scratch/pkarageo/hf_cache/hub/models--Qwen--Qwen3-VL-8B-Instruct/`
 
-Raw DROID task labels are noisy:
-- `"reaarrange pillows on sofa"` → typos
-- `"Do anything you like that takes multiple steps to complete."` → too vague
-- `"Do any two tasks consecutively.\n\nSuggested tasks:\n* ..."` → multi-line noise
+**Problem:** DROID raw task labels are often too vague or generic for meaningful scoring:
+- `"Do any task, and then reset the scene."` — completely meaningless
+- `"Move object to a new position and orientation (ex: ...)"` — template, not episode-specific
+- `"Wire harness"` — ambiguous, no clear success criterion
+- Even specific labels like `"Stack cup on bowl"` get score 1 because many videos are very short (1-2s) and at fps=1.0 the VLM only sees 1-2 frames
 
-Apply the RoboReward prompt rewrite (Section A.2.1): fix grammar/spelling, normalize to clean imperative form. Filter out episodes with unusably vague instructions (e.g., "Do anything you like").
+**Why the RoboReward paper didn't have this problem:** They never directly scored raw failure episodes. Their pipeline:
+1. OXE data = successful demos, auto-assigned score 5
+2. Failures are generated via **counterfactual relabeling** of successes (VLM generates alternative task descriptions for which the same video would be a failure)
+3. DROID data comes through RoboArena which has human-written task descriptions + human scores
+
+**Our approach — reverse counterfactual relabeling:** Instead of generating wrong tasks for successful videos, we generate correct tasks for failure videos:
+1. **Video Analysis** (Qwen3-VL-8B-Instruct): Feed each 10fps video with the paper's A.2.2 prompt to get a detailed scene description
+2. **Task Generation** (Qwen3-VL-8B-Instruct): From the scene description, generate a specific imperative task command describing what the robot was attempting
+3. Optionally keep original DROID label alongside for comparison
+
+**Test script:** `Robo-Reward-FPS/droid_failures/test_relabel.py` — runs 4 test videos (2 bad descriptions, 2 good) comparing old vs. new task labels and their RoboReward scores.
 
 ### Step 4: VLM Scoring + Verification
 
-**Script:** `Robo-Reward-FPS/scripts/label_droid_failures.py`, Phase 2
-**SLURM job:** `job_files/label_droid_failures.job` (2 GPUs: GPU 0 for Qwen3-4B, GPU 1 for Qwen3-VL-8B)
-**Model:** Qwen3-VL-8B (already available, 4-bit quantized)
+**Script:** `Robo-Reward-FPS/droid_failures/label_droid_failures.py`, Phase 2
+**SLURM job:** `job_files/label_droid_failures.job` (1 GPU)
+**Model:** RoboReward-8B (fine-tuned Qwen3-VL, 4-bit quantized)
 
-For each (video, cleaned_task) pair:
+For each (video, generated_task) pair:
 
-1. **Sample frames** at 1 FPS from the video
-2. **VLM video analysis**: Describe what happens (same prompt as paper, Appendix A.2)
-3. **Direct scoring** against the RoboReward rubric:
+1. **Feed full 10fps video** to RoboReward (NOT subsampled to 1fps — many DROID failures are <5s, subsampling loses critical information)
+2. **Direct scoring** against the RoboReward rubric:
    - Score 1: No goal-relevant change
    - Score 2: Minimal progress
    - Score 3: Partial completion
    - Score 4: Near completion (minor requirement missed)
    - Score 5: Full success (unlikely for failures, but possible if metadata is wrong)
-4. **VLM verification**: Validate the (video, task, score) triple using the paper's verification prompt (Appendix A.2.3). Keep only validated examples (ANSWER: TRUE).
+3. **VLM verification**: Validate the (video, task, score) triple using the paper's verification prompt (Appendix A.2.3). Keep only validated examples (ANSWER: TRUE).
 
 No augmentation or counterfactual relabeling — these are genuine failures scored directly.
 
@@ -152,6 +162,62 @@ Location: `/var/scratch/pkarageo/`
 4. **Step 5:** Validate JSONL parses correctly, no duplicate file_name entries, scores in {1–5}
 5. **Integration test:** Merge new JSONL with existing metadata.jsonl, verify total count increases
 
+## Step 6: Download Task-Level Success Pairs (In-Context Learning)
+
+**Goal:** For each failure episode, pair it with a successful demonstration of the **same task in the same scene** (matched by scene_id + generic_task). This enables in-context learning: concatenate a success demo with each training datapoint so the model sees "this is what success looks like" alongside the failure.
+
+**Script:** `Robo-Reward-FPS/droid_failures/download_success_pairs_v2.py`
+
+### Matching Strategy
+
+Match failures to successes by **(scene_id, generic_task)** — exact string match on the original DROID task descriptions (before Qwen3 relabeling). The `generic_task` field in `qwen3_relabeled.jsonl` traces back to the original DROID label, which matches `current_task` in success metadata.
+
+### Coverage Stats (as of 2026-03-16)
+
+| Metric | Count |
+|--------|-------|
+| Total failure episodes | 5,518 |
+| Unique (scene, task) failure pairs | 584 |
+| Pairs with exact task-level success match | 458 (78.4%) |
+| Failure episodes with ≥1 success match | 4,974 (90.1%) |
+| Failure episodes WITHOUT any match | 544 (9.9%) |
+| Unmatched (scene, task) pairs | 126 |
+| Total success episodes to download | ~4,617 |
+| Estimated download size | ~148 GB |
+
+### Download Strategy
+
+- For each matched (scene, task) pair, download **up to N successes** where N = number of failures for that pair. This ensures every failure can get a **unique** success demo when possible.
+- 391/458 pairs have enough successes (≥ failure count); 67 pairs have fewer successes than failures (those will reuse demos via sampling with replacement).
+- Max failures per pair: 299; median: 3; p90: 22.
+- Success metadata already downloaded: 59,683 JSONs in `/var/scratch/pkarageo/droid_success_pairs/_metadata/`.
+
+### Unmatched Failures → Scene-Level Fallback (544 episodes)
+
+126 (scene, task) pairs have no exact success match. Largest: 67 failures for "hang or unhang object" in scene 84bd5053. All 544 have a scene-level match (same physical environment, different task).
+
+**Strategy:** Use scene-level fallback — pair with any success from the same scene. Each episode in the manifest is flagged with `match_type`:
+- `"task"` — exact (scene_id, generic_task) match (4,974 episodes)
+- `"scene_fallback"` — same scene, different task (544 episodes)
+
+This flag allows filtering out scene-only matches later if they hurt performance. To exclude them downstream: `[ep for ep in manifest["episodes"] if ep["match_type"] == "task"]`
+
+### Output
+
+```
+/var/scratch/pkarageo/droid_success_pairs/
+  task_matched/
+    {lab}_{scene_id}_{timestamp}/
+      ext1.mp4, ext2.mp4, wrist.mp4
+  task_match_manifest.json   # Maps each failure episode to its success pair(s)
+```
+
+### Preprocessing
+
+Success videos are raw DROID format (1280×720 @ 60fps). They need the same preprocessing as failures:
+- Scale to 320×192 @ 10fps (Step 2 pipeline)
+- Store in `/var/scratch/pkarageo/droid_success_processed/`
+
 ## Execution Order
 
 1. **Quick:** Install gsutil, enumerate GCS failures (~5 min) → report count to user
@@ -159,3 +225,5 @@ Location: `/var/scratch/pkarageo/`
 3. **SLURM:** Preprocess with ffmpeg (4hrs)
 4. **SLURM:** Run labeling pipeline — task cleanup + VLM scoring (24hrs, GPU)
 5. **Local:** Package, verify, merge
+6. **Login node:** Download task-matched success pairs via gsutil (~4,617 episodes, ~148 GB)
+7. **SLURM:** Preprocess success videos (same as Step 3)

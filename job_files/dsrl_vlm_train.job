@@ -1,0 +1,121 @@
+#!/bin/bash
+#SBATCH --job-name=dsrl_vlm_can
+#SBATCH --output=/home/pkarageo/master-thesis/dsrl/dsrl_vlm_%j.out
+#SBATCH --error=/home/pkarageo/master-thesis/dsrl/dsrl_vlm_%j.out
+#SBATCH --constraint=TitanRTX
+#SBATCH --time=96:00:00 
+#SBATCH --partition=defq
+#SBATCH --gres=gpu:2
+#SBATCH --mem=80G
+#SBATCH --cpus-per-task=16
+
+# =========================================================
+# DSRL + RoboReward VLM Training Job (2 GPUs)
+# ========================================================
+# GPU 0: DSRL diffusion policy + SAC
+# GPU 1: RoboReward-8B VLM (called once per episode end)
+# 
+# Follows the same pattern as run_qwen_container.job which works
+
+echo "========================================"
+echo "DSRL + RoboReward VLM Training"
+echo "========================================"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $SLURM_NODELIST"
+echo "Start time: $(date)"
+echo "========================================"
+
+# --- 1. HOST SETUP (same as run_qwen_container.job) ---
+module load cuda12.6/toolkit/12.6
+
+# Scratch setup
+export SCRATCH_DIR="/var/scratch/pkarageo"
+export HF_HOME="$SCRATCH_DIR/hf_cache"
+export TMPDIR="$SCRATCH_DIR/tmp"
+mkdir -p $HF_HOME $TMPDIR
+
+# Output directories
+mkdir -p $SCRATCH_DIR/dsrl_logs/robomimic-dsrl-vlm
+
+# --- 2. CONTAINER ENVIRONMENT VARS (same as run_qwen_container.job) ---
+# NOTE: Do NOT set MUJOCO_GL or PYOPENGL_PLATFORM here - let the container handle it
+export APPTAINERENV_HF_HOME=$HF_HOME
+export APPTAINERENV_HF_HUB_OFFLINE=1
+export WANDB_API_KEY="wandb_v1_KXuRUzNGky1e0hM06d2A33HNd4q"
+export APPTAINERENV_WANDB_API_KEY="$WANDB_API_KEY"
+export APPTAINERENV_WANDB_ENTITY="nlp-squad"
+
+# Check GPU visibility
+echo "=== GPU Check (outside container) ==="
+nvidia-smi
+echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
+echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+
+# --- 3. MUJOCO SETUP (same as run_qwen_container.job) ---
+MUJOCO_DIR="/var/scratch/pkarageo/.mujoco"
+CONTAINER_MUJOCO_PATH="/home/pkarageo/.mujoco/mujoco210/bin"
+
+export APP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CONTAINER_MUJOCO_PATH:/usr/lib/nvidia"
+
+# Writable mujoco-py setup (for compilation)
+WRITABLE_MUJOCO_PY="$TMPDIR/mujoco_py_writable_dsrl"
+mkdir -p $WRITABLE_MUJOCO_PY
+
+CONTAINER="/var/scratch/pkarageo/dsrl_roboreward.sif"
+
+if [ -z "$(ls -A $WRITABLE_MUJOCO_PY)" ]; then
+    echo "Extracting mujoco-py to writable scratch space..."
+    apptainer exec --bind $WRITABLE_MUJOCO_PY:/tmp/extract_zone $CONTAINER \
+        bash -c "cp -a /opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py/* /tmp/extract_zone/"
+fi
+
+cd /home/pkarageo/master-thesis
+
+# --- 4. RUN TRAINING ---
+apptainer exec --nv \
+    --env LD_LIBRARY_PATH="$APP_LD_LIBRARY_PATH" \
+    --env PYTHONNOUSERSITE=1 \
+    --bind /var/scratch \
+    --bind /cm \
+    --bind $MUJOCO_DIR:/home/pkarageo/.mujoco \
+    --bind $WRITABLE_MUJOCO_PY:/opt/conda/envs/dsrl_env/lib/python3.9/site-packages/mujoco_py \
+    $CONTAINER bash -c "
+    
+    echo '=== GPU Check (inside container) ===' && \
+    nvidia-smi && \
+    
+    source /opt/conda/etc/profile.d/conda.sh && \
+    conda activate dsrl_env && \
+    
+    # Xvfb for headless rendering (same as run_qwen_container.job)
+    DISP_NUM=\$(( (\$SLURM_JOB_ID % 50) + 100 ))
+    export DISPLAY=:\$DISP_NUM
+    Xvfb \$DISPLAY -screen 0 1024x768x24 +extension GLX +render -noreset > /tmp/xvfb_dsrl.log 2>&1 &
+    XVFB_PID=\$!
+    sleep 3
+    
+    # MuJoCo environment variables
+    export MUJOCO_PY_MUJOCO_PATH=/home/pkarageo/.mujoco/mujoco210
+    export MUJOCO_PY_LOCK_PATH=$TMPDIR/mujoco_lock
+    
+    # Disable numba JIT to avoid numpy/numba version conflict
+    export NUMBA_DISABLE_JIT=1
+    
+    # Add local packages to PYTHONPATH
+    export PYTHONPATH=/home/pkarageo/master-thesis/dsrl/stable-baselines3:/home/pkarageo/master-thesis/dsrl/dppo:\$PYTHONPATH
+    
+    python -c 'import torch; print(f\"PyTorch CUDA available: {torch.cuda.is_available()}\"); print(f\"GPU count: {torch.cuda.device_count()}\"); [print(f\"GPU {i}: {torch.cuda.get_device_name(i)}\") for i in range(torch.cuda.device_count())]' && \
+    
+    cd /home/pkarageo/master-thesis/dsrl && \
+    
+    python train_dsrl_vlm.py \
+        --config-path=cfg/robomimic \
+        --config-name=dsrl_can_vlm.yaml \
+        seed=1
+    
+    kill \$XVFB_PID
+"
+
+echo "========================================"
+echo "Job finished: $(date)"
+echo "========================================"

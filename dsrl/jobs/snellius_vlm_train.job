@@ -1,23 +1,16 @@
 #!/bin/bash
-#SBATCH --job-name=dsrl_vlm_lift
+#SBATCH --job-name=dsrl_vlm_can
 #SBATCH --output=outfiles/dsrl_vlm_train_%A.out
 #SBATCH --time=96:00:00
-#SBATCH --partition=gpu_h100       
-#SBATCH --gpus=1                   
-#SBATCH --mem=80G
-#SBATCH --cpus-per-task=16
+#SBATCH --partition=gpu_h100
+#SBATCH --gpus=1
+#SBATCH --mem=40G
+#SBATCH --cpus-per-task=12
 
 # =========================================================
-# DSRL + RoboReward VLM Training (Snellius)
+# DSRL Training with Ground Truth Rewards (Snellius)
 # =========================================================
-# Single A100/H100 GPU: DSRL policy (~2GB) + RoboReward-8B 4-bit (~8GB)
-# Set vlm_device=auto in config (auto-detects single vs multi GPU)
-#
-# CUSTOMIZE BEFORE RUNNING:
-#   - Set WANDB_API_KEY in your environment (or ~/.bashrc)
-#   - Update CONTAINER path if your .sif is elsewhere
-#   - Update REPO_DIR if your repo is elsewhere
-# =========================================================
+
 
 echo "========================================"
 echo "DSRL + RoboReward VLM Training (Snellius)"
@@ -122,7 +115,7 @@ apptainer exec --nv \
 
     python train_dsrl_vlm.py \
         --config-path=cfg/robomimic \
-        --config-name=dsrl_lift_vlm.yaml \
+        --config-name=dsrl_can_vlm.yaml \
         log_dir=$SCRATCH/dsrl_logs \
         seed=1
 

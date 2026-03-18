@@ -1,0 +1,44 @@
+#!/bin/bash
+#SBATCH --job-name=fps_confusion
+#SBATCH --output=/home/pkarageo/master-thesis/Robo-Reward-FPS/logs/fps_confusion_%j.txt
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+#SBATCH --gres=gpu:1
+#SBATCH --constraint=TitanRTX
+#SBATCH --time=08:00:00
+
+# Load CUDA
+module load cuda12.6/toolkit/12.6
+
+# Activate Conda
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate /var/scratch/pkarageo/conda_envs/roboreward
+
+# Environment setup
+export HF_HOME="/var/scratch/pkarageo/hf_cache"
+export TORCH_HOME="/var/scratch/pkarageo/torch_cache"
+export HF_HUB_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
+export FORCE_QWENVL_VIDEO_READER=torchvision
+
+# Debug Info
+echo "============================================"
+echo "FPS Confusion Matrix Experiment"
+echo "============================================"
+echo "Node: $(hostname)"
+echo "Date: $(date)"
+echo "GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)"
+echo "============================================"
+
+# Create results directory
+mkdir -p /home/pkarageo/master-thesis/Robo-Reward-FPS/results
+
+# Run experiment
+python -u /home/pkarageo/master-thesis/Robo-Reward-FPS/scripts/fps_confusion_matrix_experiment.py
+
+echo "============================================"
+echo "Experiment completed at: $(date)"
+echo "============================================"

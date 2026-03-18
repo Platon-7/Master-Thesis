@@ -1,0 +1,38 @@
+#!/bin/bash
+#SBATCH --job-name=preproc_droid
+#SBATCH --output=/home/pkarageo/master-thesis/Robo-Reward-FPS/logs/preprocess_droid_%j.txt
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=32G
+#SBATCH --time=04:00:00
+
+# =========================================================
+# Preprocess DROID Failure Videos (CPU-only, ffmpeg)
+# 1280x720 @ 60fps -> 320x192 @ 10fps
+# =========================================================
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate /var/scratch/pkarageo/conda_envs/roboreward
+
+echo "============================================"
+echo "Preprocessing DROID Failure Videos"
+echo "============================================"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $(hostname)"
+echo "Date: $(date)"
+echo "CPUs: $SLURM_CPUS_PER_TASK"
+echo "============================================"
+
+# Verify ffmpeg
+ffmpeg -version | head -1
+
+python /home/pkarageo/master-thesis/Robo-Reward-FPS/droid_failures/preprocess_droid_videos.py \
+    --input-dir /var/scratch/pkarageo/droid_failures_raw \
+    --output-dir /var/scratch/pkarageo/droid_failures_processed \
+    --workers ${SLURM_CPUS_PER_TASK:-8}
+
+echo "============================================"
+echo "Preprocessing completed at: $(date)"
+echo "============================================"

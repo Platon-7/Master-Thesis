@@ -1,0 +1,37 @@
+#!/bin/bash
+#SBATCH --job-name=dl_droid_fail
+#SBATCH --output=/home/pkarageo/master-thesis/Robo-Reward-FPS/logs/download_droid_failures_%j.txt
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=16G
+#SBATCH --time=12:00:00
+
+# =========================================================
+# Bulk Download DROID Failure Episodes from GCS
+# Uses gsutil -m rsync for parallel downloads (NOT per-episode)
+# =========================================================
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate /var/scratch/pkarageo/conda_envs/roboreward
+
+export HF_HOME="/var/scratch/pkarageo/hf_cache"
+
+echo "============================================"
+echo "Bulk Downloading DROID Failure Episodes"
+echo "============================================"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $(hostname)"
+echo "Date: $(date)"
+echo "============================================"
+
+which gsutil
+
+# Bulk download all labs
+python /home/pkarageo/master-thesis/Robo-Reward-FPS/droid_failures/download_droid_failures.py \
+    --output-dir /var/scratch/pkarageo/droid_failures_raw
+
+echo "============================================"
+echo "Download completed at: $(date)"
+echo "============================================"

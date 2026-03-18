@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.py~
+.DS_Store
+
+# Logs and outputs
+*.out
+Robo-Reward-FPS/logs/
+dsrl/wandb/
+
+# Sample/test data (binary)
+Robo-Reward-FPS/sample_videos/
+Robo-Reward-FPS/test_relabel/
+Robo-Reward-FPS/droid_failures/sample_videos/
+
+# Temporary/review files
+Robo-Reward-FPS/droid_failures/sample_video_map.json
+Robo-Reward-FPS/droid_failures/task_review*.csv
+Robo-Reward-FPS/droid_failures/labeling_status.md
+
+# Model/data artifacts (stored on scratch)
+*.safetensors
+*.bin
+*.gguf

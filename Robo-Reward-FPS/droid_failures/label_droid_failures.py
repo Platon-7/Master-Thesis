@@ -292,7 +292,7 @@ def load_vlm_model(device: str = "cuda:1"):
     # Check both {hf_home}/{name} and {hf_home}/hub/{name} layouts
     model_name = "teetone/RoboReward-8B"
     for model_dir_name in ["models--teetone--RoboReward-8B", "models--Qwen--Qwen3-VL-8B-Instruct"]:
-        for subdir in ["hub", "."]:
+        for subdir in [".", "hub"]:
             cache_path = os.path.join(hf_home, subdir, model_dir_name, "snapshots")
             if os.path.exists(cache_path):
                 snapshots = sorted(glob.glob(os.path.join(cache_path, "*")))
@@ -367,20 +367,16 @@ def score_video(
     max_frames: int = 32,
 ) -> Tuple[int, str]:
     """Score a video using the VLM. Returns (score, raw_output)."""
-    frames = extract_frames_at_1fps(video_path, max_frames)
-    if not frames:
-        return 1, "ERROR: Could not extract frames"
-
     messages = [
         {"role": "system", "content": [{"type": "text", "text": SCORING_PROMPT}]},
         {"role": "user", "content": [
-            {"type": "video", "video": frames},
+            {"type": "video", "video": video_path, "fps": 1.0},
             {"type": "text", "text": f"Task: {task}"},
         ]},
     ]
 
     text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    image_inputs, video_inputs, video_kwargs = process_vision_info(messages, return_video_kwargs=True)
+    image_inputs, video_inputs = process_vision_info(messages)
 
     inputs = processor(
         text=[text],
@@ -388,12 +384,15 @@ def score_video(
         videos=video_inputs if video_inputs else None,
         padding=True,
         return_tensors="pt",
-        **video_kwargs,
     ).to(vlm_model.device)
 
     with torch.no_grad():
         output_ids = vlm_model.generate(**inputs, max_new_tokens=128, do_sample=False)
-        output_text = processor.batch_decode(output_ids, skip_special_tokens=True)[0]
+        generated_ids = output_ids[:, inputs['input_ids'].shape[1]:]
+        output_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+
+    del inputs, output_ids, generated_ids, image_inputs, video_inputs
+    torch.cuda.empty_cache()
 
     # Parse score
     score_match = re.search(r"ANSWER:\s*([1-5])", output_text)
@@ -414,10 +413,6 @@ def verify_score(
     max_frames: int = 32,
 ) -> Tuple[bool, str]:
     """Verify a (video, task, score) triple using the VLM. Returns (is_valid, explanation)."""
-    frames = extract_frames_at_1fps(video_path, max_frames)
-    if not frames:
-        return False, "ERROR: Could not extract frames"
-
     verification_text = VERIFICATION_PROMPT.format(
         task=task,
         score=score,
@@ -425,13 +420,13 @@ def verify_score(
 
     messages = [
         {"role": "user", "content": [
-            {"type": "video", "video": frames},
+            {"type": "video", "video": video_path, "fps": 1.0},
             {"type": "text", "text": verification_text},
         ]},
     ]
 
     text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    image_inputs, video_inputs, video_kwargs = process_vision_info(messages, return_video_kwargs=True)
+    image_inputs, video_inputs = process_vision_info(messages)
 
     inputs = processor(
         text=[text],
@@ -439,12 +434,15 @@ def verify_score(
         videos=video_inputs if video_inputs else None,
         padding=True,
         return_tensors="pt",
-        **video_kwargs,
     ).to(vlm_model.device)
 
     with torch.no_grad():
         output_ids = vlm_model.generate(**inputs, max_new_tokens=256, do_sample=False)
-        output_text = processor.batch_decode(output_ids, skip_special_tokens=True)[0]
+        generated_ids = output_ids[:, inputs['input_ids'].shape[1]:]
+        output_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+
+    del inputs, output_ids, generated_ids, image_inputs, video_inputs
+    torch.cuda.empty_cache()
 
     # Parse verification result
     is_valid = "ANSWER: TRUE" in output_text.upper()
@@ -562,7 +560,7 @@ def run_phase2(
                     else:
                         rejected_count += 1
 
-                    if scored_count <= 10 or scored_count % 50 == 0:
+                    if scored_count <= 20 or scored_count % 20 == 0:
                         print(f"  [{scored_count}] {video_key}: score={score}, verified={is_valid}")
                         print(f"       Task: {task[:50]}")
 

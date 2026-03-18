@@ -1,0 +1,34 @@
+#!/bin/bash
+#SBATCH --job-name=download_droid
+#SBATCH --output=/home/pkarageo/master-thesis/Robo-Reward-FPS/logs/download_droid_%j.txt
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --time=04:00:00
+
+# Activate Conda
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate /var/scratch/pkarageo/conda_envs/roboreward
+
+# Environment setup
+export HF_HOME="/var/scratch/pkarageo/hf_cache"
+
+echo "============================================"
+echo "Downloading DROID Videos"
+echo "============================================"
+echo "Node: $(hostname)"
+echo "Date: $(date)"
+echo "============================================"
+
+# Run download
+python /home/pkarageo/master-thesis/Robo-Reward-FPS/scripts/download_roboreward_by_dataset.py \
+    --dataset droid \
+    --output-dir /var/scratch/pkarageo/roboreward_tasks/droid_general \
+    --num-success 20 \
+    --num-failure 20
+
+echo "============================================"
+echo "Download completed at: $(date)"
+echo "============================================"

@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --job-name=data_check_roboreward
+#SBATCH --output=/home/pkarageo/master-thesis/Robo-Reward-FPS/logs/data_check_roboreward_%j.txt
+#SBATCH --partition=defq
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+#SBATCH --time=08:00:00
+
+# Load CUDA
+module load cuda12.6/toolkit/12.6
+
+# Activate Conda
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate /var/scratch/pkarageo/conda_envs/roboreward
+
+# Environment setup
+export HF_HOME="/var/scratch/pkarageo/hf_cache"
+export TORCH_HOME="/var/scratch/pkarageo/torch_cache"
+
+# --- CRITICAL CHANGE ---
+# These MUST be 0 (or removed) to allow streaming data from the internet
+export HF_HUB_OFFLINE=0
+export TRANSFORMERS_OFFLINE=0
+
+# Run experiment
+python -u /home/pkarageo/master-thesis/Robo-Reward-FPS/scripts/data_check_roboreward.py
