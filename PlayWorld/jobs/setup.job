@@ -1,0 +1,24 @@
+#!/bin/bash
+#SBATCH --job-name=pw_setup
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/PlayWorld/logs/setup_%j.out
+#SBATCH --partition=rome
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --time=12:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export PYTHONUNBUFFERED=1
+
+echo "============================================"
+echo "PlayWorld Setup - Clone + Download"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Date: $(date)"
+echo "============================================"
+
+bash /home/pkarageorgis/DAS-5/Master-Thesis/PlayWorld/setup.sh
+
+echo "============================================"
+echo "Done at: $(date)"
+echo "============================================"

@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --job-name=find_split_fail
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/robometer_failures/find_split_failures_%j.out
+#SBATCH --partition=rome
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=2
+#SBATCH --time=04:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate qwen_host
+
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+export PYTHONUNBUFFERED=1
+
+echo "============================================"
+echo "Finding failures in split/compressed archives"
+echo "  Job: $SLURM_JOB_ID  Node: $(hostname)"
+echo "  Date: $(date)"
+echo "============================================"
+
+python /home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/robometer_failures/find_split_failures.py
+
+echo "Done at: $(date)"

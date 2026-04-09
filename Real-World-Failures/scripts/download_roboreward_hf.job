@@ -1,0 +1,46 @@
+#!/bin/bash
+#SBATCH --job-name=download_roboreward
+#SBATCH --output=/gpfs/home4/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/logs/download_roboreward_hf_%A.out
+#SBATCH --partition=rome
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --time=24:00:00
+
+echo "========================================"
+echo "RoboReward HF Dataset Download"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $SLURM_NODELIST"
+echo "Start time: $(date)"
+echo "========================================"
+
+module purge
+module load 2024
+module load Anaconda3/2024.06-1
+
+SCRATCH="/scratch-shared/tmp.cwkV8vOvfY"
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+
+export HUGGINGFACE_HUB_CACHE="$SCRATCH/hf_cache"
+
+python3 - <<'PY'
+import os
+from huggingface_hub import snapshot_download
+
+token = os.environ["HF_TOKEN"]
+cache_dir = os.environ["HUGGINGFACE_HUB_CACHE"]
+
+print(f"Downloading to: {cache_dir}", flush=True)
+path = snapshot_download(
+    "teetone/RoboReward",
+    repo_type="dataset",
+    cache_dir=cache_dir,
+    token=token,
+    max_workers=2,
+)
+print(f"Done! Downloaded to: {path}", flush=True)
+PY
+
+echo "========================================"
+echo "Job finished: $(date)"
+echo "========================================"

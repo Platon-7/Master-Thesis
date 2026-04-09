@@ -1,0 +1,530 @@
+{
+  "results": [
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_droid",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_bridge_v2",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_bc_z",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_fractal20220817_data",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_robo_set",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_aloha_mobile",
+      "failures": 0,
+      "total": 272,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_toto",
+      "failures": 0,
+      "total": 902,
+      "status": "ok@200MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_jaco_play",
+      "failures": 0,
+      "total": 976,
+      "status": "ok@200MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_berkeley_cable_routing",
+      "failures": 0,
+      "total": 1482,
+      "status": "ok@200MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_berkeley_fanuc_manipulation",
+      "failures": 0,
+      "total": 415,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_berkeley_mvp_converted_externally_to_rlds",
+      "failures": 0,
+      "total": 480,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_berkeley_rpt_converted_externally_to_rlds",
+      "failures": 0,
+      "total": 904,
+      "status": "ok@200MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_austin_buds_dataset_converted_externally_to_rlds",
+      "failures": 0,
+      "total": 50,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_stanford_hydra_dataset_converted_externally_to_rlds",
+      "failures": 0,
+      "total": 570,
+      "status": "ok@200MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_iamlab_cmu_pickup_insert_converted_externally_to_rlds",
+      "failures": 0,
+      "total": 631,
+      "status": "ok@200MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_dlr_edan_shared_control_converted_externally_to_rlds",
+      "failures": 0,
+      "total": 48,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_furniture_bench_dataset_converted_externally_to_rlds",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_imperialcollege_sawyer_wrist_cam",
+      "failures": 0,
+      "total": 168,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_nyu_rot_dataset_converted_externally_to_rlds",
+      "failures": 0,
+      "total": 14,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_tokyo_u_lsmo_converted_externally_to_rlds",
+      "failures": 0,
+      "total": 48,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_ucsd_kitchen_dataset_converted_externally_to_rlds",
+      "failures": 0,
+      "total": 150,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_utaustin_mutex",
+      "failures": 0,
+      "total": 1500,
+      "status": "ok@200MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_oxe_language_table",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_racer_rfm_racer_train",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_racer_rfm_racer_val",
+      "failures": 5820,
+      "total": 7227,
+      "status": "ok@200MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm",
+      "failures": 80,
+      "total": 304,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_rfm_new_mit_franka_rfm_nowrist_rfm_new_mit_franka_rfm_nowrist",
+      "failures": 40,
+      "total": 152,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "aliangdw_usc_franka_policy_ranking_usc_franka_policy_ranking",
+      "failures": 8,
+      "total": 24,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "aliangdw_usc_xarm_policy_ranking_usc_xarm_policy_ranking",
+      "failures": 12,
+      "total": 36,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "aliangdw_utd_so101_human_utd_so101_human",
+      "failures": 0,
+      "total": 20,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "aliangdw_utd_so101_policy_ranking_utd_so101_policy_ranking",
+      "failures": 20,
+      "total": 60,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "ykorkmaz_usc_trossen_rfm_usc_trossen",
+      "failures": 6,
+      "total": 27,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "abraranwar_usc_koch_rewind_rfm_usc_koch_rewind",
+      "failures": 0,
+      "total": 407,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_usc_koch_human_robot_paired_usc_koch_human_robot_paired_robot",
+      "failures": 0,
+      "total": 100,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all",
+      "failures": 50,
+      "total": 150,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top",
+      "failures": 10,
+      "total": 30,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_utd_so101_clean_policy_ranking_wrist_utd_so101_clean_policy_ranking_wrist",
+      "failures": 10,
+      "total": 30,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_auto_eval_rfm_auto_eval_rfm",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_h2r_rfm_h2r",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_fino_net_rfm_fino_net",
+      "failures": 0,
+      "total": 229,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_ph2d_rfm_ph2d",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_soar_rfm_soar_rfm",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_roboarena_0825_rfm_roboarena",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_roboreward_rfm_roboreward_train",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_roboreward_rfm_roboreward_val",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_roboreward_rfm_roboreward_test",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_roboreward_rfm_high_res_roboreward_train",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_roboreward_rfm_high_res_roboreward_val",
+      "failures": 5258,
+      "total": 6232,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_roboreward_rfm_high_res_roboreward_test",
+      "failures": 2304,
+      "total": 2831,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "abraranwar_agibotworld_alpha_rfm_agibotworld",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "abraranwar_agibotworld_alpha_headcam_rfm_agibotworld",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "abraranwar_libero_rfm_libero256_10",
+      "failures": 0,
+      "total": 388,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "abraranwar_libero_rfm_libero256_90",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "abraranwar_libero_rfm_libero256_goal",
+      "failures": 0,
+      "total": 432,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "abraranwar_libero_rfm_libero256_object",
+      "failures": 0,
+      "total": 456,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "abraranwar_libero_rfm_libero256_spatial",
+      "failures": 0,
+      "total": 433,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "ykorkmaz_libero_failure_rfm_libero_10_failure",
+      "failures": 498,
+      "total": 498,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "ykorkmaz_libero_failure_rfm_libero_90_failure",
+      "failures": 4312,
+      "total": 4312,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "ykorkmaz_libero_failure_rfm_libero_goal_failure",
+      "failures": 456,
+      "total": 456,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "ykorkmaz_libero_failure_rfm_libero_object_failure",
+      "failures": 489,
+      "total": 489,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "ykorkmaz_libero_failure_rfm_libero_spatial_failure",
+      "failures": 486,
+      "total": 486,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_motif_rfm_motif_rfm",
+      "failures": 0,
+      "total": 83,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_molmoact_rfm_molmoact_dataset_tabletop",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_molmoact_rfm_molmoact_dataset_household",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "anqil_rh20t_subset_rfm_rh20t_robot",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_hand_paired_rfm_hand_paired_robot",
+      "failures": 0,
+      "total": 9,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_galaxea_rfm_galaxea_part1_r1_lite",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_eval_oxe_bc_z_eval",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_eval_oxe_bridge_v2_eval",
+      "failures": null,
+      "total": null,
+      "status": "not-found-in-range",
+      "note": "index_mappings.json not in last 200MB \u2014 archive may be compressed"
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_eval_oxe_jaco_play_eval",
+      "failures": 0,
+      "total": 109,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_eval_oxe_toto_eval",
+      "failures": 0,
+      "total": 101,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_eval_oxe_viola_eval",
+      "failures": 0,
+      "total": 15,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_oxe_rfm_eval_oxe_berkeley_cable_routing_eval",
+      "failures": 0,
+      "total": 165,
+      "status": "ok@50MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_mit_franka_p-rank_rfm_mit_franka_p-rank_rfm",
+      "failures": 5,
+      "total": 18,
+      "status": "ok@5MB",
+      "note": ""
+    },
+    {
+      "archive": "jesbu1_roboarena_eval_debug_nowrist_roboarena_eval_debug_nowrist",
+      "failures": null,
+      "total": null,
+      "status": "404",
+      "note": "not found"
+    }
+  ],
+  "total_failures_known": 19864
+}

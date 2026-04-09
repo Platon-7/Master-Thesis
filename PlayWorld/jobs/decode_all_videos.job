@@ -1,0 +1,88 @@
+#!/bin/bash
+#SBATCH --job-name=pw_allvids
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/PlayWorld/logs/decode_all_videos_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=02:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate ctrl-world
+
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export PYTHONUNBUFFERED=1
+
+python3 << 'PYEOF'
+import torch, json, numpy as np, subprocess, shutil
+from pathlib import Path
+from PIL import Image
+import sys
+
+sys.path.insert(0, "/home/pkarageorgis/DAS-5/Master-Thesis/Ctrl-World")
+
+data_dir = Path("/scratch-shared/pkarageorgis/playworld_data/v0_2025_12_28_2000")
+out_dir = Path("/home/pkarageorgis/DAS-5/Master-Thesis/PlayWorld/videos")
+out_dir.mkdir(parents=True, exist_ok=True)
+
+from diffusers import AutoencoderKLTemporalDecoder
+vae = AutoencoderKLTemporalDecoder.from_pretrained(
+    "/scratch-shared/pkarageorgis/hf_cache/stable-video-diffusion-img2vid",
+    subfolder="vae"
+).to("cuda").to(torch.bfloat16)
+
+# Find all trajectories with latent videos
+lat_dir = data_dir / "latent_videos" / "train"
+all_ids = sorted([p.name for p in lat_dir.iterdir() if p.is_dir()], key=lambda x: int(x))
+print(f"Total trajectories with latents: {len(all_ids)}")
+
+# Skip already decoded
+existing = set(p.stem.replace("traj_", "") for p in out_dir.glob("traj_*.mp4"))
+to_decode = [tid for tid in all_ids if tid not in existing]
+print(f"Already decoded: {len(existing)}, remaining: {len(to_decode)}")
+
+def decode_all_frames(vae, latents):
+    frames = []
+    chunk_size = 8
+    for i in range(0, latents.shape[0], chunk_size):
+        chunk = latents[i:i + chunk_size].to("cuda").to(torch.bfloat16)
+        chunk = chunk / vae.config.scaling_factor
+        with torch.no_grad():
+            decoded = vae.decode(chunk, num_frames=chunk.shape[0]).sample
+        video = ((decoded / 2.0 + 0.5).clamp(0, 1) * 255)
+        video = video.detach().float().cpu().numpy().transpose(0, 2, 3, 1).astype(np.uint8)
+        frames.extend([video[j] for j in range(video.shape[0])])
+    return frames
+
+for i, tid in enumerate(to_decode):
+    print(f"\n[{i+1}/{len(to_decode)}] Decoding trajectory {tid}...")
+    lat_path = lat_dir / tid / "0.pt"
+    latents = torch.load(str(lat_path), map_location="cpu")
+
+    frames = decode_all_frames(vae, latents)
+
+    # Save frames to temp dir
+    tmp_dir = out_dir / f"_tmp_{tid}"
+    tmp_dir.mkdir(exist_ok=True)
+    for fi, frame in enumerate(frames):
+        Image.fromarray(frame).save(str(tmp_dir / f"{fi:04d}.jpg"), quality=90)
+
+    # Convert to MP4
+    mp4_path = out_dir / f"traj_{tid}.mp4"
+    result = subprocess.run([
+        "ffmpeg", "-y", "-framerate", "5", "-i", str(tmp_dir / "%04d.jpg"),
+        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20",
+        str(mp4_path)
+    ], capture_output=True, text=True)
+
+    if result.returncode != 0:
+        print(f"  ffmpeg error: {result.stderr[:200]}")
+    else:
+        print(f"  OK: {len(frames)} frames -> {mp4_path.name} ({mp4_path.stat().st_size//1024}KB)")
+
+    shutil.rmtree(tmp_dir)
+
+total = len(list(out_dir.glob("traj_*.mp4")))
+total_size = sum(f.stat().st_size for f in out_dir.glob("traj_*.mp4")) / 1024 / 1024
+print(f"\nDone! {total} videos in {out_dir} ({total_size:.1f}MB total)")
+PYEOF

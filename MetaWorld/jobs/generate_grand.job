@@ -1,0 +1,29 @@
+#!/bin/bash
+#SBATCH --job-name=mw_grand
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/MetaWorld/logs/generate_grand_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --time=48:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate metaworld
+export MUJOCO_GL=egl
+export PYTHONUNBUFFERED=1
+
+OUTPUT=/scratch-shared/tmp.cwkV8vOvfY/metaworld_failures
+
+python /home/pkarageorgis/DAS-5/Master-Thesis/MetaWorld/generate_failures.py \
+    --episodes-per-score 20 \
+    --cameras corner2 corner3 gripperPOV \
+    --output-dir $OUTPUT
+
+echo "=== Generating HTML visualization ==="
+python /home/pkarageorgis/DAS-5/Master-Thesis/MetaWorld/visualize_labels.py \
+    --jsonl $OUTPUT/metaworld_failures.jsonl \
+    --keyframes $OUTPUT/keyframes \
+    --output /home/pkarageorgis/DAS-5/Master-Thesis/MetaWorld/logs/grand_labels_review.html \
+    --keyframes /scratch-shared/tmp.cwkV8vOvfY/metaworld_failures/keyframes
+
+echo "=== Done ==="

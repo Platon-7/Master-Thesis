@@ -1,0 +1,41 @@
+#!/bin/bash
+#SBATCH --job-name=vlm_multi_qw_s
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/vlm_stage1_multi30_qwen35_simple_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=2
+#SBATCH --mem=80G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=02:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate qwen_host
+
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export TORCH_HOME="/scratch-shared/pkarageorgis/torch_cache"
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+export PYTHONUNBUFFERED=1
+
+export VLM_MODEL_ID="Qwen/Qwen3.5-35B-A3B"
+export RELABELED_PATH="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/qwen3_relabeled.jsonl"
+export KEYFRAMES_DIR="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/keyframes"
+export OUTPUT_PATH="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/vlm_descriptions_multi30_qwen35_simple.jsonl"
+
+echo "============================================"
+echo "Stage 1: VLM descriptions for 30 multi-step episodes (SIMPLE prompt)"
+echo "  VLM: $VLM_MODEL_ID"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $(hostname)"
+echo "Date: $(date)"
+echo "============================================"
+
+nvidia-smi
+
+python /home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/score_keyframes.py \
+    --episodes-file /home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/multi_30_episodes.txt \
+    --videos-dir /home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/videos \
+    --skip-grading \
+    --force-simple-prompt
+
+echo "============================================"
+echo "Done at: $(date)"
+echo "============================================"

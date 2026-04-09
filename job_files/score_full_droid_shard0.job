@@ -1,0 +1,56 @@
+#!/bin/bash
+#SBATCH --job-name=droid_full_s0
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/score_full_droid_shard0_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=2
+#SBATCH --mem=80G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=5-00:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate qwen_host
+
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export TORCH_HOME="/scratch-shared/pkarageorgis/torch_cache"
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+export PYTHONUNBUFFERED=1
+
+export VLM_MODEL_ID="Qwen/Qwen3.5-35B-A3B"
+export VLM_MAX_MODEL_LEN=16384
+export LLM_MODEL_ID="Qwen/Qwen3-32B"
+export RELABELED_PATH="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/qwen3_relabeled.jsonl"
+export KEYFRAMES_DIR="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/keyframes"
+
+DROID_DIR="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures"
+SCRIPT="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/score_keyframes.py"
+
+echo "============================================"
+echo "Full DROID scoring: shard 0/2 (two-phase)"
+echo "  VLM: $VLM_MODEL_ID"
+echo "  LLM: $LLM_MODEL_ID"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $(hostname)"
+echo "Date: $(date)"
+echo "============================================"
+
+nvidia-smi
+
+# Phase 1: VLM descriptions only (saves to file for reuse)
+export OUTPUT_PATH="${DROID_DIR}/vlm_descriptions_full_shard0.jsonl"
+python $SCRIPT \
+    --videos-dir ${DROID_DIR}/videos \
+    --force-simple-prompt \
+    --skip-grading \
+    --shard-id 0 \
+    --num-shards 2
+
+echo "Phase 1 (VLM) done at: $(date)"
+
+# Phase 2: LLM grading from saved descriptions
+export OUTPUT_PATH="${DROID_DIR}/scored_full_droid_shard0.jsonl"
+python $SCRIPT \
+    --descriptions-file ${DROID_DIR}/vlm_descriptions_full_shard0.jsonl
+
+echo "============================================"
+echo "Done at: $(date)"
+echo "============================================"

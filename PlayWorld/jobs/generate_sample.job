@@ -1,0 +1,36 @@
+#!/bin/bash
+#SBATCH --job-name=pw_sample
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/PlayWorld/logs/generate_sample_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=48G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=01:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate ctrl-world
+
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export CTRLWORLD_DIR="/home/pkarageorgis/DAS-5/Master-Thesis/Ctrl-World"
+export PYTHONUNBUFFERED=1
+
+SCRIPT="/home/pkarageorgis/DAS-5/Master-Thesis/PlayWorld/generate_failures.py"
+
+echo "============================================"
+echo "PlayWorld Sample Generation"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Date: $(date)"
+echo "============================================"
+
+nvidia-smi
+
+python $SCRIPT \
+    --num-episodes 3 \
+    --noise-scale 0.5 \
+    --n-interact 5 \
+    --strategy all \
+    --output-dir /home/pkarageorgis/DAS-5/Master-Thesis/PlayWorld/output_sample
+
+echo "============================================"
+echo "Done at: $(date)"
+echo "============================================"

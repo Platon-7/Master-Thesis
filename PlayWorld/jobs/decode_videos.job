@@ -1,0 +1,89 @@
+#!/bin/bash
+#SBATCH --job-name=pw_vids
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/PlayWorld/logs/decode_videos_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=00:30:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate ctrl-world
+
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export PYTHONUNBUFFERED=1
+
+python3 << 'PYEOF'
+import torch, json, numpy as np
+from pathlib import Path
+from PIL import Image
+import sys
+
+sys.path.insert(0, "/home/pkarageorgis/DAS-5/Master-Thesis/Ctrl-World")
+
+data_dir = Path("/scratch-shared/pkarageorgis/playworld_data/v0_2025_12_28_2000")
+out_dir = Path("/home/pkarageorgis/DAS-5/Master-Thesis/PlayWorld/videos")
+out_dir.mkdir(parents=True, exist_ok=True)
+
+from diffusers import AutoencoderKLTemporalDecoder
+vae = AutoencoderKLTemporalDecoder.from_pretrained(
+    "/scratch-shared/pkarageorgis/hf_cache/stable-video-diffusion-img2vid",
+    subfolder="vae"
+).to("cuda").to(torch.bfloat16)
+
+ann_dir = data_dir / "annotation" / "train"
+lat_dir = data_dir / "latent_videos" / "train"
+lat_ids = set(p.name for p in lat_dir.iterdir() if p.is_dir())
+
+candidates = []
+for tid in sorted(lat_ids, key=lambda x: int(x)):
+    ann_path = ann_dir / f"{tid}.json"
+    if not ann_path.exists():
+        continue
+    with open(ann_path) as f:
+        ann = json.load(f)
+    vlen = ann["video_length"]
+    if vlen < 40 or vlen > 85:
+        continue
+    states = np.array(ann["states"])
+    xyz_range = states[:, :3].max(axis=0) - states[:, :3].min(axis=0)
+    total_movement = xyz_range.sum()
+    gripper_range = states[:, 6].max() - states[:, 6].min()
+    candidates.append((tid, vlen, total_movement, gripper_range))
+
+candidates.sort(key=lambda x: -(x[2] + x[3] * 0.5))
+selected = candidates[:10]
+
+print(f"Selected {len(selected)} trajectories:")
+for tid, vlen, mov, grip in selected:
+    print(f"  ID={tid}, frames={vlen}, movement={mov:.3f}, gripper_range={grip:.3f}")
+
+def decode_all_frames(vae, latents):
+    frames = []
+    chunk_size = 8
+    for i in range(0, latents.shape[0], chunk_size):
+        chunk = latents[i:i + chunk_size].to("cuda").to(torch.bfloat16)
+        chunk = chunk / vae.config.scaling_factor
+        with torch.no_grad():
+            decoded = vae.decode(chunk, num_frames=chunk.shape[0]).sample
+        video = ((decoded / 2.0 + 0.5).clamp(0, 1) * 255)
+        video = video.detach().float().cpu().numpy().transpose(0, 2, 3, 1).astype(np.uint8)
+        frames.extend([video[j] for j in range(video.shape[0])])
+    return frames
+
+for tid, vlen, mov, grip in selected:
+    print(f"\nDecoding trajectory {tid} ({vlen} frames)...")
+    lat_path = data_dir / "latent_videos" / "train" / tid / "0.pt"
+    latents = torch.load(str(lat_path), map_location="cpu")
+    frames = decode_all_frames(vae, latents)
+
+    # Save as individual frames (ffmpeg not available on compute)
+    frame_dir = out_dir / f"traj_{tid}"
+    frame_dir.mkdir(exist_ok=True)
+    for i, frame in enumerate(frames):
+        Image.fromarray(frame).save(str(frame_dir / f"{i:04d}.jpg"), quality=95)
+    print(f"  Saved {len(frames)} frames to {frame_dir}")
+
+print(f"\nDone! Frames saved. Run ffmpeg on login node to convert to MP4.")
+print(f"Example: cd {out_dir} && for d in traj_*; do ffmpeg -framerate 5 -i $d/%04d.jpg -c:v libx264 -pix_fmt yuv420p -crf 18 $d.mp4; done")
+PYEOF

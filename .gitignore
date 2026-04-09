@@ -14,18 +14,36 @@ __pycache__/
 
 # Logs and outputs
 *.out
-Robo-Reward-FPS/logs/
+Real-World-Failures/logs/
 dsrl/wandb/
 
 # Sample/test data (binary)
-Robo-Reward-FPS/sample_videos/
-Robo-Reward-FPS/test_relabel/
-Robo-Reward-FPS/droid_failures/sample_videos/
+Real-World-Failures/sample_videos/
+Real-World-Failures/test_relabel/
+
+# Droid failures data (large, stored locally)
+Real-World-Failures/droid_failures/keyframes/
+Real-World-Failures/droid_failures/videos/
+Real-World-Failures/droid_failures/*.jsonl
+Real-World-Failures/droid_failures/*.txt
 
 # Temporary/review files
-Robo-Reward-FPS/droid_failures/sample_video_map.json
-Robo-Reward-FPS/droid_failures/task_review*.csv
-Robo-Reward-FPS/droid_failures/labeling_status.md
+Real-World-Failures/droid_failures/sample_video_map.json
+Real-World-Failures/droid_failures/sample_videos/
+Real-World-Failures/droid_failures/task_review*.csv
+Real-World-Failures/droid_failures/labeling_status.md
+
+# Large generated visualizations and data files
+MetaWorld/logs/*.html
+MetaWorld/logs/*.out
+*.jsonl
+
+# Ctrl-World (embedded git repo — add as submodule if needed)
+Ctrl-World/
+
+# PlayWorld generated videos (large binaries)
+PlayWorld/videos/
+PlayWorld/verification_traj1/*.mp4
 
 # Model/data artifacts (stored on scratch)
 *.safetensors

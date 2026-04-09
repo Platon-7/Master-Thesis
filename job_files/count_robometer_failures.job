@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --job-name=count_failures
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/robometer_failures/count_failures_%j.out
+#SBATCH --partition=rome
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=2
+#SBATCH --time=03:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate qwen_host
+
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+export PYTHONUNBUFFERED=1
+
+SCRIPT_DIR="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/robometer_failures"
+
+echo "============================================"
+echo "RoboMeter failure count (range-request scan)"
+echo "  Job: $SLURM_JOB_ID  Node: $(hostname)"
+echo "  Date: $(date)"
+echo "============================================"
+
+python $SCRIPT_DIR/count_failures.py --timeout 30
+
+echo ""
+echo "Done at: $(date)"

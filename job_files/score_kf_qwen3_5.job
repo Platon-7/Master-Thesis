@@ -1,0 +1,42 @@
+#!/bin/bash
+#SBATCH --job-name=kf_qwen35
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/score_kf_qwen35_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=2
+#SBATCH --mem=80G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=04:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate qwen_host
+
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export TORCH_HOME="/scratch-shared/pkarageorgis/torch_cache"
+export HF_HUB_OFFLINE=0
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+export PYTHONUNBUFFERED=1
+
+export VLM_MODEL_ID="Qwen/Qwen3.5-35B-A3B"
+export VLM_MAX_MODEL_LEN=16384
+export LLM_MODEL_ID="Qwen/Qwen3-32B"
+export RELABELED_PATH="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/qwen3_relabeled.jsonl"
+export KEYFRAMES_DIR="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/keyframes"
+export OUTPUT_PATH="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/scored_kf_qwen35_50.jsonl"
+
+echo "============================================"
+echo "Keyframe scoring (50 episodes): Qwen3.5 + Qwen3-32B"
+echo "  VLM: $VLM_MODEL_ID"
+echo "  LLM: $LLM_MODEL_ID"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $(hostname)"
+echo "Date: $(date)"
+echo "============================================"
+
+nvidia-smi
+
+python /home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/score_keyframes.py \
+    --episodes-file /home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/episodes_50.txt
+
+echo "============================================"
+echo "Done at: $(date)"
+echo "============================================"

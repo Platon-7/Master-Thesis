@@ -1,0 +1,55 @@
+#!/bin/bash
+#SBATCH --job-name=robometer_racer_test
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/robometer_failures/robometer_racer_test_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=2
+#SBATCH --mem=80G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=03:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate qwen_host
+
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export TORCH_HOME="/scratch-shared/pkarageorgis/torch_cache"
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+export PYTHONUNBUFFERED=1
+
+export VLM_MODEL_ID="Qwen/Qwen3.5-35B-A3B"
+export LLM_MODEL_ID="Qwen/Qwen3-32B"
+export VLM_BATCH_SIZE=20
+
+DATA_DIR="/scratch-shared/pkarageorgis/robometer_racer_test"
+SCRIPT_DIR="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/robometer_failures"
+ARCHIVE="jesbu1_racer_rfm_racer_train"
+
+echo "============================================"
+echo "RoboMeter Pipeline Test — RACER train (20 episodes)"
+echo "  VLM: $VLM_MODEL_ID"
+echo "  LLM: $LLM_MODEL_ID"
+echo "  Archive: $ARCHIVE"
+echo "  Data: $DATA_DIR"
+echo "  Job: $SLURM_JOB_ID  Node: $(hostname)"
+echo "  Date: $(date)"
+echo "============================================"
+
+nvidia-smi
+
+echo ""
+echo "=== Stage 1: Keyframe extraction (20 episodes) ==="
+python $SCRIPT_DIR/selective_download.py \
+    --archive $ARCHIVE \
+    --output-dir $DATA_DIR \
+    --max-episodes 20
+
+echo ""
+echo "=== Stage 2: VLM + LLM scoring ==="
+python $SCRIPT_DIR/score_robometer_failures.py \
+    --archive $ARCHIVE \
+    --data-dir $DATA_DIR
+
+echo ""
+echo "============================================"
+echo "Done at: $(date)"
+echo "Results in: $DATA_DIR/scores/"
+echo "============================================"

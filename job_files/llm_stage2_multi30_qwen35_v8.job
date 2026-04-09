@@ -1,0 +1,25 @@
+#!/bin/bash
+#SBATCH --job-name=llm_multi30_qw8
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/llm_stage2_multi30_qwen35_v8_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=2
+#SBATCH --mem=80G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=02:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate qwen_host
+
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export TORCH_HOME="/scratch-shared/pkarageorgis/torch_cache"
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+export PYTHONUNBUFFERED=1
+
+export LLM_MODEL_ID="Qwen/Qwen3-32B"
+export RELABELED_PATH="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/qwen3_relabeled.jsonl"
+export OUTPUT_PATH="/home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/scored_multi30_qwen35_v8.jsonl"
+
+python /home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/score_keyframes.py \
+    --descriptions-file /home/pkarageorgis/DAS-5/Master-Thesis/Robo-Reward-FPS/droid_failures/vlm_descriptions_multi30_qwen35_simple.jsonl
+
+echo "Done at: $(date)"

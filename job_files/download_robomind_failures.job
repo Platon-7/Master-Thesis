@@ -1,0 +1,33 @@
+#!/bin/bash
+#SBATCH --job-name=dl_robomind
+#SBATCH --output=/home/pkarageorgis/droid_failures/download_robomind_%j.out
+#SBATCH --partition=rome
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --time=24:00:00
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate qwen_host
+
+export HF_HOME="/scratch-shared/pkarageorgis/hf_cache"
+export HF_TOKEN="hf_YOUR_TOKEN_HERE"
+export PYTHONUNBUFFERED=1
+
+DEST="/scratch-shared/pkarageorgis/robomind_failures"
+mkdir -p "$DEST"
+
+echo "Downloading RoboMIND failure_data to $DEST"
+echo "Start time: $(date)"
+
+# Download only the failure_data directory from the dataset
+huggingface-cli download x-humanoid-robomind/RoboMIND \
+    --repo-type dataset \
+    --include "failure_data/*" \
+    --local-dir "$DEST" \
+    --local-dir-use-symlinks False
+
+echo "Download complete: $(date)"
+echo "Size:"
+du -sh "$DEST/failure_data/" 2>/dev/null
+echo "Task folders:"
+ls "$DEST/failure_data/" 2>/dev/null | wc -l
