@@ -38,6 +38,8 @@ from pathlib import Path
 
 import numpy as np
 import requests
+from requests.exceptions import ChunkedEncodingError, ConnectionError, ReadTimeout
+from urllib3.exceptions import IncompleteRead, ProtocolError
 from PIL import Image
 
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
@@ -99,11 +101,161 @@ def save_keyframes(frames, src_indices, fps, out_dir: Path):
 # Two-pass streaming extractor
 # ────────────────────────────────────────────────────────────────────────────
 
+class _MultiPartStream:
+    """Reads split archive parts (part-aa, part-ab, …) as one sequential stream."""
+
+    def __init__(self, archive: str, parts: list, token: str,
+                 max_retries: int = 8, retry_backoff_s: float = 2.0):
+        self._archive = archive
+        self._parts   = parts
+        self._token   = token
+        self._max_retries = max_retries
+        self._retry_backoff_s = retry_backoff_s
+        self._idx     = 0
+        self._part_pos = 0
+        self._raw     = None
+        self._resp    = None
+        self._sess    = requests.Session()
+        self._sess.headers["Authorization"] = f"Bearer {self._token}"
+        self._open_next()
+
+    def _open_next(self):
+        if self._resp is not None:
+            self._resp.close()
+            self._resp = None
+        if self._idx >= len(self._parts):
+            self._raw = None
+            return
+        suffix = self._parts[self._idx]
+        url = f"{BASE_URL}/{self._archive}.tar.{suffix}"
+        print(f"    → streaming part {self._idx + 1}/{len(self._parts)}: {suffix}")
+        self._part_pos = 0
+        self._resp = self._sess.get(url, stream=True, timeout=60)
+        self._resp.raise_for_status()
+        self._raw = self._resp.raw
+        self._idx += 1
+
+    def _reopen_current_part(self):
+        if self._idx == 0:
+            raise RuntimeError("Cannot reopen current part before first open")
+        suffix = self._parts[self._idx - 1]
+        url = f"{BASE_URL}/{self._archive}.tar.{suffix}"
+        if self._resp is not None:
+            self._resp.close()
+            self._resp = None
+        headers = {"Range": f"bytes={self._part_pos}-"}
+        self._resp = self._sess.get(url, stream=True, timeout=60, headers=headers)
+        self._resp.raise_for_status()
+        self._raw = self._resp.raw
+
+    def read(self, n=-1):
+        if self._raw is None:
+            return b""
+
+        retries = 0
+        while True:
+            try:
+                data = self._raw.read(n)
+                if data:
+                    self._part_pos += len(data)
+                    return data
+                if self._idx < len(self._parts):
+                    self._open_next()
+                    continue
+                return b""
+            except (IncompleteRead, ProtocolError, ChunkedEncodingError, ConnectionError, ReadTimeout) as e:
+                retries += 1
+                if retries > self._max_retries:
+                    raise RuntimeError(
+                        f"Failed to stream part {self._parts[self._idx - 1]} after "
+                        f"{self._max_retries} retries"
+                    ) from e
+                wait_s = min(30.0, self._retry_backoff_s * retries)
+                print(
+                    f"    ! stream interrupted on part {self._parts[self._idx - 1]} "
+                    f"at byte {self._part_pos:,}; retry {retries}/{self._max_retries} in {wait_s:.1f}s"
+                )
+                time.sleep(wait_s)
+                self._reopen_current_part()
+
+    def readable(self):
+        return True
+
+
+class _ResumableHTTPStream:
+    """HTTP stream with automatic reconnect using Range requests."""
+
+    def __init__(self, url: str, token: str,
+                 max_retries: int = 8, retry_backoff_s: float = 2.0):
+        self._url = url
+        self._token = token
+        self._max_retries = max_retries
+        self._retry_backoff_s = retry_backoff_s
+        self._pos = 0
+        self._resp = None
+        self._raw = None
+        self._sess = requests.Session()
+        self._sess.headers["Authorization"] = f"Bearer {self._token}"
+        self._open(initial=True)
+
+    def _open(self, initial: bool = False):
+        if self._resp is not None:
+            self._resp.close()
+            self._resp = None
+        headers = None if initial else {"Range": f"bytes={self._pos}-"}
+        self._resp = self._sess.get(self._url, stream=True, timeout=60, headers=headers)
+        self._resp.raise_for_status()
+        self._raw = self._resp.raw
+
+    def read(self, n=-1):
+        if self._raw is None:
+            return b""
+
+        retries = 0
+        while True:
+            try:
+                data = self._raw.read(n)
+                if data:
+                    self._pos += len(data)
+                return data
+            except (IncompleteRead, ProtocolError, ChunkedEncodingError, ConnectionError, ReadTimeout) as e:
+                retries += 1
+                if retries > self._max_retries:
+                    raise RuntimeError(
+                        f"Failed to stream {self._url} after {self._max_retries} retries"
+                    ) from e
+                wait_s = min(30.0, self._retry_backoff_s * retries)
+                print(
+                    f"    ! stream interrupted at byte {self._pos:,}; "
+                    f"retry {retries}/{self._max_retries} in {wait_s:.1f}s"
+                )
+                time.sleep(wait_s)
+                self._open(initial=False)
+
+    def readable(self):
+        return True
+
+
+def _discover_parts(archive: str, token: str) -> list:
+    """Probe HuggingFace for split parts (part-aa … part-az). Returns sorted list."""
+    session = requests.Session()
+    session.headers["Authorization"] = f"Bearer {token}"
+    parts = []
+    for c in "abcdefghijklmnopqrstuvwxyz":
+        suffix = f"part-a{c}"
+        url = f"{BASE_URL}/{archive}.tar.{suffix}"
+        r = session.head(url, timeout=30, allow_redirects=True)
+        if r.status_code == 404:
+            break
+        parts.append(suffix)
+    return parts
+
+
 def open_tar_stream(archive: str, token: str, local_tar: str = None):
     """Return a tarfile opened in streaming mode.
 
     Uses local file if provided, otherwise streams from HuggingFace.
-    Streaming mode ('r|') reads sequentially — no seeking.
+    Handles both single-file (.tar) and split (.tar.part-aa …) archives.
     """
     import tarfile
 
@@ -111,13 +263,26 @@ def open_tar_stream(archive: str, token: str, local_tar: str = None):
         print(f"  Using local tar: {local_tar}")
         return tarfile.open(local_tar, mode="r:")  # seekable local file → faster
 
-    url = f"{BASE_URL}/{archive}.tar"
-    print(f"  Streaming from HuggingFace: {url}")
+    # Try single-file archive first
     session = requests.Session()
     session.headers["Authorization"] = f"Bearer {token}"
-    resp = session.get(url, stream=True, timeout=60)
-    resp.raise_for_status()
-    return tarfile.open(fileobj=resp.raw, mode="r|")  # non-seekable stream
+    url = f"{BASE_URL}/{archive}.tar"
+    rh = session.head(url, timeout=30, allow_redirects=True)
+
+    if rh.status_code == 200:
+        print(f"  Streaming from HuggingFace: {url}")
+        stream = _ResumableHTTPStream(url, token)
+        return tarfile.open(fileobj=stream, mode="r|")
+
+    # Fall back to split archive
+    parts = _discover_parts(archive, token)
+    if not parts:
+        raise FileNotFoundError(
+            f"Archive not found as single file or split parts: {archive}"
+        )
+    print(f"  Split archive detected ({len(parts)} parts): {archive}")
+    stream = _MultiPartStream(archive, parts, token)
+    return tarfile.open(fileobj=stream, mode="r|")
 
 
 def process_archive(archive: str, token: str, output_dir: Path,

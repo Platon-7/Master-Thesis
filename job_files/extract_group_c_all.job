@@ -1,0 +1,47 @@
+#!/bin/bash
+#SBATCH --job-name=extract_groupC
+#SBATCH --output=/home/pkarageorgis/DAS-5/Master-Thesis/Real-World-Failures/robometer_failures/extract_groupC_%a_%j.out
+#SBATCH --partition=rome
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=24:00:00
+#SBATCH --array=0-9
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate qwen_host
+
+: "${HF_TOKEN:?HF_TOKEN is not set. Export HF_TOKEN before submitting the job.}"
+export PYTHONUNBUFFERED=1
+
+DATA_DIR="/scratch-shared/pkarageorgis/robometer_groupC"
+SCRIPT_DIR="/home/pkarageorgis/DAS-5/Master-Thesis/Real-World-Failures/robometer_failures"
+
+ARCHIVES=(
+    "jesbu1_failsafe_rfm_failsafe"
+    "anqil_rh20t_subset_rfm_rh20t_robot"
+    "jesbu1_soar_rfm_soar_rfm"
+    "jesbu1_roboarena_0825_rfm_roboarena"
+    "jesbu1_galaxea_rfm_galaxea_part1_r1_lite"
+    "jesbu1_galaxea_rfm_galaxea_part2_r1_lite"
+    "jesbu1_galaxea_rfm_galaxea_part3_r1_lite"
+    "jesbu1_galaxea_rfm_galaxea_part4_r1_lite"
+    "jesbu1_galaxea_rfm_galaxea_part5_r1_lite"
+    "jesbu1_molmoact_rfm_molmoact_dataset_household"
+)
+
+ARCHIVE=${ARCHIVES[$SLURM_ARRAY_TASK_ID]}
+
+echo "============================================"
+echo "Group C extraction — array task $SLURM_ARRAY_TASK_ID"
+echo "  Archive: $ARCHIVE"
+echo "  Data:    $DATA_DIR"
+echo "  Job: $SLURM_JOB_ID  Node: $(hostname)"
+echo "  Date: $(date)"
+echo "============================================"
+
+python $SCRIPT_DIR/selective_download.py \
+    --archive $ARCHIVE \
+    --output-dir $DATA_DIR
+
+echo ""
+echo "Done at: $(date)"
