@@ -1,0 +1,81 @@
+#!/bin/bash
+#SBATCH --job-name=download_robometer_full
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/robometer_failures/download_robometer_full_%a_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=24:00:00
+#SBATCH --array=0-3
+
+set -euo pipefail
+
+# Initialize conda in non-login batch shells when available.
+CONDA_BASE=""
+if command -v conda >/dev/null 2>&1; then
+  CONDA_BASE="$(conda info --base)"
+elif [[ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]]; then
+  CONDA_BASE="$HOME/miniconda3"
+elif [[ -f "$HOME/anaconda3/etc/profile.d/conda.sh" ]]; then
+  CONDA_BASE="$HOME/anaconda3"
+fi
+
+if [[ -n "$CONDA_BASE" && -f "$CONDA_BASE/etc/profile.d/conda.sh" ]]; then
+  source "$CONDA_BASE/etc/profile.d/conda.sh"
+  conda activate qwen_host
+else
+  echo "WARN: conda not found; using system Python"
+fi
+
+PYTHON_BIN="$(command -v python3 || command -v python || true)"
+if [[ -z "$PYTHON_BIN" ]]; then
+  echo "ERROR: No python executable found in PATH"
+  exit 1
+fi
+export PATH="$HOME/.local/bin:$PATH"
+
+export PYTHONUNBUFFERED=1
+
+# Prefer pre-exported HF_TOKEN. Fallback to local Hugging Face CLI token file.
+if [[ -z "${HF_TOKEN:-}" && -f "$HOME/.cache/huggingface/token" ]]; then
+  export HF_TOKEN="$(cat "$HOME/.cache/huggingface/token")"
+fi
+
+if [[ -z "${HF_TOKEN:-}" ]]; then
+  echo "WARN: HF_TOKEN is not set; proceeding anonymously"
+fi
+
+SCRIPT="/home/pkarageorgis1/Master-Thesis/Real-World-Failures/robometer_failures/download_full_robometer_dataset.py"
+DEST="/projects/prjs1958/robometer_full_dataset"
+NUM_SHARDS=4
+SHARD_INDEX=${SLURM_ARRAY_TASK_ID:-0}
+
+echo "============================================"
+echo "RoboMeter full dataset download"
+echo "  Script: $SCRIPT"
+echo "  Dest:   $DEST"
+echo "  Shard:  $((SHARD_INDEX + 1))/$NUM_SHARDS"
+echo "  Node:   $(hostname)"
+echo "  Job:    $SLURM_JOB_ID"
+echo "  Date:   $(date)"
+echo "============================================"
+
+if ! "$PYTHON_BIN" -c "import requests, huggingface_hub" >/dev/null 2>&1; then
+  echo "WARN: Missing Python deps; installing to --user site-packages"
+  "$PYTHON_BIN" -m pip install --user requests huggingface_hub
+fi
+
+"$PYTHON_BIN" -c "import requests, huggingface_hub" >/dev/null
+
+"$PYTHON_BIN" "$SCRIPT" \
+  --dest "$DEST" \
+  --adopt-from /scratch-shared/pkarageorgis \
+  --adopt-mode hardlink \
+  --workers 2 \
+  --num-shards "$NUM_SHARDS" \
+  --shard-index "$SHARD_INDEX" \
+  --retries 8 \
+  --timeout 180 \
+  --chunk-mb 8
+
+echo ""
+echo "Done at: $(date)"

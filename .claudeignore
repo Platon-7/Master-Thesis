@@ -1,0 +1,25 @@
+# The absolute biggest culprits
+node_modules/
+RL-VLM-F/
+dsrl/
+
+# Common research bulk
+PlayWorld/
+**/__pycache__/
+**/.venv/
+**/data/
+**/datasets/
+**/logs/
+**/checkpoints/
+
+# Massive file types
+*.pth
+*.h5
+*.npy
+*.npz
+*.bin
+*.tar.gz
+*.zip
+*.mp4
+*.png
+*.jpg

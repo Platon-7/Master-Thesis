@@ -182,6 +182,41 @@ class _MultiPartStream:
         return True
 
 
+class _LocalMultiPartStream:
+    """Reads local split archive parts (part-aa, part-ab, …) as one sequential stream."""
+
+    def __init__(self, part_paths: list):
+        self._paths = [Path(p) for p in sorted(part_paths)]
+        self._idx   = 0
+        self._fh    = None
+        self._open_next()
+
+    def _open_next(self):
+        if self._fh is not None:
+            self._fh.close()
+            self._fh = None
+        if self._idx >= len(self._paths):
+            return
+        p = self._paths[self._idx]
+        print(f"    → reading local part {self._idx + 1}/{len(self._paths)}: {p.name}")
+        self._fh  = open(p, "rb")
+        self._idx += 1
+
+    def read(self, n=-1):
+        if self._fh is None:
+            return b""
+        data = self._fh.read(n)
+        if data:
+            return data
+        self._open_next()
+        if self._fh is None:
+            return b""
+        return self._fh.read(n)
+
+    def readable(self):
+        return True
+
+
 class _ResumableHTTPStream:
     """HTTP stream with automatic reconnect using Range requests."""
 
@@ -251,17 +286,28 @@ def _discover_parts(archive: str, token: str) -> list:
     return parts
 
 
-def open_tar_stream(archive: str, token: str, local_tar: str = None):
+def open_tar_stream(archive: str, token: str, local_tar: str = None,
+                    local_tar_dir: str = None):
     """Return a tarfile opened in streaming mode.
 
-    Uses local file if provided, otherwise streams from HuggingFace.
+    Priority: local_tar > local_tar_dir > HuggingFace HTTP.
     Handles both single-file (.tar) and split (.tar.part-aa …) archives.
     """
     import tarfile
 
     if local_tar:
         print(f"  Using local tar: {local_tar}")
-        return tarfile.open(local_tar, mode="r:")  # seekable local file → faster
+        return tarfile.open(local_tar, mode="r:")  # seekable → faster
+
+    if local_tar_dir:
+        parts = sorted(Path(local_tar_dir).glob(f"{archive}.tar.part-*"))
+        if not parts:
+            raise FileNotFoundError(
+                f"No part files matching '{archive}.tar.part-*' in {local_tar_dir}"
+            )
+        print(f"  Reading {len(parts)} local parts from {local_tar_dir}")
+        stream = _LocalMultiPartStream([str(p) for p in parts])
+        return tarfile.open(fileobj=stream, mode="r|")
 
     # Try single-file archive first
     session = requests.Session()
@@ -288,7 +334,7 @@ def open_tar_stream(archive: str, token: str, local_tar: str = None):
 def process_archive(archive: str, token: str, output_dir: Path,
                     fps: float = 8.0, max_episodes: int = None,
                     include_partial: bool = False, resume: bool = True,
-                    local_tar: str = None) -> int:
+                    local_tar: str = None, local_tar_dir: str = None) -> int:
     """
     Stream a tar archive, extract failures, save keyframes + manifest.
 
@@ -328,7 +374,7 @@ def process_archive(archive: str, token: str, output_dir: Path,
         # Pass 1 (fast): stream to find index_mappings.json at end of archive
         print(f"  All-failures archive — pass 1: reading metadata …")
         idx_to_task = {}
-        with open_tar_stream(archive, token, local_tar) as tf:
+        with open_tar_stream(archive, token, local_tar, local_tar_dir) as tf:
             for member in tf:
                 if member.name.endswith("index_mappings.json") and member.size > 0:
                     raw = tf.extractfile(member).read()
@@ -339,7 +385,7 @@ def process_archive(archive: str, token: str, output_dir: Path,
                 # All other members: tarfile reads and discards the data
 
         print(f"  Pass 2: extracting all NPZs …")
-        with open_tar_stream(archive, token, local_tar) as tf:
+        with open_tar_stream(archive, token, local_tar, local_tar_dir) as tf:
             episode_counter = 0
 
             for member in tf:
@@ -390,7 +436,7 @@ def process_archive(archive: str, token: str, output_dir: Path,
         print(f"  Pass 1: collecting metadata …")
 
         if local_tar:
-            # Local file: seek directly
+            # Seekable local single-file: open in random-access mode
             import tarfile
             with tarfile.open(local_tar, "r:") as tf:
                 idx_map_raw = None
@@ -403,11 +449,11 @@ def process_archive(archive: str, token: str, output_dir: Path,
                     if m:
                         idx_to_uuid[int(m.group(1))] = m.group(2)
         else:
-            # Stream: must read all members to reach the metadata at the end
+            # Stream (local split parts or HuggingFace): read sequentially
             idx_map_raw = None
             idx_to_uuid = {}
             emb_pat = re.compile(r"trajectory_(\d+)_([0-9a-f\-]+)_embeddings\.pt$")
-            with open_tar_stream(archive, token, local_tar) as tf:
+            with open_tar_stream(archive, token, local_tar, local_tar_dir) as tf:
                 for member in tf:
                     if "index_mappings" in member.name and member.size > 0:
                         idx_map_raw = tf.extractfile(member).read()
@@ -444,7 +490,7 @@ def process_archive(archive: str, token: str, output_dir: Path,
         print(f"  Pass 2: extracting failure NPZs …")
         npz_pat = re.compile(r"trajectory_([0-9a-f\-]+)\.npz$")
 
-        with open_tar_stream(archive, token, local_tar) as tf:
+        with open_tar_stream(archive, token, local_tar, local_tar_dir) as tf:
             for member in tf:
                 m = npz_pat.search(member.name)
                 if not m:
@@ -501,7 +547,9 @@ def main():
     parser.add_argument("--output-dir", default=str(DATA_DIR))
     parser.add_argument("--hf-token", default=HF_TOKEN)
     parser.add_argument("--local-tar", default=None,
-                        help="Path to a locally cached .tar file (skips download)")
+                        help="Path to a locally cached single .tar file (skips download)")
+    parser.add_argument("--local-tar-dir", default=None,
+                        help="Directory containing split .tar.part-* files for this archive")
     parser.add_argument("--fps", type=float, default=8.0)
     parser.add_argument("--max-episodes", type=int, default=None,
                         help="Stop after N episodes (for testing)")
@@ -511,8 +559,8 @@ def main():
     parser.add_argument("--no-resume", action="store_true")
     args = parser.parse_args()
 
-    if not args.hf_token and not args.local_tar:
-        print("ERROR: set --hf-token or HF_TOKEN, or use --local-tar")
+    if not args.hf_token and not args.local_tar and not args.local_tar_dir:
+        print("ERROR: set --hf-token or HF_TOKEN, or use --local-tar / --local-tar-dir")
         sys.exit(1)
 
     output_dir = Path(args.output_dir)
@@ -538,7 +586,8 @@ def main():
         print(f"Archive: {archive}")
         print(f"{'='*60}")
 
-        local = args.local_tar if (args.archive != "all") else None
+        local     = args.local_tar     if (args.archive != "all") else None
+        local_dir = args.local_tar_dir if (args.archive != "all") else None
 
         try:
             n = process_archive(
@@ -550,6 +599,7 @@ def main():
                 include_partial=args.include_partial,
                 resume=not args.no_resume,
                 local_tar=local,
+                local_tar_dir=local_dir,
             )
             total += n
         except Exception as e:

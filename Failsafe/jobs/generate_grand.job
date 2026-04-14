@@ -1,0 +1,36 @@
+#!/bin/bash
+#SBATCH --job-name=failsafe_grand
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Failsafe/logs/grand_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --time=24:00:00
+
+# Full dataset run: 20 episodes per score, all 3 tasks.
+# Run ONLY after sample_review.html confirms stage→score mapping is correct.
+
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate failsafe
+
+export FAILSAFE_PATH=/path/to/FailSafe_code     # <-- SET THIS
+export MUJOCO_GL=egl
+export PYTHONUNBUFFERED=1
+
+THESIS=/home/pkarageorgis1/Master-Thesis
+OUTPUT=/scratch-shared/$USER/failsafe_failures
+
+mkdir -p $THESIS/Failsafe/logs
+
+python $THESIS/Failsafe/generate_failures.py \
+    --episodes-per-score 20 \
+    --output-dir $OUTPUT/grand_v1
+
+echo "=== Generating HTML review page ==="
+python $THESIS/Failsafe/visualize_labels.py \
+    --jsonl     $OUTPUT/grand_v1/maniskill_failures.jsonl \
+    --keyframes $OUTPUT/grand_v1/keyframes \
+    --output    $THESIS/Failsafe/logs/grand_review.html
+
+echo "=== Done. ==="
+echo "Output: $OUTPUT/grand_v1/"

@@ -49,3 +49,11 @@ PlayWorld/verification_traj1/*.mp4
 *.safetensors
 *.bin
 *.gguf
+
+# Node
+node_modules/
+package-lock.json
+package.json
+
+# External dependency vendored into Failsafe (360 MB ManiSkill install)
+Failsafe/failsafe_repo/

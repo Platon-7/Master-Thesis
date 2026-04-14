@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH --job-name=failsafe_debug
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Failsafe/logs/debug_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=0:30:00
+
+CONDA_BASE=/gpfs/scratch1/shared/pkarageorgis1/miniforge3
+source $CONDA_BASE/etc/profile.d/conda.sh
+conda activate failsafe
+
+export FAILSAFE_PATH=/home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo
+export MUJOCO_GL=egl
+export PYTHONUNBUFFERED=1
+
+THESIS=/home/pkarageorgis1/Master-Thesis
+mkdir -p $THESIS/Failsafe/logs
+
+python $THESIS/Failsafe/debug_planner.py

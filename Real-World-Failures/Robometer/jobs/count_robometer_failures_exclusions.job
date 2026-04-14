@@ -1,0 +1,51 @@
+#!/bin/bash
+#SBATCH --job-name=count_failures_excl
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/robometer_failures/count_failures_exclusions_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=24:00:00
+
+set -euo pipefail
+
+# Initialize conda in non-login shells when available.
+CONDA_BASE=""
+if command -v conda >/dev/null 2>&1; then
+  CONDA_BASE="$(conda info --base)"
+elif [[ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]]; then
+  CONDA_BASE="$HOME/miniconda3"
+elif [[ -f "$HOME/anaconda3/etc/profile.d/conda.sh" ]]; then
+  CONDA_BASE="$HOME/anaconda3"
+fi
+
+if [[ -n "$CONDA_BASE" && -f "$CONDA_BASE/etc/profile.d/conda.sh" ]]; then
+  source "$CONDA_BASE/etc/profile.d/conda.sh"
+  conda activate qwen_host || true
+else
+  echo "WARN: conda not found; using system Python"
+fi
+
+PYTHON_BIN="$(command -v python3 || command -v python || true)"
+if [[ -z "$PYTHON_BIN" ]]; then
+  echo "ERROR: No python executable found in PATH"
+  exit 1
+fi
+
+SCRIPT="/home/pkarageorgis1/Master-Thesis/Real-World-Failures/robometer_failures/count_failures_local_exclusions.py"
+OUT_JSON="/projects/prjs1958/robometer_full_dataset/failure_summary_exclusions.json"
+
+export PYTHONUNBUFFERED=1
+
+echo "============================================"
+echo "RoboMeter failure count with exclusions"
+echo "  Script: $SCRIPT"
+echo "  Output: $OUT_JSON"
+echo "  Node:   $(hostname)"
+echo "  Job:    $SLURM_JOB_ID"
+echo "  Date:   $(date)"
+echo "============================================"
+
+"$PYTHON_BIN" "$SCRIPT" --output "$OUT_JSON"
+
+echo ""
+echo "Done at: $(date)"
