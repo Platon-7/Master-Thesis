@@ -1,0 +1,12 @@
+# Bake-off Run 7 — L2 (asymmetric C51 + BCE) λ=0.3 + ICL task-instruction dropout.
+# Same as Run 5 plus the dropout flag. Direct A/B comparison: Run 7 vs Run 5 isolates the
+# corruption effect on L2.
+#
+#   * λ=0.3 (matches Run 5).
+#   * lr=2e-5 (base default).
+#   * ICL task-instruction dropout: ON.
+
+loss.asymmetric_lambda: 0.3
+training.max_steps: 4000
+data.icl_task_dropout: true
+training.exp_name: bakeoff_run7_l2_lambda03_dropout

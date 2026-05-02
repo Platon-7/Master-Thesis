@@ -57,3 +57,27 @@ package.json
 
 # External dependency vendored into Failsafe (360 MB ManiSkill install)
 Failsafe/failsafe_repo/
+
+# Wandb run artifacts (cloud-synced; only the run dirs are local noise)
+**/wandb/
+
+# SLURM logs (per-job .out/.err, regenerated each run; existing pattern *.out covers
+# .out files everywhere but not the matching .err logs — be explicit)
+Robometer-LoRA/logs/
+Robometer/logs/
+Failsafe/logs/
+Real-World-Failures/Robometer/logs/
+Real-World-Failures/Droid-Failures/logs/
+
+# Checkpoints (often huge, scratch-storage anyway)
+**/checkpoint-*/
+**/ckpt-*/
+
+# Per-rank memory logs that the Robometer trainer writes
+**/memory_log_rank*.txt
+
+# Vendored MetaWorld package — install via pip if needed, don't track 294 MB
+MetaWorld/metaworld_repo/
+
+# Local Claude Code guidance — kept on disk but not pushed
+CLAUDE.md

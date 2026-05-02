@@ -1,0 +1,82 @@
+# CORN head pretrain — 50-step sanity (May-1, attempt 3).
+#
+# Attempt 1 (Apr-30, lr=1e-3, no pos_weight, no bias-init): collapsed to constant
+# output by step 150.
+# Attempt 2 (May-1 morning, lr=1e-4, pos_weight=[0.81, 1.23, 1.95, 3.48], bias-init):
+# bias-init kicked in at step 0 (loss=0.286) but pos_weight fought against it. By
+# step 50 σ means had drifted to [0.479, 0.372, 0.275, 0.197] — k=5 was 2.6× above
+# prior. Math: with bias-init at σ=p_k, the expected gradient under pos_weight β_k
+# is -p(1-p)(β-1), which is non-zero whenever β≠1 and pulls σ toward β·p/(β·p+1-p).
+# So pos_weight DEFEATS bias-init.
+#
+# Insight: pos_weight existed to escape the σ=0.5 → "predict negative" pull when
+# bias=0. With bias-init removing that pull, pos_weight is now harmful — it
+# introduces a SECOND degenerate at σ=β·p/(β·p+1-p) instead of letting the head
+# learn per-frame deviation from the prior.
+#
+# Attempt 3: bias-init ONLY, β_k=1 for all k, lr=1e-4. The only gradient that flows
+# now is per-frame deviation from the prior — the actual signal we want.
+#
+# Pass criteria after 50 steps (same as attempt 2):
+#   * σ(z_5) range across the eval batch ≥ 0.05 (head finds per-frame variation
+#     on the hardest threshold — the headline diagnostic).
+#   * Per-threshold σ means stay within ±20% of prior [0.602, 0.399, 0.209, 0.076].
+#   * No loss spikes >0.5 above starting loss after the warmup completes.
+# If all three pass → flip max_steps to 500 and submit the full pretrain.
+
+# ---------- Head + loss ----------
+model.progress_head_mode: corn
+loss.progress_loss_type: corn_asymmetric
+loss.corn_asymmetric_c: 0.0           # symmetric pretrain — no negative-side weighting
+
+# pos_weight DELIBERATELY OFF (β_k=1). With bias-init providing a calibrated start,
+# pos_weight introduces a destabilizing drift away from the prior. See header above.
+# loss.corn_pos_weights: <intentionally unset>
+
+# Bias-init the final-layer bias to logit(prior_k). σ(z_k)=p_k at step 0; only
+# learnable per-frame deviation from prior gets gradient.
+loss.corn_bias_init_priors: [0.602, 0.399, 0.209, 0.076]
+
+# ---------- Freeze everything except the progress head ----------
+model.use_peft: false                  # no LoRA
+model.train_progress_head: true
+model.train_success_head: false
+model.train_preference_head: false
+model.train_vision_encoder: false
+model.train_language_model: false
+
+# ---------- Backbone weights ----------
+training.load_from_checkpoint: robometer/Robometer-4B
+
+# ---------- ICL: off ----------
+data.use_icl: false
+data.icl_prob: 0.0
+
+# ---------- Data ----------
+data.failure_label_smoothing: none
+data.success_label_noise_std: 0.1
+data.stratified_batch_balance: true
+data.warmup_steps: 0
+
+# ---------- Optimizer ----------
+training.learning_rate: 1.0e-4         # 10× lower than Apr-30 sanity (was 1e-3)
+training.warmup_ratio: 0.05            # ~3 warmup steps over 50
+training.weight_decay: 0.01
+
+# ---------- Schedule (50-step sanity) ----------
+training.max_steps: 50
+training.eval_steps: 50                # one eval at the end
+training.custom_eval_steps: 50
+training.per_device_train_batch_size: 8
+training.gradient_accumulation_steps: 1
+
+# Light eval — single split, no dual-ICL
+custom_eval.eval_types: [policy_ranking]
+custom_eval.policy_ranking: [robometer_frames_eval_failsafe]
+custom_eval.policy_ranking_dual_icl: false
+custom_eval.num_examples_per_quality_pr: 30
+
+training.save_strategy: steps
+training.save_steps: 50
+training.overwrite_output_dir: true
+training.exp_name: corn_head_pretrain_sanity

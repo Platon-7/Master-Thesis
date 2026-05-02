@@ -1,0 +1,30 @@
+# Data-generation config for the preprocessed keyframe dataset.
+# Mirrors Robometer/dataset_upload/configs/data_gen_configs/*.yaml.
+# Consumed by dataset_upload.generate_hf_dataset once the router entry
+# (see MODIFICATIONS.md §A.2) is added upstream.
+
+dataset:
+  dataset_path: /projects/prjs1958/robometer_frame_dataset
+  dataset_name: robometer_frames_metaworld   # change per-family: metaworld|failsafe|droid|robometer|roboreward
+  # Adapter-specific knobs (consumed by robometer_frames_loader.py):
+  family: metaworld
+  include_successes: true
+  include_failures: true
+  max_episodes_per_archive: null             # null = no cap; set an int for smoke tests
+
+output:
+  output_dir: /scratch-shared/${oc.env:USER}/robometer_frames_hf/metaworld
+  max_trajectories: null
+  max_frames: 16                             # keyframes are already 16
+  shortest_edge_size: 240
+  # NOTE: kept as `true` because Robometer's `create_hf_trajectory` (helpers.py:333) ignores
+  # the `use_video=false` branch and always writes per-episode MP4 files. Setting false here
+  # would crash the schema validation downstream. See README "Outstanding open items" #4 for
+  # the path to fix this for full-dataset training.
+  use_video: true
+  fps: 10
+  center_crop: false
+
+hub:
+  push_to_hub: false
+  hub_repo_id: null

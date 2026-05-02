@@ -1,0 +1,16 @@
+# Bake-off Run 4 — L1 (CORN) c=0.5 + ICL task-instruction dropout.
+# Same as Run 2 plus the dropout flag. Direct A/B comparison: Run 4 vs Run 2 isolates the
+# corruption effect on L1.
+#
+#   * c=0.5 → α_k = (1, 1.5, 2.0, 2.5).
+#   * lr=4e-5.
+#   * ICL task-instruction dropout: ON. Per Chris's recipe (only fires on ICL-attached
+#     samples, never at eval): with p=1/3 keep original task wording; p=1/3 replace with
+#     a generic string ("", "do the task", "perform the demonstrated task"); p=1/3 split
+#     by whitespace and drop each word independently with p=0.1.
+
+loss.corn_asymmetric_c: 0.5
+training.learning_rate: 4.0e-5
+training.max_steps: 4000
+data.icl_task_dropout: true
+training.exp_name: bakeoff_run4_l1_c05_dropout

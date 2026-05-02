@@ -1,0 +1,47 @@
+# Minimum Python deps for running the Robometer-LoRA smoke tests and CPU-side label/ICL
+# validation. Tested against Python 3.10 in the `robometer_train` conda env.
+#
+# Install:
+#   conda create -n robometer_train -c conda-forge --override-channels python=3.10
+#   conda activate robometer_train
+#   pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+#   pip install -r requirements.txt
+#
+# For real training the full Robometer/pyproject.toml dependency set is required (unsloth,
+# xformers, tensorflow, robosuite, CUDA torch, etc.). This file is intentionally a SUBSET
+# sufficient for smoke_test_icl.py and smoke_test_labels.py.
+
+# Core numerics / data handling
+numpy
+pillow
+pydantic
+scipy
+h5py
+
+# Config / logging
+omegaconf
+hydra-core
+pyyaml
+rich
+loguru
+termcolor
+codetiming
+tensorboard
+matplotlib
+wandb
+
+# Robometer model / dataset support
+transformers
+datasets
+accelerate
+peft
+safetensors
+huggingface-hub
+sentence-transformers
+evaluate
+einops
+qwen-vl-utils[decord]==0.0.14
+tqdm
+
+# NOTE: torch/torchvision NOT pinned here — install them first from the pytorch index
+# (CPU build for smoke tests, CUDA 12.8 build for training — see pyproject.toml).

@@ -1,0 +1,84 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_bakeoff
+#SBATCH --output=logs/bakeoff_%j_%x.out
+#SBATCH --error=logs/bakeoff_%j_%x.err
+#SBATCH --time=24:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
+
+# Generic LoRA bake-off launcher. Combines:
+#   train_lora_base.yaml + <LOSS_PRESET>.yaml + <RUN_OVERLAY>.yaml
+# into Hydra ++ overrides via the same sed-based translator the other jobs use.
+#
+# Usage:
+#   RUN=run1_l1_c0           LOSS_PRESET=loss1_corn  sbatch jobs/bakeoff_run.job
+#   RUN=run2_l1_c05          LOSS_PRESET=loss1_corn  sbatch jobs/bakeoff_run.job
+#   RUN=run3_l1_c15          LOSS_PRESET=loss1_corn  sbatch jobs/bakeoff_run.job
+#   RUN=run4_l1_c05_dropout  LOSS_PRESET=loss1_corn  sbatch jobs/bakeoff_run.job
+#   RUN=run5_l2_lambda03         LOSS_PRESET=loss2_c51  sbatch jobs/bakeoff_run.job
+#   RUN=run6_l2_lambda05         LOSS_PRESET=loss2_c51  sbatch jobs/bakeoff_run.job
+#   RUN=run7_l2_lambda03_dropout LOSS_PRESET=loss2_c51  sbatch jobs/bakeoff_run.job
+#
+# 24h time budget covers 7500 steps × ~6-9 sec/step (with ICL prob 0.5 + dual-ICL eval).
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf}"
+
+RUN="${RUN:?set RUN=run1_l1_c0|run2_l1_c05|run3_l1_c15|run4_l1_c05_dropout|run5_l2_lambda03|run6_l2_lambda05|run7_l2_lambda03_dropout}"
+LOSS_PRESET="${LOSS_PRESET:?set LOSS_PRESET=loss1_corn|loss2_c51}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+if [[ ! -x "$PYTHON" ]]; then
+    echo "ERROR: $PYTHON not executable — likely an NFS-mount issue on this node" >&2
+    exit 1
+fi
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_LoRA_bakeoff}"
+export WANDB_API_KEY="${WANDB_API_KEY:-}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+
+cd "$ROBOMETER_DIR"
+
+# Sanity: all three YAMLs must exist before we start
+for f in "$HERE/configs/train_lora_base.yaml" "$HERE/configs/${LOSS_PRESET}.yaml" "$HERE/configs/${RUN}.yaml"; do
+    if [[ ! -f "$f" ]]; then
+        echo "ERROR: missing config $f" >&2
+        exit 2
+    fi
+done
+
+# NOTE: cannot use `grep -h FILE1 FILE2 FILE3` here — grep on this cluster reverses
+# multi-file output order (verified May-1: cmdline order base→preset→run produces output
+# order run→preset→base). Use `cat` to guarantee file order: base → preset → run, so the
+# run YAML's overrides land LAST in the CLI args. Hydra's `++` semantics are last-wins,
+# so the run overlay wins on every duplicate key.
+readarray -t OVERRIDES < <(
+    cat "$HERE/configs/train_lora_base.yaml" \
+        "$HERE/configs/${LOSS_PRESET}.yaml" \
+        "$HERE/configs/${RUN}.yaml" \
+      | grep -v '^[[:space:]]*#' \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+OUT_DIR="${WEIGHTS_DIR:-/projects/prjs1958/LoRA_weights}/${RUN}_${SLURM_JOB_ID:-local}"
+mkdir -p "$OUT_DIR"
+
+echo "[bakeoff] RUN=$RUN  LOSS_PRESET=$LOSS_PRESET"
+echo "[bakeoff] output: $OUT_DIR"
+echo "[bakeoff] full overrides:"
+printf '  %s\n' "${OVERRIDES[@]}"
+
+"$PYTHON" train.py "${OVERRIDES[@]}" \
+    training.output_dir="$OUT_DIR"

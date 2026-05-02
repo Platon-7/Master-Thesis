@@ -1,0 +1,30 @@
+# Loss-function sweep for the LoRA progress head.
+# Each variant is a set of Hydra overrides applied on top of train_lora_base.yaml.
+# launch_sweep.py submits one SLURM job per variant.
+
+variants:
+  - id: l1
+    overrides:
+      loss.progress_loss_type: l1
+
+  - id: l2
+    overrides:
+      loss.progress_loss_type: l2
+
+  - id: disc4
+    overrides:
+      loss.progress_loss_type: discrete
+      loss.progress_discrete_bins: 4
+
+  - id: disc10
+    overrides:
+      loss.progress_loss_type: discrete
+      loss.progress_discrete_bins: 10
+
+  # Requires the new monotonic penalty patch in rbm_heads_trainer.py.
+  # Leave commented until patch lands.
+  # - id: disc4_mono
+  #   overrides:
+  #     loss.progress_loss_type: discrete
+  #     loss.progress_discrete_bins: 4
+  #     loss.progress_monotonic_weight: 0.1

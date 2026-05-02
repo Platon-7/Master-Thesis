@@ -1,0 +1,48 @@
+#!/bin/bash
+#SBATCH --job-name=corn_sanity
+#SBATCH --output=logs/corn_sanity_%j.out
+#SBATCH --error=logs/corn_sanity_%j.err
+#SBATCH --time=00:45:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
+
+# CORN-pretrain 10-step pos_weight sanity check. See configs/corn_head_pretrain_sanity.yaml
+# for the decision rule and CORN_PRETRAIN_DEBUG.md for context.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+if [[ ! -x "$PYTHON" ]]; then
+    echo "ERROR: "$PYTHON" interpreter not executable at $PYTHON — likely an NFS-mount issue on this node" >&2
+    exit 1
+fi
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_LoRA_pretrain}"
+export WANDB_MODE="${WANDB_MODE:-offline}"   # 10-step diagnostic — keep offline
+
+cd "$ROBOMETER_DIR"
+
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_lora_base.yaml" "$HERE/configs/corn_head_pretrain_sanity.yaml" \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+OUT_DIR="${WEIGHTS_DIR:-/projects/prjs1958/LoRA_weights}/corn_sanity_${SLURM_JOB_ID:-local}"
+mkdir -p "$OUT_DIR"
+
+echo "[corn_sanity] output: $OUT_DIR"
+"$PYTHON" train.py "${OVERRIDES[@]}" \
+  training.output_dir="$OUT_DIR"

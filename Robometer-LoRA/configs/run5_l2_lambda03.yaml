@@ -1,0 +1,10 @@
+# Bake-off Run 5 — L2 (asymmetric C51 + BCE) original lambda.
+# Apply on top of train_lora_base.yaml + loss2_c51.yaml.
+#   * λ=0.3 → matches loss2_c51.yaml default (the original Apr-25 setting); explicit here
+#     for traceability and to lock in the value if loss2_c51.yaml ever changes.
+#   * lr=2e-5 (base default; L2 runs do NOT use the L1 4e-5 override).
+#   * ICL task-instruction dropout: OFF.
+
+loss.asymmetric_lambda: 0.3
+training.max_steps: 4000
+training.exp_name: bakeoff_run5_l2_lambda03

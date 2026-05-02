@@ -1,0 +1,64 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_loss2
+#SBATCH --output=logs/train_loss2_%j.out
+#SBATCH --error=logs/train_loss2_%j.err
+#SBATCH --time=72:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
+
+# Loss 2 training run (Chris' asymmetric C51 + asymmetric BCE).
+# See jobs/train_loss1.job header for usage notes — same env-var conventions.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+if [[ ! -x "$PYTHON" ]]; then
+    echo "ERROR: "$PYTHON" interpreter not executable at $PYTHON — likely an NFS-mount issue on this node" >&2
+    exit 1
+fi
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+# expandable_segments handles fragmentation that builds up across eval passes (each eval
+# allocates and frees big attention buffers; without expandable segments, training-side
+# allocs of similar size can't slot back into the freed-but-fragmented chunks → OOM).
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_LoRA}"
+# Forward wandb credentials and entity from the submitting shell.
+export WANDB_API_KEY="${WANDB_API_KEY:-}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+
+cd "$ROBOMETER_DIR"
+
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_lora_base.yaml" "$HERE/configs/loss2_c51.yaml" \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+EXTRA="${EXTRA:-}"
+MAX_STEPS_OVERRIDE=""
+if [[ -n "${MAX_STEPS:-}" ]]; then
+    # ++ forces the override to win against the base-yaml's own ++training.max_steps line.
+    MAX_STEPS_OVERRIDE="++training.max_steps=$MAX_STEPS"
+fi
+
+ENTITY_OVERRIDE=""
+if [[ -n "$WANDB_ENTITY" ]]; then
+    ENTITY_OVERRIDE="logging.wandb_entity=$WANDB_ENTITY"
+fi
+
+WEIGHTS_DIR="${WEIGHTS_DIR:-/projects/prjs1958/LoRA_weights}"
+mkdir -p "$WEIGHTS_DIR"
+
+"$PYTHON" train.py "${OVERRIDES[@]}" $MAX_STEPS_OVERRIDE $ENTITY_OVERRIDE $EXTRA \
+  training.output_dir="$WEIGHTS_DIR/loss2_${SLURM_JOB_ID:-local}"

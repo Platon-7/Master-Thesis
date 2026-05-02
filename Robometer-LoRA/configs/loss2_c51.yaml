@@ -1,0 +1,26 @@
+# Loss 2: Chris' asymmetric C51 + asymmetric BCE (see losses.md §Loss 2).
+# Apply on top of train_lora_base.yaml:
+#   uv run python train.py --config-path=../Robometer-LoRA/configs/train_lora_base.yaml \
+#       --config-path=../Robometer-LoRA/configs/loss2_c51.yaml \
+#       <any extra overrides>
+#
+# Keeps the progress and success heads exactly as the pretrained Robometer-4B release shipped.
+# Only the loss functions change. Preference head disabled.
+
+loss.progress_loss_type: c51_asymmetric   # asymmetric weight on the soft-CE C51 path
+loss.success_loss_type: bce_asymmetric    # mean(bce[neg]) + lambda * mean(bce[pos]) with empty-positives guard
+loss.progress_discrete_bins: 10            # matches the Robometer-4B checkpoint (confirmed via its own config.yaml)
+loss.asymmetric_lambda: 0.3                # single shared lambda; < 1 damps the false-negative / positive-class side
+
+# Active heads for this variant.
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# Warmup disabled (was 750). Apr-30 decision: skip the failure-only bootstrap phase,
+# go straight to 50/50 stratified batches from step 0. The `robometer_frames_warmup`
+# dataset is correspondingly dropped from data.train_datasets in train_lora_base.yaml.
+data.stratified_batch_balance: true
+data.warmup_steps: 0
+
+training.exp_name: robometer_lora_loss2_c51_asymmetric

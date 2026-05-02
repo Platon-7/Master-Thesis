@@ -1,0 +1,11 @@
+# Bake-off Run 6 — L2 (asymmetric C51 + BCE) milder lambda.
+# Apply on top of train_lora_base.yaml + loss2_c51.yaml.
+#   * λ=0.5 → less aggressive negative-side damping than 0.3. A higher λ means more weight
+#     on the false-negative / positive-class side (closer to symmetric). Tests whether the
+#     0.3 default was over-asymmetric.
+#   * lr=2e-5 (base default).
+#   * ICL task-instruction dropout: OFF.
+
+loss.asymmetric_lambda: 0.5
+training.max_steps: 4000
+training.exp_name: bakeoff_run6_l2_lambda05
