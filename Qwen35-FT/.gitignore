@@ -1,0 +1,7 @@
+logs/
+configs/_discovered_modules.json
+__pycache__/
+*.pyc
+*.pyo
+wandb/
+.ipynb_checkpoints/

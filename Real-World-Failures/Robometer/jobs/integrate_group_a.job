@@ -1,0 +1,52 @@
+#!/bin/bash
+#SBATCH --job-name=integrate_gA
+#SBATCH --output=/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/integrate_gA_%A_%a.out
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=8G
+#SBATCH --time=02:00:00
+#SBATCH --array=0-17
+
+# Integrate Leonardo's Group A output (8-frame jpg) into the canonical
+# robometer_frame_dataset format (16-frame sharded tars + compact scores).
+#
+# One array task per archive. Task 0 is the largest (racer_train, 23k eps,
+# ~45 min); the rest finish in <10 min each.
+
+set -euo pipefail
+
+ARCHIVES=(
+    "jesbu1_racer_rfm_racer_train"                                             # 23391  ← largest, run first
+    "jesbu1_racer_rfm_racer_val"                                               #  5820
+    "ykorkmaz_libero_failure_rfm_libero_90_failure"                            #  4312
+    "jesbu1_auto_eval_rfm_auto_eval_rfm"                                       #  3721
+    "ykorkmaz_libero_failure_rfm_libero_10_failure"                            #   498
+    "ykorkmaz_libero_failure_rfm_libero_object_failure"                        #   489
+    "ykorkmaz_libero_failure_rfm_libero_spatial_failure"                       #   486
+    "ykorkmaz_libero_failure_rfm_libero_goal_failure"                          #   456
+    "jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm"                     #    80
+    "jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all"                     #    50
+    "jesbu1_rfm_new_mit_franka_rfm_nowrist_rfm_new_mit_franka_rfm_nowrist"     #    40
+    "aliangdw_utd_so101_policy_ranking_utd_so101_policy_ranking"               #    20
+    "aliangdw_usc_xarm_policy_ranking_usc_xarm_policy_ranking"                 #    12
+    "jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top"        # 10
+    "jesbu1_utd_so101_clean_policy_ranking_wrist_utd_so101_clean_policy_ranking_wrist"    # 10
+    "aliangdw_usc_franka_policy_ranking_usc_franka_policy_ranking"             #     8
+    "ykorkmaz_usc_trossen_rfm_usc_trossen"                                     #     6 (manual)
+    "jesbu1_mit_franka_p-rank_rfm_mit_franka_p-rank_rfm"                       #     5
+)
+
+ARCHIVE="${ARCHIVES[$SLURM_ARRAY_TASK_ID]}"
+SCRIPT=/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/integrate_group_a_to_frame_dataset.py
+
+mkdir -p /gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs
+
+echo "============================================"
+echo "task $SLURM_ARRAY_TASK_ID / 17   archive=$ARCHIVE"
+echo "job $SLURM_JOB_ID  node=$(hostname)  $(date)"
+echo "============================================"
+
+python3 "$SCRIPT" --archive "$ARCHIVE"
+
+echo
+echo "=== done: $(date) ==="

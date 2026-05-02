@@ -23,8 +23,10 @@ OUTPUT=/gpfs/scratch1/shared/pkarageorgis1/failsafe_failures
 
 mkdir -p $THESIS/Failsafe/logs
 
+# Wipe previous run so all slots regenerate with updated parameters
+rm -rf $OUTPUT/sample_v1
+
 python $THESIS/Failsafe/generate_failures.py \
-    --episodes-per-score 3 \
     --output-dir $OUTPUT/sample_v1
 
 echo "=== Generating HTML verification page ==="

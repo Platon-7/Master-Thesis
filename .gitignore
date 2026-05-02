@@ -81,3 +81,16 @@ MetaWorld/metaworld_repo/
 
 # Local Claude Code guidance — kept on disk but not pushed
 CLAUDE.md
+
+# Claude Code session state (local-only)
+.claude/
+
+# Generated visualizations (>100MB, regenerable)
+Failsafe/failsafe_multicam.html
+
+# Qwen35-FT noise (logs / training outputs / wandb already covered by **/wandb/)
+Qwen35-FT/logs/
+Qwen35-FT/outputs/
+
+# Generic outputs/ dirs (training checkpoints, eval dumps, etc.)
+**/outputs/

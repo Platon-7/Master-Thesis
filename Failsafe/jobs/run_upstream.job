@@ -1,0 +1,59 @@
+#!/bin/bash
+#SBATCH --job-name=failsafe_upstream
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Failsafe/logs/upstream_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=24G
+#SBATCH --cpus-per-task=6
+#SBATCH --time=0:30:00
+
+# Run FailSafe's OWN example script unmodified. If the resulting MP4s show real
+# robot motion, then our pipeline wrapping it is broken. If the MP4s are frozen
+# too, then FailSafe's sim simply doesn't render correctly on our cluster and we
+# have a principled reason to drop the sim-regeneration path.
+
+CONDA_BASE=/gpfs/scratch1/shared/pkarageorgis1/miniforge3
+source $CONDA_BASE/etc/profile.d/conda.sh
+conda activate failsafe
+
+export FAILSAFE_PATH=/home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo
+export MUJOCO_GL=egl
+export PYTHONUNBUFFERED=1
+
+# FailSafe's script writes to ./data/failgen_data/ — run it from a scratch dir.
+OUTPUT=/gpfs/scratch1/shared/pkarageorgis1/failsafe_failures/upstream_test
+rm -rf $OUTPUT
+mkdir -p $OUTPUT
+cd $OUTPUT
+
+# Patch YAML save_path AND bump noise so failures actually occur
+# Default trans_x noise 0.1 doesn't fail FailPushCube — all tries succeed and no MP4s are written.
+export OUTPUT_DIR=$OUTPUT
+python - <<'PY'
+import yaml, os
+for t in ["FailPushCube-v1", "FailStackCube-v1"]:
+    p = f"{os.environ['FAILSAFE_PATH']}/failgen/configs/{t}.yaml"
+    c = yaml.safe_load(open(p))
+    c["save_path"] = os.environ["OUTPUT_DIR"] + "/_failsafe_tmp"
+    for f in c["failures"]:
+        if f["type"] in ("trans_x", "trans_y", "trans_z"):
+            f["noise"] = 0.5   # up from 0.1
+        elif f["type"].startswith("rot_"):
+            f["noise"] = 2.5   # up from 1.5
+    open(p, "w").write(yaml.dump(c))
+PY
+
+# FailStackCube is harder than FailPushCube → failures come easier.
+# rot_x @ 2.5 rad noise almost guarantees grasp-stage failures.
+python $FAILSAFE_PATH/examples/ex_failgen_data_collection.py \
+    --task-name FailStackCube-v1 \
+    --fail-type rot_x \
+    --headless \
+    --save-video \
+    --num-gt 1 \
+    --num-episodes 2
+
+echo ""
+echo "=== Output layout ==="
+find $OUTPUT -type f | head -50
+find $OUTPUT -name "*.mp4" | head -20

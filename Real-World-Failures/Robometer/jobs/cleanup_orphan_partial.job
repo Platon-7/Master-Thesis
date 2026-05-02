@@ -1,0 +1,60 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_cleanup
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/cleanup_orphan_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=04:00:00
+
+# Finish deleting the partial orphan-success extraction that was aborted
+# when we hit the project inode cap. The bc_z dir alone has ~461k loose
+# JPEGs across ~28.8k subdirs — slow on GPFS, should never be run on the
+# login node.
+#
+# Deletes:
+#   keyframes_orphan_success/jesbu1_oxe_rfm_oxe_bc_z        (big: ~461k files)
+#   keyframes_orphan_success/jesbu1_oxe_rfm_oxe_nyu_rot...  (tiny: ~224 files)
+#   manifests/*_orphan_*.jsonl                              (4 files)
+
+set -e
+
+BASE="/projects/prjs1958/robometer_frame_dataset/robometer"
+
+echo "============================================================"
+echo "Orphan-extraction partial cleanup"
+echo "  Job ID: $SLURM_JOB_ID"
+echo "  Node:   $(hostname)"
+echo "  Start:  $(date)"
+echo "============================================================"
+
+echo "[1/3] Quota BEFORE:"
+/usr/hpc/bin/myquota prjs1958 2>/dev/null | tail -3 || echo "  (myquota not available)"
+
+echo
+echo "[2/3] Removing partial orphan-success archive dirs..."
+for d in jesbu1_oxe_rfm_oxe_bc_z jesbu1_oxe_rfm_oxe_nyu_rot_dataset_converted_externally_to_rlds; do
+    path="${BASE}/keyframes_orphan_success/${d}"
+    if [ -d "$path" ]; then
+        echo "  rm -rf ${path}"
+        time rm -rf "$path"
+    else
+        echo "  (already gone) ${path}"
+    fi
+done
+
+echo
+echo "  Removing orphan manifest files..."
+for f in "${BASE}/manifests/"*_orphan_*.jsonl; do
+    [ -f "$f" ] || continue
+    echo "  rm ${f}"
+    rm -f "$f"
+done
+
+echo
+echo "[3/3] Quota AFTER:"
+/usr/hpc/bin/myquota prjs1958 2>/dev/null | tail -3 || echo "  (myquota not available)"
+
+echo
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

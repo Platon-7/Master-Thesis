@@ -1,0 +1,88 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_migrate
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/migrate_to_shards_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=24:00:00
+
+# Migrate every loose-JPEG root under /projects/prjs1958/robometer_frame_dataset/
+# into WebDataset-style tar shards (256 episodes per shard). This reclaims
+# millions of inodes on the prjs1958 project allocation, which has a 1.9M
+# hard inode cap.
+#
+# For each root:
+#   - pack_loose_to_shards.py writes shard-XXXXX.tar alongside loose data
+#   - --verify re-reads each shard to confirm every packed episode is intact
+#   - loose JPEGs are only deleted after verification succeeds
+#
+# Order: smallest -> largest, so a failure in the first few is caught early.
+#
+# Usage (submit after cleanup_orphan_partial.job finishes):
+#   sbatch --dependency=afterok:<cleanup_jobid> migrate_to_shards.job
+# or standalone:
+#   sbatch migrate_to_shards.job
+#
+# To run a single root only:
+#   sbatch --export=ONLY_ROOT=/projects/prjs1958/robometer_frame_dataset/robometer/keyframes_success migrate_to_shards.job
+
+set -e
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer"
+PACK="python3 ${SCRIPT_DIR}/pack_loose_to_shards.py"
+BASE="/projects/prjs1958/robometer_frame_dataset"
+
+# NOTE: The .bak_8to16_nn variants are old snapshots — NOT migrated here.
+# Delete them separately if no longer needed.
+ROOTS=(
+    "${BASE}/robometer/keyframes_success"
+    "${BASE}/droid/keyframes_success"
+    "${BASE}/droid/keyframes_success_ext2"
+    "${BASE}/droid/keyframes_success_wrist"
+    "${BASE}/droid/keyframes"
+    "${BASE}/droid/keyframes_ext2"
+    "${BASE}/droid/keyframes_wrist"
+)
+
+echo "============================================================"
+echo "Frame-dataset migration to WebDataset shards"
+echo "  Job ID: $SLURM_JOB_ID"
+echo "  Node:   $(hostname)"
+echo "  Start:  $(date)"
+echo "============================================================"
+
+echo "[pre] Quota BEFORE:"
+/usr/hpc/bin/myquota prjs1958 2>/dev/null | tail -3 || true
+
+if [ -n "$ONLY_ROOT" ]; then
+    ROOTS=("$ONLY_ROOT")
+    echo "  ONLY_ROOT override: $ONLY_ROOT"
+fi
+
+for root in "${ROOTS[@]}"; do
+    echo
+    echo "======================================================="
+    echo "ROOT: $root"
+    echo "  Start: $(date)"
+    echo "======================================================="
+    if [ ! -d "$root" ]; then
+        echo "  skip: directory does not exist"
+        continue
+    fi
+
+    # Safety: pass --verify so we only delete loose files after re-reading shards
+    $PACK "$root" --verify
+
+    echo "  Done with $root at $(date)"
+    echo "  Quota now:"
+    /usr/hpc/bin/myquota prjs1958 2>/dev/null | tail -3 || true
+done
+
+echo
+echo "[post] Quota AFTER:"
+/usr/hpc/bin/myquota prjs1958 2>/dev/null | tail -3 || true
+
+echo
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

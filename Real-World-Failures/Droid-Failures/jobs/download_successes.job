@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH --job-name=droid_successes
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Droid-Failures/logs/download_successes_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=24
+#SBATCH --time=12:00:00
+
+# Download matched success episodes (3 cams each) + extract 16 keyframes.
+# Reads:  /projects/prjs1958/robometer_frame_dataset/droid/metadata/success_pairs.jsonl
+# Writes: /projects/prjs1958/robometer_frame_dataset/droid/keyframes_success*/...
+# Resume-safe.
+
+module load 2025
+module load FFmpeg/7.1.1-GCCcore-14.2.0
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Droid-Failures"
+
+echo "============================================================"
+echo "DROID Success Downloader"
+echo "  Job ID: $SLURM_JOB_ID"
+echo "  Node:   $(hostname)"
+echo "  Date:   $(date)"
+echo "============================================================"
+
+python3 "${SCRIPT_DIR}/download_successes.py" --workers 24
+
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

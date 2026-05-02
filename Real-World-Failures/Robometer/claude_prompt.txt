@@ -1,0 +1,89 @@
+I need you to make 3 small edits to my RoboMeter VLM+LLM scoring pipeline so its output format matches the DROID pipeline format used by the rest of the project. Don't re-run any tests — just apply the edits and confirm.
+
+Change 1 — Enable vLLM prefix caching
+
+In my scoring script, find the two vLLM model constructors (one loads the VLM for frame descriptions, one loads the LLM for scoring). Add enable_prefix_caching=True as the final kwarg to both. They should look like this afterwards:
+
+# VLM loader
+llm = LLM(
+    model=model_id,
+    dtype="bfloat16",
+    tensor_parallel_size=num_gpus,
+    max_model_len=int(os.environ.get("VLM_MAX_MODEL_LEN", 16384)),
+    gpu_memory_utilization=0.90,
+    enforce_eager=True,
+    trust_remote_code=True,
+    allowed_local_media_path="/",
+    enable_prefix_caching=True,   # <-- add this
+)
+
+# LLM loader
+model = vLLM(
+    model=model_id,
+    dtype="bfloat16",
+    tensor_parallel_size=num_gpus,
+    max_model_len=4096,
+    gpu_memory_utilization=0.90,
+    enforce_eager=True,
+    trust_remote_code=True,
+    enable_prefix_caching=True,   # <-- add this
+)
+
+Change 2 — Flatten the score tuple into two flat fields
+
+My current scored JSONL has score as a tuple [int, "ANSWER: ..."]. Split it into two separate fields, score (int) and llm_raw (str). Apply this at both the top-level episode record and inside each entry of the frames[] array.
+
+Change 3 — Add image_path to each frame record
+
+Each frame record inside frames[] is missing the image path. Add a new field:
+
+"image_path": "keyframes/<archive>/<episode_id>/frame_<frame_idx>_<timestamp:.2f>s.jpg"
+
+Path is relative to DATA_DIR. The keyframe files already exist at those paths — you're just writing the relative path string into the JSON.
+
+Target format — exact example
+
+Current (wrong) — one line of my test output:
+{
+  "episode_id": "ep_000015_9f1d74ef-...",
+  "archive": "jesbu1_mit_franka_p-rank_rfm_mit_franka_p-rank_rfm",
+  "category": "real_robot",
+  "task": "move some pebbles from the blue bowl to the green plate using the scoop",
+  "robometer_label": "failure",
+  "score": [2, "ANSWER: 2 because the robot approached the bowl but never scooped"],
+  "frames": [
+    {"frame_idx": 0, "timestamp": 0.0,
+     "description": "The gripper hovers above the blue bowl...",
+     "score": [1, "ANSWER: 1 because the robot has not moved"]},
+    {"frame_idx": 1, "timestamp": 0.5,
+     "description": "The scoop is lowered toward the pebbles...",
+     "score": [2, "ANSWER: 2 because the robot is approaching"]}
+  ]
+}
+
+Target (correct, matching DROID) — same line after your edits:
+{
+  "episode_id": "ep_000015_9f1d74ef-...",
+  "archive": "jesbu1_mit_franka_p-rank_rfm_mit_franka_p-rank_rfm",
+  "category": "real_robot",
+  "task": "move some pebbles from the blue bowl to the green plate using the scoop",
+  "robometer_label": "failure",
+  "score": 2,
+  "llm_raw": "ANSWER: 2 because the robot approached the bowl but never scooped",
+  "frames": [
+    {"frame_idx": 0, "timestamp": 0.0,
+     "image_path": "keyframes/jesbu1_mit_franka_p-rank_rfm_mit_franka_p-rank_rfm/ep_000015_9f1d74ef-.../frame_0_0.00s.jpg",
+     "description": "The gripper hovers above the blue bowl...",
+     "score": 1,
+     "llm_raw": "ANSWER: 1 because the robot has not moved"},
+    {"frame_idx": 1, "timestamp": 0.5,
+     "image_path": "keyframes/jesbu1_mit_franka_p-rank_rfm_mit_franka_p-rank_rfm/ep_000015_9f1d74ef-.../frame_1_0.50s.jpg",
+     "description": "The scoop is lowered toward the pebbles...",
+     "score": 2,
+     "llm_raw": "ANSWER: 2 because the robot is approaching"}
+  ]
+}
+
+Key differences: score is now a plain int, llm_raw holds the justification string, and every frame has an image_path.
+
+Confirm with one sample line of your scored output after edits, then we're done — I'll launch the full run.

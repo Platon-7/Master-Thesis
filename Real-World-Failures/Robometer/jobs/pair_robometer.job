@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_pair
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/pair_robometer_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=04:00:00
+
+# Build failure->success in-context pair manifests for every RoboMeter
+# Group A + Group B archive (excluding DROID/metaworld/human_hand/humanoid/failsafe).
+# Reads index_mappings.json from each archive (streamed from split tars) and
+# writes one JSONL per archive + a consolidated report.json under
+# /projects/prjs1958/robometer_full_dataset/pairs/
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer"
+
+echo "============================================================"
+echo "RoboMeter Pair Builder"
+echo "  Job ID: $SLURM_JOB_ID"
+echo "  Node:   $(hostname)"
+echo "  Date:   $(date)"
+echo "============================================================"
+
+python3 "${SCRIPT_DIR}/pair_robometer.py"
+
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

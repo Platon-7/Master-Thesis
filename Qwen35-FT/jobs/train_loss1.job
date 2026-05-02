@@ -1,0 +1,86 @@
+#!/bin/bash
+#SBATCH --job-name=qwen35_ft_l1
+#SBATCH --output=logs/train_loss1_%j.out
+#SBATCH --error=logs/train_loss1_%j.err
+#SBATCH --time=72:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:4
+#SBATCH --cpus-per-task=16
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem=480G
+
+# Full fine-tune of vanilla Qwen3.5-4B with Loss 1 (CORN asymmetric ordinal).
+# Multi-GPU FSDP via accelerate. Single-node 4×H100 — flip --gres + --num_processes
+# below for different topologies.
+#
+# Recipe overrides (set at launch via env vars or `EXTRA="..."`):
+#   * MAX_STEPS=N                              → training.max_steps
+#   * EXTRA="++data.use_icl=false ..."         → arbitrary Hydra overrides (ICL toggle, ICL dropout, lr, etc.)
+#   * WANDB_PROJECT=...                        → WandB project (default Qwen35_FT)
+#   * WEIGHTS_DIR=...                          → checkpoint output root
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+QWEN35_DIR="${QWEN35_DIR:-$HERE}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu/bin/python"
+ACCELERATE="/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu/bin/accelerate"
+if [[ ! -x "$PYTHON" ]] || [[ ! -x "$ACCELERATE" ]]; then
+    echo "ERROR: env interpreter / accelerate not executable" >&2
+    echo "  expected: $PYTHON   $ACCELERATE" >&2
+    echo "  build env first: see Qwen35-FT/README.md" >&2
+    exit 1
+fi
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_PROJECT="${WANDB_PROJECT:-Qwen35_FT}"
+export WANDB_API_KEY="${WANDB_API_KEY:-}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+
+# CRITICAL: cd into Qwen35-FT/ so the vendored robometer/ wins on import precedence
+# over Robometer/robometer/. PYTHONPATH prepended belt-and-suspenders.
+cd "$QWEN35_DIR"
+export PYTHONPATH="$QWEN35_DIR:${PYTHONPATH:-}"
+
+# Sed-flatten the YAML configs into Hydra ++key=value overrides. Inline lists [a,b,c]
+# survive; block lists (- item) would break this — see configs/train_base.yaml header.
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_base.yaml" "$HERE/configs/loss1_corn.yaml" \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+EXTRA="${EXTRA:-}"
+if [[ -n "${MAX_STEPS:-}" ]]; then
+    EXTRA="$EXTRA ++training.max_steps=$MAX_STEPS"
+fi
+if [[ -n "${WANDB_ENTITY:-}" ]]; then
+    EXTRA="$EXTRA logging.wandb_entity=$WANDB_ENTITY"
+fi
+
+WEIGHTS_DIR="${WEIGHTS_DIR:-/projects/prjs1958/Qwen35_FT_weights}"
+mkdir -p "$WEIGHTS_DIR"
+
+NUM_PROC="${NUM_PROC:-$(nvidia-smi -L 2>/dev/null | wc -l)}"
+NUM_PROC="${NUM_PROC:-4}"
+
+echo "==================== launch summary ===================="
+echo "FSDP num_processes : $NUM_PROC"
+echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
+echo "MAX_STEPS          : ${MAX_STEPS:-<from-yaml>}"
+echo "EXTRA              : $EXTRA"
+echo "OVERRIDES count    : ${#OVERRIDES[@]}"
+echo "========================================================"
+
+"$ACCELERATE" launch \
+  --config_file configs/distributed/fsdp_qwen35.yaml \
+  --num_processes="$NUM_PROC" \
+  train.py "${OVERRIDES[@]}" $EXTRA \
+  training.output_dir="$WEIGHTS_DIR/loss1_${SLURM_JOB_ID:-local}"

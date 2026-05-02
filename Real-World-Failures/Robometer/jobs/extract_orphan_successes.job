@@ -1,0 +1,44 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_orph
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/extract_orphan_successes_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=64G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=24:00:00
+
+# Extract 16 uniformly-spaced keyframes from Robometer ORPHAN-success
+# episodes (~341,220 across 28 archives — OXE robot arms, MolmoACT,
+# rh20t_robot, motif, fino_net). Resume-safe — re-submit if time
+# runs out.
+#
+# Excludes (per FOR_LEONARDO.md): humanoid robot data (agibotworld,
+# galaxea r1_lite) and human-only/hand data (egodex, epic, rh20t_human,
+# h2r), plus archives already extracted by extract_successes.py.
+#
+# Output: /projects/prjs1958/robometer_frame_dataset/robometer/keyframes_orphan_success/
+#
+# To run a single archive instead:
+#   sbatch --export=ARCHIVE=jesbu1_oxe_rfm_oxe_bridge_v2 extract_orphan_successes.job
+# To just count (no extraction):
+#   sbatch --export=COUNT_ONLY=1 extract_orphan_successes.job
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer"
+ARCHIVE="${ARCHIVE:-all}"
+
+echo "============================================================"
+echo "RoboMeter Orphan-Success Keyframe Extraction"
+echo "  Job ID:   $SLURM_JOB_ID"
+echo "  Node:     $(hostname)"
+echo "  Archive:  $ARCHIVE"
+echo "  Date:     $(date)"
+echo "============================================================"
+
+if [ -n "$COUNT_ONLY" ]; then
+    python3 "${SCRIPT_DIR}/extract_orphan_successes.py" --count-only
+else
+    python3 "${SCRIPT_DIR}/extract_orphan_successes.py" --archive "$ARCHIVE"
+fi
+
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

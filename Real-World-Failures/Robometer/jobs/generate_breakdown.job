@@ -1,0 +1,41 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_breakdown
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/generate_breakdown_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:30:00
+
+# Generate ROBOMETER_BREAKDOWN.md from the full audit + pair report.
+# Intended to run immediately after audit_full.job so that the .md
+# reflects the no-exclusions audit output.
+#
+# Inputs:
+#   /projects/prjs1958/robometer_full_dataset/audit_report.json
+#   /projects/prjs1958/robometer_full_dataset/pairs/report.json
+# Output:
+#   /gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/ROBOMETER_BREAKDOWN.md
+
+set -e
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer"
+AUDIT="/projects/prjs1958/robometer_full_dataset/audit_report.json"
+PAIRS="/projects/prjs1958/robometer_full_dataset/pairs/report.json"
+OUTPUT="${SCRIPT_DIR}/ROBOMETER_BREAKDOWN.md"
+
+echo "============================================================"
+echo "Generate ROBOMETER_BREAKDOWN.md"
+echo "  Job ID: $SLURM_JOB_ID"
+echo "  Date:   $(date)"
+echo "  Audit:  $AUDIT"
+echo "  Pairs:  $PAIRS"
+echo "  Output: $OUTPUT"
+echo "============================================================"
+
+python3 "${SCRIPT_DIR}/generate_breakdown_md.py" \
+    --audit  "$AUDIT" \
+    --pairs  "$PAIRS" \
+    --output "$OUTPUT"
+
+echo
+echo "Done at: $(date)"

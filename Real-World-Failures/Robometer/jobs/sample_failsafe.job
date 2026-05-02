@@ -1,0 +1,38 @@
+#!/bin/bash
+#SBATCH --job-name=sample_failsafe
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/sample_failsafe_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=2:00:00
+
+# Download & extract a handful of FailSafe failure episodes so we can eyeball them.
+# Uses the same selective_download.py pipeline that Group C uses, but capped to
+# max_episodes=10 so this finishes fast and doesn't fill scratch.
+
+CONDA_BASE=/gpfs/scratch1/shared/pkarageorgis1/miniforge3
+source $CONDA_BASE/etc/profile.d/conda.sh
+conda activate failsafe
+
+# HF_TOKEN not required — we're reading a local tar, not downloading
+export HF_TOKEN="${HF_TOKEN:-not_needed_local}"
+export PYTHONUNBUFFERED=1
+
+SCRIPT_DIR=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer
+DATA_DIR=/home/pkarageorgis1/Master-Thesis/Failsafe/robometer_sample
+LOCAL_TAR_DIR=/projects/prjs1958/robometer_full_dataset/raw_archives/split/jesbu1_failsafe_rfm_failsafe
+
+mkdir -p $SCRIPT_DIR/logs
+
+python $SCRIPT_DIR/selective_download.py \
+    --archive jesbu1_failsafe_rfm_failsafe \
+    --output-dir $DATA_DIR \
+    --local-tar-dir $LOCAL_TAR_DIR \
+    --max-episodes 10 \
+    --include-partial
+
+echo ""
+echo "Done. Keyframes under $DATA_DIR/keyframes/jesbu1_failsafe_rfm_failsafe/"
+ls $DATA_DIR/keyframes/jesbu1_failsafe_rfm_failsafe/ | head
+wc -l $DATA_DIR/manifests/jesbu1_failsafe_rfm_failsafe.jsonl

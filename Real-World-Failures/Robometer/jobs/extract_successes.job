@@ -1,0 +1,32 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_succ
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/extract_successes_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=64G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=24:00:00
+
+# Extract 16 uniformly-spaced keyframes from all 26,045 Robometer success
+# episodes across 24 archives. Resume-safe — re-submit if time runs out.
+#
+# Output: /projects/prjs1958/robometer_full_dataset/keyframes_success/
+#
+# To run a single archive instead:
+#   sbatch --export=ARCHIVE=jesbu1_racer_rfm_racer_train extract_successes.job
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer"
+ARCHIVE="${ARCHIVE:-all}"
+
+echo "============================================================"
+echo "RoboMeter Success Keyframe Extraction"
+echo "  Job ID:   $SLURM_JOB_ID"
+echo "  Node:     $(hostname)"
+echo "  Archive:  $ARCHIVE"
+echo "  Date:     $(date)"
+echo "============================================================"
+
+python3 "${SCRIPT_DIR}/extract_successes.py" --archive "$ARCHIVE"
+
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

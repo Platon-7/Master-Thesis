@@ -1,0 +1,75 @@
+#!/bin/bash
+#SBATCH --job-name=mw_dataset
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/MetaWorld/logs/dataset_%A_%a.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --time=12:00:00
+#SBATCH --array=0-45
+
+# Full MetaWorld dataset in robometer_frame_dataset format.
+# SLURM array indexed 0..45, one MetaWorld task per array index
+# (46 tasks = 50 scripted policies minus reach / reach-wall / peg-insertion-side /
+# peg-unplug-side).
+#
+# Per task:
+#   - 25 success episodes (scripted expert, randomized initial conditions via MT1 train_tasks)
+#   - 100 failure episodes per valid score × 3 cameras (corner2/corner3/gripperPOV)
+#
+# Output (shared across array tasks, no race because archive names differ):
+#   $OUT/keyframes/metaworld_<task>/shard-*.tar
+#   $OUT/keyframes_success/metaworld_<task>/shard-*.tar
+#   $OUT/manifests/metaworld_<task>_{failures,successes}.jsonl
+#   $OUT/scores/metaworld_<task>_scored.jsonl
+
+set -euo pipefail
+
+CONDA_BASE=/gpfs/scratch1/shared/pkarageorgis1/miniforge3
+source $CONDA_BASE/etc/profile.d/conda.sh
+conda activate metaworld
+
+export MUJOCO_GL=egl
+export PYTHONUNBUFFERED=1
+
+THESIS=/home/pkarageorgis1/Master-Thesis
+OUT=/gpfs/scratch1/shared/pkarageorgis1/metaworld_dataset/full_v1
+
+mkdir -p $THESIS/MetaWorld/logs $OUT
+
+# Derive the canonical task list from generate_failures.py so we never drift
+# from the category sets / EXCLUDED_TASKS.
+cd $THESIS/MetaWorld
+TASK_LIST=$(python -c "
+from generate_failures import SCRIPTED_POLICIES, EXCLUDED_TASKS
+tasks = sorted(t for t in SCRIPTED_POLICIES if t not in EXCLUDED_TASKS)
+print('\n'.join(tasks))
+")
+readarray -t TASKS <<< "$TASK_LIST"
+
+N_TASKS=${#TASKS[@]}
+if (( SLURM_ARRAY_TASK_ID >= N_TASKS )); then
+    echo "Array index $SLURM_ARRAY_TASK_ID >= N_TASKS=$N_TASKS — nothing to do"
+    exit 0
+fi
+
+TASK=${TASKS[$SLURM_ARRAY_TASK_ID]}
+BASE_SEED=$(( 100000 + SLURM_ARRAY_TASK_ID * 1000 ))
+
+echo "=== Array task $SLURM_ARRAY_TASK_ID/$N_TASKS: $TASK  base_seed=$BASE_SEED ==="
+echo "Start: $(date)"
+
+python $THESIS/MetaWorld/generate_dataset.py \
+    --task $TASK \
+    --output-dir $OUT \
+    --base-seed $BASE_SEED
+
+echo
+echo "=== Summary for $TASK ==="
+ARCHIVE="metaworld_$(echo $TASK | tr '-' '_')"
+ls -la $OUT/keyframes/$ARCHIVE 2>/dev/null || true
+ls -la $OUT/keyframes_success/$ARCHIVE 2>/dev/null || true
+wc -l $OUT/manifests/${ARCHIVE}_*.jsonl $OUT/scores/${ARCHIVE}_*.jsonl 2>/dev/null || true
+
+echo "End: $(date)"
+echo "=== Done: $TASK ==="

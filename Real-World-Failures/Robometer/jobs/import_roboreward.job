@@ -1,0 +1,36 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_import_rr
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/import_roboreward_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=2
+#SBATCH --time=04:00:00
+
+# Import roboreward_frame_dataset into /projects/prjs1958/robometer_frame_dataset/
+# as its own subtree (parallel to droid/ and robometer/). Source is on
+# /scratch-shared (purgeable), destination is the project allocation.
+#
+# rsync: resumable, verifies file sizes, safe to re-run.
+# Source is left intact until manually cleaned up.
+
+set -u
+SRC="/scratch-shared/pkarageorgis1/roboreward_import/"
+DST="/projects/prjs1958/robometer_frame_dataset/roboreward/"
+
+echo "============================================================"
+echo "Import roboreward_frame_dataset"
+echo "  Job ID: $SLURM_JOB_ID   Node: $(hostname)   Date: $(date)"
+echo "  SRC: $SRC"
+echo "  DST: $DST"
+echo "============================================================"
+
+mkdir -p "$DST"
+rsync -a --info=progress2 --info=stats2 "$SRC" "$DST"
+
+echo
+echo "--- post-import inode count ---"
+find "$DST" -xdev | wc -l
+
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

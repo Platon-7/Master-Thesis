@@ -1,0 +1,64 @@
+#!/bin/bash
+#SBATCH --job-name=failsafe_dataset
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Failsafe/logs/dataset_%A_%a.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --time=24:00:00
+#SBATCH --array=0-2
+
+# Full FailSafe dataset in robometer_frame_dataset format.
+# SLURM array (3 tasks):
+#   index 0 -> FailPickCube-v1  (8 slots: 1 success @ 25 inst + 7 fail @ 100 inst each)
+#   index 1 -> FailPushCube-v1  (6 slots: 1 success @ 25 inst + 5 fail @ 100 inst each)
+#   index 2 -> FailStackCube-v1 (10 slots: 1 success @ 25 inst + 9 fail @ 100 inst each)
+#
+# Each instance is rendered from 3 cameras (front/side/wrist) and emitted as
+# 3 separate episodes. Successes run FIRST so failures can reference
+# paired_success_id.
+#
+# Output (shared across array tasks, no race since archive names differ):
+#   $OUT/keyframes/<archive>/shard-*.tar
+#   $OUT/keyframes_success/<archive>/shard-*.tar
+#   $OUT/manifests/<archive>_{failures,successes}.jsonl
+#   $OUT/scores/<archive>_scored.jsonl
+
+set -euo pipefail
+
+CONDA_BASE=/gpfs/scratch1/shared/pkarageorgis1/miniforge3
+source $CONDA_BASE/etc/profile.d/conda.sh
+conda activate failsafe
+
+export FAILSAFE_PATH=/home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo
+export MUJOCO_GL=egl
+export PYTHONUNBUFFERED=1
+
+THESIS=/home/pkarageorgis1/Master-Thesis
+OUT=/gpfs/scratch1/shared/pkarageorgis1/failsafe_dataset/full_v1
+
+mkdir -p $THESIS/Failsafe/logs $OUT
+
+TASKS=(FailPickCube-v1 FailPushCube-v1 FailStackCube-v1)
+TASK=${TASKS[$SLURM_ARRAY_TASK_ID]}
+
+# Distinct base seeds so replays across array tasks don't collide on disk names.
+BASE_SEEDS=(100000 200000 300000)
+BASE_SEED=${BASE_SEEDS[$SLURM_ARRAY_TASK_ID]}
+
+echo "=== Array task $SLURM_ARRAY_TASK_ID: $TASK  base_seed=$BASE_SEED ==="
+echo "Start: $(date)"
+
+python $THESIS/Failsafe/generate_dataset.py \
+    --task $TASK \
+    --output-dir $OUT \
+    --base-seed $BASE_SEED
+
+echo
+echo "=== Summary for $TASK ==="
+ls -la $OUT/keyframes/ 2>/dev/null || true
+ls -la $OUT/keyframes_success/ 2>/dev/null || true
+wc -l $OUT/manifests/*.jsonl $OUT/scores/*.jsonl 2>/dev/null || true
+
+echo "End: $(date)"
+echo "=== Done: $TASK ==="

@@ -1,0 +1,38 @@
+#!/bin/bash
+#SBATCH --job-name=droid_extra_views
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Droid-Failures/logs/download_extra_views_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=24
+#SBATCH --time=12:00:00
+
+# ============================================================
+# Download ext2 + wrist keyframes for all DROID failure episodes.
+#
+# Reads from: /projects/prjs1958/robometer_frame_dataset/droid/metadata/scored_full_droid_shard*.jsonl
+# Writes to:  /projects/prjs1958/robometer_frame_dataset/droid/keyframes_ext2/
+#             /projects/prjs1958/robometer_frame_dataset/droid/keyframes_wrist/
+#
+# Resume-safe: re-running picks up from where it left off.
+# ============================================================
+
+module load 2025
+module load FFmpeg/7.1.1-GCCcore-14.2.0
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Droid-Failures"
+
+echo "============================================================"
+echo "DROID Extra Views Downloader"
+echo "  Job ID: $SLURM_JOB_ID"
+echo "  Node:   $(hostname)"
+echo "  Date:   $(date)"
+echo "  CPUs:   $SLURM_CPUS_PER_TASK"
+echo "============================================================"
+
+python3 "${SCRIPT_DIR}/download_extra_views.py" \
+    --droid-dir "/projects/prjs1958/robometer_frame_dataset/droid" \
+    --workers 24
+
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

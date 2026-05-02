@@ -730,11 +730,12 @@ def render_all_cameras(env, camera_names):
 
 def _run_one_episode(env, policy, target_score, category, calib,
                      noise_mode, max_steps, noise_scale, noisy_steps, cameras,
-                     task_name=""):
+                     task_name="", n_keyframes=8):
     """Run a single episode attempt. Returns (keyframes, n_steps) or None.
 
     cameras: list of camera names to render from, or empty list for no render.
     Each keyframe stores images: {camera_name: np.ndarray}.
+    n_keyframes: number of evenly-spaced frames sampled from the trajectory.
     """
     init_o2t_default = calib["init_o2t"]
     obs, info = env.reset()
@@ -899,14 +900,14 @@ def _run_one_episode(env, policy, target_score, category, calib,
                 break
 
     n_steps = len(trajectory)
-    if n_steps < 8:
+    if n_steps < n_keyframes:
         return None
 
     # Basketball's expert briefly moves the arm away from the ball before
     # approaching, making frame 0 look misleadingly close. Skip the first
     # 10% of steps for this task only.
     kf_start = (n_steps // 10) if task_name == "basketball-v3" else 0
-    indices = np.linspace(kf_start, n_steps - 1, 8, dtype=int)
+    indices = np.linspace(kf_start, n_steps - 1, n_keyframes, dtype=int)
     keyframes = []
     for idx in indices:
         t = trajectory[idx]

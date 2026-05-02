@@ -1,0 +1,90 @@
+# Base Hydra overrides shared by every Qwen3.5 full-FT training run.
+# Per-variant loss setup comes from loss1_corn.yaml or loss2_c51.yaml.
+#
+# Mirrors the recipe in Robometer/FINETUNE_ROBOMETER.md (Qwen3-VL-4B → Robometer-4B
+# full FT) with these deltas:
+#   1. model.base_model_id     = Qwen/Qwen3.5-4B  (vanilla — no Robometer pretrain)
+#   2. training.load_from_checkpoint REMOVED  (no checkpoint resume)
+#   3. exp_name suffix         → qwen35_ft_*
+#   4. logging.wandb_project   = Qwen35_FT
+#
+# IMPORTANT: This file is consumed by the same sed-based line-to-CLI-override translator
+# used by Robometer-LoRA. Keep every list in inline [a,b,c] form — block lists (- item)
+# break the flattening.
+
+model.base_model_id: Qwen/Qwen3.5-4B
+# Full fine-tune — every weight is trained. PEFT/LoRA NOT used (the user will tune
+# the recipe on Robometer-LoRA first, then full-FT here once the recipe is settled).
+model.use_peft: false
+
+# Unsloth is OFF — Robometer's base config.yaml defaults to use_unsloth=true, but
+# unsloth is incompatible with transformers 5.7 and intentionally NOT installed
+# in robometer_qwen35_gpu. The vendored setup_utils.py lazy-imports it (only fires
+# when this flag is true), so we explicitly disable it here.
+model.use_unsloth: false
+
+# Active heads: progress + success. Loss 1 (CORN) overrides train_success_head back to
+# false. Preference head off for both losses.
+model.train_progress_head: true
+model.train_preference_head: false
+model.train_success_head: true
+
+# Splits unchanged — same data, different base model. ICL pairs unchanged.
+data.train_datasets: [robometer_frames_train]
+data.eval_datasets: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
+
+# ICL — toggle/dropout via Hydra CLI override at launch time
+# (e.g. ++data.use_icl=false, ++data.icl_prob=0.3, ++data.icl_task_dropout=0.2).
+data.use_icl: true
+data.icl_prob: 0.5
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits/pairs_index_train.jsonl
+
+# Augmentations — identical to Robometer-LoRA. Pure progress sampling (one trajectory
+# per sample), preference head disabled.
+data.sample_type_ratio: [0,1,0]
+data.preference_strategy_ratio: [1,1,1,1]
+data.progress_strategy_ratio: [1,1,1,1]
+
+# NOTE: training.load_from_checkpoint INTENTIONALLY OMITTED. Vanilla Qwen3.5-4B is
+# loaded via Qwen3_5ForConditionalGeneration.from_pretrained; the 3 RBM heads
+# initialize fresh (resize_token_embeddings handles the +6 special tokens).
+
+# Hyperparameters — match Robometer/FINETUNE_ROBOMETER.md's full-FT recipe defaults.
+# Learning rate / warmup / max_steps will be the FIRST things you override at launch
+# once the LoRA bake-off recipe is finalized.
+training.per_device_train_batch_size: 8
+training.gradient_accumulation_steps: 1
+training.learning_rate: 2.0e-5
+training.warmup_ratio: 0.1
+training.weight_decay: 0.01
+training.max_steps: 7500
+training.eval_steps: 500
+training.custom_eval_steps: 500
+
+# Mixed precision — bf16 on H100 (consistent with FSDP config below).
+training.bf16: true
+training.fp16: false
+training.gradient_checkpointing: true
+
+# Don't strip batch columns based on model.forward signature. Qwen3.5's processor
+# emits `mm_token_type_ids` (required for M-RoPE in transformers >=5.7); HF
+# Trainer's _signature_columns filter would drop it before the model sees it.
+# Belt-and-suspenders even though we list mm_token_type_ids explicitly in
+# RBM.forward — disabling the filter is the surest path to "all collator keys
+# survive to forward()".
+training.remove_unused_columns: false
+
+# Custom eval: only policy_ranking (the §Winning-criterion metric from losses.md).
+custom_eval.eval_types: [policy_ranking]
+custom_eval.policy_ranking: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
+custom_eval.num_examples_per_quality_pr: 85
+
+training.per_device_eval_batch_size: 4
+custom_eval.policy_ranking_dual_icl: true
+training.overwrite_output_dir: true
+training.save_strategy: steps
+training.save_steps: 1000
+
+logging.log_to: [wandb]
+logging.wandb_project: Qwen35_FT
+logging.wandb_entity: nlp-squad

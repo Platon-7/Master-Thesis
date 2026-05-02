@@ -1,0 +1,50 @@
+# Python deps for the Qwen3.5-4B LoRA ablation env (`robometer_qwen35_gpu`).
+# Built fresh — never inherited from `robometer_gpu` per user instruction.
+#
+# Construction:
+#   conda create -n robometer_qwen35_gpu -c conda-forge --override-channels python=3.10 -y
+#   conda activate robometer_qwen35_gpu
+#   pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision  # CPU smoke tests
+#   pip install -r requirements.txt
+#
+# For real H100 training, swap CPU torch for the matching CUDA build (cu124 wheels).
+# Unsloth + bitsandbytes are intentionally NOT pinned — the smoke tests bypass setup_utils
+# (the only consumer); we add them on demand once the smoke tests pass and we're ready
+# for full LoRA training.
+
+# Core: transformers 5.7+ is the lowest version that exports Qwen3_5ForConditionalGeneration.
+transformers>=5.7,<6
+peft
+accelerate
+safetensors
+huggingface-hub
+einops
+
+# Numerics / data
+numpy
+pillow
+pydantic
+scipy
+h5py
+
+# Config / logging (mirror Robometer-LoRA/requirements.txt)
+omegaconf
+hydra-core
+pyyaml
+rich
+loguru
+termcolor
+codetiming
+tensorboard
+matplotlib
+wandb
+
+# Robometer model / dataset support
+datasets
+evaluate
+qwen-vl-utils[decord]==0.0.14
+tqdm
+sentence-transformers           # used by robometer.data.samplers.eval.confusion_matrix
+seaborn                         # used by robometer.evals.compile_results
+opencv-python-headless          # used by robometer.evals.compile_results (no GUI deps)
+flash-linear-attention          # fast path for Qwen3.5 linear_attn layers; install --no-deps

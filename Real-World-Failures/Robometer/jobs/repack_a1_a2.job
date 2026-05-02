@@ -1,0 +1,61 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_repack
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/repack_a1_a2_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=2
+#SBATCH --time=12:00:00
+
+# Repack A1 (droid keyframe roots) + A2 (robometer per-archive success dirs)
+# into the same format as A3 / roboreward:
+#   - frame_N_... -> frame_NN_... (fixes lex ordering)
+#   - inject <episode_id>/meta.json per episode
+#
+# Idempotent: repack_to_match_format.py skips shards that already have
+# meta.json. Atomic (.tar.new + rename) — crash-safe.
+
+set -u
+SCRIPT="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/repack_to_match_format.py"
+DATA_ROOT="/projects/prjs1958/robometer_frame_dataset"
+
+echo "============================================================"
+echo "RoboMeter A1+A2 Repack"
+echo "  Job ID: $SLURM_JOB_ID   Node: $(hostname)   Date: $(date)"
+echo "============================================================"
+
+run_repack () {
+    local kind="$1"  shard_dir="$2"  archive="$3"  root_name="$4"  label="$5"
+    echo
+    echo "--- kind=$kind  archive=$archive  root=$root_name  label=$label"
+    echo "    shard_dir=$shard_dir"
+    python3 "$SCRIPT" \
+        --shard-dir "$shard_dir" \
+        --kind      "$kind" \
+        --archive   "$archive" \
+        --root-name "$root_name" \
+        --label     "$label"
+}
+
+# ───────────────────────── A1 — DROID ─────────────────────────
+# 6 keyframe roots under droid/. .bak_* dirs left untouched.
+#   failure views:    keyframes, keyframes_ext2, keyframes_wrist
+#   success views:    keyframes_success, keyframes_success_ext2, keyframes_success_wrist
+# (droid meta auto-infers label from success_index / failure_index; --label is a fallback.)
+for root in keyframes keyframes_ext2 keyframes_wrist; do
+    run_repack droid "$DATA_ROOT/droid/$root/shards" droid "$root" failure
+done
+for root in keyframes_success keyframes_success_ext2 keyframes_success_wrist; do
+    run_repack droid "$DATA_ROOT/droid/$root/shards" droid "$root" successful
+done
+
+# ───────────────────────── A2 — Robometer successes ─────────────────────────
+# One invocation per archive subdir under robometer/keyframes_success/.
+for arch_dir in "$DATA_ROOT/robometer/keyframes_success"/*/; do
+    arch="$(basename "$arch_dir")"
+    run_repack robometer "$arch_dir" "$arch" keyframes_success successful
+done
+
+echo
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

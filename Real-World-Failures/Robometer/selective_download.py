@@ -64,16 +64,10 @@ HUMAN_ARCHIVES = {
     "jesbu1_usc_koch_human_robot_paired_usc_koch_human_robot_paired_human",
 }
 
-# User built own version / different failure type handled separately
+# MetaWorld archives we built our own version of from upstream sims.
 SKIP_ARCHIVES = {
     "aliangdw_metaworld_metaworld_train",
     "aliangdw_metaworld_metaworld_eval",
-    "jesbu1_roboreward_rfm_roboreward_train",
-    "jesbu1_roboreward_rfm_roboreward_val",
-    "jesbu1_roboreward_rfm_roboreward_test",
-    "jesbu1_roboreward_rfm_high_res_roboreward_train",
-    "jesbu1_roboreward_rfm_high_res_roboreward_val",
-    "jesbu1_roboreward_rfm_high_res_roboreward_test",
 }
 
 

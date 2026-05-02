@@ -1,0 +1,19 @@
+# Loss 2: Chris' asymmetric C51 + asymmetric BCE (see Robometer-LoRA/losses.md §Loss 2).
+# Identical loss math to Robometer-LoRA/configs/loss2_c51.yaml — only exp_name differs.
+#
+# Apply on top of Qwen35-FT/configs/train_base.yaml:
+#   sbatch Qwen35-FT/jobs/train_loss2.job
+
+loss.progress_loss_type: c51_asymmetric
+loss.success_loss_type: bce_asymmetric
+loss.progress_discrete_bins: 10
+loss.asymmetric_lambda: 0.3
+
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+data.stratified_batch_balance: true
+data.warmup_steps: 0
+
+training.exp_name: qwen35_ft_loss2_c51_asymmetric

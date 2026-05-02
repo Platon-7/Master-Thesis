@@ -2,6 +2,7 @@
 node_modules/
 RL-VLM-F/
 dsrl/
+.git/
 
 # Common research bulk
 PlayWorld/

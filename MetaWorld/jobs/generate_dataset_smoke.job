@@ -1,0 +1,78 @@
+#!/bin/bash
+#SBATCH --job-name=mw_dataset_smoke
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/MetaWorld/logs/dataset_smoke_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --time=0:45:00
+
+# Smoke test of MetaWorld generate_dataset.py (robometer_frame_dataset format).
+# 1 success + 2 failures × 3 cameras on pick-place-v3 (full 4-score rubric).
+#
+# Expected output:
+#   keyframes/metaworld_pick_place_v3/shard-*.tar  (failures, 2 x 4 scores x 3 cams)
+#   keyframes_success/metaworld_pick_place_v3/shard-*.tar  (1 x 3 cams = 3 episodes)
+
+set -euo pipefail
+
+CONDA_BASE=/gpfs/scratch1/shared/pkarageorgis1/miniforge3
+source $CONDA_BASE/etc/profile.d/conda.sh
+conda activate metaworld
+
+export MUJOCO_GL=egl
+export PYTHONUNBUFFERED=1
+
+THESIS=/home/pkarageorgis1/Master-Thesis
+OUT=/gpfs/scratch1/shared/pkarageorgis1/metaworld_dataset/smoke_v1
+
+mkdir -p $THESIS/MetaWorld/logs
+rm -rf $OUT
+
+python $THESIS/MetaWorld/generate_dataset.py \
+    --task pick-place-v3 \
+    --n-success 1 \
+    --n-failures 2 \
+    --output-dir $OUT
+
+echo
+echo "=== Output tree ==="
+find $OUT -maxdepth 4 -print | sort
+
+# Inspection block: disable pipefail so `tar | head` SIGPIPE doesn't kill the job.
+set +o pipefail
+
+echo
+echo "=== Shard contents ==="
+for tar in $OUT/keyframes/*/shard-*.tar $OUT/keyframes_success/*/shard-*.tar; do
+  [ -f "$tar" ] || continue
+  echo "--- $tar ---"
+  tar -tf "$tar" | head -25
+done
+
+echo
+echo "=== Sample failure meta ==="
+for tar in $OUT/keyframes/*/shard-*.tar; do
+  [ -f "$tar" ] || continue
+  META=$(tar -tf "$tar" | grep meta.json | head -1)
+  tar -xOf "$tar" "$META" | python3 -m json.tool
+  break
+done
+
+echo
+echo "=== Sample success meta ==="
+for tar in $OUT/keyframes_success/*/shard-*.tar; do
+  [ -f "$tar" ] || continue
+  META=$(tar -tf "$tar" | grep meta.json | head -1)
+  tar -xOf "$tar" "$META" | python3 -m json.tool
+  break
+done
+
+set -o pipefail
+
+echo
+echo "=== Manifest / score line counts ==="
+wc -l $OUT/manifests/*.jsonl $OUT/scores/*.jsonl 2>/dev/null || true
+
+echo
+echo "=== Smoke test done ==="

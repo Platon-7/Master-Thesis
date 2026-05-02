@@ -1,0 +1,58 @@
+#!/bin/bash
+#SBATCH --job-name=mw_fetch
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/MetaWorld/logs/fetch_%j.out
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=8G
+#SBATCH --time=12:00:00
+
+# Pull MetaWorld failure/success pairs from Google Drive
+# (rclone remote "robometer_dataset:Metaworld_Failures") into the
+# master dataset at /projects/prjs1958/robometer_frame_dataset/metaworld/.
+#
+# Source layout (Drive):
+#   Metaworld_Failures/keyframes/metaworld_<task>_v3/...
+#   Metaworld_Failures/keyframes_success/metaworld_<task>_v3/...
+#   Metaworld_Failures/manifests/metaworld_<task>_v3_{failures,successes}.jsonl
+#
+# Dest layout:
+#   /projects/prjs1958/robometer_frame_dataset/metaworld/{keyframes,keyframes_success,manifests}/...
+#
+# Total source: ~41.3 GiB, 227 objects.
+
+set -euo pipefail
+
+SRC=robometer_dataset:Metaworld_Failures
+DST=/projects/prjs1958/robometer_frame_dataset/metaworld
+
+mkdir -p "$DST"
+
+echo "=== rclone copy start: $(date) ==="
+echo "source: $SRC"
+echo "dest  : $DST"
+echo
+
+rclone copy "$SRC" "$DST" \
+    --transfers 8 \
+    --checkers 8 \
+    --drive-chunk-size 64M \
+    --stats 30s \
+    --stats-one-line \
+    --progress=false \
+    --log-level INFO
+
+echo
+echo "=== done: $(date) ==="
+echo "--- dest tree (depth 2) ---"
+find "$DST" -maxdepth 2 -mindepth 1 -type d | sort
+echo
+echo "--- archive counts ---"
+echo "keyframes:         $(ls -d "$DST"/keyframes/*/ 2>/dev/null | wc -l) archives"
+echo "keyframes_success: $(ls -d "$DST"/keyframes_success/*/ 2>/dev/null | wc -l) archives"
+echo "manifests:         $(ls "$DST"/manifests/*.jsonl 2>/dev/null | wc -l) files"
+echo
+echo "--- total shards ---"
+find "$DST" -name "shard-*.tar" | wc -l
+echo
+echo "--- size ---"
+du -sh "$DST"

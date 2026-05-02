@@ -1,0 +1,40 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_audit_full
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/audit_full_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=24:00:00
+
+# Full Robometer audit: scan EVERY archive in robometer_full_dataset,
+# including the 8 that the standard audit skips (droid, metaworld x2,
+# failsafe, hand_paired x2, humanoid_everyday, usc_koch_human).
+#
+# This is the "no blind spots" scan — its output becomes the single
+# source of truth for ROBOMETER_BREAKDOWN.md.
+#
+# Output: /projects/prjs1958/robometer_full_dataset/audit_report.json
+# (single source of truth — the previous partial audit has been deleted)
+
+set -e
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer"
+OUTPUT="/projects/prjs1958/robometer_full_dataset/audit_report.json"
+
+echo "============================================================"
+echo "RoboMeter Full Audit (no exclusions)"
+echo "  Job ID: $SLURM_JOB_ID"
+echo "  Node:   $(hostname)"
+echo "  Start:  $(date)"
+echo "  Output: ${OUTPUT}"
+echo "============================================================"
+
+python3 "${SCRIPT_DIR}/audit_all_archives.py" \
+    --no-exclusions \
+    --output "${OUTPUT}"
+
+echo
+echo "============================================================"
+echo "Done at: $(date)"
+echo "  Written: ${OUTPUT}"
+echo "============================================================"

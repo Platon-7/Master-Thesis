@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --job-name=rmt_patch_family
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/patch_meta_family_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=2
+#SBATCH --time=04:00:00
+
+# In-place meta.json-only rewrite: fixes the `family` field on every shard
+# that was repacked with the old 13-entry ROBOMETER_FAMILY dict. Uses
+# FAMILY_REGISTRY (single source of truth) for the correct values.
+#
+# Atomic (.tar.new + rename), idempotent (skips shards already correct),
+# streams JPEGs through byte-for-byte (only meta.json entries change).
+#
+# For a preview pass, add --dry-run.
+
+set -u
+SCRIPT="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/patch_meta_family.py"
+
+echo "============================================================"
+echo "RoboMeter meta.json family patch"
+echo "  Job ID: $SLURM_JOB_ID   Node: $(hostname)   Date: $(date)"
+echo "============================================================"
+
+python3 "$SCRIPT" --scope all "$@"
+
+echo
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

@@ -1,0 +1,61 @@
+#!/bin/bash
+#SBATCH --job-name=mw_scores
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/MetaWorld/logs/mw_scores_%j.out
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=4G
+#SBATCH --time=0:30:00
+
+# Derive scores/ from manifests/ for the MetaWorld variant at
+# /projects/prjs1958/robometer_frame_dataset/metaworld/ . The Drive source
+# didn't ship a scores/ dir, but the canonical robometer_frame_dataset layout
+# has one with the compact schema:
+#   {episode_id, archive, task, terminal_reward, frame_labels, paired_success_id}
+#
+# Runs after the fetch job completes (afterok dependency).
+
+set -euo pipefail
+
+DST=/projects/prjs1958/robometer_frame_dataset/metaworld
+SCORES=$DST/scores
+mkdir -p "$SCORES"
+
+echo "=== deriving scores/ from manifests/ ==="
+echo "Start: $(date)"
+
+python3 - <<'PY'
+import json
+import pathlib
+
+root = pathlib.Path("/projects/prjs1958/robometer_frame_dataset/metaworld")
+manifests = root / "manifests"
+scores    = root / "scores"
+scores.mkdir(exist_ok=True)
+
+FIELDS = ("episode_id", "archive", "task", "terminal_reward",
+          "frame_labels", "paired_success_id")
+
+count_written = 0
+for m in sorted(manifests.glob("*_failures.jsonl")):
+    arch = m.name[:-len("_failures.jsonl")]
+    out = scores / f"{arch}_scored.jsonl"
+    n = 0
+    with m.open() as fin, out.open("w") as fout:
+        for line in fin:
+            line = line.strip()
+            if not line:
+                continue
+            d = json.loads(line)
+            compact = {k: d.get(k) for k in FIELDS}
+            fout.write(json.dumps(compact) + "\n")
+            n += 1
+    print(f"  {arch}: {n} lines -> {out.name}")
+    count_written += n
+
+print(f"\nTotal scored lines: {count_written}")
+print(f"Archives written: {len(list(scores.glob('*_scored.jsonl')))}")
+PY
+
+echo
+echo "=== done: $(date) ==="
+ls -la "$SCORES" | head -60

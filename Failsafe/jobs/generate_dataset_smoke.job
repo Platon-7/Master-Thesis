@@ -1,0 +1,64 @@
+#!/bin/bash
+#SBATCH --job-name=failsafe_dataset_smoke
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Failsafe/logs/dataset_smoke_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --time=0:45:00
+
+# Small smoke test of generate_dataset.py (robometer_frame_dataset format).
+# Generates:
+#   - pick_success:              2 instances x 3 cameras = 6 success episodes
+#   - pick_s2_approach_retreat:  2 instances x 3 cameras = 6 failure episodes
+# Then packs shards and prints the output tree.
+
+set -euo pipefail
+
+CONDA_BASE=/gpfs/scratch1/shared/pkarageorgis1/miniforge3
+source $CONDA_BASE/etc/profile.d/conda.sh
+conda activate failsafe
+
+export FAILSAFE_PATH=/home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo
+export MUJOCO_GL=egl
+export PYTHONUNBUFFERED=1
+
+THESIS=/home/pkarageorgis1/Master-Thesis
+OUT=/gpfs/scratch1/shared/pkarageorgis1/failsafe_dataset/smoke_v1
+
+mkdir -p $THESIS/Failsafe/logs
+rm -rf $OUT
+
+python $THESIS/Failsafe/generate_dataset.py \
+    --task FailPickCube-v1 \
+    --slot-id pick_success \
+    --slot-id pick_s2_approach_retreat \
+    --instances 2 \
+    --output-dir $OUT
+
+echo
+echo "=== Output tree ==="
+find $OUT -maxdepth 4 -print | sort
+
+echo
+echo "=== Shard contents (keyframes) ==="
+for tar in $OUT/keyframes/*/shard-*.tar $OUT/keyframes_success/*/shard-*.tar; do
+  [ -f "$tar" ] || continue
+  echo "--- $tar ---"
+  tar -tf "$tar" | head -30
+done
+
+echo
+echo "=== Sample meta.json ==="
+for tar in $OUT/keyframes/*/shard-*.tar; do
+  [ -f "$tar" ] || continue
+  tar -xOf "$tar" "$(tar -tf "$tar" | grep meta.json | head -1)" | python3 -m json.tool
+  break
+done
+
+echo
+echo "=== Manifest line counts ==="
+wc -l $OUT/manifests/*.jsonl $OUT/scores/*.jsonl 2>/dev/null || true
+
+echo
+echo "=== Smoke test done. ==="

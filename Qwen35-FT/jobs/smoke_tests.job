@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --job-name=qwen35_smoke
+#SBATCH --output=logs/smoke_%j.out
+#SBATCH --error=logs/smoke_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+# Runs the full smoke test suite (00–08). Uses gpu_h100 because that's the only
+# partition our account has budget on; smokes themselves are CPU-only (device_map="cpu").
+# 64G RAM keeps smoke_test_03 (4B model load + resize) comfortable.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+bash scripts/run_all_smoke_tests.sh

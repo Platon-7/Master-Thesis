@@ -1,0 +1,62 @@
+#!/bin/bash
+#SBATCH --job-name=mw_preview
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/MetaWorld/logs/preview_%j.out
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=1
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --time=3:00:00
+
+# Generate 1 success (x 3 cameras) per MetaWorld task for visual inspection.
+# Single job, all 46 tasks serial. Writes to preview_v1.
+#
+# Output:
+#   $OUT/keyframes_success/metaworld_<task>/shard-*.tar
+#   $OUT/manifests/metaworld_<task>_successes.jsonl
+
+set -euo pipefail
+
+CONDA_BASE=/gpfs/scratch1/shared/pkarageorgis1/miniforge3
+source $CONDA_BASE/etc/profile.d/conda.sh
+conda activate metaworld
+
+export MUJOCO_GL=egl
+export PYTHONUNBUFFERED=1
+
+THESIS=/home/pkarageorgis1/Master-Thesis
+OUT=/gpfs/scratch1/shared/pkarageorgis1/metaworld_dataset/preview_v1
+
+mkdir -p $THESIS/MetaWorld/logs
+rm -rf $OUT
+
+cd $THESIS/MetaWorld
+TASK_LIST=$(python -c "
+from generate_failures import SCRIPTED_POLICIES, EXCLUDED_TASKS
+tasks = sorted(t for t in SCRIPTED_POLICIES if t not in EXCLUDED_TASKS)
+print('\n'.join(tasks))
+")
+readarray -t TASKS <<< "$TASK_LIST"
+
+echo "=== Generating 1 success for ${#TASKS[@]} tasks ==="
+echo "Start: $(date)"
+
+for i in "${!TASKS[@]}"; do
+    TASK=${TASKS[$i]}
+    BASE_SEED=$(( 500000 + i * 1000 ))
+    echo
+    echo "--- [$((i+1))/${#TASKS[@]}] $TASK  base_seed=$BASE_SEED ---"
+    python $THESIS/MetaWorld/generate_dataset.py \
+        --task $TASK \
+        --n-success 1 \
+        --n-failures 0 \
+        --output-dir $OUT \
+        --base-seed $BASE_SEED || echo "!! $TASK FAILED, continuing"
+done
+
+echo
+echo "=== Summary ==="
+ls -d $OUT/keyframes_success/*/ 2>/dev/null | wc -l | xargs echo "archives:"
+wc -l $OUT/manifests/*_successes.jsonl 2>/dev/null | tail -1
+
+echo "End: $(date)"
+echo "=== Preview batch done ==="

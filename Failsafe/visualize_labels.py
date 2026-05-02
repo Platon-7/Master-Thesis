@@ -30,8 +30,10 @@ import argparse
 from pathlib import Path
 from collections import defaultdict
 
-SCORE_COLOR = {1: "#e74c3c", 2: "#e67e22", 3: "#f1c40f", 4: "#2ecc71"}
-SCORE_LABEL = {1: "No progress", 2: "Approached", 3: "Grasped/contacted", 4: "Near completion"}
+SCORE_COLOR = {0: "#3498db", 1: "#e74c3c", 2: "#e67e22", 3: "#f1c40f",
+               4: "#2ecc71", 5: "#27ae60"}
+SCORE_LABEL = {0: "✓ Reference", 1: "No progress", 2: "Approached",
+               3: "Grasped/contacted", 4: "Near completion", 5: "Success"}
 
 
 def img_to_b64(path):
@@ -61,14 +63,24 @@ def main():
 
     if args.tasks:
         episodes = [e for e in episodes if e["task"] in args.tasks]
+    # Group by the MAX frame label across keyframes. Rationale: if an episode
+    # reaches score 3 at some frame then regresses, we still call it a "3" run
+    # because peak achieved progress is what defines RoboMeter grouping.
+    for ep in episodes:
+        frame_labels = [f.get("frame_label", f.get("score", 1)) for f in ep.get("frames", [])]
+        if frame_labels:
+            ep["_display_score"] = max(frame_labels)
+        else:
+            ep["_display_score"] = ep.get("final_score", ep["target_score"])
+
     if args.scores:
-        episodes = [e for e in episodes if e["target_score"] in args.scores]
+        episodes = [e for e in episodes if e["_display_score"] in args.scores]
     if args.stages:
         episodes = [e for e in episodes if e.get("stage_name") in args.stages]
 
-    # Sort: task → score → stage → episode_id
+    # Sort: task → display_score → stage → episode_id
     episodes.sort(key=lambda e: (
-        e["task"], e["target_score"],
+        e["task"], e["_display_score"],
         e.get("stage_name") or "zz",
         e["episode_id"]
     ))
@@ -80,7 +92,7 @@ def main():
     # ------------------------------------------------------------------ #
     stats = defaultdict(lambda: defaultdict(int))
     for ep in episodes:
-        stats[ep["task"]][ep["target_score"]] += 1
+        stats[ep["task"]][ep["_display_score"]] += 1
 
     # ------------------------------------------------------------------ #
     # HTML boilerplate
@@ -136,10 +148,10 @@ def main():
     # ------------------------------------------------------------------ #
     html_parts.append("<table class='stats-table'>\n")
     html_parts.append("<tr><th>Task</th><th>Score 1</th><th>Score 2</th>"
-                      "<th>Score 3</th><th>Score 4</th></tr>\n")
+                      "<th>Score 3</th><th>Score 4</th><th>Score 5</th></tr>\n")
     for task in sorted(stats.keys()):
         row = f"<tr><td>{task}</td>"
-        for s in [1, 2, 3, 4]:
+        for s in [1, 2, 3, 4, 5]:
             n = stats[task].get(s, 0)
             color = SCORE_COLOR.get(s, "#555")
             row += f"<td style='background:{color}22;color:{color}'>{n}</td>"
@@ -156,17 +168,18 @@ def main():
     total_shown        = 0
 
     for ep in episodes:
-        task_score = (ep["task"], ep["target_score"])
+        disp = ep["_display_score"]
+        task_score = (ep["task"], disp)
         stage_name = ep.get("stage_name") or "—"
 
         if task_score != current_task_score:
             current_task_score = task_score
             current_stage      = None
-            score_color = SCORE_COLOR.get(ep["target_score"], "#999")
-            score_desc  = SCORE_LABEL.get(ep["target_score"], "")
+            score_color = SCORE_COLOR.get(disp, "#999")
+            score_desc  = SCORE_LABEL.get(disp, "")
             html_parts.append(
                 f"<h2>{ep['task']} &mdash; "
-                f"<span style='color:{score_color}'>Score {ep['target_score']}: {score_desc}</span>"
+                f"<span style='color:{score_color}'>Observed score {disp}: {score_desc}</span>"
                 f"</h2>\n"
             )
 
@@ -184,7 +197,9 @@ def main():
         ep_id     = ep["episode_id"]
         fail_type = ep.get("fail_type", "—")
         n_steps   = ep.get("total_steps", "?")
-        score_color = SCORE_COLOR.get(ep["target_score"], "#999")
+        disp_color   = SCORE_COLOR.get(ep["_display_score"], "#999")
+        target_color = SCORE_COLOR.get(ep["target_score"], "#999")
+        mismatch = "" if ep["_display_score"] == ep["target_score"] else " ⚠"
 
         html_parts.append('<div class="ep">\n')
         html_parts.append(
@@ -192,7 +207,9 @@ def main():
             f'<b>{ep_id}</b><br>'
             f'fail_type: <b>{fail_type}</b><br>'
             f'steps: {n_steps}<br>'
-            f'target: <span class="score-badge" style="background:{score_color}">'
+            f'observed: <span class="score-badge" style="background:{disp_color}">'
+            f'Score {ep["_display_score"]}</span>{mismatch}<br>'
+            f'intent:   <span class="score-badge" style="background:{target_color}">'
             f'Score {ep["target_score"]}</span>'
             f'</div>\n'
         )

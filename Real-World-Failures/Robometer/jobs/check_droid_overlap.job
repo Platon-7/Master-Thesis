@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --job-name=droid_overlap
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/droid_overlap_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=2
+#SBATCH --time=04:00:00
+
+# Check overlap between the 5,503 droid successes downloaded to match
+# droid failures, and the 149,804 droid successes inside Robometer.
+
+set -e
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer"
+
+echo "============================================================"
+echo "Droid overlap check"
+echo "  Job ID: $SLURM_JOB_ID"
+echo "  Node:   $(hostname)"
+echo "  Start:  $(date)"
+echo "============================================================"
+
+python3 "${SCRIPT_DIR}/check_droid_overlap.py"
+
+echo
+echo "Done at: $(date)"

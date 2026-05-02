@@ -296,6 +296,7 @@ def load_vlm():
         enforce_eager=True,
         trust_remote_code=True,
         allowed_local_media_path="/",
+        enable_prefix_caching=True,
     )
     print("VLM loaded (vLLM)")
     return llm
@@ -321,6 +322,7 @@ def load_llm():
         gpu_memory_utilization=0.90,
         enforce_eager=True,
         trust_remote_code=True,
+        enable_prefix_caching=True,
     )
     tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
     print("LLM loaded (vLLM)")

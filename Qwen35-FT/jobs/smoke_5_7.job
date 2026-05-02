@@ -1,0 +1,41 @@
+#!/bin/bash
+#SBATCH --job-name=qwen35_smk57
+#SBATCH --output=logs/smoke57_%j.out
+#SBATCH --error=logs/smoke57_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+# Runs smoke tests 05 (forward) and 07 (LoRA targets) on a GPU compute node.
+# Login nodes hit OOM on the slow-path linear-attention forward (no flash-linear-attention
+# / causal-conv1d installed yet). The GPU partition is the only one our account has
+# budget on — the smoke tests still load to CPU (device_map="cpu") but get the 64G RAM.
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+
+PY="/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu/bin/python"
+export PYTHONPATH="$SLURM_SUBMIT_DIR:${PYTHONPATH:-}"
+
+echo "================ smoke_test_05_forward ================"
+"$PY" scripts/smoke_test_05_forward.py
+EC=$?
+if [[ $EC -ne 0 ]]; then
+    echo "FAIL: smoke_test_05_forward exited $EC"
+    exit $EC
+fi
+
+echo
+echo "================ smoke_test_07_lora_targets ================"
+"$PY" scripts/smoke_test_07_lora_targets.py
+EC=$?
+if [[ $EC -ne 0 ]]; then
+    echo "FAIL: smoke_test_07_lora_targets exited $EC"
+    exit $EC
+fi
+
+echo
+echo "================ smoke 05 + 07 PASS ================"
