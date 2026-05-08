@@ -1,0 +1,31 @@
+# Loss 2: Chris' asymmetric C51 + asymmetric BCE (see Robometer-LoRA/losses.md
+# §Loss 2). Apply on top of train_base.yaml — identical to Robometer-LoRA/
+# configs/loss2_c51.yaml; the LoRA-vs-full-FT axis is set in train_base.yaml.
+#
+# Keeps the progress (10-bin C51) and success heads exactly as the pretrained
+# Robometer-4B release shipped. Only the loss functions change.
+
+loss.progress_loss_type: c51_asymmetric    # asymmetric weight on the soft-CE C51 path
+loss.success_loss_type: bce_asymmetric     # mean(bce[neg]) + lambda * mean(bce[pos]) with empty-positives guard
+loss.progress_discrete_bins: 10            # matches the Robometer-4B checkpoint
+loss.asymmetric_lambda: 0.3                # shared lambda; <1 damps the false-negative / positive-class side
+
+# Active heads for this variant.
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# 50/50 fail/success batches from step 0. Same as Loss 1 — no failure-only
+# warmup phase.
+data.stratified_batch_balance: true
+data.warmup_steps: 0
+
+# Failure-label shape: piecewise-linear ramp interpolated between rubric anchors.
+# Reason: Robometer-4B's C51 head was pretrained on smooth t/T progress curves.
+# Stair-step rubric values would put failures into a distinct bin pattern that
+# doesn't resemble the pretrained head's expected target distribution. Loss 1
+# (CORN) keeps `none` because there we deliberately bucketise BOTH classes onto
+# the same 5-quantile ordinal grid.
+data.failure_label_smoothing: linear
+
+training.exp_name: robometer_ft_loss2_c51_asymmetric

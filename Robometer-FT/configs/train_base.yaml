@@ -1,0 +1,115 @@
+# Base Hydra overrides shared by every Robometer-4B FULL fine-tune run.
+# Per-variant loss setup comes from loss1_corn.yaml or loss2_c51.yaml.
+#
+# Mirrors Robometer-LoRA/configs/train_lora_base.yaml on the data/eval/ICL side,
+# and Qwen35-FT/configs/train_base.yaml on the multi-GPU FSDP side. Differences
+# from each:
+#   vs Robometer-LoRA :  use_peft=false, use_unsloth=false, gradient_accumulation_steps=1
+#                        (full FT, every weight trains; unsloth is LoRA-only).
+#   vs Qwen35-FT      :  base_model_id stays Qwen3-VL-4B (NOT Qwen3.5-4B), and
+#                        training.load_from_checkpoint=robometer/Robometer-4B is
+#                        SET (we initialize from the Robometer pretrained heads,
+#                        then fine-tune; Qwen3.5 chat starts from vanilla Qwen).
+#
+# IMPORTANT: This file is consumed by a sed-based line-to-CLI-override translator
+# in jobs/train_loss*.job. Keep every list in inline [a,b,c] form — block lists
+# (- item) break the flattening.
+
+model.base_model_id: Qwen/Qwen3-VL-4B-Instruct
+# Full fine-tune — every weight is trained. PEFT/LoRA NOT used.
+model.use_peft: false
+# Unsloth's FastVisionModel is a LoRA-path accelerator and conflicts with FSDP
+# wrapping for full FT. Robometer's setup_utils only imports it when this flag
+# is true, so disabling here keeps the import path clean.
+model.use_unsloth: false
+
+# Active heads: progress + success. Loss 1 (CORN) overrides train_success_head
+# back to false in its preset. Preference head off for both losses (matches the
+# Robometer-LoRA bake-off recipe exactly so results are comparable).
+model.train_progress_head: true
+model.train_preference_head: false
+model.train_success_head: true
+
+# --- TAR LOADER (bypasses HF + MP4 + NPZ) -------------------------------------
+# train_ft.py always uses the tar-shard loader; no config flag.
+# Source paths come from env vars exported by the SLURM job (so we don't need
+# to add custom fields to upstream's DataConfig dataclass):
+#   TAR_DATASET_ROOT       (default: /projects/prjs1958/robometer_frame_dataset)
+#   TAR_PAIRS_UNIFIED_PATH (default: <TAR_DATASET_ROOT>/pairs_unified.jsonl)
+
+# data.train_datasets / data.eval_datasets are still required by upstream
+# config validation — kept here as no-op placeholders since the tar loader
+# selects rows via tar_families instead.
+data.train_datasets: [robometer_frames_train]
+data.eval_datasets: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
+
+# ICL — toggle/dropout via Hydra CLI override at launch time
+# (e.g. ++data.use_icl=false, ++data.icl_prob=0.3).
+data.use_icl: true
+data.icl_prob: 0.5
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits/pairs_index_train.jsonl
+
+# Augmentations — pure progress sampling (one trajectory per sample). Identical
+# to Robometer-LoRA so the only experimental delta is full-FT vs LoRA.
+data.sample_type_ratio: [0,1,0]
+data.preference_strategy_ratio: [1,1,1,1]
+data.progress_strategy_ratio: [1,1,1,1]
+
+# Initialize from the released Robometer-4B checkpoint (heads already trained on
+# the original Robometer recipe), then full-fine-tune from there. This is the
+# whole point of THIS chat vs the Qwen3.5 chat: we keep Robometer's pretraining
+# advantage and just fine-tune all weights on our split + winner loss.
+training.load_from_checkpoint: robometer/Robometer-4B
+
+# Hyperparameters — match upstream's full-FT recipe in FINETUNE_ROBOMETER.md.
+# The LR / warmup / max_steps are the FIRST things to tweak once the LoRA
+# bake-off declares a winner: copy the winning preset's values across, then
+# adjust LR if full-FT needs a smaller one (typical: 5e-6 → 2e-5 range).
+training.per_device_train_batch_size: 8
+training.gradient_accumulation_steps: 1
+training.learning_rate: 2.0e-5
+training.warmup_ratio: 0.1
+training.weight_decay: 0.01
+training.max_steps: 7500
+training.eval_steps: 500
+training.custom_eval_steps: 500
+
+# Mixed precision — bf16 on H100, consistent with FSDP config.
+training.bf16: true
+training.fp16: false
+training.gradient_checkpointing: true
+
+# Don't strip batch columns based on model.forward signature. Belt-and-suspenders
+# (Robometer's collator emits keys the HF Trainer signature filter would otherwise
+# drop). Same setting Qwen35-FT and Robometer-LoRA use.
+training.remove_unused_columns: false
+
+# Custom eval: only policy_ranking — the §Winning-criterion metric from
+# losses.md (Success AUC + ranking accuracy + per-source slicing). Skipping
+# confusion_matrix and reward_alignment because they expand to a 44k-batch
+# cross-product (~30h per round) and their signal is redundant with what the
+# standard per-frame eval already logs.
+custom_eval.eval_types: [policy_ranking]
+custom_eval.policy_ranking: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
+# Bumped from default 5 so failsafe (3 tasks × 2 qualities × 85 = 510) lands at
+# the user-requested ~500 trajectories per eval round. Other splits cap to their
+# natural partnered-only pool size.
+custom_eval.num_examples_per_quality_pr: 85
+
+# Eval batch size — ICL doubles per-sample image-token count (16 demo + 16 query
+# = 32 frames). Robometer-LoRA's Apr-30 dual-eval smoke test OOM'd at batch=16
+# on a single H100; batch=4 fits with margin. Full FT has the same eval-time
+# memory profile (eval is no_grad, identical to LoRA) so 4 carries over.
+training.per_device_eval_batch_size: 4
+# Dual-ICL eval: every policy_ranking round runs TWICE — once with icl_prob=1.0
+# (ICL-on) and once with icl_prob=0.0 (ICL-off). Metrics emitted with `_iclon`
+# and `_icloff` suffixes. Eval is deterministic 1.0 vs 0.0; the training-time
+# 0.5 coin-flip only applies during training.
+custom_eval.policy_ranking_dual_icl: true
+training.overwrite_output_dir: true
+training.save_strategy: steps
+training.save_steps: 1000
+
+logging.log_to: [wandb]
+logging.wandb_project: Robometer_FT
+logging.wandb_entity: nlp-squad

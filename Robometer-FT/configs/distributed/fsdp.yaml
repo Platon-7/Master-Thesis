@@ -1,0 +1,44 @@
+# Accelerate config for Robometer-4B FULL fine-tuning on multiple GPUs via FSDP.
+#
+# Identical to Robometer/robometer/configs/distributed/fsdp.yaml — kept locally
+# so this directory is self-contained for its own training infra and doesn't
+# depend on the upstream copy moving. Layer class names match Qwen3-VL (the
+# base model), NOT Qwen3.5 (which is what Qwen35-FT/configs/distributed/
+# fsdp_qwen35.yaml targets).
+#
+#   Qwen3-VL  : Qwen3VLVisionBlock,    Qwen3VLTextDecoderLayer    <-- this file
+#   Qwen3.5   : Qwen3_5VisionBlock,    Qwen3_5DecoderLayer
+#
+# Override `--num_processes=N` from the launcher (jobs/train_loss*.job) to match
+# the allocated GPU count.
+
+compute_environment: LOCAL_MACHINE
+distributed_type: FSDP
+num_processes: 1  # overridden from the launcher
+machine_rank: 0
+num_machines: 1
+main_training_function: main
+mixed_precision: bf16
+use_cpu: false
+
+fsdp_config:
+  # Wrap each Qwen3-VL vision block + each text decoder layer as its own FSDP unit.
+  fsdp_auto_wrap_policy: "TRANSFORMER_BASED_WRAP"
+  fsdp_backward_prefetch: BACKWARD_PRE
+  fsdp_cpu_ram_efficient_loading: true
+  fsdp_forward_prefetch: false
+  fsdp_transformer_layer_cls_to_wrap: "Qwen3VLVisionBlock,Qwen3VLTextDecoderLayer"
+
+  # FULL_SHARD = most memory-efficient (params + grads + optimizer state all sharded).
+  fsdp_sharding_strategy: FULL_SHARD
+
+  # CPU offload off by default — H100 80GB should fit 4B model + grads + bf16 Adam
+  # state with FULL_SHARD across 4 GPUs. Flip to true if you OOM.
+  fsdp_offload_params: false
+
+  fsdp_use_orig_params: true
+
+  # FULL_STATE_DICT — saves a single consolidated checkpoint (slower but easier to
+  # load downstream). Switch to SHARDED_STATE_DICT for faster checkpointing if I/O
+  # becomes the bottleneck.
+  fsdp_state_dict_type: FULL_STATE_DICT

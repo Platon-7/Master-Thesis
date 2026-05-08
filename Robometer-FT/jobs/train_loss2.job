@@ -1,0 +1,153 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_ft_l2
+#SBATCH --output=logs/train_loss2_%j.out
+#SBATCH --error=logs/train_loss2_%j.err
+#SBATCH --time=72:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=4
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=480G
+
+# Full fine-tune of Robometer-4B with Loss 2 (asymmetric C51 + asymmetric BCE).
+# Multi-GPU FSDP via accelerate. Defaults to single node 4×H100; mirror the
+# Qwen35-FT multi-node pattern by passing --nodes=N at submit time:
+#     sbatch --nodes=2 jobs/train_loss2.job
+#
+# Recipe overrides (set at launch via `sbatch --export=ALL,VAR=val,...`):
+#   * MAX_STEPS=N                          → training.max_steps
+#   * EXTRA="++data.use_icl=false ..."     → arbitrary Hydra overrides
+#   * WANDB_PROJECT=...                    → WandB project (default Robometer_FT)
+#   * WEIGHTS_DIR=...                      → checkpoint output root
+#   * CKPT_RESUME=<path>                   → full resume (optimizer + step counter)
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+# Env interpreter — overrideable via ENV_PREFIX so the same job works on
+# both your local conda env and Leonardo's conda-packed copy.
+ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_gpu}"
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+if [[ ! -x "$PYTHON" ]] || [[ ! -x "$ACCELERATE" ]]; then
+    echo "ERROR: env interpreter / accelerate not executable at $ENV_PREFIX/bin/" >&2
+    exit 1
+fi
+# Put env's bin/ on PATH so `#!/usr/bin/env python3.10` shebangs resolve to
+# the env interpreter (matters for conda-packed envs — conda-unpack only
+# rewrites absolute-path shebangs, not /usr/bin/env-style ones).
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_FT}"
+export WANDB_API_KEY="${WANDB_API_KEY:-}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+
+for f in "$HERE/configs/train_base.yaml" "$HERE/configs/loss2_c51.yaml" "$HERE/configs/distributed/fsdp.yaml"; do
+    if [[ ! -f "$f" ]]; then
+        echo "ERROR: missing config $f" >&2
+        exit 2
+    fi
+done
+
+# ---------------- multi-node topology ----------------
+NUM_NODES="${SLURM_NNODES:-1}"
+GPUS_PER_NODE="${GPUS_PER_NODE:-4}"
+TOTAL_PROCESSES=$(( NUM_NODES * GPUS_PER_NODE ))
+RDZV_PORT=$(( 10000 + ${SLURM_JOB_ID:-0} % 50000 ))
+NODE_LIST=( $(scontrol show hostnames "$SLURM_JOB_NODELIST") )
+HEAD_NODE="${NODE_LIST[0]}"
+HEAD_NODE_IP=$(srun --nodes=1 --ntasks=1 -w "$HEAD_NODE" hostname --ip-address | head -1)
+
+export NCCL_ASYNC_ERROR_HANDLING=1
+export FI_PROVIDER=efa
+export OMP_NUM_THREADS=1
+# ------------------------------------------------------
+
+readarray -t OVERRIDES < <(
+    cat "$HERE/configs/train_base.yaml" "$HERE/configs/loss2_c51.yaml" \
+      | grep -v '^[[:space:]]*#' \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+EXTRA="${EXTRA:-}"
+if [[ -n "${MAX_STEPS:-}" ]]; then
+    EXTRA="$EXTRA ++training.max_steps=$MAX_STEPS"
+fi
+if [[ -n "${WANDB_ENTITY:-}" ]]; then
+    EXTRA="$EXTRA logging.wandb_entity=$WANDB_ENTITY"
+fi
+
+RESUME_OVERRIDE=""
+if [[ -n "${CKPT_RESUME:-}" ]]; then
+    RESUME_OVERRIDE="++training.resume_from_checkpoint='${CKPT_RESUME}'"
+    EXTRA="$EXTRA $RESUME_OVERRIDE"
+fi
+
+WEIGHTS_DIR="${WEIGHTS_DIR:-/projects/prjs1958/Robometer_FT_weights}"
+mkdir -p "$WEIGHTS_DIR"
+
+# Run from Robometer/ so Hydra resolves `config_path="robometer/configs"`
+# as a relative DIR (matches upstream train.py invocation pattern).
+# train_ft.py lives in Robometer-FT/ — invoke via absolute path. PYTHONPATH
+# includes both so `import robometer_ft_data` and `import robometer.*` resolve.
+cd "$ROBOMETER_DIR"
+export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export ROBOMETER_DIR
+
+echo "==================== launch summary ===================="
+echo "Nodes              : $NUM_NODES  (${NODE_LIST[*]})"
+echo "Head node          : $HEAD_NODE  ($HEAD_NODE_IP)"
+echo "GPUs per node      : $GPUS_PER_NODE"
+echo "TOTAL_PROCESSES    : $TOTAL_PROCESSES"
+echo "Rendezvous port    : $RDZV_PORT"
+echo "ROBOMETER_DIR      : $ROBOMETER_DIR"
+echo "Entry script       : $HERE/train_ft.py"
+echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
+echo "MAX_STEPS          : ${MAX_STEPS:-<from-yaml>}"
+echo "CKPT_RESUME        : ${CKPT_RESUME:-<none>}"
+echo "EXTRA              : $EXTRA"
+echo "OVERRIDES count    : ${#OVERRIDES[@]}"
+echo "========================================================"
+
+# train_ft.py declares its own @hydra.main(config_path="upstream_configs",
+# config_name="config") which resolves to Robometer-FT/upstream_configs/
+# (a symlink to Robometer/robometer/configs/). No --config-dir override
+# needed; Hydra finds it relative to train_ft.py's location.
+
+if [[ "$NUM_NODES" -le 1 ]]; then
+    "$ACCELERATE" launch \
+      --config_file "$HERE/configs/distributed/fsdp.yaml" \
+      --num_machines=1 \
+      --num_processes="$TOTAL_PROCESSES" \
+      --machine_rank=0 \
+      --main_process_ip="$HEAD_NODE_IP" \
+      --main_process_port="$RDZV_PORT" \
+      "$HERE/train_ft.py" "${OVERRIDES[@]}" $EXTRA \
+      training.output_dir="$WEIGHTS_DIR/loss2_${SLURM_JOB_ID:-local}"
+else
+    srun --ntasks-per-node=1 --cpu-bind=none bash -c "
+        export PYTHONPATH=$HERE:$ROBOMETER_DIR:\${PYTHONPATH:-}
+        export ROBOMETER_DIR=$ROBOMETER_DIR
+        \"$ACCELERATE\" launch \\
+          --config_file $HERE/configs/distributed/fsdp.yaml \\
+          --num_machines=$NUM_NODES \\
+          --num_processes=$TOTAL_PROCESSES \\
+          --machine_rank=\$SLURM_NODEID \\
+          --main_process_ip=$HEAD_NODE_IP \\
+          --main_process_port=$RDZV_PORT \\
+          $HERE/train_ft.py ${OVERRIDES[*]} $EXTRA \\
+          training.output_dir=$WEIGHTS_DIR/loss2_${SLURM_JOB_ID:-local}
+    "
+fi

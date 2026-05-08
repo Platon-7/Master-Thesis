@@ -1,0 +1,46 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_env_smoke
+#SBATCH --output=/projects/prjs1958/handoff/env_smoke/env_smoke_%j.out
+#SBATCH --error=/projects/prjs1958/handoff/env_smoke/env_smoke_%j.err
+#SBATCH --time=00:15:00
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=4
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=120G
+
+# Robometer-FT env smoke. Submit via:
+#     sbatch --account=<YOUR_ACCOUNT> \
+#            --export=ALL,ENV_PREFIX=/projects/prjs1958/envs/robometer_gpu \
+#            env_smoke.job
+#
+# Pass/fail signal: a line `>>> ENV SMOKE PASSED` (or FAILED) in env_smoke_<JID>.out.
+
+set -euo pipefail
+ENV_PREFIX="${ENV_PREFIX:?set ENV_PREFIX=/path/to/extracted/env}"
+[[ -x "$ENV_PREFIX/bin/python" ]]     || { echo "ERROR: $ENV_PREFIX/bin/python not executable" >&2; exit 1; }
+[[ -x "$ENV_PREFIX/bin/accelerate" ]] || { echo "ERROR: $ENV_PREFIX/bin/accelerate not executable" >&2; exit 1; }
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+# Put the unpacked env's bin/ on PATH so scripts with `#!/usr/bin/env python3.10`
+# shebangs resolve to the env's interpreter. conda-unpack only rewrites shebangs
+# that already point to an absolute path; pip-installed binaries like `accelerate`
+# often ship a `/usr/bin/env`-style shebang which conda-unpack leaves alone.
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+
+echo "==================== env smoke ===================="
+echo "ENV_PREFIX  : $ENV_PREFIX"
+echo "node        : $(hostname)"
+echo "GPUs visible: $(nvidia-smi --list-gpus | wc -l)"
+echo "==================================================="
+
+"$ENV_PREFIX/bin/accelerate" launch \
+  --num_processes=4 \
+  --multi_gpu \
+  "$HERE/env_smoke.py"

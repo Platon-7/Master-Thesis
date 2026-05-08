@@ -1,0 +1,141 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_ft_smoke
+#SBATCH --output=logs/smoke_%j.out
+#SBATCH --error=logs/smoke_%j.err
+#SBATCH --time=00:45:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=4
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=480G
+
+# Multi-GPU FSDP smoke for Robometer-FT. Mirrors the real train_loss<N>.job's
+# launch path 1:1 (same accelerate config, same conda env, same overrides
+# pipeline) so a passing smoke proves the prod job will launch cleanly.
+#
+# Smoke deltas vs prod:
+#   * max_steps             = 2          (vs 7500)
+#   * per_device_train_bsz  = 2          (vs 8)    — minimum that satisfies the
+#                                                    stratified batch sampler
+#                                                    (batch_size >= 2 required
+#                                                    for 50/50 fail/success split)
+#   * do_eval               = false                — skip both standard + custom eval
+#   * save_strategy         = no                   — no checkpoint write
+#   * logging.log_to        = []                   — no WandB run
+#   * data.icl_prob         = 0.0                  — skip ICL (no demo loading)
+#                                                    keeps smoke fast and avoids
+#                                                    pairs_index hot-path issues
+#   * custom_eval.policy_ranking_dual_icl = false  — no dual eval
+#   * walltime              = 45 min               — covers H100 queue + cold load
+#
+# Usage:
+#     sbatch --export=ALL,LOSS=1 jobs/smoke.job   # CORN
+#     sbatch --export=ALL,LOSS=2 jobs/smoke.job   # C51
+
+set -uo pipefail   # NOT -e: we want to capture trainer exit code, not abort
+
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf}"
+
+LOSS="${LOSS:?set LOSS=1|2}"
+case "$LOSS" in
+    1) PRESET="loss1_corn.yaml" ;;
+    2) PRESET="loss2_c51.yaml" ;;
+    *) echo "ERROR: LOSS must be 1 or 2 (got: $LOSS)" >&2; exit 2 ;;
+esac
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+ACCELERATE="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/accelerate"
+[[ -x "$PYTHON" && -x "$ACCELERATE" ]] || { echo "ERROR: env binaries missing" >&2; exit 1; }
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+# WandB explicitly disabled — smoke doesn't write a run.
+unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+export WANDB_MODE=disabled
+
+# Multi-node topology — same shape as the prod jobs, but smoke defaults to 1 node.
+NUM_NODES="${SLURM_NNODES:-1}"
+GPUS_PER_NODE="${GPUS_PER_NODE:-4}"
+TOTAL_PROCESSES=$(( NUM_NODES * GPUS_PER_NODE ))
+RDZV_PORT=$(( 10000 + ${SLURM_JOB_ID:-0} % 50000 ))
+NODE_LIST=( $(scontrol show hostnames "$SLURM_JOB_NODELIST") )
+HEAD_NODE="${NODE_LIST[0]}"
+HEAD_NODE_IP=$(srun --nodes=1 --ntasks=1 -w "$HEAD_NODE" hostname --ip-address | head -1)
+
+export NCCL_ASYNC_ERROR_HANDLING=1
+export FI_PROVIDER=efa
+export OMP_NUM_THREADS=1
+
+# Sed-flatten train_base + the chosen loss preset — IDENTICAL to the prod job
+# pipeline, no smoke-specific config files. Smoke deltas are appended via SMOKE.
+readarray -t OVERRIDES < <(
+    cat "$HERE/configs/train_base.yaml" "$HERE/configs/${PRESET}" \
+      | grep -v '^[[:space:]]*#' \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+# Smoke-specific overrides — last on the CLI so they win on duplicate keys.
+SMOKE=$(cat <<'EOF'
+++training.max_steps=2
+++training.per_device_train_batch_size=2
+++training.do_eval=false
+++training.evaluation_strategy=no
+++training.save_strategy=no
+++training.logging_steps=1
+++custom_eval.eval_types=[]
+++custom_eval.policy_ranking_dual_icl=false
+++logging.log_to=[]
+++data.icl_prob=0.0
+++data.use_icl=false
+EOF
+)
+SMOKE_ARGS=$(echo "$SMOKE" | tr '\n' ' ')
+
+WEIGHTS_DIR="/scratch-shared/pkarageorgis1/Robometer_FT_smoke/loss${LOSS}_${SLURM_JOB_ID:-local}"
+mkdir -p "$WEIGHTS_DIR"
+
+cd "$ROBOMETER_DIR"
+
+echo "==================== smoke launch summary ===================="
+echo "LOSS               : $LOSS  (preset: $PRESET)"
+echo "Nodes              : $NUM_NODES  (${NODE_LIST[*]})"
+echo "Head node IP       : $HEAD_NODE_IP"
+echo "GPUs per node      : $GPUS_PER_NODE"
+echo "TOTAL_PROCESSES    : $TOTAL_PROCESSES"
+echo "ROBOMETER_DIR      : $ROBOMETER_DIR"
+echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
+echo "OVERRIDES count    : ${#OVERRIDES[@]}"
+echo "SMOKE overrides    :"
+echo "$SMOKE" | sed 's/^/  /'
+echo "==============================================================="
+
+"$ACCELERATE" launch \
+  --config_file "$HERE/configs/distributed/fsdp.yaml" \
+  --num_machines=1 \
+  --num_processes="$TOTAL_PROCESSES" \
+  --machine_rank=0 \
+  --main_process_ip="$HEAD_NODE_IP" \
+  --main_process_port="$RDZV_PORT" \
+  train.py "${OVERRIDES[@]}" $SMOKE_ARGS \
+  training.output_dir="$WEIGHTS_DIR"
+RC=$?
+
+echo
+echo "==================== smoke exit summary ===================="
+echo "trainer return code: $RC"
+if [[ $RC -eq 0 ]]; then
+    echo "SMOKE PASSED — Loss $LOSS"
+else
+    echo "SMOKE FAILED — Loss $LOSS (rc=$RC)"
+fi
+echo "============================================================"
+exit $RC

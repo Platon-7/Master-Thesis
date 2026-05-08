@@ -1,0 +1,7 @@
+logs/
+unsloth_compiled_cache/
+outputs/
+wandb/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
