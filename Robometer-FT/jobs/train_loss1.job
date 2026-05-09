@@ -109,10 +109,10 @@ fi
 WEIGHTS_DIR="${WEIGHTS_DIR:-/projects/prjs1958/Robometer_FT_weights}"
 mkdir -p "$WEIGHTS_DIR"
 
-# Run from Robometer-FT/ so train_ft.py is the entry. PYTHONPATH includes both
-# Robometer-FT/ (for robometer_ft_data) and Robometer/ (for upstream robometer.*).
+# Run from Robometer/ so upstream's train.py finds `config_path="robometer/configs"`
+# as a relative DIR. PYTHONPATH includes Robometer/ for `import robometer.*`.
 cd "$ROBOMETER_DIR"
-export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export PYTHONPATH="$ROBOMETER_DIR:${PYTHONPATH:-}"
 export ROBOMETER_DIR
 
 echo "==================== launch summary ===================="
@@ -122,7 +122,7 @@ echo "GPUs per node      : $GPUS_PER_NODE"
 echo "TOTAL_PROCESSES    : $TOTAL_PROCESSES"
 echo "Rendezvous port    : $RDZV_PORT"
 echo "ROBOMETER_DIR      : $ROBOMETER_DIR"
-echo "Entry script       : $HERE/train_ft.py"
+echo "Entry script       : $ROBOMETER_DIR/train.py (upstream HF+MP4)"
 echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
 echo "MAX_STEPS          : ${MAX_STEPS:-<from-yaml>}"
 echo "CKPT_RESUME        : ${CKPT_RESUME:-<none>}"
@@ -138,12 +138,13 @@ if [[ "$NUM_NODES" -le 1 ]]; then
       --machine_rank=0 \
       --main_process_ip="$HEAD_NODE_IP" \
       --main_process_port="$RDZV_PORT" \
-      "$HERE/train_ft.py" "${OVERRIDES[@]}" $EXTRA \
+      train.py "${OVERRIDES[@]}" $EXTRA \
       training.output_dir="$WEIGHTS_DIR/loss1_${SLURM_JOB_ID:-local}"
 else
     srun --ntasks-per-node=1 --cpu-bind=none bash -c "
-        export PYTHONPATH=$HERE:$ROBOMETER_DIR:\${PYTHONPATH:-}
+        export PYTHONPATH=$ROBOMETER_DIR:\${PYTHONPATH:-}
         export ROBOMETER_DIR=$ROBOMETER_DIR
+        cd $ROBOMETER_DIR
         \"$ACCELERATE\" launch \\
           --config_file $HERE/configs/distributed/fsdp.yaml \\
           --num_machines=$NUM_NODES \\
@@ -151,7 +152,7 @@ else
           --machine_rank=\$SLURM_NODEID \\
           --main_process_ip=$HEAD_NODE_IP \\
           --main_process_port=$RDZV_PORT \\
-          $HERE/train_ft.py ${OVERRIDES[*]} $EXTRA \\
+          train.py ${OVERRIDES[*]} $EXTRA \\
           training.output_dir=$WEIGHTS_DIR/loss1_${SLURM_JOB_ID:-local}
     "
 fi

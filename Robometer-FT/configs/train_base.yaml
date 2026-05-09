@@ -30,16 +30,8 @@ model.train_progress_head: true
 model.train_preference_head: false
 model.train_success_head: true
 
-# --- TAR LOADER (bypasses HF + MP4 + NPZ) -------------------------------------
-# train_ft.py always uses the tar-shard loader; no config flag.
-# Source paths come from env vars exported by the SLURM job (so we don't need
-# to add custom fields to upstream's DataConfig dataclass):
-#   TAR_DATASET_ROOT       (default: /projects/prjs1958/robometer_frame_dataset)
-#   TAR_PAIRS_UNIFIED_PATH (default: <TAR_DATASET_ROOT>/pairs_unified.jsonl)
-
-# data.train_datasets / data.eval_datasets are still required by upstream
-# config validation — kept here as no-op placeholders since the tar loader
-# selects rows via tar_families instead.
+# Splits resolve to preprocessed HF Arrow caches under
+# $ROBOMETER_PROCESSED_DATASETS_PATH (= /projects/prjs1958/robometer_frames_hf).
 data.train_datasets: [robometer_frames_train]
 data.eval_datasets: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
 

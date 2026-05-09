@@ -98,12 +98,10 @@ fi
 WEIGHTS_DIR="${WEIGHTS_DIR:-/projects/prjs1958/Robometer_FT_weights}"
 mkdir -p "$WEIGHTS_DIR"
 
-# Run from Robometer/ so Hydra resolves `config_path="robometer/configs"`
-# as a relative DIR (matches upstream train.py invocation pattern).
-# train_ft.py lives in Robometer-FT/ — invoke via absolute path. PYTHONPATH
-# includes both so `import robometer_ft_data` and `import robometer.*` resolve.
+# Run from Robometer/ so upstream's train.py finds `config_path="robometer/configs"`
+# as a relative DIR. PYTHONPATH includes Robometer/ for `import robometer.*`.
 cd "$ROBOMETER_DIR"
-export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export PYTHONPATH="$ROBOMETER_DIR:${PYTHONPATH:-}"
 export ROBOMETER_DIR
 
 echo "==================== launch summary ===================="
@@ -113,18 +111,13 @@ echo "GPUs per node      : $GPUS_PER_NODE"
 echo "TOTAL_PROCESSES    : $TOTAL_PROCESSES"
 echo "Rendezvous port    : $RDZV_PORT"
 echo "ROBOMETER_DIR      : $ROBOMETER_DIR"
-echo "Entry script       : $HERE/train_ft.py"
+echo "Entry script       : $ROBOMETER_DIR/train.py (upstream HF+MP4)"
 echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
 echo "MAX_STEPS          : ${MAX_STEPS:-<from-yaml>}"
 echo "CKPT_RESUME        : ${CKPT_RESUME:-<none>}"
 echo "EXTRA              : $EXTRA"
 echo "OVERRIDES count    : ${#OVERRIDES[@]}"
 echo "========================================================"
-
-# train_ft.py declares its own @hydra.main(config_path="upstream_configs",
-# config_name="config") which resolves to Robometer-FT/upstream_configs/
-# (a symlink to Robometer/robometer/configs/). No --config-dir override
-# needed; Hydra finds it relative to train_ft.py's location.
 
 if [[ "$NUM_NODES" -le 1 ]]; then
     "$ACCELERATE" launch \
@@ -134,12 +127,13 @@ if [[ "$NUM_NODES" -le 1 ]]; then
       --machine_rank=0 \
       --main_process_ip="$HEAD_NODE_IP" \
       --main_process_port="$RDZV_PORT" \
-      "$HERE/train_ft.py" "${OVERRIDES[@]}" $EXTRA \
+      train.py "${OVERRIDES[@]}" $EXTRA \
       training.output_dir="$WEIGHTS_DIR/loss2_${SLURM_JOB_ID:-local}"
 else
     srun --ntasks-per-node=1 --cpu-bind=none bash -c "
-        export PYTHONPATH=$HERE:$ROBOMETER_DIR:\${PYTHONPATH:-}
+        export PYTHONPATH=$ROBOMETER_DIR:\${PYTHONPATH:-}
         export ROBOMETER_DIR=$ROBOMETER_DIR
+        cd $ROBOMETER_DIR
         \"$ACCELERATE\" launch \\
           --config_file $HERE/configs/distributed/fsdp.yaml \\
           --num_machines=$NUM_NODES \\
@@ -147,7 +141,7 @@ else
           --machine_rank=\$SLURM_NODEID \\
           --main_process_ip=$HEAD_NODE_IP \\
           --main_process_port=$RDZV_PORT \\
-          $HERE/train_ft.py ${OVERRIDES[*]} $EXTRA \\
+          train.py ${OVERRIDES[*]} $EXTRA \\
           training.output_dir=$WEIGHTS_DIR/loss2_${SLURM_JOB_ID:-local}
     "
 fi
