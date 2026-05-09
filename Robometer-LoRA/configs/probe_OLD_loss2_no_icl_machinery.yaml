@@ -1,0 +1,41 @@
+# Diagnostic probe — does the eval-pipeline ICL machinery cause OLD's apparent regression?
+#
+# Setup: OLD-loss2 step-7500 (the model that scored AUC=0.7834 at presentation time),
+# evaluated on the CURRENT test split, but with ALL ICL infrastructure hard-disabled —
+# not just `icl_prob=0` but `use_icl=false` so no demo slots, no <|demo_end|> tokens, no
+# dual-mode forced-icloff/forced-iclon machinery. Closest reproduction of the prompt
+# structure OLD's training-time eval used (which also ran without dual_icl).
+#
+# Outcomes:
+#   * AUC on test split ≈ 0.78  →  inference-pipeline drift confirmed (dual_icl / special
+#     tokens / MRoPE rewiring is shifting the head outputs). The "regression" is mostly
+#     an eval artefact and the bake-off training is probably fine.
+#   * AUC ≈ 0.50              →  inference drift isn't the (full) cause. Possible
+#     remaining suspects: test-split distribution shift, post-Apr-30 sampler edits.
+
+training.load_from_checkpoint: /projects/prjs1958/LoRA_weights/loss2_22244009/robometer_lora_loss2_c51_asymmetric/checkpoint-7500
+
+training.max_steps: 1
+training.eval_steps: 1
+training.custom_eval_steps: 1
+training.save_steps: 100
+
+# Match OLD's loss2 head config
+loss.progress_loss_type: c51_asymmetric
+loss.success_loss_type: bce_asymmetric
+loss.progress_discrete_bins: 10
+loss.asymmetric_lambda: 0.3
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# ── HARD-DISABLE all ICL infrastructure ──
+data.use_icl: false
+data.icl_prob: 0.0
+custom_eval.policy_ranking_dual_icl: false
+custom_eval.num_examples_per_quality_pr: 85   # match the prior OLD-step7500 re-eval setup so the test slice is the same
+custom_eval.policy_ranking: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe,robometer_frames_test]
+custom_eval.eval_types: [policy_ranking]
+
+data.warmup_steps: 0
+training.exp_name: probe_OLD_loss2_ckpt7500_no_icl_machinery

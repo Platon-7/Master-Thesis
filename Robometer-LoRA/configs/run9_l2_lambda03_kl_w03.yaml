@@ -1,0 +1,19 @@
+# Bake-off Run 9 — L2 (asymmetric C51 + BCE) lambda=0.3 + failure-KL anchor at higher weight.
+# Companion to Run 8 (failure_kl_weight=0.1, the losses.md pilot value). Run 9 picks up
+# the upper end of the documented sweep `{0.05, 0.1, 0.3}` so we have a 3-point dose-
+# response across (no KL = Run 5) → (pilot KL = Run 8) → (max-recipe KL = Run 9).
+# Both runs share every other hyperparameter with Run 5, so any difference cleanly
+# attributes to the KL anchor strength.
+
+loss.asymmetric_lambda: 0.3
+
+# ── Failure-KL anchor (off by default; turning on at the upper-end recommended weight) ──
+loss.failure_kl_weight: 0.3                      # max recommended pilot per losses.md §Loss 3 sweep
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+
+training.max_steps: 7500
+training.exp_name: bakeoff_run9_l2_lambda03_kl_w03

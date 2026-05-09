@@ -1,0 +1,89 @@
+#!/bin/bash
+#SBATCH --job-name=failsafe_pack
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Failsafe/logs/pack_%j.out
+#SBATCH --account=gusei17535
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=04:00:00
+
+# Single-process pack of failsafe loose episode dirs into shard tars.
+# Run AFTER generate_dataset_full.job array completes (use --dependency=afterok:<array_jobid>).
+# A single writer guarantees no shard-name overwrite race.
+
+set -euo pipefail
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+source activate /home/pkarageorgis1/.conda/envs/failsafe
+
+export FAILSAFE_PATH=/home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo
+export PYTHONUNBUFFERED=1
+
+THESIS=/home/pkarageorgis1/Master-Thesis
+OUT=/gpfs/scratch1/shared/pkarageorgis1/failsafe_dataset/full_v1
+
+echo "Start: $(date)"
+echo "Packing under $OUT"
+
+python $THESIS/Failsafe/generate_dataset.py \
+    --task FailPickCube-v1 \
+    --output-dir $OUT \
+    --pack-only
+
+echo
+echo "=== Building shard_index.json sidecars (scratch only) ==="
+# Mirror build_shard_indices.py:build_simple() but rooted at scratch $OUT.
+# eid -> shard filename, written per-archive so the loader and
+# build_unified_pairs can find episodes after rsync to /projects/.
+export OUT
+python - <<'PY'
+import json, os, tarfile
+from pathlib import Path
+
+OUT = Path(os.environ["OUT"])
+for sub in ("keyframes", "keyframes_success"):
+    parent = OUT / sub
+    if not parent.exists():
+        print(f"skip (missing): {parent}")
+        continue
+    print(f"[{sub}]")
+    for archive_dir in sorted(parent.iterdir()):
+        if not archive_dir.is_dir():
+            continue
+        shards = sorted(archive_dir.glob("shard-*.tar"))
+        if not shards:
+            continue
+        index, collisions = {}, 0
+        for shard in shards:
+            try:
+                with tarfile.open(shard, "r") as t:
+                    names = t.getnames()
+            except Exception as e:
+                print(f"  ERROR reading {shard}: {e}")
+                continue
+            top_dirs = {n.split("/", 1)[0] for n in names if n}
+            for d in top_dirs:
+                if d in index and index[d] != shard.name:
+                    collisions += 1
+                else:
+                    index[d] = shard.name
+        out_path = archive_dir / "shard_index.json"
+        out_path.write_text(json.dumps(index))
+        tag = f"({collisions} dup)" if collisions else ""
+        print(f"  {archive_dir.name}: {len(index)} episodes across {len(shards)} shards {tag}")
+print("Done.")
+PY
+
+echo
+echo "=== Final summary ==="
+for sub in keyframes keyframes_success; do
+    echo "-- $sub --"
+    for arch in $OUT/$sub/*/; do
+        n=$(ls $arch/shard-*.tar 2>/dev/null | wc -l)
+        idx_eps=$(python -c "import json; print(len(json.load(open('$arch/shard_index.json'))))" 2>/dev/null || echo "?")
+        echo "  $(basename $arch): $n shard files, $idx_eps eids in shard_index.json"
+    done
+done
+wc -l $OUT/manifests/*.jsonl 2>/dev/null || true
+echo "End: $(date)"

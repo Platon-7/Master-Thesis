@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_audit_mig
+#SBATCH --output=logs/audit_%j.out
+#SBATCH --error=logs/audit_%j.err
+#SBATCH --time=01:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_mig
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+mkdir -p logs
+export AUDIT_ROOT="/scratch-shared/pkarageorgis1/robometer_frame_dataset_20260505_164035"
+echo "[audit-mig] start: $(date) AUDIT_ROOT=$AUDIT_ROOT"
+"$PYTHON" scripts/audit_keyframe_counts.py
+echo "[audit-mig] done: $(date)"

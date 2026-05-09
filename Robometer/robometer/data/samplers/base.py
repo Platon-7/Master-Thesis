@@ -12,6 +12,14 @@ from PIL import Image
 from random import Random
 from datasets import Dataset
 
+
+class SampleSkipRequest(Exception):
+    """Raised by samplers to signal that the current item should be skipped (bad data,
+    label/frame mismatch, etc.). Upstream RBMDataset.__getitem__ catches this and
+    retries with the next index. Use this instead of ValueError when the trajectory
+    is unrecoverable but training should continue with other samples."""
+    pass
+
 from robometer.configs.experiment_configs import DataConfig
 from robometer.data.datasets.helpers import (
     load_frames_from_npz,
@@ -134,6 +142,11 @@ class RBMBaseSampler:
         self._use_icl: bool = bool(getattr(config, "use_icl", False))
         self._icl_prob: float = float(getattr(config, "icl_prob", 0.0))
         self._icl_min_coverage: float = float(getattr(config, "icl_min_coverage", 0.40))
+        # Ablation: when True, demo frames are replaced with all-zero pixels after
+        # loading. Keeps the demo length / separator / position embeddings intact, but
+        # removes the visual content. Used to test whether the VLM is genuinely using
+        # the demo's visual signal vs. just reacting to longer context length.
+        self._icl_demo_blank: bool = bool(getattr(config, "icl_demo_blank", False))
         self._is_evaluation: bool = bool(is_evaluation)
         self._pair_index: Dict[str, Dict[str, Any]] = {}
         if self._use_icl:
@@ -836,6 +849,12 @@ class RBMBaseSampler:
         shard_path = self._resolve_shard_path(shard_str)
         frames = self._load_partner_frames(shard_path, episode_dir)
 
+        # ABLATION: zero out the demo's visual content while keeping its shape +
+        # position. Lets us test whether the VLM is using the demo's visual signal
+        # or just the extra context length / separator token.
+        if self._icl_demo_blank:
+            frames = np.zeros_like(frames)
+
         return Trajectory(
             id=pair_row.get("partner_episode_id"),
             task=pair_row.get("partner_task") or pair_row.get("task"),
@@ -864,12 +883,20 @@ class RBMBaseSampler:
             return sample
 
         pair = self._pair_index.get(query_id)
-        if pair is None:
-            # Soft fallback: coin said ICL-on but this episode has no partner in the index.
-            # Rather than dropping the datapoint, just train it ICL-off. The effective ICL rate
-            # ends up marginally below the configured icl_prob when some episodes lack partners.
+        # Soft fallback covers two cases that would otherwise drop or crash the sample:
+        #   (1) `pair is None`: no entry for this query in the pair index.
+        #   (2) `pair` exists but `partner_frames_path` was not resolved at index-load time
+        #       (the partner_episode_id wasn't found in pairs_unified.jsonl). _load_partner_
+        #       trajectory raises RuntimeError on this — which propagates as a silent dataloader
+        #       drop and surfaces as `compile_results.py: "No valid policy ranking data found"`
+        #       when most samples in a dataset hit this case (e.g. eval failsafe at 14% partner
+        #       resolution; eval metaworld at 26%).
+        # In both cases the right behavior is: train/eval this sample ICL-off rather than crash.
+        partner_path = pair.get("partner_frames_path") if pair is not None else None
+        if pair is None or not partner_path or "::" not in partner_path:
             logger.trace(
-                f"[BASE SAMPLER] ICL coin-on but no partner for episode {query_id!r} — training this sample ICL-off."
+                f"[BASE SAMPLER] ICL coin-on but partner unavailable for episode {query_id!r} "
+                f"(pair_missing={pair is None}, partner_path={partner_path!r}) — using ICL-off."
             )
             return sample
         sample.context_trajectory = self._load_partner_trajectory(pair)
@@ -1009,7 +1036,13 @@ class RBMBaseSampler:
                     f"(trajectory id={traj.get('id')!r})"
                 )
             if len(raw_frame_labels) != num_frames_total:
-                raise ValueError(
+                # Bad data: the curated frame_labels were authored against a different
+                # number of frames than the actual loaded trajectory has (e.g., labels
+                # built from a 16-frame view but the default keyframes/ view has fewer).
+                # Skip-and-retry instead of crashing the whole training run — the
+                # DataLoader worker will receive the SampleSkipRequest, RBMDataset's
+                # __getitem__ wraps a retry loop that advances to the next index.
+                raise SampleSkipRequest(
                     f"frame_labels length mismatch: got {len(raw_frame_labels)}, expected "
                     f"{num_frames_total} (trajectory id={traj.get('id')!r})"
                 )

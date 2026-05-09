@@ -18,14 +18,44 @@ export WANDB_API_KEY="$YOUR_KEY"
 # Catches missing deps / dataset paths / WANDB key / SLURM account issues early.
 bash scripts/preflight.sh
 
-# Just go with the defaults baked into configs/train_base.yaml + configs/loss2_c51.yaml:
-sbatch jobs/train_loss2.job
-
-# Or override anything via env vars at submit time:
-EXTRA="++training.learning_rate=5e-6 ++data.icl_prob=0.3 ++data.icl_task_dropout=0.2" \
-MAX_STEPS=15000 \
+# Defaults from configs/train_base.yaml + configs/loss2_c51.yaml:
 sbatch jobs/train_loss2.job
 ```
+
+To override anything via env vars, use `sbatch --export=ALL,VAR=val,...` —
+Snellius does NOT propagate user env vars to SLURM jobs by default:
+
+```bash
+EXTRA='++training.learning_rate=5e-6 ++data.icl_prob=0.3 ++data.icl_task_dropout=0.2'
+sbatch --export=ALL,EXTRA="$EXTRA",MAX_STEPS=15000,WANDB_API_KEY="$WANDB_API_KEY" \
+       jobs/train_loss2.job
+```
+
+EXTRA is a single space-separated string of `++key=value` Hydra overrides. The job
+script splits it on whitespace before passing to `accelerate launch`.
+
+### Multi-node training (validated 2026-05-05 on 2 nodes — see MULTI_NODE_CHANGES.md)
+
+To train on N nodes (N×4 H100s total), override `--nodes` at submit time:
+
+```bash
+sbatch --nodes=2 --time=72:00:00 \
+       --export=ALL,EXTRA="$EXTRA",WANDB_API_KEY="$WANDB_API_KEY" \
+       jobs/train_loss2.job
+```
+
+The job script auto-detects `$SLURM_NNODES` and dispatches:
+- **`nodes=1`** → direct `accelerate launch` (same as before)
+- **`nodes>1`** → `srun --ntasks-per-node=1` per-node accelerate launch with shared
+  rendezvous (head node IP + port derived from job id)
+
+FSDP shards the 4B params across ALL ranks (8 ranks for 2 nodes), so per-rank
+memory drops. Effective global batch size grows N× — drop
+`++training.per_device_train_batch_size=4` (from default 8) to keep total batch
+comparable to single-node baselines.
+
+If multi-node fails, single-node `--nodes=1` still works exactly as before. Revert
+path documented in `MULTI_NODE_CHANGES.md`.
 
 For Loss 1 (CORN), swap to `jobs/train_loss1.job`. Both jobs are byte-identical
 except for the loss config they sed-flatten on top of `train_base.yaml`.

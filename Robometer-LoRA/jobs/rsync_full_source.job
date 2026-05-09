@@ -1,0 +1,43 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_rsync
+#SBATCH --output=logs/rsync_%j.out
+#SBATCH --error=logs/rsync_%j.err
+#SBATCH --time=03:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_mig
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+
+# Full source dataset rsync: /projects → /scratch-shared.
+# Source: /projects/prjs1958/robometer_frame_dataset/  (~220GB)
+# Dest:   /scratch-shared/$USER/robometer_frame_dataset_<timestamp>/
+#
+# Includes top-level pairs_unified.jsonl + per-family manifests/keyframes/scores.
+# Excludes the keyframes_orphan_success/keyframes_success secondary stores
+# from robometer/ — those are extra-large and not currently used by training.
+# Comment the --exclude lines if you want a true full mirror.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+
+TS=$(date +%Y%m%d_%H%M%S)
+SRC="/projects/prjs1958/robometer_frame_dataset"
+DST="/scratch-shared/$USER/robometer_frame_dataset_${TS}"
+
+echo "[rsync] src=$SRC"
+echo "[rsync] dst=$DST"
+echo "[rsync] start: $(date)"
+echo "[rsync] node: $(hostname)"
+
+mkdir -p "$DST"
+
+# -a: archive mode (preserves perms, times, symlinks)
+# --info=progress2: show overall progress
+# --human-readable: pretty sizes
+# Default behavior keeps everything; user can add --exclude later.
+rsync -a --info=progress2 --human-readable "$SRC/" "$DST/"
+
+echo "[rsync] done: $(date)"
+echo "[rsync] dst size:"
+du -sh "$DST" 2>&1

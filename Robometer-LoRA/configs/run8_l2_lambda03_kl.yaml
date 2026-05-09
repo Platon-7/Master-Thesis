@@ -1,0 +1,21 @@
+# Bake-off Run 8 — L2 (asymmetric C51 + BCE) lambda=0.3 + failure-KL anchor.
+# Same as run5 but adds the failure-KL regularizer to suppress drift on the failure
+# distribution during success-heavy phases. The KL anchor maintains a small FIFO
+# buffer of past failure-prediction logits and on each success step samples one entry
+# and adds λ_KL · KL(P_old ∥ P_new) so the model can't quietly forget what failures
+# look like as it shifts toward predicting successes.
+#
+# Apply on top of train_lora_base.yaml + loss2_c51.yaml + this overlay.
+
+loss.asymmetric_lambda: 0.3
+
+# ── Failure-KL anchor (off by default in loss2_c51.yaml; turning on here) ─────────
+loss.failure_kl_weight: 0.1                      # scale of the KL penalty (losses.md §Loss 3 pilot value)
+loss.failure_kl_buffer_size: 10                  # FIFO of past failure logits
+loss.failure_kl_apply_when_buffer_below_size: true  # apply even when buffer is below capacity (matches earlier diag config)
+loss.failure_kl_apply_every_n_success: 1         # one KL term per success-step
+loss.failure_kl_concat_batch: false              # KL in a separate forward pass, not concatenated
+loss.failure_kl_detach_backbone: false           # gradients flow through the backbone (matches diag config)
+
+training.max_steps: 7500
+training.exp_name: bakeoff_run8_l2_lambda03_kl

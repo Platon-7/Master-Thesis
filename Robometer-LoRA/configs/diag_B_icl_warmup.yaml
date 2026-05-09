@@ -1,0 +1,34 @@
+# Diagnostic Run B — ICL on (real demos) + warmup re-enabled.
+#
+# Question: is the regression caused by removing the warmup phase?
+# Hypothesis: with `icl_prob=0.5` (real demos as in the failed bake-off) AND
+# `warmup_steps=750` (re-enabled), if we recover OLD-like failsafe kendall, the
+# warmup removal is the dominant cause and the ICL fix itself is fine.
+#
+# Companion: diag_A_no_icl_warmup.yaml (icl_prob=0 + warmup=750).
+# Comparison matrix (with cancelled run5 + OLD as reference points):
+#
+#                ICL              warmup    failsafe kendall trajectory
+#   OLD          broken (≈ off)   750       +0.43 stable through step 7500
+#   run5  (NEW)  real, 0.5        0         +0.175 → +0.056 (declining)
+#   diag_A       off (0.0)        750       ?  → tests ICL-fix-as-cause
+#   diag_B       real, 0.5        750       ?  → tests warmup-removal-as-cause
+#
+# If diag_A is OLD-like and diag_B is run5-like → ICL fix is the issue.
+# If both are OLD-like                          → warmup removal is the issue.
+# If only diag_B is OLD-like                    → unexpected; ICL was actually OK without warmup.
+# If both are run5-like                         → something else changed; investigate further.
+
+# ---------- ICL ON (matches the failed bake-off) ----------
+data.icl_prob: 0.5
+
+# ---------- Warmup re-enabled ----------
+data.warmup_steps: 750
+data.train_datasets: [robometer_frames_train,robometer_frames_warmup]
+
+# ---------- L2 loss config (default lambda) ----------
+loss.asymmetric_lambda: 0.3
+
+# ---------- Schedule ----------
+training.max_steps: 2500
+training.exp_name: diag_B_icl_warmup

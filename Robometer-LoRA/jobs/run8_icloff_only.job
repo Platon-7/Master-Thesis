@@ -1,0 +1,88 @@
+#!/bin/bash
+#SBATCH --job-name=run8_icloff
+#SBATCH --output=logs/run8_icloff_%A_%a.out
+#SBATCH --error=logs/run8_icloff_%A_%a.err
+#SBATCH --time=00:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
+#SBATCH --array=0-6
+
+# run8 ICL-OFF for the 7 step points. Single run, smallest possible scope.
+# Recipe = validated step_curve_validate.job ICL-off (which produced clean
+# AUC 0.7087 progress, 0.6044 success at step 7500), plus the
+# icl_min_coverage=0.0 override to bypass the drift sniff on the new
+# train_lora_base.yaml's 70.6%-coverage train pair index.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf_v2}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_MODE=offline
+
+cd "$ROBOMETER_DIR"
+
+STEPS=(500 1500 2500 3500 4500 5500 7500)
+CKPTS=(
+    "/projects/prjs1958/LoRA_weights/run8_l2_lambda03_kl_22443273/bakeoff_run8_l2_lambda03_kl/ckpt-avg-5metrics=0.0000_step=500"
+    "/projects/prjs1958/LoRA_weights/run8_l2_lambda03_kl_22458569/bakeoff_run8_l2_lambda03_kl/ckpt-avg-5metrics=0.0000_step=1500"
+    "/projects/prjs1958/LoRA_weights/run8_l2_lambda03_kl_22458569/bakeoff_run8_l2_lambda03_kl/ckpt-avg-5metrics=0.0000_step=2500"
+    "/projects/prjs1958/LoRA_weights/run8_l2_lambda03_kl_22519887/bakeoff_run8_l2_lambda03_kl/ckpt-avg-5metrics=0.0000_step=3500"
+    "/projects/prjs1958/LoRA_weights/run8_l2_lambda03_kl_22519887/bakeoff_run8_l2_lambda03_kl/ckpt-avg-5metrics=0.0000_step=4500"
+    "/projects/prjs1958/LoRA_weights/run8_l2_lambda03_kl_22519887/bakeoff_run8_l2_lambda03_kl/ckpt-avg-5metrics=0.0000_step=5500"
+    "/projects/prjs1958/LoRA_weights/run8_l2_lambda03_kl_22519887/bakeoff_run8_l2_lambda03_kl/checkpoint-7500"
+)
+
+I=$SLURM_ARRAY_TASK_ID
+STEP="${STEPS[$I]}"
+CKPT="${CKPTS[$I]}"
+PRESET="$HERE/configs/loss2_c51.yaml"
+
+OUT_BASE="/scratch-shared/pkarageorgis1/LoRA_step_curves_v3"
+OUTPUT_DIR="$OUT_BASE/loss2_step${STEP}_run8_l2_lambda03_kl_icloff"
+mkdir -p "$OUTPUT_DIR"
+
+echo "[$I] STEP=$STEP  CKPT=$CKPT  OUTPUT_DIR=$OUTPUT_DIR"
+
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_lora_base.yaml" "$PRESET" \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+TEST_OVERRIDES=(
+    "++data.eval_datasets=[robometer_frames_test_v3]"
+    "++custom_eval.policy_ranking=[robometer_frames_test_v3]"
+    "++custom_eval.policy_ranking_dual_icl=false"
+)
+
+# ICL-off recipe: explicit icl_prob=0.0 + disable drift sniff
+ICL_OVERRIDES=(
+    "++data.icl_prob=0.0"
+    "++data.icl_min_coverage=0.0"
+)
+
+COMMON_OVERRIDES=(
+    "++mode=evaluate"
+    "training.output_dir=$OUTPUT_DIR"
+    "++training.overwrite_output_dir=true"
+    "logging.wandb_entity=nlp-squad"
+)
+
+RESUME_OVERRIDE="++training.resume_from_checkpoint='$CKPT'"
+
+"$PYTHON" train.py "${OVERRIDES[@]}" "${TEST_OVERRIDES[@]}" "${COMMON_OVERRIDES[@]}" \
+    "$RESUME_OVERRIDE" "${ICL_OVERRIDES[@]}"
+
+echo "[$I] DONE"

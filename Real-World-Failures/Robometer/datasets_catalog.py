@@ -314,50 +314,49 @@ DATASETS = [
         "skip": False,
     },
     # ----------------------------------------------------------------
-    # REAL ROBOT — RoboReward subset (own neural-annotation pipeline, integrated as
-    # a first-class family in pairs_unified.jsonl alongside droid / robometer / etc.)
+    # REAL ROBOT — Already processed (DROID failures done separately)
     # ----------------------------------------------------------------
     {
         "archive": "jesbu1_roboreward_rfm_roboreward_train",
         "category": "real_robot",
-        "description": "RoboReward benchmark train",
+        "description": "RoboReward benchmark train — SKIP: different failure type, handled separately",
         "split_parts": True,
-        "skip": False,
+        "skip": True,
     },
     {
         "archive": "jesbu1_roboreward_rfm_roboreward_val",
         "category": "real_robot",
-        "description": "RoboReward benchmark val",
+        "description": "RoboReward benchmark val — SKIP: different failure type, handled separately",
         "split_parts": False,
-        "skip": False,
+        "skip": True,
     },
     {
         "archive": "jesbu1_roboreward_rfm_roboreward_test",
         "category": "real_robot",
-        "description": "RoboReward benchmark test",
+        "description": "RoboReward benchmark test — SKIP: different failure type, handled separately",
         "split_parts": False,
-        "skip": False,
+        "skip": True,
     },
     {
         "archive": "jesbu1_roboreward_rfm_high_res_roboreward_train",
         "category": "real_robot",
-        "description": "RoboReward high-res train",
+        "description": "RoboReward high-res train — SKIP: different failure type, handled separately",
         "split_parts": False,
-        "skip": False,
+        "skip": True,
     },
     {
         "archive": "jesbu1_roboreward_rfm_high_res_roboreward_val",
         "category": "real_robot",
-        "description": "RoboReward high-res val",
+        "description": "RoboReward high-res val — SKIP: different failure type, handled separately",
         "split_parts": False,
-        "skip": False,
+        "skip": True,
     },
     {
         "archive": "jesbu1_roboreward_rfm_high_res_roboreward_test",
         "category": "real_robot",
-        "description": "RoboReward high-res test",
+        "description": "RoboReward high-res test — SKIP: different failure type, handled separately",
         "split_parts": False,
-        "skip": False,
+        "skip": True,
     },
     # ----------------------------------------------------------------
     # REAL ROBOT — Large split archives (need part assembly)

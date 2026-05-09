@@ -249,9 +249,33 @@ def _load_frame_labels_from_manifests(
     return lookup, known_eids
 
 
+def _load_scope_eids(scope_paths: Sequence[str]) -> Optional[set]:
+    """Load episode_ids from one or more *.jsonl files. Each line is a JSON
+    object with at least an `episode_id` field. Returns the union as a set,
+    or None if scope_paths is empty (== no filtering).
+    """
+    if not scope_paths:
+        return None
+    eids: set = set()
+    for p in scope_paths:
+        if not os.path.isfile(p):
+            raise FileNotFoundError(f"scope file missing: {p}")
+        with open(p) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    eids.add(json.loads(line)["episode_id"])
+                except (json.JSONDecodeError, KeyError):
+                    continue
+    return eids
+
+
 def build_index_from_pairs_unified(
     frame_dataset_root: str,
     pairs_unified_path: Optional[str] = None,
+    scope_eids: Optional[set] = None,
 ) -> TarKeyframeIndex:
     """Master entry point. Builds a TarKeyframeIndex from pairs_unified.jsonl
     plus per-source manifest frame_labels.
@@ -259,6 +283,10 @@ def build_index_from_pairs_unified(
     Args:
         frame_dataset_root: e.g. /projects/prjs1958/robometer_frame_dataset/
         pairs_unified_path: defaults to <frame_dataset_root>/pairs_unified.jsonl
+        scope_eids: optional allow-list of episode_ids. When provided, rows whose
+            episode_id is not in this set are dropped before any other processing.
+            Used by TAR_SPLITS_DIR-driven train/eval scoping (see
+            TarKeyframeRBMDataset._load_all_datasets).
     """
     if pairs_unified_path is None:
         pairs_unified_path = os.path.join(frame_dataset_root, "pairs_unified.jsonl")
@@ -269,6 +297,7 @@ def build_index_from_pairs_unified(
     n_total = 0
     n_dropped_label = 0
     n_dropped_no_fl_failure = 0
+    n_dropped_out_of_scope = 0
     n_no_family = 0
     n_no_task = 0
 
@@ -278,6 +307,10 @@ def build_index_from_pairs_unified(
             try:
                 r = json.loads(line)
             except json.JSONDecodeError:
+                continue
+
+            if scope_eids is not None and r.get("episode_id") not in scope_eids:
+                n_dropped_out_of_scope += 1
                 continue
 
             label = r.get("label")
@@ -347,7 +380,8 @@ def build_index_from_pairs_unified(
             })
 
     print(f"[tar-dataset] pairs_unified rows: {n_total} total | kept {len(rows)} | "
-          f"dropped {n_dropped_label} (non-binary label) + "
+          f"dropped {n_dropped_out_of_scope} (out of scope) + "
+          f"{n_dropped_label} (non-binary label) + "
           f"{n_no_family} (no source) + {n_no_task} (no task) + "
           f"{n_dropped_no_fl_failure} (failure with missing frame_labels)")
 
@@ -384,9 +418,31 @@ class TarKeyframeRBMDataset(RBMDataset):
         )
         pairs_unified_path = os.environ.get("TAR_PAIRS_UNIFIED_PATH") or None
 
+        # Train/eval scoping: TAR_SPLITS_DIR points at a dir containing
+        # train.jsonl + eval_*.jsonl files (one episode_id per line). When set,
+        # we filter pairs_unified rows down to the relevant scope. Without it,
+        # the loader falls back to the legacy "all 651k rows" behavior.
+        splits_dir = os.environ.get("TAR_SPLITS_DIR") or None
+        scope_eids = None
+        if splits_dir:
+            from glob import glob
+            if self.is_evaluation:
+                scope_paths = sorted(glob(os.path.join(splits_dir, "eval_*.jsonl")))
+                if not scope_paths:
+                    raise FileNotFoundError(
+                        f"TAR_SPLITS_DIR={splits_dir} has no eval_*.jsonl files"
+                    )
+            else:
+                scope_paths = [os.path.join(splits_dir, "train.jsonl")]
+            scope_eids = _load_scope_eids(scope_paths)
+            print(f"[tar-dataset] scope: is_eval={self.is_evaluation}, "
+                  f"files={[os.path.basename(p) for p in scope_paths]}, "
+                  f"unique_eids={len(scope_eids)}")
+
         index = build_index_from_pairs_unified(
             frame_dataset_root=frame_dataset_root,
             pairs_unified_path=pairs_unified_path,
+            scope_eids=scope_eids,
         )
 
         # combined_indices schema (from upstream BaseDataset._build_indices):

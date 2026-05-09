@@ -232,6 +232,16 @@ class DataConfig:
             "between label transitions to match the smooth t/T character of success labels."
         },
     )
+    icl_demo_blank: bool = field(
+        default=False,
+        metadata={
+            "help": "Ablation: when True, replace demo frames with all-zero pixels after loading. "
+            "Keeps demo length, separator token, and position embeddings intact, but removes the "
+            "visual content. Used to test whether the VLM is genuinely using the demo's visual "
+            "signal vs. just reacting to longer context length / extra separator token. "
+            "Default False."
+        },
+    )
     icl_task_dropout: bool = field(
         default=False,
         metadata={

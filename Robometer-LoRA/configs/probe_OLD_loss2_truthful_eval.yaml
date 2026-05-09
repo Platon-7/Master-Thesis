@@ -1,0 +1,50 @@
+# Behavioural bisect — evaluate OLD-loss2 checkpoint-7500 (the model that reported
+# +0.413 failsafe kendall under N=30 + self-demo bug) under CURRENT eval setup
+# (N=510 per failsafe split, real ICL, dual_icl, samplers + trainer fixes applied).
+#
+# We cannot do a code-bisect: OLD (Apr-25, p4z06ajv) and the failed bake-off (May-1,
+# efv1j9ve etc) were submitted from the SAME commit 15d673ae — the changes between
+# them lived only in the working tree. This is the only behavioural test that
+# disambiguates "OLD genuinely learned" from "OLD's +0.413 was measurement artefact".
+#
+# Outcomes:
+#   * kendall_avg_failsafe ≫ 0 under truthful eval → real regression, OLD's model
+#     legitimately ranks failsafe trajectories. Hunt for what changed in the data
+#     pipeline / working tree between Apr-25 and May-1.
+#   * kendall_avg_failsafe ≈ 0 under truthful eval → OLD's +0.413 was some mix of
+#     N=30 noise (CI ≈ ±0.36) + self-demo label leakage during eval. No bug to find;
+#     the model never generalised. Pivot from debugging to thesis content.
+
+# OLD-loss2's exact final weights (full base+LoRA merged, ~9 GB safetensors).
+# Reported under p4z06ajv at step 7501: kendall_avg_failsafe = +0.413.
+training.load_from_checkpoint: /projects/prjs1958/LoRA_weights/loss2_22244009/robometer_lora_loss2_c51_asymmetric/checkpoint-7500
+
+# Trivial training step to enter the trainer loop, then immediate eval at step 1.
+# We cannot run with max_steps=0; one step leaves the loaded weights effectively
+# unchanged (one optimizer step at lr=2e-5 with grad clip is negligible).
+training.max_steps: 1
+training.eval_steps: 1
+training.custom_eval_steps: 1
+training.save_steps: 100   # never reached
+
+# OLD-loss2 head config — must match for the saved success_head + progress_head to
+# load cleanly. Same as configs/loss2_c51.yaml.
+loss.progress_loss_type: c51_asymmetric
+loss.success_loss_type: bce_asymmetric
+loss.progress_discrete_bins: 10
+loss.asymmetric_lambda: 0.3
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# CURRENT (truthful) eval setup — N=510 per failsafe split, dual_icl forces
+# icl_prob=1 and icl_prob=0 inside eval. data.icl_prob below only affects training.
+custom_eval.num_examples_per_quality_pr: 85
+custom_eval.policy_ranking_dual_icl: true
+custom_eval.policy_ranking: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
+custom_eval.eval_types: [policy_ranking]
+
+data.icl_prob: 0.5
+data.warmup_steps: 0
+
+training.exp_name: probe_OLD_loss2_ckpt7500_truthful_eval

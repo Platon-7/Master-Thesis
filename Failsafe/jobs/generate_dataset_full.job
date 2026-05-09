@@ -26,9 +26,9 @@
 
 set -euo pipefail
 
-CONDA_BASE=/gpfs/scratch1/shared/pkarageorgis1/miniforge3
-source $CONDA_BASE/etc/profile.d/conda.sh
-conda activate failsafe
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+source activate /home/pkarageorgis1/.conda/envs/failsafe
 
 export FAILSAFE_PATH=/home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo
 export MUJOCO_GL=egl
@@ -52,7 +52,8 @@ echo "Start: $(date)"
 python $THESIS/Failsafe/generate_dataset.py \
     --task $TASK \
     --output-dir $OUT \
-    --base-seed $BASE_SEED
+    --base-seed $BASE_SEED \
+    --no-pack
 
 echo
 echo "=== Summary for $TASK ==="

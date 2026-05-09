@@ -70,7 +70,7 @@ Run `python extract_failures.py --list-datasets` to see all available archives.
 | `human_egocentric` | EgoDex, EPIC Kitchens, RH20T human, Hand-Paired human |
 | `eval_benchmark` | OXE Eval splits, MIT Franka Policy Ranking |
 
-> **Note:** The `jesbu1_roboreward_rfm_*` archives are integrated as a first-class family in `pairs_unified.jsonl` (see `ROBOMETER_FRAME_BREAKDOWN.md`). Their RoboReward-pipeline annotations live at `/projects/prjs1958/robometer_frame_dataset/roboreward/`.
+> **Note:** The `jesbu1_roboreward_rfm_*` archives (DROID subset) are marked `skip=True` in `datasets_catalog.py` — those were already scored and live in `Robo-Reward-FPS/droid_failures/`.
 
 > **Large archives** (AgiBot World ~1 TB, EgoDex parts) are marked `split_parts=True` and are skipped by default. Contact Platon if you want to process these — they require manual `cat` reassembly before extraction.
 

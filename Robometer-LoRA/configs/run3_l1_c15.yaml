@@ -6,5 +6,5 @@
 
 loss.corn_asymmetric_c: 1.5
 training.learning_rate: 4.0e-5
-training.max_steps: 4000
+training.max_steps: 7500
 training.exp_name: bakeoff_run3_l1_c15

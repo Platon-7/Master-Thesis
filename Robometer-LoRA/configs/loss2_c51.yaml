@@ -22,5 +22,13 @@ model.train_preference_head: false
 # dataset is correspondingly dropped from data.train_datasets in train_lora_base.yaml.
 data.stratified_batch_balance: true
 data.warmup_steps: 0
+# Failure-label shape: piecewise-linear ramp interpolated between the rubric anchor frames.
+# Reason: the pretrained Robometer-4B C51 head was trained on smooth t/T-shaped progress
+# curves; matching that shape on the failure side keeps the two classes in the same target
+# space (a smooth ramp from 0 → some peak < 1, vs successes' smooth ramp 0 → 1). Stair-step
+# rubric values would put failures into a distinct bin pattern that doesn't resemble the
+# pretrained head's expected target distribution. Loss 1 (CORN) keeps `none` because there
+# we deliberately bucketise BOTH classes onto the same 5-quantile ordinal grid.
+data.failure_label_smoothing: linear
 
 training.exp_name: robometer_lora_loss2_c51_asymmetric

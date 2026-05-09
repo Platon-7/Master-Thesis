@@ -1,0 +1,40 @@
+# Companion probe to probe_OLD_loss2_truthful_eval. Loads OLD-loss1 (rl5u04gb)
+# checkpoint-7500 — the run user asked about because it used CORN (loss1) which
+# trains the progress head primarily. Reported failsafe kendall of +0.293 at
+# step 7501 (max +0.440 mid-training, under N=30 + self-demo bug).
+#
+# Decisive question: under truthful eval (N=510, real ICL, dual_icl, fixes
+# applied), does OLD-loss1's progress head still produce +0.29 — or does it
+# collapse like OLD-loss2 did (-0.18 to -0.01 across modes)?
+#
+#   * kendall_avg failsafe_iclon ≫ 0 → progress head genuinely learned, BAKE-r3's
+#     non-learning is a real regression. Hunt for what changed in data pipeline.
+#   * kendall_avg failsafe ≈ 0 → OLD-loss1's +0.29 was noise + leakage, same as
+#     OLD-loss2. No regression to find.
+
+training.load_from_checkpoint: /projects/prjs1958/LoRA_weights/loss1_22244008/robometer_lora_loss1_corn_asymmetric/checkpoint-7500
+
+training.max_steps: 1
+training.eval_steps: 1
+training.custom_eval_steps: 1
+training.save_steps: 100
+
+# OLD-loss1 head config — CORN ordinal head (4 logits, no continuous head).
+loss.progress_loss_type: corn_asymmetric
+loss.corn_asymmetric_c: 1.5
+loss.progress_discrete_bins: 10   # not used in CORN path but harmless
+model.progress_head_mode: corn
+model.train_progress_head: true
+model.train_success_head: false
+model.train_preference_head: false
+
+# Same truthful eval setup as the loss2 probe.
+custom_eval.num_examples_per_quality_pr: 85
+custom_eval.policy_ranking_dual_icl: true
+custom_eval.policy_ranking: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
+custom_eval.eval_types: [policy_ranking]
+
+data.icl_prob: 0.5
+data.warmup_steps: 0
+
+training.exp_name: probe_OLD_loss1_ckpt7500_truthful_eval

@@ -7,5 +7,5 @@
 loss.corn_asymmetric_c: 0.0
 training.learning_rate: 4.0e-5
 # 4000 steps (down from base's 7500) — past runs plateaued well before 7500.
-training.max_steps: 4000
+training.max_steps: 7500
 training.exp_name: bakeoff_run1_l1_c0

@@ -1,0 +1,33 @@
+# Diagnostic Run A — no ICL + warmup re-enabled.
+#
+# Question: is the regression caused by the ICL fix (broken→real demos)?
+# Hypothesis: with `icl_prob=0` (no demos at all, mimicking OLD's effective behavior
+# under the broken-ICL bug) AND `warmup_steps=750` (re-enabled), if we recover OLD's
+# stable +0.4 failsafe kendall, the ICL fix is the dominant cause.
+#
+# Companion: diag_B_icl_warmup.yaml (icl_prob=0.5 + warmup=750).
+# Comparison axis:
+#   * vs OLD run loss2_22244009 (broken-ICL effective + warmup=750):  same → ICL was the issue
+#   * vs the cancelled run5 (real-ICL + no warmup):                   same → warmup re-enable matters
+#
+# Loss preset: loss2_c51 (matches OLD's setup exactly except for icl_prob=0 here).
+# Schedule: 2500 steps (5 evals at 500/1000/1500/2000/2500) — enough to see whether
+# the trajectory plateaus high (OLD-like) or low (NEW-like).
+
+# ---------- ICL OFF (the variable under test) ----------
+data.icl_prob: 0.0
+# Note: data.use_icl is still true (inherited from base) so the ICL infrastructure runs;
+# icl_prob=0.0 makes every coin-flip return ICL-OFF. Equivalent to never attaching demos.
+
+# ---------- Warmup re-enabled ----------
+# Re-introduce the 750-step failure-only bootstrap (matches OLD's stable recipe). Need
+# to also re-add the warmup dataset to the train pool — base.yaml dropped it Apr-30.
+data.warmup_steps: 750
+data.train_datasets: [robometer_frames_train,robometer_frames_warmup]
+
+# ---------- L2 loss config (default lambda) ----------
+loss.asymmetric_lambda: 0.3
+
+# ---------- Schedule ----------
+training.max_steps: 2500
+training.exp_name: diag_A_no_icl_warmup

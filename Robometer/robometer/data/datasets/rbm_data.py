@@ -1,12 +1,18 @@
 import random
 
 from robometer.data.datasets.base import BaseDataset
+from robometer.data.samplers.base import SampleSkipRequest
 from robometer.data.samplers.pref import PrefSampler
 from robometer.data.samplers.progress import ProgressSampler
 from robometer.data.dataset_category import is_preference_only
 from robometer.utils.logger import get_logger
 
 logger = get_logger()
+
+# Bound the skip-and-retry loop so a fully-broken dataset crashes loudly rather than
+# spinning forever. With ~17.3k train trajectories and a handful of bad ones, hitting
+# this many in a row is essentially impossible under random sampling.
+_MAX_SKIP_RETRIES = 50
 
 
 class RBMDataset(BaseDataset):
@@ -76,18 +82,37 @@ class RBMDataset(BaseDataset):
             return self.max_samples
 
     def __getitem__(self, idx):
-        """Create a data sample from the dataset."""
+        """Create a data sample from the dataset.
+
+        Wraps the sampler call in a skip-and-retry loop so trajectories with
+        unrecoverable data issues (e.g., curated frame_labels length not matching
+        the actual loaded frames count, see samplers/base.py) advance to the next
+        index instead of crashing the worker. Bounded by _MAX_SKIP_RETRIES.
+        """
         idx = idx % self.data_len
-        logger.trace(f"[RBMDataset] __getitem__: Starting for idx={idx}")
+        for attempt in range(_MAX_SKIP_RETRIES):
+            cur_idx = (idx + attempt) % self.data_len
+            logger.trace(f"[RBMDataset] __getitem__: Starting for idx={cur_idx} (attempt {attempt+1})")
 
-        # Get the item from the filtered dataset
-        item = self.dataset[idx]
-        traj_id = item.get("id", "unknown")
-        logger.trace(f"[RBMDataset] __getitem__: Got item with ID={traj_id}, calling _generate_sample_from_item")
+            item = self.dataset[cur_idx]
+            traj_id = item.get("id", "unknown")
+            logger.trace(f"[RBMDataset] __getitem__: Got item with ID={traj_id}, calling _generate_sample_from_item")
 
-        sample = self._generate_sample_from_item(item)
-        logger.trace(f"[RBMDataset] __getitem__: Successfully generated sample for idx={idx}, ID={traj_id}")
-        return sample
+            try:
+                sample = self._generate_sample_from_item(item)
+                logger.trace(f"[RBMDataset] __getitem__: Successfully generated sample for idx={cur_idx}, ID={traj_id}")
+                return sample
+            except SampleSkipRequest as e:
+                logger.warning(
+                    f"[RBMDataset] Skipping idx={cur_idx} ID={traj_id} "
+                    f"(attempt {attempt+1}/{_MAX_SKIP_RETRIES}): {e}"
+                )
+                continue
+
+        raise RuntimeError(
+            f"RBMDataset.__getitem__: hit {_MAX_SKIP_RETRIES} consecutive SampleSkipRequest "
+            f"failures starting from idx={idx}. Dataset likely has too many bad samples."
+        )
 
     def _generate_sample_from_item(self, item):
         """Shared sampler logic that can be reused by balanced datasets."""

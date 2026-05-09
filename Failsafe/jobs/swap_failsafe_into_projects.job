@@ -1,0 +1,172 @@
+#!/bin/bash
+#SBATCH --job-name=failsafe_swap
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Failsafe/logs/swap_%j.out
+#SBATCH --account=gusei17535
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=02:00:00
+
+# 1. Pre-flight: confirm scratch has full failsafe dataset (manifest/shard_index sane)
+# 2. Backup pairs_unified.jsonl + per-source report
+# 3. Wipe /projects/.../failsafe/{keyframes,keyframes_success,manifests,scores}
+# 4. Rsync scratch → projects
+# 5. Verify shard_index counts in /projects/
+# 6. Rebuild pairs_unified.jsonl (picks up new failsafe rows)
+# 7. Print 3-way sanity table: manifest rows ↔ shard_index ↔ pairs_unified rows
+
+set -euo pipefail
+
+SCRATCH=/scratch-shared/pkarageorgis1/failsafe_dataset/full_v1
+PROJ=/projects/prjs1958/robometer_frame_dataset/failsafe
+PAIRS=/projects/prjs1958/robometer_frame_dataset/pairs_unified.jsonl
+REPORT=/projects/prjs1958/robometer_frame_dataset/pairs_unified_report.json
+BUILD_PAIRS=/gpfs/home3/pkarageorgis1/Master-Thesis/Robometer-LoRA/scripts/build_unified_pairs.py
+PYTHON=/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python
+
+echo "Start: $(date)"
+
+# ---------- 1. Pre-flight on scratch ----------
+echo
+echo "=== 1. Pre-flight on scratch ==="
+[[ -d "$SCRATCH" ]] || { echo "ERROR: scratch dir missing"; exit 1; }
+for sub in keyframes keyframes_success manifests; do
+    [[ -d "$SCRATCH/$sub" ]] || { echo "ERROR: $SCRATCH/$sub missing"; exit 1; }
+done
+# Sanity: each archive's shard_index must match its manifest count
+$PYTHON - <<'PY'
+import json, sys
+from pathlib import Path
+SCRATCH = Path("/scratch-shared/pkarageorgis1/failsafe_dataset/full_v1")
+ok = True
+for sub, kind in [("keyframes", "failures"), ("keyframes_success", "successes")]:
+    for arch_dir in sorted((SCRATCH / sub).iterdir()):
+        if not arch_dir.is_dir(): continue
+        si = arch_dir / "shard_index.json"
+        if not si.exists():
+            print(f"  ERR: {si} missing"); ok = False; continue
+        n_idx = len(json.load(open(si)))
+        mfile = SCRATCH / "manifests" / f"{arch_dir.name}_{kind}.jsonl"
+        if not mfile.exists():
+            print(f"  ERR: {mfile} missing"); ok = False; continue
+        with open(mfile) as f:
+            n_man = sum(1 for line in f if line.strip())
+        match = "✓" if n_idx == n_man else "✗"
+        print(f"  {match} {sub}/{arch_dir.name:20s}  manifest={n_man:>5}  shard_index={n_idx:>5}")
+        if n_idx != n_man: ok = False
+sys.exit(0 if ok else 1)
+PY
+
+# ---------- 2. Backup ----------
+echo
+echo "=== 2. Backup pairs_unified + report ==="
+cp -v "$PAIRS"   "${PAIRS}.preswap_$(date +%Y%m%d_%H%M%S).bak"
+cp -v "$REPORT" "${REPORT}.preswap_$(date +%Y%m%d_%H%M%S).bak"
+
+# ---------- 3. Wipe old failsafe in /projects/ ----------
+echo
+echo "=== 3. Wipe old failsafe data in /projects/ ==="
+for sub in keyframes keyframes_success manifests scores; do
+    if [[ -d "$PROJ/$sub" ]]; then
+        echo "  removing $PROJ/$sub"
+        rm -rf "$PROJ/$sub"
+    fi
+done
+
+# ---------- 4. Rsync scratch → projects ----------
+echo
+echo "=== 4. Rsync scratch → projects ==="
+mkdir -p "$PROJ"
+rsync -a --info=progress2 \
+    "$SCRATCH/keyframes"          \
+    "$SCRATCH/keyframes_success"  \
+    "$SCRATCH/manifests"          \
+    "$SCRATCH/scores"             \
+    "$PROJ/"
+
+# ---------- 5. Verify projects matches scratch ----------
+echo
+echo "=== 5. Post-rsync verification on /projects/ ==="
+$PYTHON - <<'PY'
+import json, sys
+from pathlib import Path
+PROJ = Path("/projects/prjs1958/robometer_frame_dataset/failsafe")
+ok = True
+for sub, kind in [("keyframes", "failures"), ("keyframes_success", "successes")]:
+    for arch_dir in sorted((PROJ / sub).iterdir()):
+        if not arch_dir.is_dir(): continue
+        si = arch_dir / "shard_index.json"
+        if not si.exists():
+            print(f"  ERR: {si} missing"); ok = False; continue
+        n_idx = len(json.load(open(si)))
+        mfile = PROJ / "manifests" / f"{arch_dir.name}_{kind}.jsonl"
+        with open(mfile) as f:
+            n_man = sum(1 for line in f if line.strip())
+        match = "✓" if n_idx == n_man else "✗"
+        print(f"  {match} {sub}/{arch_dir.name:20s}  manifest={n_man:>5}  shard_index={n_idx:>5}")
+        if n_idx != n_man: ok = False
+sys.exit(0 if ok else 1)
+PY
+
+# ---------- 6. Rebuild pairs_unified.jsonl ----------
+echo
+echo "=== 6. Rebuild pairs_unified.jsonl ==="
+cd /gpfs/home3/pkarageorgis1/Master-Thesis/Robometer-LoRA
+$PYTHON "$BUILD_PAIRS"
+
+# ---------- 7. Three-way sanity table ----------
+echo
+echo "=== 7. Final 3-way sanity check ==="
+$PYTHON - <<'PY'
+import json, collections
+from pathlib import Path
+PROJ = Path("/projects/prjs1958/robometer_frame_dataset/failsafe")
+
+# Manifest base eids (per-view rows / 3 views, but use unique base eids)
+def base_id(eid):
+    for v in ("front", "side", "wrist"):
+        tok = f"_{v}"
+        i = eid.find(tok)
+        if i >= 0:
+            end = i + len(tok)
+            if end == len(eid) or eid[end] == "_":
+                return eid[:i] + eid[end:]
+    return eid
+
+manifest_base = set()
+for f in (PROJ / "manifests").glob("*.jsonl"):
+    with open(f) as fh:
+        for line in fh:
+            r = json.loads(line)
+            manifest_base.add(base_id(r["episode_id"]))
+
+# shard_index per-view eid count
+shard_view_count = 0
+for sub in ("keyframes", "keyframes_success"):
+    for archd in (PROJ / sub).iterdir():
+        if not archd.is_dir(): continue
+        si = archd / "shard_index.json"
+        if si.exists():
+            shard_view_count += len(json.load(open(si)))
+
+# pairs_unified failsafe rows (already collapsed to base)
+pu_path = Path("/projects/prjs1958/robometer_frame_dataset/pairs_unified.jsonl")
+pu_failsafe = 0
+with open(pu_path) as f:
+    for line in f:
+        r = json.loads(line)
+        if r.get("source") == "failsafe":
+            pu_failsafe += 1
+
+print(f"  manifest unique base eids : {len(manifest_base)}")
+print(f"  shard_index per-view rows : {shard_view_count}  (÷3 views ≈ {shard_view_count // 3})")
+print(f"  pairs_unified failsafe rows: {pu_failsafe}")
+print()
+if len(manifest_base) == pu_failsafe == shard_view_count // 3:
+    print("  ✓ ALL THREE COUNTS AGREE — swap is clean.")
+else:
+    print("  ✗ MISMATCH — investigate.")
+PY
+
+echo
+echo "End: $(date)"

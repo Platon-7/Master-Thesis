@@ -7,6 +7,6 @@
 #   * ICL task-instruction dropout: ON.
 
 loss.asymmetric_lambda: 0.3
-training.max_steps: 4000
+training.max_steps: 7500
 data.icl_task_dropout: true
 training.exp_name: bakeoff_run7_l2_lambda03_dropout

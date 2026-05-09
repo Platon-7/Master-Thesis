@@ -1,0 +1,27 @@
+# 10-step training smoke on the v2 HF cache.
+# Goal: confirm sampler→collator→loss path actually consumes frame_labels and produces
+# rubric-shaped (not t/T linear) target_progress for failure trajectories on real GPU.
+#
+# Pass criteria (verified by inspecting the .out file):
+#   * train/prog_loss is a finite number after step 1
+#   * train_strat_spearman_corr/forward_progress logged (means batches were stratified
+#     and progress targets reached the loss)
+#   * one custom_eval pass at step 10 dumps a non-empty
+#     eval_results/policy_ranking_*.json with a numeric kendall_last
+#
+# Schedule: 10 steps, eval at step 10, save off (won't reach step 100).
+training.max_steps: 10
+training.eval_steps: 10
+training.custom_eval_steps: 10
+training.save_steps: 100
+
+# Eval just one split — failsafe — to keep total runtime ~5 min on H100.
+custom_eval.policy_ranking: [robometer_frames_eval_failsafe]
+custom_eval.policy_ranking_dual_icl: false
+custom_eval.num_examples_per_quality_pr: 5
+custom_eval.eval_types: [policy_ranking]
+
+data.icl_prob: 0.5
+data.warmup_steps: 0
+
+training.exp_name: smoke_v2_loss2_10steps

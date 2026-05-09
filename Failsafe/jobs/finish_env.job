@@ -1,0 +1,81 @@
+#!/bin/bash
+#SBATCH --job-name=failsafe_finishenv
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Failsafe/logs/finishenv_%j.out
+#SBATCH --account=gusei17535
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=01:00:00
+
+# Resume the failsafe env build at the pip step. Conda already created the env
+# at ~/.conda/envs/failsafe; the previous run died on `failgen==0.0.1` (a local
+# package not on PyPI). We strip that line, finish pip, then editable-install
+# failgen from failsafe_repo.
+
+set -euo pipefail
+
+ENVYML=/home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo/environment.yml
+ENV_PATH=/home/pkarageorgis1/.conda/envs/failsafe
+REPO=/home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo
+
+LOCAL_TMP="${SLURM_TMPDIR:-/scratch-local/pkarageorgis1.${SLURM_JOB_ID}}"
+mkdir -p "$LOCAL_TMP"
+export TMPDIR="$LOCAL_TMP"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+source activate "$ENV_PATH"
+
+echo "Start: $(date)"
+python --version
+
+# Extract pip section. Drop both known local-source packages (failgen + mani_skill)
+# AND lerobot==0.1.0 (not on PyPI — was likely installed from a git clone in the
+# original env, then captured by conda env export as if it were a public package).
+REQS=$LOCAL_TMP/requirements.txt
+SKIPS_RE='^(failgen|mani_skill|mani-skill|lerobot)([=<>!~]|$)'
+awk '/^\s*- pip:/{found=1; next} found && /^[^[:space:]]/{found=0} found' "$ENVYML" \
+    | sed -E 's/^[[:space:]]*-[[:space:]]*//' \
+    | grep -vE "$SKIPS_RE" \
+    > "$REQS"
+
+echo "Extracted $(wc -l < "$REQS") pip requirements (failgen/mani_skill/lerobot removed)."
+
+# Install pip deps in tolerant mode: one line at a time, log failures, keep going.
+# Most are already in the env from the prior conda phase, so this is fast.
+FAIL_LOG=$LOCAL_TMP/pip_failures.txt
+> "$FAIL_LOG"
+ok=0; failed=0
+while IFS= read -r req; do
+    [[ -z "$req" || "$req" =~ ^# ]] && continue
+    if pip install --no-input --no-deps "$req" >/dev/null 2>&1; then
+        ok=$((ok+1))
+    else
+        echo "$req" >> "$FAIL_LOG"
+        failed=$((failed+1))
+    fi
+done < "$REQS"
+echo "pip install done — ok=$ok  failed=$failed"
+if (( failed > 0 )); then
+    echo "=== failed packages (logged) ==="
+    cat "$FAIL_LOG"
+fi
+
+# Now resolve dependencies properly with ONE batch install (now that all
+# missing local pins are stripped, pip's resolver should succeed).
+echo "=== final dep resolution pass ==="
+pip install --no-input -r "$REQS" || {
+    echo "Resolver pass had errors — see above. Continuing to local installs."
+}
+
+# Install the local source packages: failgen + the vendored ManiSkill
+pip install -e "$REPO" --no-deps
+pip install -e "$REPO/ManiSkill" --no-deps
+
+# Sanity
+python -c "import torch; print('torch:', torch.__version__, 'cuda:', torch.cuda.is_available())"
+python -c "import mani_skill; print('mani_skill ok')"
+python -c "import failgen; print('failgen ok')"
+
+echo "End: $(date)"
+echo "Env complete at $ENV_PATH"

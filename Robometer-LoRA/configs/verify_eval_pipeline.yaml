@@ -1,0 +1,41 @@
+# 10-step verification — does the eval pipeline produce non-empty dumps for all 4
+# datasets in both ICL modes?
+#
+# Trains for 10 steps (intentionally trivial — we don't care about the model state),
+# then runs ONE eval at step 10 which exercises:
+#   - 4 eval datasets (droid, robometer, metaworld, failsafe)
+#   - 2 ICL modes per dataset (iclon, icloff) via dual_icl
+# = 8 eval passes total
+#
+# Pass criteria (verified post-run by inspecting eval_results/ + .out trainer logs):
+#   1. all 4 datasets' eval_results/*.json files are NON-EMPTY (this is the
+#      regression we just fixed — robometer was producing 0-entry dumps because
+#      `data_source = eval_results[0]["data_source"]` flipped use_partial_success=True
+#      on heterogeneous-source splits)
+#   2. all 8 # Metrics blocks in the .out report `'kendall_last': <number>` (not
+#      `'error': 'No valid policy ranking data found'`)
+#   3. icl_on samples actually had demos attached (verifiable via demo_frames_count
+#      in the per-sample metadata, or via the absence of "partner unavailable" warnings
+#      for failsafe/metaworld which have 100% pair coverage)
+#
+# Setup mirrors loss2_c51 baseline so the comparison to the planned diag runs is direct.
+
+loss.asymmetric_lambda: 0.3
+
+# Trivial training schedule
+training.max_steps: 10
+training.eval_steps: 10            # one eval at step 10
+training.custom_eval_steps: 10
+training.save_steps: 100           # save off (won't reach step 100)
+
+# Eval all 4 datasets in both ICL modes (dual_icl is already on in train_lora_base)
+custom_eval.policy_ranking: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
+custom_eval.policy_ranking_dual_icl: true
+# Use the smaller eval N to keep this fast (we just need the pipeline to populate)
+custom_eval.num_examples_per_quality_pr: 10
+
+# Same ICL setup as the failed bake-off (most realistic test of demo attachment)
+data.icl_prob: 0.5
+data.warmup_steps: 0    # match base; warmup re-enable is the diag question, not this verification
+
+training.exp_name: verify_eval_pipeline

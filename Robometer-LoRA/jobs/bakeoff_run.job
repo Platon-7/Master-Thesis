@@ -53,6 +53,12 @@ export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
 # pairs_unified.jsonl + tar shards directly).
 export TAR_DATASET_ROOT="${TAR_DATASET_ROOT:-/projects/prjs1958/robometer_frame_dataset}"
 
+# Train/eval episode-id scope. Contains train.jsonl + eval_*.jsonl (one
+# episode_id per line). Tar loader filters pairs_unified to these ids.
+# Default: 3.5x success-skewed splits (4k fail / 14k succ). Set to
+# /scratch-shared/$USER/robometer_frames_splits_unified to fall back to the 1:1 mix.
+export TAR_SPLITS_DIR="${TAR_SPLITS_DIR:-/scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x}"
+
 # Run from upstream Robometer/ for `import robometer.*` to resolve, but invoke
 # our local train_ft.py via absolute path. PYTHONPATH includes both so the
 # tar loader (Robometer-LoRA/robometer_ft_data) is also importable.

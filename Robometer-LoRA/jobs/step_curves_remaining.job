@@ -1,0 +1,148 @@
+#!/bin/bash
+#SBATCH --job-name=stepcurves_remaining
+#SBATCH --output=logs/stepcurves_remaining_%A_%a.out
+#SBATCH --error=logs/stepcurves_remaining_%A_%a.err
+#SBATCH --time=00:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
+#SBATCH --array=0-28%10
+
+# Fill the gaps for run2/run3/run5/run7 step curves: 28 ICL-off tasks
+# (one per step × 4 runs) + 1 ICL-on retry for run3 step=7500 (transient
+# failure in 22595667).
+#
+# Layout (29 tasks):
+#   indices 0..6   → run2 ICL-OFF
+#   indices 7..13  → run3 ICL-OFF
+#   indices 14..20 → run5 ICL-OFF
+#   indices 21..27 → run7 ICL-OFF
+#   index   28     → run3 step=7500 ICL-ON retry
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf_v2}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_MODE=offline
+
+cd "$ROBOMETER_DIR"
+
+STEPS=(500 1500 2500 3500 4500 5500 7500)
+RUNS=(run2_l1_c05 run3_l1_c15 run5_l2_lambda03 run7_l2_lambda03_dropout)
+
+declare -A LOSS_BY_RUN
+LOSS_BY_RUN[run2_l1_c05]=loss1
+LOSS_BY_RUN[run3_l1_c15]=loss1
+LOSS_BY_RUN[run5_l2_lambda03]=loss2
+LOSS_BY_RUN[run7_l2_lambda03_dropout]=loss2
+
+declare -A CKPTS
+CKPTS[run2_l1_c05_500]="/projects/prjs1958/LoRA_weights/run2_l1_c05_22443129/bakeoff_run2_l1_c05/ckpt-avg-5metrics=0.0000_step=500"
+CKPTS[run2_l1_c05_1500]="/projects/prjs1958/LoRA_weights/run2_l1_c05_22458563/bakeoff_run2_l1_c05/ckpt-avg-5metrics=0.0000_step=1500"
+CKPTS[run2_l1_c05_2500]="/projects/prjs1958/LoRA_weights/run2_l1_c05_22458563/bakeoff_run2_l1_c05/ckpt-avg-5metrics=0.0000_step=2500"
+CKPTS[run2_l1_c05_3500]="/projects/prjs1958/LoRA_weights/run2_l1_c05_22519881/bakeoff_run2_l1_c05/ckpt-avg-5metrics=0.0000_step=3500"
+CKPTS[run2_l1_c05_4500]="/projects/prjs1958/LoRA_weights/run2_l1_c05_22519881/bakeoff_run2_l1_c05/ckpt-avg-5metrics=0.0000_step=4500"
+CKPTS[run2_l1_c05_5500]="/projects/prjs1958/LoRA_weights/run2_l1_c05_22519881/bakeoff_run2_l1_c05/ckpt-avg-5metrics=0.0000_step=5500"
+CKPTS[run2_l1_c05_7500]="/projects/prjs1958/LoRA_weights/run2_l1_c05_22519881/bakeoff_run2_l1_c05/checkpoint-7500"
+CKPTS[run3_l1_c15_500]="/projects/prjs1958/LoRA_weights/run3_l1_c15_22443130/bakeoff_run3_l1_c15/ckpt-avg-5metrics=0.0000_step=500"
+CKPTS[run3_l1_c15_1500]="/projects/prjs1958/LoRA_weights/run3_l1_c15_22458564/bakeoff_run3_l1_c15/ckpt-avg-5metrics=0.0000_step=1500"
+CKPTS[run3_l1_c15_2500]="/projects/prjs1958/LoRA_weights/run3_l1_c15_22458564/bakeoff_run3_l1_c15/ckpt-avg-5metrics=0.0000_step=2500"
+CKPTS[run3_l1_c15_3500]="/projects/prjs1958/LoRA_weights/run3_l1_c15_22519882/bakeoff_run3_l1_c15/ckpt-avg-5metrics=0.0000_step=3500"
+CKPTS[run3_l1_c15_4500]="/projects/prjs1958/LoRA_weights/run3_l1_c15_22519882/bakeoff_run3_l1_c15/ckpt-avg-5metrics=0.0000_step=4500"
+CKPTS[run3_l1_c15_5500]="/projects/prjs1958/LoRA_weights/run3_l1_c15_22519882/bakeoff_run3_l1_c15/ckpt-avg-5metrics=0.0000_step=5500"
+CKPTS[run3_l1_c15_7500]="/projects/prjs1958/LoRA_weights/run3_l1_c15_22519882/bakeoff_run3_l1_c15/checkpoint-7500"
+CKPTS[run5_l2_lambda03_500]="/projects/prjs1958/LoRA_weights/run5_l2_lambda03_22443132/bakeoff_run5_l2_lambda03/ckpt-avg-5metrics=0.0000_step=500"
+CKPTS[run5_l2_lambda03_1500]="/projects/prjs1958/LoRA_weights/run5_l2_lambda03_22458566/bakeoff_run5_l2_lambda03/ckpt-avg-5metrics=0.0000_step=1500"
+CKPTS[run5_l2_lambda03_2500]="/projects/prjs1958/LoRA_weights/run5_l2_lambda03_22458566/bakeoff_run5_l2_lambda03/ckpt-avg-5metrics=0.0000_step=2500"
+CKPTS[run5_l2_lambda03_3500]="/projects/prjs1958/LoRA_weights/run5_l2_lambda03_22519884/bakeoff_run5_l2_lambda03/ckpt-avg-5metrics=0.0000_step=3500"
+CKPTS[run5_l2_lambda03_4500]="/projects/prjs1958/LoRA_weights/run5_l2_lambda03_22519884/bakeoff_run5_l2_lambda03/ckpt-avg-5metrics=0.0000_step=4500"
+CKPTS[run5_l2_lambda03_5500]="/projects/prjs1958/LoRA_weights/run5_l2_lambda03_22519884/bakeoff_run5_l2_lambda03/ckpt-avg-5metrics=0.0000_step=5500"
+CKPTS[run5_l2_lambda03_7500]="/projects/prjs1958/LoRA_weights/run5_l2_lambda03_22519884/bakeoff_run5_l2_lambda03/checkpoint-7500"
+CKPTS[run7_l2_lambda03_dropout_500]="/projects/prjs1958/LoRA_weights/run7_l2_lambda03_dropout_22443135/bakeoff_run7_l2_lambda03_dropout/ckpt-avg-5metrics=0.0000_step=500"
+CKPTS[run7_l2_lambda03_dropout_1500]="/projects/prjs1958/LoRA_weights/run7_l2_lambda03_dropout_22458568/bakeoff_run7_l2_lambda03_dropout/ckpt-avg-5metrics=0.0000_step=1500"
+CKPTS[run7_l2_lambda03_dropout_2500]="/projects/prjs1958/LoRA_weights/run7_l2_lambda03_dropout_22458568/bakeoff_run7_l2_lambda03_dropout/ckpt-avg-5metrics=0.0000_step=2500"
+CKPTS[run7_l2_lambda03_dropout_3500]="/projects/prjs1958/LoRA_weights/run7_l2_lambda03_dropout_22519886/bakeoff_run7_l2_lambda03_dropout/ckpt-avg-5metrics=0.0000_step=3500"
+CKPTS[run7_l2_lambda03_dropout_4500]="/projects/prjs1958/LoRA_weights/run7_l2_lambda03_dropout_22519886/bakeoff_run7_l2_lambda03_dropout/ckpt-avg-5metrics=0.0000_step=4500"
+CKPTS[run7_l2_lambda03_dropout_5500]="/projects/prjs1958/LoRA_weights/run7_l2_lambda03_dropout_22519886/bakeoff_run7_l2_lambda03_dropout/ckpt-avg-5metrics=0.0000_step=5500"
+CKPTS[run7_l2_lambda03_dropout_7500]="/projects/prjs1958/LoRA_weights/run7_l2_lambda03_dropout_22519886/bakeoff_run7_l2_lambda03_dropout/checkpoint-7500"
+
+I=$SLURM_ARRAY_TASK_ID
+
+if (( I < 28 )); then
+    RUN_IDX=$(( I / 7 ))
+    STEP_IDX=$(( I % 7 ))
+    MODE_TAG=icloff
+    RUN_NAME="${RUNS[$RUN_IDX]}"
+    STEP="${STEPS[$STEP_IDX]}"
+elif (( I == 28 )); then
+    # run3 step=7500 ICL-on retry
+    MODE_TAG=iclon
+    RUN_NAME=run3_l1_c15
+    STEP=7500
+fi
+
+LOSS="${LOSS_BY_RUN[$RUN_NAME]}"
+CKPT="${CKPTS[${RUN_NAME}_${STEP}]}"
+PRESET="$HERE/configs/${LOSS}_${LOSS/loss1/corn}.yaml"
+[[ "$LOSS" == "loss1" ]] && PRESET="$HERE/configs/loss1_corn.yaml"
+[[ "$LOSS" == "loss2" ]] && PRESET="$HERE/configs/loss2_c51.yaml"
+
+OUT_BASE="/scratch-shared/pkarageorgis1/LoRA_step_curves_v3"
+OUTPUT_DIR="$OUT_BASE/${LOSS}_step${STEP}_${RUN_NAME}_${MODE_TAG}"
+mkdir -p "$OUTPUT_DIR"
+
+echo "[$I] RUN=$RUN_NAME STEP=$STEP ICL=$MODE_TAG LOSS=$LOSS"
+echo "[$I] CKPT=$CKPT"
+echo "[$I] OUTPUT_DIR=$OUTPUT_DIR"
+
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_lora_base.yaml" "$PRESET" \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+TEST_OVERRIDES=(
+    "++data.eval_datasets=[robometer_frames_test_v3]"
+    "++custom_eval.policy_ranking=[robometer_frames_test_v3]"
+    "++custom_eval.policy_ranking_dual_icl=false"
+)
+
+if [[ "$MODE_TAG" == "iclon" ]]; then
+    ICL_OVERRIDES=(
+        "++data.use_icl=true"
+        "++data.icl_prob=1.0"
+        "++data.pairs_index_path=/scratch-shared/pkarageorgis1/robometer_frames_splits/pairs_index_test_v3.jsonl"
+        "++data.icl_min_coverage=0.0"
+        "++training.per_device_eval_batch_size=4"
+    )
+else
+    ICL_OVERRIDES=(
+        "++data.icl_prob=0.0"
+        "++data.icl_min_coverage=0.0"
+    )
+fi
+
+COMMON_OVERRIDES=(
+    "++mode=evaluate"
+    "training.output_dir=$OUTPUT_DIR"
+    "++training.overwrite_output_dir=true"
+    "logging.wandb_entity=nlp-squad"
+)
+
+RESUME_OVERRIDE="++training.resume_from_checkpoint='$CKPT'"
+
+"$PYTHON" train.py "${OVERRIDES[@]}" "${TEST_OVERRIDES[@]}" "${COMMON_OVERRIDES[@]}" \
+    "$RESUME_OVERRIDE" "${ICL_OVERRIDES[@]}"
+
+echo "[$I] DONE"

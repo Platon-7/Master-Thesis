@@ -1,0 +1,9 @@
+# Fresh training on the 3.5x success-skewed dataset, starting from run5_l2_lambda03's
+# step-3000 weights instead of robometer/Robometer-4B. Fresh optimizer + scheduler;
+# step counter starts at 0 and runs to max_steps=7500.
+loss.asymmetric_lambda: 0.3
+training.load_from_checkpoint: /projects/prjs1958/LoRA_weights/run5_l2_lambda03_22482424/bakeoff_run5_l2_lambda03/step3000
+training.learning_rate: 1.0e-5
+training.warmup_ratio: 0.0
+training.max_steps: 7500
+training.exp_name: bakeoff_run12_l2_lambda03_3p5x

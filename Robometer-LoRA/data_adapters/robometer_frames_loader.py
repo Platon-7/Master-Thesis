@@ -103,13 +103,15 @@ def _index_shards(keyframes_root: Path) -> Dict[str, Path]:
     return index
 
 
-def _build_manifest_index(dataset_root: Path, families: Iterable[str] = ("metaworld", "failsafe", "robometer", "roboreward")) -> Dict[str, Dict[str, Any]]:
+def _build_manifest_index(dataset_root: Path, families: Iterable[str] = ("metaworld", "failsafe", "robometer", "roboreward", "droid")) -> Dict[str, Dict[str, Any]]:
     """Cross-family episode_id → manifest_row index.
 
     Manifest rows carry the per-frame `frame_labels` list that the failure rubric path needs
-    (rows in pairs_unified.jsonl don't include frame_labels). Built once at loader startup;
-    only manifests-bearing families are scanned (droid lacks a manifests/ dir and gets its
-    frame_labels from the curated DROID-Failures pipeline upstream).
+    (rows in pairs_unified.jsonl don't include frame_labels). Built once at loader startup.
+    All families now have a manifests/ dir after the May-3 frame_labels-fix rearrangement:
+      * robometer/manifests/  — added <archive>_failures.jsonl synthesised from scores/
+      * roboreward/manifests/ — augmented existing _failures.jsonl with frame_labels from scores/
+      * droid/manifests/      — newly synthesised droid_failures.jsonl from metadata/scored shards
     """
     index: Dict[str, Dict[str, Any]] = {}
     for fam in families:
@@ -167,9 +169,15 @@ def load_robometer_frames_split(
             continue
 
         # frame_labels for failures (and for successes that happen to have curated labels too)
-        # come from the manifest. Successes that aren't in the manifest index just have None
-        # — the sampler handles success target_progress via the standard t/T path.
-        manifest_row = manifest_index.get(episode_id, {})
+        # come from the manifest. Lookup priority: episode_dir (view-specific id from
+        # frames_path, e.g. `failsafe_push_..._front_score_2`) → episode_id (view-agnostic
+        # id from pairs_unified, e.g. `failsafe_push_..._score_2`). The metaworld/failsafe
+        # manifests are keyed by view-specific ids while pairs_unified strips the view; the
+        # episode_dir-first lookup recovers the eval splits' frame_labels coverage from
+        # 0% (failsafe) / 54% (metaworld) up to ~100%. robometer/roboreward/droid have no
+        # view multiplicity, so episode_id == episode_dir for them and the order doesn't
+        # matter.
+        manifest_row = manifest_index.get(episode_dir) or manifest_index.get(episode_id) or {}
         frame_labels = manifest_row.get("frame_labels")
 
         family = row.get("family") or "unknown"

@@ -1,0 +1,39 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_audit_gpu
+#SBATCH --output=logs/audit_%j.out
+#SBATCH --error=logs/audit_%j.err
+#SBATCH --time=01:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --gres=gpu:a100:1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
+
+# GPU-partition variant of the keyframe-count audit. The audit doesn't actually
+# use the GPU — submitted here only because gpu_a100 is less contested than
+# staging/cbuild today and we want results faster. Job script is otherwise
+# identical to audit_keyframe_counts.job.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+if [[ ! -x "$PYTHON" ]]; then
+    echo "ERROR: $PYTHON not executable" >&2
+    exit 1
+fi
+
+mkdir -p logs
+
+echo "[audit-gpu] starting at $(date)"
+echo "[audit-gpu] node: $(hostname)"
+echo "[audit-gpu] CPUs: $(nproc)"
+
+"$PYTHON" scripts/audit_keyframe_counts.py
+
+echo "[audit-gpu] done at $(date)"
+echo ""
+echo "=== summary preview ==="
+cat "/scratch-shared/$USER/dataset_audit_summary.txt" 2>/dev/null || echo "(summary file not found)"

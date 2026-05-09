@@ -1,0 +1,59 @@
+#!/bin/bash
+#SBATCH --job-name=failsafe_buildenv
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Failsafe/logs/buildenv_%j.out
+#SBATCH --account=gusei17535
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=01:00:00
+
+# Build the failsafe conda env at ~/.conda/envs/failsafe (durable; survives scratch purges).
+# Uses the system Anaconda module + libmamba solver — no miniforge install needed.
+
+set -euo pipefail
+
+ENVYML=/home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo/environment.yml
+ENV_PATH=/home/pkarageorgis1/.conda/envs/failsafe
+
+# Per-job local SSD for pkg cache & TMP (sidesteps SQLite-on-GPFS lock issues
+# that previously killed env-create at the metadata phase).
+LOCAL_TMP="${SLURM_TMPDIR:-/scratch-local/pkarageorgis1.${SLURM_JOB_ID}}"
+mkdir -p "$LOCAL_TMP/conda_pkgs"
+export TMPDIR="$LOCAL_TMP"
+export CONDA_PKGS_DIRS="$LOCAL_TMP/conda_pkgs"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+echo "Start: $(date)"
+echo "TMPDIR=$TMPDIR"
+echo "ENV_PATH=$ENV_PATH"
+conda --version
+
+# If a previous attempt left a partial env behind, wipe it so we get a clean rebuild.
+if [[ -d "$ENV_PATH" ]]; then
+    echo "Removing partial env at $ENV_PATH"
+    rm -rf "$ENV_PATH"
+fi
+
+# Conda 25.5+ requires explicit ToS acceptance for Anaconda channels (defaults
+# routes through repo.anaconda.com/pkgs/main and pkgs/r). Accept once per user.
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main || true
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r    || true
+
+echo "Creating failsafe env from $ENVYML (libmamba solver, pkg cache on local SSD)"
+conda env create --solver=libmamba -f "$ENVYML" -p "$ENV_PATH"
+
+# Sanity check
+source activate "$ENV_PATH"
+echo "=== Sanity check ==="
+python --version
+python -c "import torch; print('torch:', torch.__version__, 'cuda available:', torch.cuda.is_available())"
+python -c "import mani_skill; print('mani_skill ok')"
+
+# Install local failgen package (failsafe_repo) editable, no-deps
+pip install -e /home/pkarageorgis1/Master-Thesis/Failsafe/failsafe_repo --no-deps || true
+python -c "import failgen; print('failgen import ok')"
+
+echo "End: $(date)"
+echo "Env ready at $ENV_PATH"
