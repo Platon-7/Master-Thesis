@@ -2,7 +2,7 @@
 #SBATCH --job-name=rbm_bakeoff
 #SBATCH --output=logs/bakeoff_%j_%x.out
 #SBATCH --error=logs/bakeoff_%j_%x.err
-#SBATCH --time=72:00:00
+#SBATCH --time=24:00:00
 #SBATCH --account=gusei17535
 #SBATCH --partition=gpu_h100
 #SBATCH --gres=gpu:h100:1
@@ -22,9 +22,7 @@
 #   RUN=run6_l2_lambda05         LOSS_PRESET=loss2_c51  sbatch jobs/bakeoff_run.job
 #   RUN=run7_l2_lambda03_dropout LOSS_PRESET=loss2_c51  sbatch jobs/bakeoff_run.job
 #
-# 72h time budget for max_steps=7500 → with ICL prob 0.5 + dual-ICL eval ~6-9 sec/step
-# the run takes ~13-19h of pure training; 72h gives ample headroom for eval rounds + any
-# slowdowns. Earlier 24h budget cut us off near step 2000 on the first bake-off attempt.
+# 24h time budget covers 7500 steps × ~6-9 sec/step (with ICL prob 0.5 + dual-ICL eval).
 
 set -euo pipefail
 cd "$SLURM_SUBMIT_DIR"
@@ -49,22 +47,7 @@ export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_LoRA_bakeoff}"
 export WANDB_API_KEY="${WANDB_API_KEY:-}"
 export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
 
-# Tar-shard dataset root (HF + MP4 stack bypassed — train_ft.py reads
-# pairs_unified.jsonl + tar shards directly).
-export TAR_DATASET_ROOT="${TAR_DATASET_ROOT:-/projects/prjs1958/robometer_frame_dataset}"
-
-# Train/eval episode-id scope. Contains train.jsonl + eval_*.jsonl (one
-# episode_id per line). Tar loader filters pairs_unified to these ids.
-# Default: 3.5x success-skewed splits (4k fail / 14k succ). Set to
-# /scratch-shared/$USER/robometer_frames_splits_unified to fall back to the 1:1 mix.
-export TAR_SPLITS_DIR="${TAR_SPLITS_DIR:-/scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x}"
-
-# Run from upstream Robometer/ for `import robometer.*` to resolve, but invoke
-# our local train_ft.py via absolute path. PYTHONPATH includes both so the
-# tar loader (Robometer-LoRA/robometer_ft_data) is also importable.
 cd "$ROBOMETER_DIR"
-export ROBOMETER_DIR
-export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
 
 # Sanity: all three YAMLs must exist before we start
 for f in "$HERE/configs/train_lora_base.yaml" "$HERE/configs/${LOSS_PRESET}.yaml" "$HERE/configs/${RUN}.yaml"; do
@@ -97,20 +80,5 @@ echo "[bakeoff] output: $OUT_DIR"
 echo "[bakeoff] full overrides:"
 printf '  %s\n' "${OVERRIDES[@]}"
 
-# Optional: resume from a previous checkpoint (full state — optimizer, step counter,
-# scheduler, LR). Set CKPT_RESUME=<path> when relaunching after a crash so we don't
-# repeat the steps already trained. The May-4 relaunch uses this to pick up at the
-# step-500 SaveBestCallback checkpoint after the May-3 attempt crashed at step 764.
-RESUME_OVERRIDE=""
-if [[ -n "${CKPT_RESUME:-}" ]]; then
-    # Wrap value in single quotes so Hydra's override grammar treats the value as a
-    # string literal even when it contains '=' chars (the May-4 ckpt path is
-    # `ckpt-avg-5metrics=0.0000_step=500` — Hydra otherwise mis-parses on the second '=').
-    RESUME_OVERRIDE="++training.resume_from_checkpoint='${CKPT_RESUME}'"
-    echo "[bakeoff] resuming from: $CKPT_RESUME"
-fi
-
-"$PYTHON" "$HERE/train_ft.py" "${OVERRIDES[@]}" \
-    training.output_dir="$OUT_DIR" \
-    ${EXTRA:-} \
-    ${RESUME_OVERRIDE:+"$RESUME_OVERRIDE"}
+"$PYTHON" train.py "${OVERRIDES[@]}" \
+    training.output_dir="$OUT_DIR"
