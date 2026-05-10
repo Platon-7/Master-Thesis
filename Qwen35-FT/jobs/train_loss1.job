@@ -24,18 +24,26 @@ set -euo pipefail
 cd "$SLURM_SUBMIT_DIR"
 HERE="$(pwd)"
 QWEN35_DIR="${QWEN35_DIR:-$HERE}"
-HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf_full}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/$USER/robometer_frames_hf_full_step2}"
 
 source /etc/profile.d/lmod.sh 2>/dev/null || true
 module load 2025 Anaconda3/2025.06-1
-PYTHON="/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu/bin/python"
-ACCELERATE="/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu/bin/accelerate"
+
+# Env interpreter — overrideable via ENV_PREFIX so the same job works on
+# both your local conda env and Leonardo's conda-packed copy.
+ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu}"
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
 if [[ ! -x "$PYTHON" ]] || [[ ! -x "$ACCELERATE" ]]; then
-    echo "ERROR: env interpreter / accelerate not executable" >&2
+    echo "ERROR: env interpreter / accelerate not executable at $ENV_PREFIX/bin/" >&2
     echo "  expected: $PYTHON   $ACCELERATE" >&2
     echo "  build env first: see Qwen35-FT/README.md" >&2
     exit 1
 fi
+# Put env's bin/ on PATH so `#!/usr/bin/env python3.10` shebangs resolve to
+# the env interpreter (matters for conda-packed envs — conda-unpack only
+# rewrites absolute-path shebangs, not /usr/bin/env-style ones).
+export PATH="$ENV_PREFIX/bin:$PATH"
 
 export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
 export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
