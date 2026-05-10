@@ -1,0 +1,20 @@
+# Apples-to-apples vs eejpy0ud (run8): same recipe, but trained on v2_LEAKFIX
+# instead of v2 (the leaky cache). 1000 steps so we can compare to run8's
+# step-500 and step-1000 evals on the same eval set (v2 eval, untouched).
+#
+# Diff vs run8_l2_lambda03_kl.yaml: max_steps 7500 → 1000.
+# Everything else (KL weight, lambda, buffer, etc.) IDENTICAL to run8.
+
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.1
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+
+# pairs_index_path = v2 splits (same as run8 used)
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits/pairs_index_train.jsonl
+
+training.max_steps: 1000
+training.exp_name: bakeoff_run8_repro_leakfix_1000

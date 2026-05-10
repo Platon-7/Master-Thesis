@@ -1,0 +1,54 @@
+#!/bin/bash
+#SBATCH --job-name=rclone_od
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/rclone_push_onedrive_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=12:00:00
+
+# Push robometer_frame_dataset (~285 GB excl. .bak) to user's OneDrive via rclone.
+# OneDrive handles concurrent uploads better than Drive and has standard 429
+# backoff, so no manual tpslimit/bwlimit needed.
+
+SRC="/projects/prjs1958/robometer_frame_dataset"
+DST="myonedrive:robometer_frame_dataset"
+
+echo "============================================================"
+echo "rclone push robometer_frame_dataset -> OneDrive (myonedrive:)"
+echo "  Job ID:   $SLURM_JOB_ID"
+echo "  Node:     $(hostname)"
+echo "  Source:   $SRC"
+echo "  Dest:     $DST"
+echo "  Date:     $(date)"
+echo "============================================================"
+
+rclone --version | head -1
+
+# Settings tuned for OneDrive (after burst-throttle hit at ~13 GB in 3 min):
+#   --transfers 2                  low concurrency to stay under MS anti-burst
+#   --checkers 8                   metadata checks
+#   --onedrive-chunk-size 32M      smaller chunks → smoother bandwidth
+#   --bwlimit 30M                  cap sustained rate at 30 MB/s
+#                                   (~13 GB / 7 min = 30 MB/s — under MS's
+#                                    burst-detect threshold)
+#   --tpslimit 6                   stay under any per-second API limit
+#   --retries 10 --low-level-retries 30   ride out transient 429s
+rclone copy "$SRC" "$DST" \
+    --exclude '*.bak' \
+    --transfers 2 \
+    --checkers 8 \
+    --onedrive-chunk-size 30M \
+    --bwlimit 30M \
+    --tpslimit 6 \
+    --stats 60s \
+    --stats-one-line \
+    --retries 10 \
+    --low-level-retries 30 \
+    --log-level INFO
+
+RC=$?
+echo "============================================================"
+echo "rclone exit code: $RC"
+echo "Done at: $(date)"
+echo "============================================================"
+exit $RC

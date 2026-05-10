@@ -1,0 +1,57 @@
+#!/bin/bash
+#SBATCH --job-name=rclone_frame
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/rclone_push_frame_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=12:00:00
+
+# Push robometer_frame_dataset (~285 GB excl. .bak) to Google Drive via rclone.
+# Mode: rclone copy — never deletes on the remote, skips matching files (idempotent).
+
+SRC="/projects/prjs1958/robometer_frame_dataset"
+DST="robometer_dataset:robometer_frame_dataset"
+
+echo "============================================================"
+echo "rclone push robometer_frame_dataset -> Google Drive"
+echo "  Job ID:   $SLURM_JOB_ID"
+echo "  Node:     $(hostname)"
+echo "  Source:   $SRC"
+echo "  Dest:     $DST"
+echo "  Date:     $(date)"
+echo "============================================================"
+
+rclone --version | head -1
+
+# Settings (tuned conservative after Drive throttled prior 16-transfer run
+# down to ~0 B/s after 11 GB — anti-abuse heuristics):
+#   --transfers 4               Drive throttles >4 concurrent uploads/user
+#   --checkers 8                metadata checks are cheap but still rate-limited
+#   --tpslimit 4                stay well below Drive's per-user soft limit
+#   --drive-chunk-size 32M      moderate chunks; bigger triggers throttling
+#   --drive-pacer-min-sleep 200ms   adaptive backoff floor between API calls
+#   --drive-pacer-burst 50      allow short bursts then throttle
+#   --bwlimit 40M               cap peak BW so Drive's "burst quota" doesn't spike
+#   --stats 60s --stats-one-line   one progress line per minute
+#   --retries 10 --low-level-retries 30   ride out long throttle windows
+rclone copy "$SRC" "$DST" \
+    --exclude '*.bak' \
+    --transfers 4 \
+    --checkers 8 \
+    --tpslimit 4 \
+    --drive-chunk-size 32M \
+    --drive-pacer-min-sleep 200ms \
+    --drive-pacer-burst 50 \
+    --bwlimit 40M \
+    --stats 60s \
+    --stats-one-line \
+    --retries 10 \
+    --low-level-retries 30 \
+    --log-level INFO
+
+RC=$?
+echo "============================================================"
+echo "rclone exit code: $RC"
+echo "Done at: $(date)"
+echo "============================================================"
+exit $RC

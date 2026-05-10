@@ -9,6 +9,7 @@ loss.failure_kl_apply_every_n_success: 1
 loss.failure_kl_concat_batch: false
 loss.failure_kl_detach_backbone: false
 training.load_from_checkpoint: /projects/prjs1958/LoRA_weights/run9_l2_lambda03_kl_w03_22482431/bakeoff_run9_l2_lambda03_kl_w03/step3000
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x/pairs_index_train.jsonl
 training.learning_rate: 1.0e-5
 training.warmup_ratio: 0.0
 training.max_steps: 7500

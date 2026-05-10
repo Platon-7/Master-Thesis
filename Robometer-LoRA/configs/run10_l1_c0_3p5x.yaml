@@ -3,6 +3,7 @@
 # step counter starts at 0 and runs to max_steps=7500.
 loss.corn_asymmetric_c: 0.0
 training.load_from_checkpoint: /projects/prjs1958/LoRA_weights/run1_l1_c0_22482417/bakeoff_run1_l1_c0/step3000
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x/pairs_index_train.jsonl
 training.learning_rate: 1.0e-5
 training.warmup_ratio: 0.0
 training.max_steps: 7500

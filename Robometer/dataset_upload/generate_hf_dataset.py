@@ -95,6 +95,11 @@ BASE_FEATURES = {
     # "preference_group_id": datasets.Value("string"),
     # "preference_rank": datasets.Value("int32"),
     "partial_success": datasets.Value("float32"),  # in [0, 1]
+    # Per-frame ordinal failure-rubric labels (1..5) populated by the robometer_frames_loader's
+    # manifest index; None for successes (sampler uses t/T for those). The v2 HF rebuild
+    # restores this column — it had been silently dropped because it wasn't in BASE_FEATURES,
+    # which made every failure trajectory fall through to the t/T fallback in the sampler.
+    "frame_labels": datasets.Sequence(datasets.Value("int32")),
 }
 
 
@@ -366,6 +371,7 @@ def convert_dataset_to_hf_format(
         "is_robot": [entry["is_robot"] for entry in all_entries],
         "quality_label": [entry.get("quality_label") for entry in all_entries],
         "partial_success": [entry.get("partial_success") for entry in all_entries],
+        "frame_labels": [entry.get("frame_labels") for entry in all_entries],
         # "preference_group_id": [entry.get("preference_group_id") for entry in all_entries],
         # "preference_rank": [entry.get("preference_rank") for entry in all_entries],
     }
@@ -462,17 +468,12 @@ def main(cfg: GenerateConfig):
 
         if cfg.dataset.pairs_index_path:
             # Multi-family split-aware path. Reads each row's frames_path directly so we
-            # avoid scanning every shard in every family.
-            # When the dataset name contains "warmup", tag every row's data_source with
-            # "robometer_frames_warmup" so the StratifiedWarmupBatchSampler (substring match
-            # on "warmup") can identify the dedicated warmup pool.
-            data_source_override = None
-            if "warmup" in (cfg.dataset.dataset_name or ""):
-                data_source_override = "robometer_frames_warmup"
+            # avoid scanning every shard in every family. data_source is stamped with the
+            # bare family name (e.g. "oxe_bridge_v2") so dataset_success_cutoff.txt's
+            # paper-calibrated values match without re-prefixing.
             task_data = load_robometer_frames_split(
                 base_path=cfg.dataset.dataset_path,
                 pairs_index_path=cfg.dataset.pairs_index_path,
-                data_source_override=data_source_override,
             )
         else:
             family = cfg.dataset.family

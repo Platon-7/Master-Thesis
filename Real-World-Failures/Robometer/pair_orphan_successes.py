@@ -30,7 +30,14 @@ import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-ROOT = Path("/projects/prjs1958/robometer_frame_dataset/robometer")
+DATASET_ROOT = Path("/projects/prjs1958/robometer_frame_dataset")
+GROUP_ROOTS = {
+    "robot":      DATASET_ROOT / "robometer",
+    "humanoid":   DATASET_ROOT / "humanoid",
+    "human_hand": DATASET_ROOT / "human_hand",
+}
+# Defaults preserved for backward compat (single-arg invocations).
+ROOT = GROUP_ROOTS["robot"]
 MAN_DIR = ROOT / "manifests"
 OUT_DIR = ROOT / "pairs_orphan"
 MANIFEST_SUFFIX = "_orphan_successes.jsonl"
@@ -50,9 +57,10 @@ def norm_task(s):
     return s
 
 
-def load_manifests():
+def load_manifests(man_dir=None):
+    man_dir = Path(man_dir) if man_dir else MAN_DIR
     archives = {}
-    for p in sorted(MAN_DIR.glob(f"*{MANIFEST_SUFFIX}")):
+    for p in sorted(man_dir.glob(f"*{MANIFEST_SUFFIX}")):
         archive = p.name[: -len(MANIFEST_SUFFIX)]
         eps = []
         with open(p) as f:
@@ -77,11 +85,13 @@ def task_size_bucket(n):
     return "100+"
 
 
-def pair_all(reuse_cap, seed):
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+def pair_all(reuse_cap, seed, man_dir=None, out_dir=None):
+    man_dir = Path(man_dir) if man_dir else MAN_DIR
+    out_dir = Path(out_dir) if out_dir else OUT_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
     rng = random.Random(seed)
 
-    archives = load_manifests()
+    archives = load_manifests(man_dir)
 
     # task lookups
     by_archive_task = defaultdict(lambda: defaultdict(list))      # archive -> task -> [ep_id]
@@ -115,7 +125,7 @@ def pair_all(reuse_cap, seed):
     }
 
     for archive, eps in archives.items():
-        out_path = OUT_DIR / f"{archive}_orphan_pairs.jsonl"
+        out_path = out_dir / f"{archive}_orphan_pairs.jsonl"
         tier_hist = Counter()
         with open(out_path, "w") as fh:
             for ep in eps:
@@ -224,9 +234,9 @@ def pair_all(reuse_cap, seed):
             "mean_uses": round(sum(uses) / len(uses), 2),
         }
 
-    with open(OUT_DIR / "report.json", "w") as f:
+    with open(out_dir / "report.json", "w") as f:
         json.dump(report, f, indent=2)
-    print(f"\nReport: {OUT_DIR/'report.json'}")
+    print(f"\nReport: {out_dir/'report.json'}")
     print(f"Totals: {report['totals']}")
 
 
@@ -235,8 +245,20 @@ def main():
     ap.add_argument("--reuse-cap", type=int, default=0,
                     help="Max times a single partner may be reused in tier 3. 0 = uncapped.")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--group", choices=sorted(GROUP_ROOTS.keys()), default="robot",
+                    help="Pair manifests under <group_root>/manifests/, write pairs to "
+                         "<group_root>/pairs_orphan/. Default 'robot' preserves the "
+                         "original behavior.")
+    ap.add_argument("--manifest-dir", default=None,
+                    help="Override input manifest dir (default: <group_root>/manifests).")
+    ap.add_argument("--out-dir", default=None,
+                    help="Override output pairs dir (default: <group_root>/pairs_orphan).")
     args = ap.parse_args()
-    pair_all(args.reuse_cap, args.seed)
+
+    group_root = GROUP_ROOTS[args.group]
+    man_dir = args.manifest_dir or (group_root / "manifests")
+    out_dir = args.out_dir or (group_root / "pairs_orphan")
+    pair_all(args.reuse_cap, args.seed, man_dir=man_dir, out_dir=out_dir)
 
 
 if __name__ == "__main__":

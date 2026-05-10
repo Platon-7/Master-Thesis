@@ -32,14 +32,14 @@ model.train_success_head: true
 
 # Splits resolve to preprocessed HF Arrow caches under
 # $ROBOMETER_PROCESSED_DATASETS_PATH (= /projects/prjs1958/robometer_frames_hf).
-data.train_datasets: [robometer_frames_train]
+data.train_datasets: [robometer_frames_train_no_extras]    # excludes humanoid + human_hand for Robometer FT
 data.eval_datasets: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
 
 # ICL — toggle/dropout via Hydra CLI override at launch time
 # (e.g. ++data.use_icl=false, ++data.icl_prob=0.3).
 data.use_icl: true
 data.icl_prob: 0.5
-data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits/pairs_index_train.jsonl
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_full/pairs_index_train.jsonl
 
 # Augmentations — pure progress sampling (one trajectory per sample). Identical
 # to Robometer-LoRA so the only experimental delta is full-FT vs LoRA.

@@ -1,0 +1,31 @@
+# INFERENCE-ONLY: eval run9-step3000 on the squared droid cache to test if
+# the persistent ~0.5 droid AUC across run5–9 was driven by the 16×24 vs 16×16
+# patch grid mismatch.
+#
+# OOD CAVEAT: run9 was trained on 240×400 droid (16×24 patches). Here we feed
+# it 240×240 squared droid (16×16 patches). The shape is OOD vs training.
+# Asymmetric reading:
+#   - if squared AUC > 0.55  → strong "shape was hurting droid" signal
+#                              (model survives the OOD shift AND scores higher)
+#   - if squared AUC ≤ 0.55  → inconclusive; either scene complexity dominates
+#                              OR the OOD shift is too large to see the effect
+#
+# Cache: /projects/prjs1958/robometer_frames_hf_3p5x/robometer_frames_eval_droid_squared
+mode: evaluate
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.3
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+training.load_from_checkpoint: /projects/prjs1958/LoRA_weights/run9_l2_lambda03_kl_w03_22482431/bakeoff_run9_l2_lambda03_kl_w03/step3000
+training.exp_name: droid_squared_eval
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x/pairs_index_train.jsonl
+data.eval_datasets: [robometer_frames_eval_droid, robometer_frames_eval_droid_squared]
+custom_eval.policy_ranking: [robometer_frames_eval_droid, robometer_frames_eval_droid_squared]
+custom_eval.policy_ranking_max_tasks: 30
+custom_eval.policy_ranking_dual_icl: false
+custom_eval.num_examples_per_quality_pr: 30
+training.per_device_eval_batch_size: 4
+data.icl_min_coverage: 0.0

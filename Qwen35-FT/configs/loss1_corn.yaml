@@ -19,7 +19,7 @@ model.train_preference_head: false
 data.failure_label_smoothing: none
 data.success_label_noise_std: 0.1
 
-data.stratified_batch_balance: true
+data.stratified_batch_balance: false   # paper-faithful: uniform sampling, natural class distribution
 data.warmup_steps: 0
 
 training.exp_name: qwen35_ft_loss1_corn_asymmetric

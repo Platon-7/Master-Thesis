@@ -30,14 +30,14 @@ model.train_preference_head: false
 model.train_success_head: true
 
 # Splits unchanged — same data, different base model. ICL pairs unchanged.
-data.train_datasets: [robometer_frames_train]
+data.train_datasets: [robometer_frames_train]    # full pool — includes humanoid + human_hand for Qwen3.5 pretraining
 data.eval_datasets: [robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
 
 # ICL — toggle/dropout via Hydra CLI override at launch time
 # (e.g. ++data.use_icl=false, ++data.icl_prob=0.3, ++data.icl_task_dropout=0.2).
 data.use_icl: true
 data.icl_prob: 0.5
-data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits/pairs_index_train.jsonl
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_full/pairs_index_train.jsonl
 
 # Augmentations — identical to Robometer-LoRA. Pure progress sampling (one trajectory
 # per sample), preference head disabled.

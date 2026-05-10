@@ -152,6 +152,18 @@ def build_mw_fs(source, manifest_dir, keyframes_sub, keyframes_succ_sub, views):
             bases[base_id]["views"].append({"view": view or "default",
                                             "frames_path": fpath})
 
+    # 2.5  Build a per-task index of available successes to enable success-reuse
+    #      fallback pairing (per user instruction: failsafe/metaworld have many
+    #      more failure modes than success modes; reuse same success across
+    #      multiple failures rather than leaving them no_pair).
+    successes_by_task = defaultdict(list)
+    for base_id_iter, b_iter in bases.items():
+        if b_iter["label"] == "success" and b_iter.get("views"):
+            successes_by_task[b_iter["task"]].append(base_id_iter)
+    # Round-robin counter so reuse spreads evenly across available successes
+    # instead of always picking the first one.
+    success_use_idx = defaultdict(int)
+
     # 3. Resolve partners & emit unified rows.
     for base_id, b in bases.items():
         partner_view_id = b.pop("paired_success_id", None)
@@ -175,6 +187,25 @@ def build_mw_fs(source, manifest_dir, keyframes_sub, keyframes_succ_sub, views):
                 "partner_task": None,
                 "partner_label": None,
             }
+
+            # Fallback: if this is a failure that didn't get an explicit pair,
+            # pick any same-task success (round-robin to spread reuse evenly).
+            # User confirmed it's OK to reuse successes across multiple failures
+            # since failure modes outnumber success modes in failsafe/metaworld.
+            if b["label"] == "failure":
+                candidates = successes_by_task.get(b["task"], [])
+                if candidates:
+                    pick_idx = success_use_idx[b["task"]] % len(candidates)
+                    success_use_idx[b["task"]] += 1
+                    fallback = bases[candidates[pick_idx]]
+                    tier = "3_same_task_reused"
+                    out_partner = {
+                        "partner_episode_id": fallback["episode_id"],
+                        "partner_source": source,
+                        "partner_archive": fallback["archive"],
+                        "partner_task": fallback["task"],
+                        "partner_label": fallback["label"],
+                    }
 
         views_sorted = sorted(b["views"], key=lambda v: v["view"])
         yield {
@@ -490,8 +521,12 @@ def build_roboreward():
             }
 
 
-def build_robometer_orphan():
-    rm = ROOT / "robometer"
+def _build_orphan_subtree(subdir, source_tag):
+    """Common builder for any orphan-success subtree (robometer/, humanoid/,
+    human_hand/). Schema and tier semantics are identical across all three —
+    only the source_tag (= subdir name + '_orphan_success') and the on-disk
+    frames_path prefix differ. Yields one row per episode."""
+    rm = ROOT / subdir
     pairs_dir = rm / "pairs_orphan"
     man_dir = rm / "manifests"
 
@@ -506,7 +541,7 @@ def build_robometer_orphan():
         shard = rec.get("shard")
         if not shard:
             return None
-        return rel_path(f"robometer/keyframes_orphan_success/{archive}",
+        return rel_path(f"{subdir}/keyframes_orphan_success/{archive}",
                         shard, rec["episode_id"])
 
     for p in sorted(pairs_dir.glob("*_orphan_pairs.jsonl")):
@@ -526,7 +561,7 @@ def build_robometer_orphan():
             if partner_id and partner_fpath:
                 out_partner = {
                     "partner_episode_id": partner_id,
-                    "partner_source": "robometer_orphan_success",
+                    "partner_source": source_tag,
                     "partner_archive": rec.get("partner_archive"),
                     "partner_task": rec.get("partner_task"),
                     "partner_label": "success",
@@ -540,13 +575,31 @@ def build_robometer_orphan():
                 tier = "no_pair"
 
             yield {
-                "episode_id": ep_id, "source": "robometer_orphan_success",
+                "episode_id": ep_id, "source": source_tag,
                 "archive": rec.get("archive"), "family": rec.get("family"),
                 "task": rec.get("task"), "label": norm_label(src_rec.get("label", "success")),
                 **out_partner, "tier": tier,
                 "frames_path": fpath,
                 "views": [{"view": "default", "frames_path": fpath}],
             }
+
+
+def build_robometer_orphan():
+    yield from _build_orphan_subtree("robometer", "robometer_orphan_success")
+
+
+def build_humanoid_orphan():
+    # Skip cleanly if the subtree hasn't been created yet (e.g., extraction
+    # still running or this build is being run on an older snapshot).
+    if not (ROOT / "humanoid" / "manifests").exists():
+        return
+    yield from _build_orphan_subtree("humanoid", "humanoid_orphan_success")
+
+
+def build_human_hand_orphan():
+    if not (ROOT / "human_hand" / "manifests").exists():
+        return
+    yield from _build_orphan_subtree("human_hand", "human_hand_orphan_success")
 
 
 # --------------------------------------------------------------------------- #
@@ -644,6 +697,8 @@ def main():
         emit(build_robometer(), "robometer")
         emit(build_roboreward(), "roboreward")
         emit(build_robometer_orphan(), "robometer_orphan_success")
+        emit(build_humanoid_orphan(),  "humanoid_orphan_success")
+        emit(build_human_hand_orphan(),"human_hand_orphan_success")
 
     # Post-pass: pair unpartnered successes with another same-task same-source success.
     # This makes pairs_unified.jsonl carry success→success demos in addition to the

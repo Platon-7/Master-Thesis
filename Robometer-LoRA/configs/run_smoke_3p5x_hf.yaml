@@ -1,0 +1,24 @@
+# Smoke for the new HF cache at /projects/prjs1958/robometer_frames_hf_3p5x.
+# Mirrors run14 (resume from step3000, λ=0.3, KL=0.3) but with:
+#   - max_steps=200, custom_eval_steps=100 → first eval at step 100, second at 200
+#   - policy_ranking_max_tasks=20 + dual_icl=false → ~5x faster eval
+# Goal: verify loss decay AND eval AUC > 0.55 on at least 1 source by step 100,
+# before launching the full 5 LoRA bake-off runs.
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.3
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+training.load_from_checkpoint: robometer/Robometer-4B
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits/pairs_index_train.jsonl
+training.learning_rate: 2.0e-5
+training.warmup_ratio: 0.05
+training.max_steps: 200
+training.eval_steps: 100
+training.custom_eval_steps: 100
+training.exp_name: smoke_3p5x_hf
+custom_eval.policy_ranking_max_tasks: 20
+custom_eval.policy_ranking_dual_icl: false
+custom_eval.num_examples_per_quality_pr: 20

@@ -1,0 +1,55 @@
+#!/bin/bash
+#SBATCH --job-name=orph_finalize
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/orphan_finalize_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=2
+#SBATCH --time=02:00:00
+
+# Post-extraction finalization for humanoid + human_hand orphan-success
+# subtrees: build per-archive ICL pair manifests, then refresh
+# pairs_unified.jsonl + pairs_unified_report.json.
+#
+# Submit AFTER all extract_orphan_human.* jobs have completed:
+#
+#   sbatch --dependency=afterany:<id1>:<id2>:... finalize_orphan_human.job
+#
+# or (simpler):
+#
+#   sbatch --dependency=singleton finalize_orphan_human.job   # if jobname uniqueness fits
+set -e
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer"
+LORA_SCRIPT="/gpfs/home3/pkarageorgis1/Master-Thesis/Robometer-LoRA/scripts/build_unified_pairs.py"
+
+echo "============================================================"
+echo "Finalize humanoid + human_hand orphan-success integration"
+echo "  Job ID: $SLURM_JOB_ID"
+echo "  Date:   $(date)"
+echo "============================================================"
+
+cd "$SCRIPT_DIR"
+
+echo ""
+echo "[1/3] pair_orphan_successes humanoid"
+python3 -u pair_orphan_successes.py --group humanoid
+
+echo ""
+echo "[2/3] pair_orphan_successes human_hand"
+python3 -u pair_orphan_successes.py --group human_hand
+
+echo ""
+echo "[3/3] build_unified_pairs (refresh pairs_unified.jsonl)"
+# Back up existing unified pairs before overwrite (mirrors prior pre-swap convention)
+TS=$(date +%Y%m%d_%H%M%S)
+UNIFIED=/projects/prjs1958/robometer_frame_dataset/pairs_unified.jsonl
+REPORT=/projects/prjs1958/robometer_frame_dataset/pairs_unified_report.json
+[ -f "$UNIFIED" ] && cp -p "$UNIFIED" "${UNIFIED}.preorphan_${TS}.bak"
+[ -f "$REPORT" ]  && cp -p "$REPORT"  "${REPORT}.preorphan_${TS}.bak"
+
+python3 -u "$LORA_SCRIPT"
+
+echo ""
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

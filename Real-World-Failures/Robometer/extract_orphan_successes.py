@@ -82,6 +82,13 @@ AUDIT_REPORT = Path("/projects/prjs1958/robometer_full_dataset/audit_report.json
 DEFAULT_OUTPUT = Path("/projects/prjs1958/robometer_frame_dataset/robometer/keyframes_orphan_success")
 DEFAULT_MANIFEST_DIR = Path("/projects/prjs1958/robometer_frame_dataset/robometer/manifests")
 
+# Group-specific output roots (mirror robometer/'s subfolder layout).
+GROUP_ROOTS = {
+    "robot":      Path("/projects/prjs1958/robometer_frame_dataset/robometer"),
+    "humanoid":   Path("/projects/prjs1958/robometer_frame_dataset/humanoid"),
+    "human_hand": Path("/projects/prjs1958/robometer_frame_dataset/human_hand"),
+}
+
 N_KEYFRAMES = 16
 FPS_DEFAULT = 8.0
 EPISODES_PER_SHARD = 256  # ≈ 4096 JPEGs ≈ 50 MB at quality=90
@@ -89,6 +96,28 @@ EPISODES_PER_SHARD = 256  # ≈ 4096 JPEGs ≈ 50 MB at quality=90
 # ────────────────────────────────────────────────────────────────────────────
 # Orphan archive registry — maps archive_name -> robot family.
 # ────────────────────────────────────────────────────────────────────────────
+
+# Humanoid + human-hand registries — extracted under separate top-level
+# subfolders (humanoid/ and human_hand/) but reuse the same orphan-success
+# format as robometer/.
+HUMANOID_ARCHIVES = {
+    "jesbu1_galaxea_rfm_galaxea_part1_r1_lite":                                   "galaxea_r1_lite",
+    "jesbu1_galaxea_rfm_galaxea_part2_r1_lite":                                   "galaxea_r1_lite",
+    "jesbu1_galaxea_rfm_galaxea_part3_r1_lite":                                   "galaxea_r1_lite",
+    "jesbu1_galaxea_rfm_galaxea_part4_r1_lite":                                   "galaxea_r1_lite",
+    "jesbu1_galaxea_rfm_galaxea_part5_r1_lite":                                   "galaxea_r1_lite",
+    "jesbu1_humanoid_everyday_rfm_humanoid_everyday_rfm":                         "humanoid_everyday",
+}
+
+HUMAN_HAND_ARCHIVES = {
+    "jesbu1_egodex_rfm_egodex_part1":                                             "egodex",
+    "jesbu1_egodex_rfm_egodex_test":                                              "egodex",
+    "jesbu1_epic_rfm_epic":                                                       "epic",
+    "anqil_rh20t_subset_rfm_rh20t_human":                                         "rh20t_human",
+    "jesbu1_h2r_rfm_h2r":                                                         "h2r",
+    "jesbu1_usc_koch_human_robot_paired_usc_koch_human_robot_paired_human":       "usc_koch_human",
+    "jesbu1_hand_paired_rfm_hand_paired_human":                                   "hand_paired_human",
+}
 
 ORPHAN_ARCHIVES = {
     # --- OXE robot-arm subset ---
@@ -266,7 +295,8 @@ class ShardWriter:
 # Extraction (seekable single-file archives)
 # ────────────────────────────────────────────────────────────────────────────
 
-def extract_seekable(archive_name, tf, output_dir, manifest_path, fps, resume_set):
+def extract_seekable(archive_name, tf, output_dir, manifest_path, fps, resume_set,
+                     max_episodes=None):
     members = tf.getmembers()
     mapping_member = next((m for m in members if m.name.endswith("index_mappings.json")), None)
     if mapping_member is None:
@@ -340,6 +370,9 @@ def extract_seekable(archive_name, tf, output_dir, manifest_path, fps, resume_se
                 processed += 1
                 if processed % 100 == 0:
                     log(f"  {processed} extracted ({skipped} resumed-skipped)")
+                if max_episodes is not None and processed >= max_episodes:
+                    log(f"  reached --max-episodes={max_episodes}, stopping")
+                    break
     finally:
         writer.close()
 
@@ -350,7 +383,8 @@ def extract_seekable(archive_name, tf, output_dir, manifest_path, fps, resume_se
 # Extraction (streaming split-part archives)
 # ────────────────────────────────────────────────────────────────────────────
 
-def extract_streaming(archive_name, output_dir, manifest_path, fps, resume_set):
+def extract_streaming(archive_name, output_dir, manifest_path, fps, resume_set,
+                      max_episodes=None):
     split_dir = SPLIT_DIR / archive_name
     parts = sorted(split_dir.glob(f"{archive_name}.tar.part-*"))
     if not parts:
@@ -444,10 +478,17 @@ def extract_streaming(archive_name, output_dir, manifest_path, fps, resume_set):
                 processed += 1
                 if processed % 100 == 0:
                     log(f"  {processed} extracted")
+                if max_episodes is not None and processed >= max_episodes:
+                    log(f"  reached --max-episodes={max_episodes}, stopping early")
+                    break
     finally:
         writer.close()
         tf.close()
-        cat.wait()
+        cat.terminate()
+        try:
+            cat.wait(timeout=5)
+        except Exception:
+            cat.kill()
 
     return processed
 
@@ -456,9 +497,10 @@ def extract_streaming(archive_name, output_dir, manifest_path, fps, resume_set):
 # Per-archive driver
 # ────────────────────────────────────────────────────────────────────────────
 
-def process_archive(archive_name, output_dir, manifest_dir, fps):
+def process_archive(archive_name, output_dir, manifest_dir, fps, max_episodes=None):
     log(f"\n{'='*60}")
-    log(f"Archive: {archive_name} [{ORPHAN_ARCHIVES.get(archive_name, '?')}]")
+    log(f"Archive: {archive_name} [{family_of(archive_name)}]"
+        + (f"  (cap {max_episodes})" if max_episodes else ""))
     log(f"{'='*60}")
 
     manifest_path = manifest_dir / f"{archive_name}_orphan_successes.jsonl"
@@ -469,16 +511,27 @@ def process_archive(archive_name, output_dir, manifest_dir, fps):
                 resume_set.add(json.loads(line)["episode_id"])
         log(f"  Resuming: {len(resume_set)} episodes already in manifest")
 
+    # Adjust the cap by what's already been written so we extract exactly
+    # max_episodes total (resume + new), not max_episodes more.
+    remaining = None
+    if max_episodes is not None:
+        remaining = max(0, max_episodes - len(resume_set))
+        if remaining == 0:
+            log(f"  cap already met by resume_set ({len(resume_set)} >= {max_episodes})")
+            return 0
+
     single_tar = SINGLE_DIR / f"{archive_name}.tar"
     split_dir  = SPLIT_DIR / archive_name
 
     if single_tar.exists():
         log(f"  Opening single tar: {single_tar}")
         with tarfile.open(single_tar, "r") as tf:
-            return extract_seekable(archive_name, tf, output_dir, manifest_path, fps, resume_set)
+            return extract_seekable(archive_name, tf, output_dir, manifest_path,
+                                     fps, resume_set, max_episodes=remaining)
     if split_dir.exists():
         log(f"  Processing split archive: {split_dir}")
-        return extract_streaming(archive_name, output_dir, manifest_path, fps, resume_set)
+        return extract_streaming(archive_name, output_dir, manifest_path,
+                                  fps, resume_set, max_episodes=remaining)
 
     log(f"  ERROR: Archive not found at {single_tar} or {split_dir}")
     return 0
@@ -534,15 +587,26 @@ def main():
     )
     parser.add_argument(
         "--archive",
-        help="Archive name from ORPHAN_ARCHIVES, or 'all'. Required unless --count-only.",
+        help="Archive name from the selected --group registry, or 'all'. Required unless --count-only.",
+    )
+    parser.add_argument(
+        "--group", choices=sorted(GROUP_ROOTS.keys()), default="robot",
+        help="Archive group: 'robot' (default, OXE arms etc.), 'humanoid', or 'human_hand'. "
+             "Switches the archive registry AND the output/manifest roots."
     )
     parser.add_argument(
         "--count-only", action="store_true",
         help="Print orphan-success breakdown from audit_report.json and exit."
     )
-    parser.add_argument("--output-dir", type=str, default=str(DEFAULT_OUTPUT))
-    parser.add_argument("--manifest-dir", type=str, default=str(DEFAULT_MANIFEST_DIR))
+    parser.add_argument("--output-dir", type=str, default=None,
+                        help="Override output dir (default: <group_root>/keyframes_orphan_success).")
+    parser.add_argument("--manifest-dir", type=str, default=None,
+                        help="Override manifest dir (default: <group_root>/manifests).")
     parser.add_argument("--fps", type=float, default=FPS_DEFAULT)
+    parser.add_argument("--max-episodes", type=int, default=None,
+                        help="Per-archive cap (resume-aware). For split tars this enables "
+                             "early-exit during pass 2, which can shave significant wall-time "
+                             "on huge archives like epic (206 GB).")
     args = parser.parse_args()
 
     if args.count_only:
@@ -552,24 +616,32 @@ def main():
     if not args.archive:
         parser.error("--archive is required (or use --count-only)")
 
-    output_dir = Path(args.output_dir)
-    manifest_dir = Path(args.manifest_dir)
+    # Pick registry + default paths from --group.
+    registry = {
+        "robot":      ORPHAN_ARCHIVES,
+        "humanoid":   HUMANOID_ARCHIVES,
+        "human_hand": HUMAN_HAND_ARCHIVES,
+    }[args.group]
+    group_root = GROUP_ROOTS[args.group]
+    output_dir = Path(args.output_dir) if args.output_dir else group_root / "keyframes_orphan_success"
+    manifest_dir = Path(args.manifest_dir) if args.manifest_dir else group_root / "manifests"
     output_dir.mkdir(parents=True, exist_ok=True)
     manifest_dir.mkdir(parents=True, exist_ok=True)
 
     if args.archive == "all":
-        archives = list(ORPHAN_ARCHIVES.keys())
+        archives = list(registry.keys())
     else:
-        if args.archive not in ORPHAN_ARCHIVES:
-            log(f"ERROR: {args.archive} not in ORPHAN_ARCHIVES registry. "
-                f"Valid archives: {sorted(ORPHAN_ARCHIVES)}")
+        if args.archive not in registry:
+            log(f"ERROR: {args.archive} not in {args.group} registry. "
+                f"Valid archives for group={args.group}: {sorted(registry)}")
             return
         archives = [args.archive]
 
     total = 0
     for arch in archives:
         try:
-            n = process_archive(arch, output_dir, manifest_dir, args.fps)
+            n = process_archive(arch, output_dir, manifest_dir, args.fps,
+                                max_episodes=args.max_episodes)
             total += n
             log(f"  -> {n} new orphan-success episodes extracted")
         except Exception as e:

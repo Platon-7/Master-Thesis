@@ -1,0 +1,26 @@
+# FAST smoke: train from Robometer-4B base on tar/JPG path with aggressive eval
+# cadence so we get a definitive eval AUC reading in ~30 min.
+#   - max_steps=200, custom_eval_steps=100 → 2 evals (step 100 and 200)
+#   - policy_ranking_max_tasks=20 → eval ~5x faster
+#   - dual_icl=false → eval runs only ONCE per round (no second pass)
+#   - icl_prob=0.5 (default from base) — keeps ICL on so this matches real runs
+#
+# If ranking_acc_failure_vs_successful > 0.6 by step 200 on at least one source,
+# the tar/JPG path WORKS for fresh-from-base training.
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.3
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+training.load_from_checkpoint: robometer/Robometer-4B
+training.learning_rate: 2.0e-5
+training.warmup_ratio: 0.05
+training.max_steps: 200
+training.eval_steps: 100
+training.custom_eval_steps: 100
+training.exp_name: smoke_fast_from_base
+custom_eval.policy_ranking_max_tasks: 20
+custom_eval.policy_ranking_dual_icl: false
+custom_eval.num_examples_per_quality_pr: 20

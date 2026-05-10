@@ -149,8 +149,10 @@ class RBMHeadsTrainer(Trainer):
             from robometer.trainers.failure_kl import FailureKLBuffer
             buffer_size = int(getattr(self.config.loss, "failure_kl_buffer_size", 10))
             self._failure_kl_buffer = FailureKLBuffer(maxlen=buffer_size)
-            logger_obj = logger if logger is not None else logging.getLogger(__name__)
-            logger_obj.info(
+            # Use stdlib logging directly here — the `logger` arg may be the project's
+            # custom Logger class which lacks `.info`. Stdlib is safe and will route to
+            # whatever handlers are already attached.
+            logging.getLogger(__name__).info(
                 f"Failure-rehearsal KL anchor ENABLED: weight={self.config.loss.failure_kl_weight}, "
                 f"buffer_size={buffer_size}, "
                 f"apply_when_below_size={getattr(self.config.loss, 'failure_kl_apply_when_buffer_below_size', True)}, "
@@ -1080,9 +1082,19 @@ class RBMHeadsTrainer(Trainer):
         is_discrete_mode = self.config.loss.progress_loss_type.lower() in ("discrete", "c51_asymmetric")
         num_bins = self.config.loss.progress_discrete_bins if is_discrete_mode else None
 
-        data_source = None
-        if eval_results and len(eval_results) > 0:
-            data_source = eval_results[0]["data_source"]
+        # `data_source` here is consumed by run_policy_ranking_eval / run_reward_alignment_eval
+        # to decide whether to use the partial_success-based ranking path
+        # (`"roboreward" in data_source.lower() or "roboarena" in data_source.lower()`).
+        # The legacy implementation took eval_results[0]["data_source"] — a per-trajectory
+        # field. After the eval splits were rebuilt to mix sources within one split (post-Apr-30),
+        # this means a single roboarena-tagged trajectory at index 0 flips use_partial_success=True
+        # for the whole batch, then every other trajectory's partial_success=None gets `continue`d
+        # in compile_results.py:1196 → empty dump → "No valid policy ranking data found".
+        # Use the eval-split name (`ds_name`, e.g. "robometer_frames_eval_robometer") instead —
+        # it never matches the "roboreward"/"roboarena" substring trigger, so heterogeneous-source
+        # splits use the quality_label path uniformly. Splits that genuinely require partial_success
+        # would need a name like "robometer_frames_eval_roboarena" to opt in (none currently do).
+        data_source = ds_name
 
         if eval_type == "reward_alignment":
             eval_metrics, plots, video_frames_list, trajectory_progress_data = run_reward_alignment_eval_per_trajectory(

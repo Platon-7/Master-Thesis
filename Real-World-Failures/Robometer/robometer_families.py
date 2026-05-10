@@ -98,6 +98,29 @@ FAMILY_REGISTRY: dict[str, str] = {
     # + matched successes). The Robometer `oxe_droid` archive holds 149,804
     # ORPHAN successes that belong under keyframes_orphan_success/, NOT droid/.
     "jesbu1_oxe_rfm_oxe_droid":                                                         "droid",
+
+    # ── Humanoid orphan-success archives (extracted under humanoid/) ──
+    "jesbu1_galaxea_rfm_galaxea_part1_r1_lite":                                         "galaxea_r1_lite",
+    "jesbu1_galaxea_rfm_galaxea_part2_r1_lite":                                         "galaxea_r1_lite",
+    "jesbu1_galaxea_rfm_galaxea_part3_r1_lite":                                         "galaxea_r1_lite",
+    "jesbu1_galaxea_rfm_galaxea_part4_r1_lite":                                         "galaxea_r1_lite",
+    "jesbu1_galaxea_rfm_galaxea_part5_r1_lite":                                         "galaxea_r1_lite",
+    "jesbu1_humanoid_everyday_rfm_humanoid_everyday_rfm":                               "humanoid_everyday",
+    "abraranwar_agibotworld_alpha_rfm_agibotworld":                                     "agibotworld",
+    "abraranwar_agibotworld_alpha_headcam_rfm_agibotworld":                             "agibotworld",
+
+    # ── Human-hand orphan-success archives (extracted under human_hand/) ──
+    "jesbu1_egodex_rfm_egodex_part1":                                                   "egodex",
+    "jesbu1_egodex_rfm_egodex_part2":                                                   "egodex",
+    "jesbu1_egodex_rfm_egodex_part3":                                                   "egodex",
+    "jesbu1_egodex_rfm_egodex_part4":                                                   "egodex",
+    "jesbu1_egodex_rfm_egodex_part5":                                                   "egodex",
+    "jesbu1_egodex_rfm_egodex_test":                                                    "egodex",
+    "jesbu1_epic_rfm_epic":                                                             "epic",
+    "anqil_rh20t_subset_rfm_rh20t_human":                                               "rh20t_human",
+    "jesbu1_h2r_rfm_h2r":                                                               "h2r",
+    "jesbu1_usc_koch_human_robot_paired_usc_koch_human_robot_paired_human":             "usc_koch_human",
+    "jesbu1_hand_paired_rfm_hand_paired_human":                                         "hand_paired_human",
 }
 
 

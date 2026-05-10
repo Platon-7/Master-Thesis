@@ -1,0 +1,81 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_ood_score
+#SBATCH --output=/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/rbm-1m-ood-pipeline/logs/score_%j.out
+#SBATCH --error=/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/rbm-1m-ood-pipeline/logs/score_%j.err
+#SBATCH --partition=gpu_a100
+#SBATCH --gpus=2
+#SBATCH --mem=80G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=04:00:00
+
+# Score 116 failure trajectories (5 archives) from rbm-1m-ood through the
+# Robometer VLM+LLM pipeline (Qwen3.5-35B-A3B → Qwen3-32B).
+# Successes (666 episodes) get linear-ramp labels later via pack_scored_output.py
+# and don't need scoring.
+
+set -euo pipefail
+
+mkdir -p /gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/rbm-1m-ood-pipeline/logs
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate robometer_score
+
+DATA_DIR=/projects/prjs1958/robometer_frame_eval_dataset/staging
+SCRIPT_DIR=/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer
+
+# IMPORTANT: score_robometer_failures.py imports robot-agnostic VLM/LLM utility code
+# (prompts, model loaders, frame description, grading) from Droid-Failures/score_keyframes.py.
+# Including that path on PYTHONPATH does NOT mean we are processing DROID data — we are
+# only borrowing the shared scoring infrastructure. The data being scored is rbm-1m-ood.
+# The Robometer authors originally wrote these utilities while building the DROID pipeline
+# and reused them verbatim for the Robometer pipeline.
+DROID_UTILS_DIR=/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Droid-Failures
+export PYTHONPATH="${DROID_UTILS_DIR}:${PYTHONPATH:-}"
+
+# Models + caches
+export HF_HOME=/scratch-shared/$USER/hf_cache_robometer_score
+export HF_TOKEN="${HF_TOKEN:-}"
+if [[ -z "$HF_TOKEN" ]]; then
+    echo "ERROR: HF_TOKEN must be passed via --export=ALL,HF_TOKEN=hf_..."
+    exit 1
+fi
+export VLM_MODEL_ID="Qwen/Qwen3.5-35B-A3B"
+export LLM_MODEL_ID="Qwen/Qwen3-32B"
+export VLM_BATCH_SIZE=20
+export PYTHONUNBUFFERED=1
+mkdir -p "$HF_HOME"
+
+echo "============================================"
+echo "rbm-1m-ood VLM+LLM scoring"
+echo "  VLM: $VLM_MODEL_ID"
+echo "  LLM: $LLM_MODEL_ID"
+echo "  Data: $DATA_DIR"
+echo "  Job: $SLURM_JOB_ID  Node: $(hostname)"
+echo "  Date: $(date)"
+echo "============================================"
+nvidia-smi
+echo ""
+
+# Move successes manifests aside so --archive all doesn't try to score them.
+ASIDE=$DATA_DIR/manifests/_successes_aside
+mkdir -p "$ASIDE"
+mv $DATA_DIR/manifests/*_successes.jsonl "$ASIDE/" 2>/dev/null || true
+mv $DATA_DIR/manifests/*.merged_into_failures "$ASIDE/" 2>/dev/null || true
+
+trap 'mv "$ASIDE"/*.jsonl $DATA_DIR/manifests/ 2>/dev/null || true; mv "$ASIDE"/*.merged_into_failures $DATA_DIR/manifests/ 2>/dev/null || true' EXIT
+
+ls $DATA_DIR/manifests/
+echo ""
+echo "=== Scoring all *_failures manifests ==="
+python $SCRIPT_DIR/score_robometer_failures.py \
+    --archive all \
+    --data-dir $DATA_DIR
+
+echo ""
+echo "============================================"
+echo "Done at: $(date)"
+echo "Scores in: $DATA_DIR/scores/"
+echo "============================================"
+ls -la $DATA_DIR/scores/

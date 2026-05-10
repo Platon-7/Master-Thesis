@@ -1,0 +1,78 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_step2
+#SBATCH --output=logs/step2_%j_%x.out
+#SBATCH --error=logs/step2_%j_%x.err
+#SBATCH --time=04:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
+#SBATCH --account=gusei17535
+#SBATCH --partition=staging
+
+# Step 2 of the cache build: runs preprocess_datasets.py to produce the
+# training-ready processed_dataset/. Inputs (MP4s in _raw) live on
+# /projects/prjs1958/...; the per-row NPZs that step 2 writes go into
+# cache_dir on /scratch-shared/$USER/... to avoid blowing the project
+# inode quota.
+#
+# For train, also runs the per-shard concat first (concat output goes on
+# /projects alongside the shards).
+#
+# Usage:
+#   STEP1_DIR=/projects/prjs1958/robometer_frames_hf_full \
+#   ROBOMETER_PROCESSED_DATASETS_PATH=/scratch-shared/$USER/robometer_frames_hf_full_step2 \
+#   SPLITS_DIR=/scratch-shared/$USER/robometer_frames_splits_full \
+#   SPLIT=train  N_SHARDS=16 \
+#   sbatch --dependency=afterok:<train_array_jobid> jobs/step2_after_array.job
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+SPLIT="${SPLIT:?set SPLIT=train|eval_*}"
+SPLITS_DIR="${SPLITS_DIR:?set SPLITS_DIR}"
+STEP1_DIR="${STEP1_DIR:?set STEP1_DIR (where _raw shards live, /projects/prjs1958/...)}"
+HF_OUT_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:?set ROBOMETER_PROCESSED_DATASETS_PATH (cache_dir for step 2 — /scratch-shared/...)}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+
+export ROBOMETER_DATASET_PATH="/projects/prjs1958/robometer_frame_dataset"
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_OUT_DIR"
+# HF_DIR points where the _raw lives (input). cache_dir is separate (output).
+export HF_DIR="$STEP1_DIR"
+export SPLIT
+
+echo "============================================================"
+echo "step 2 for SPLIT=$SPLIT"
+echo "  STEP1_DIR (read MP4s)      : $STEP1_DIR"
+echo "  cache_dir (write NPZs)     : $HF_OUT_DIR"
+echo "============================================================"
+
+# ----- (a) For train only: merge per-shard outputs INTO STEP1_DIR -------------
+if [[ "$SPLIT" == "train" ]]; then
+    N_SHARDS="${N_SHARDS:-16}"
+    echo "[step 2a] concatenating $N_SHARDS shards into $STEP1_DIR/train_raw/"
+    "$PYTHON" "$HERE/scripts/concat_split_shards.py" \
+        --hf-out-dir "$STEP1_DIR" \
+        --split train \
+        --n-shards "$N_SHARDS"
+fi
+
+# ----- (b) Run preprocess_datasets — reads from STEP1_DIR, writes to HF_OUT_DIR
+TMP_PP_YAML="$(mktemp --suffix=.yaml)"
+trap 'rm -f "$TMP_PP_YAML"' EXIT
+sed -e "s|\${oc.env:HF_DIR}|$STEP1_DIR|g" \
+    -e "s|\${oc.env:SPLIT}|$SPLIT|g" \
+    -e "s|\${oc.env:ROBOMETER_PROCESSED_DATASETS_PATH}|$HF_OUT_DIR|g" \
+    "$HERE/configs/preprocess_split.yaml" > "$TMP_PP_YAML"
+echo "[step 2b] preprocess_datasets config:"
+cat "$TMP_PP_YAML"
+
+cd "$ROBOMETER_DIR"
+"$PYTHON" -m robometer.data.scripts.preprocess_datasets \
+    --config "$TMP_PP_YAML" \
+    --cache_dir "$HF_OUT_DIR"
+
+echo "[step 2] DONE for $SPLIT"

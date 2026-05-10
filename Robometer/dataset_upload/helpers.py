@@ -168,6 +168,7 @@ def create_trajectory_video_optimized(
     fps: int = 10,
     shortest_edge_size: int = 240,
     center_crop: bool = False,
+    max_long_edge: int = None,
 ) -> str:
     """
     Creates a web-optimized trajectory video using a memory-efficient FFmpeg pipe.
@@ -179,6 +180,10 @@ def create_trajectory_video_optimized(
         fps (int): Frames per second for the output video.
         shortest_edge_size (int): The target size for the shortest edge of the video.
         center_crop (bool): If True, center crop frames to a square before resizing.
+        max_long_edge (int, optional): If set, after the shortest_edge resize the long
+            axis is centered-cropped to this value. Used to fix the droid shape leak —
+            standalone droid yields 240x400 frames while oxe_droid orphan-success yields
+            240x426; setting max_long_edge=400 unifies both into 240x400.
 
     Returns:
         str: The path to the created video file.
@@ -225,6 +230,26 @@ def create_trajectory_video_optimized(
     else:
         target_height, target_width = height, width
 
+    # Optional long-edge clamp (used for droid: 240x426 → 240x400 to match the
+    # standalone-droid shape and kill the success/failure shape leak). Resize is
+    # aspect-preserving (handled above); the clamp is a separate center-crop along
+    # the long axis. We track the scaled shape and the post-crop offsets here, then
+    # apply both in the per-frame loop below.
+    scaled_width, scaled_height = target_width, target_height
+    long_crop_x = 0
+    long_crop_y = 0
+    if max_long_edge is not None and max(target_height, target_width) > max_long_edge:
+        if target_width >= target_height:
+            new_width = max_long_edge if max_long_edge % 2 == 0 else max_long_edge + 1
+            long_crop_x = (target_width - new_width) // 2
+            long_crop_x -= long_crop_x % 2
+            target_width = new_width
+        else:
+            new_height = max_long_edge if max_long_edge % 2 == 0 else max_long_edge + 1
+            long_crop_y = (target_height - new_height) // 2
+            long_crop_y -= long_crop_y % 2
+            target_height = new_height
+
     # FFmpeg command for creating a web-optimized H.264 video
     # This pipes raw video frames from stdin
     command = [
@@ -245,12 +270,21 @@ def create_trajectory_video_optimized(
         "-an",  # No audio
         "-c:v",
         "libx264",  # Use the H.264 codec
+        # ── Original v2 encoding — distribution-matched to all training caches ──
+        # libx264 defaults: crf 23, preset medium, profile high, yuv420p.
+        # NO -threads 1 and NO -x264-params force-cfr=1 — those were tried as a
+        # determinism experiment (v3-style) but they slightly shifted pixel/frame
+        # statistics away from what every existing checkpoint was trained on,
+        # producing worse eval AUC than the multi-threaded original. For any new
+        # HF cache that needs to be eval-compatible with existing trained
+        # checkpoints, keep this code path (multi-threaded, no determinism flags).
+        # See losses.md / BAKEOFF_RUNS.md for the v2 vs v3 saga.
         "-profile:v",
         "high",
         "-pix_fmt",
-        "yuv420p",  # Pixel format for maximum web compatibility
+        "yuv420p",  # 4:2:0 chroma — matches all training caches
         "-movflags",
-        "+faststart",  # CRITICAL: For web streaming
+        "+faststart",
         video_path,
     ]
 
@@ -273,9 +307,15 @@ def create_trajectory_video_optimized(
         if center_crop:
             frame = frame[y_start : y_start + crop_size, x_start : x_start + crop_size]
 
-        # Resize frame to target dimensions
-        if frame.shape[0] != target_height or frame.shape[1] != target_width:
-            frame = cv2.resize(frame, (target_width, target_height), interpolation=cv2.INTER_AREA)
+        # Resize frame to scaled (aspect-preserving) dimensions, then optionally
+        # crop along the long axis to match max_long_edge.
+        if frame.shape[0] != scaled_height or frame.shape[1] != scaled_width:
+            frame = cv2.resize(frame, (scaled_width, scaled_height), interpolation=cv2.INTER_AREA)
+        if long_crop_x or long_crop_y:
+            frame = frame[
+                long_crop_y : long_crop_y + target_height,
+                long_crop_x : long_crop_x + target_width,
+            ]
 
         # Convert RGB to BGR for FFmpeg pipe
         if len(frame.shape) == 3 and frame.shape[2] == 3:
@@ -349,8 +389,17 @@ def create_hf_trajectory(
     if frames_data is None:
         raise ValueError("Trajectory must contain 'frames'")
 
+    # Per-source long-edge clamp. Standalone droid yields 240x400; oxe_droid orphan
+    # successes yield 240x426. Both have family=="droid" in the post-fix loader, so
+    # the model sees shape correlate perfectly with the success/failure label unless
+    # we crop the orphan rows to 240x400. 400 also leaves the standalone failures
+    # untouched (they're already at or below 400 long-edge).
+    _data_source = traj_dict.get("data_source", "")
+    _max_long_edge = 400 if _data_source == "droid" else None
+
     video_path = create_trajectory_video_optimized(
-        frames_data, video_path, max_frames, fps, shortest_edge_size, center_crop
+        frames_data, video_path, max_frames, fps, shortest_edge_size, center_crop,
+        max_long_edge=_max_long_edge,
     )
 
     if video_path is None:
@@ -366,6 +415,12 @@ def create_hf_trajectory(
     preference_rank = traj_dict.get("preference_rank", None)
     partial_success = traj_dict.get("partial_success", None)
     data_source = traj_dict.get("data_source", dataset_name)
+    # Per-frame ordinal failure labels populated by the robometer_frames_loader's manifest
+    # index. Carries the rubric stair-step that the sampler converts to target_progress for
+    # failures; None for successes (use the t/T path). MUST be propagated here — the sampler
+    # downstream calls `traj.get("frame_labels")` and falls back to t/T if absent (Apr-30
+    # bug repro). Listed alongside partial_success since both are nullable per-frame fields.
+    frame_labels = traj_dict.get("frame_labels", None)
 
     # Create dataset trajectory
     trajectory = {
@@ -379,6 +434,7 @@ def create_hf_trajectory(
         "preference_group_id": preference_group_id,
         "preference_rank": preference_rank,
         "partial_success": partial_success,
+        "frame_labels": frame_labels,
     }
 
     return trajectory
@@ -395,9 +451,17 @@ def create_output_directory(output_dir: str) -> None:
 
 
 def flatten_task_data(task_data: dict[str, list[dict]]) -> list[dict]:
-    """Flatten task data into a list of trajectories."""
+    """Flatten task data into a list of trajectories.
+
+    v3 determinism: sort tasks alphabetically and trajectories by episode_id within
+    each task. Multi-process loaders fill task_data in nondeterministic order;
+    without this sort, the resulting HF dataset's row ordering varies across
+    rebuilds, which makes any seed-based sampling (eval test selection) pick
+    different trajectories and breaks bit-exact reproducibility of the cache."""
     all_trajectories = []
-    for task_name, trajectories in task_data.items():
+    for task_name in sorted(task_data.keys()):
+        trajectories = task_data[task_name]
+        trajectories = sorted(trajectories, key=lambda t: (t.get("id") or t.get("episode_id") or ""))
         for trajectory in trajectories:
             trajectory["task_name"] = task_name
             all_trajectories.append(trajectory)

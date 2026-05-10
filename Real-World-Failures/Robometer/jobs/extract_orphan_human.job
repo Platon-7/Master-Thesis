@@ -1,0 +1,49 @@
+#!/bin/bash
+#SBATCH --job-name=orphan_h
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/orphan_human_%x_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=32G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=06:00:00
+
+# Per-archive parallel extraction of orphan-success keyframes for
+# humanoid + human_hand groups. Submit once per archive via the helper
+# `submit_orphan_human.sh` so all archives run concurrently — wall clock
+# is bounded by the slowest single archive instead of the sum.
+#
+#   sbatch --export=GROUP=human_hand,ARCHIVE=jesbu1_egodex_rfm_egodex_part1 \
+#          extract_orphan_human.job
+#
+# Optional cap (resume-aware):
+#   sbatch --export=GROUP=human_hand,ARCHIVE=jesbu1_epic_rfm_epic,MAX_EPS=10000 \
+#          extract_orphan_human.job
+
+set -e
+
+SCRIPT_DIR="/gpfs/home3/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer"
+GROUP="${GROUP:?GROUP is required (humanoid|human_hand)}"
+ARCHIVE="${ARCHIVE:?ARCHIVE is required}"
+
+CAP_ARG=""
+if [ -n "$MAX_EPS" ]; then
+    CAP_ARG="--max-episodes $MAX_EPS"
+fi
+
+echo "============================================================"
+echo "Orphan-success keyframe extraction (group=$GROUP)"
+echo "  Job ID:    $SLURM_JOB_ID"
+echo "  Node:      $(hostname)"
+echo "  Archive:   $ARCHIVE"
+echo "  Cap:       ${MAX_EPS:-(none)}"
+echo "  Date:      $(date)"
+echo "============================================================"
+
+cd "$SCRIPT_DIR"
+python3 -u extract_orphan_successes.py \
+    --group "$GROUP" \
+    --archive "$ARCHIVE" \
+    $CAP_ARG
+
+echo "============================================================"
+echo "Done at: $(date)"
+echo "============================================================"

@@ -10,7 +10,7 @@ Robometer/dataset_upload/generate_hf_dataset.py → create_hf_trajectory:
         "frames": Callable[[], np.ndarray],  # lazy (T, H, W, 3) uint8
         "is_robot": True,
         "quality_label": "successful" | "failure",
-        "data_source": str,              # "robometer_frames_<family>"
+        "data_source": str,              # bare family name (e.g. "oxe_bridge_v2") — matches paper cutoff keys
         "preference_group_id": str|None, # paired_success_id (links fail→success)
         "preference_rank": int|None,
         "frame_labels": List[int] | None,# per-frame ordinals {1..4} for failures, None for successes.
@@ -129,7 +129,6 @@ def _build_manifest_index(dataset_root: Path, families: Iterable[str] = ("metawo
 def load_robometer_frames_split(
     base_path: str,
     pairs_index_path: str,
-    data_source_override: Optional[str] = None,
 ) -> Dict[str, List[Dict[str, Any]]]:
     """Loader for a build_splits.py-produced pairs_index file (train or any eval slice).
 
@@ -139,9 +138,8 @@ def load_robometer_frames_split(
     of failsafe/metaworld/robometer/roboreward), we look up the matching manifest row via a
     cross-family index built once at startup.
 
-    When `data_source_override` is set, every emitted trajectory carries that string as its
-    `data_source` instead of the per-family default. Used by the warmup split so the
-    StratifiedWarmupBatchSampler (which keys on the substring 'warmup') can identify it.
+    `data_source` on emitted trajectories is the bare family string (e.g. "oxe_bridge_v2",
+    "droid", "metaworld"), matching the upstream Robometer cutoff-file naming convention.
     """
     base_root = Path(base_path)
     pairs_index = Path(pairs_index_path)
@@ -181,7 +179,7 @@ def load_robometer_frames_split(
         frame_labels = manifest_row.get("frame_labels")
 
         family = row.get("family") or "unknown"
-        data_source = data_source_override or f"robometer_frames_{family}"
+        data_source = family
         traj: Dict[str, Any] = {
             "id": episode_id,
             "task": row.get("task"),
@@ -296,7 +294,7 @@ def load_robometer_frames_dataset(
                 "frames": TarKeyframeLoader(str(shard_path), episode_id),
                 "is_robot": True,
                 "quality_label": "successful" if row["label"] == "success" else "failure",
-                "data_source": f"robometer_frames_{family}",
+                "data_source": family,
                 "preference_group_id": row.get("paired_success_id"),
                 "preference_rank": None,
                 # Dedicated per-frame ordinal labels ({1..4} for failures, None for successes).

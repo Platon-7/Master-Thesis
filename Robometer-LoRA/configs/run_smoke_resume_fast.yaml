@@ -1,0 +1,23 @@
+# FAST smoke: SAME config as the failing run14 (resume from step-3000 of run9
+# bake-off) but with aggressive eval cadence. Confirms whether the failing
+# behaviour reproduces under the same settings on a shorter horizon.
+#
+# Compared to run14: only added eval cadence + max_tasks reduction + dual_icl=false.
+# All other settings (LR=1e-5, warmup=0, KL=0.3, asym=0.3) are PRESERVED from run14.
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.3
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+training.load_from_checkpoint: /projects/prjs1958/LoRA_weights/run9_l2_lambda03_kl_w03_22482431/bakeoff_run9_l2_lambda03_kl_w03/step3000
+training.learning_rate: 1.0e-5
+training.warmup_ratio: 0.0
+training.max_steps: 200
+training.eval_steps: 100
+training.custom_eval_steps: 100
+training.exp_name: smoke_resume_fast
+custom_eval.policy_ranking_max_tasks: 20
+custom_eval.policy_ranking_dual_icl: false
+custom_eval.num_examples_per_quality_pr: 20

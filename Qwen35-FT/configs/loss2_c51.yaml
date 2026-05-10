@@ -13,7 +13,7 @@ model.train_progress_head: true
 model.train_success_head: true
 model.train_preference_head: false
 
-data.stratified_batch_balance: true
+data.stratified_batch_balance: false   # paper-faithful: uniform sampling, natural class distribution
 data.warmup_steps: 0
 
 training.exp_name: qwen35_ft_loss2_c51_asymmetric

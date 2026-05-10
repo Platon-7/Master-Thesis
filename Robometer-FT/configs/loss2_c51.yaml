@@ -17,7 +17,7 @@ model.train_preference_head: false
 
 # 50/50 fail/success batches from step 0. Same as Loss 1 — no failure-only
 # warmup phase.
-data.stratified_batch_balance: true
+data.stratified_batch_balance: false   # paper-faithful: uniform sampling, natural class distribution
 data.warmup_steps: 0
 
 # Failure-label shape: piecewise-linear ramp interpolated between rubric anchors.

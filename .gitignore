@@ -67,6 +67,7 @@ Robometer-LoRA/logs/
 Robometer/logs/
 Failsafe/logs/
 Real-World-Failures/Robometer/logs/
+Real-World-Failures/Robometer/rbm-1m-ood-pipeline/logs/
 Real-World-Failures/Droid-Failures/logs/
 
 # Checkpoints (often huge, scratch-storage anyway)
@@ -94,3 +95,13 @@ Qwen35-FT/outputs/
 
 # Generic outputs/ dirs (training checkpoints, eval dumps, etc.)
 **/outputs/
+
+# Pre-revert backup (1.1 GB) — kept locally, never push
+Robometer.bak_pre_revert/
+
+# Unsloth bytecode cache — auto-regenerated on first import
+**/unsloth_compiled_cache/
+
+# Top-level SLURM logs dir (per-job artifacts, regenerated each run)
+/logs/
+Robometer-FT/logs/
