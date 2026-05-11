@@ -1,0 +1,41 @@
+# Run 4 — Qwen3.5-FT (850k full train pool, incl. humanoid + human_hand)
+# WITH ICL + our loss recipe. This is a PRETRAINING stage; a second fine-tuning
+# step with lower LR is planned afterwards to match runs 1/2/3.
+#   * Loss: asymmetric C51 + asymmetric BCE, lambda=0.3, KL anchor weight=0.1
+#   * Active heads: progress + success
+#   * sample_type_ratio = [0,1,0] (failures kept via patched base.py escape hatch)
+#   * stratified_batch_balance = true (50/50 batches so KL fires)
+#   * ICL: on
+#   * LR = 2e-5 (higher than runs 1/2/3 since this is pretraining from vanilla Qwen3.5)
+
+# Data pool — 850k full pool (includes humanoid + human_hand extras).
+data.train_datasets: [robometer_frames_train]
+
+# Loss 2.
+loss.progress_loss_type: c51_asymmetric
+loss.success_loss_type: bce_asymmetric
+loss.progress_discrete_bins: 10
+loss.asymmetric_lambda: 0.3
+
+# KL anchor.
+loss.failure_kl_weight: 0.1
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+
+# Heads.
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# Sampler.
+data.sample_type_ratio: [0,1,0]
+data.stratified_batch_balance: true
+data.warmup_steps: 0
+data.failure_label_smoothing: linear
+
+training.learning_rate: 2.0e-5
+
+training.exp_name: qwen35_ft_run4_icl_ours

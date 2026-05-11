@@ -39,7 +39,7 @@ set -uo pipefail   # NOT -e: we want to capture trainer exit code, not abort
 cd "$SLURM_SUBMIT_DIR"
 HERE="$(pwd)"
 ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
-HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/$USER/robometer_frames_hf_full_step2}"
 
 LOSS="${LOSS:?set LOSS=1|2}"
 case "$LOSS" in

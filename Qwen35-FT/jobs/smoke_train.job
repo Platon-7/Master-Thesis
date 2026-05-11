@@ -1,0 +1,119 @@
+#!/bin/bash
+#SBATCH --job-name=qwen35_ft_smoke
+#SBATCH --output=logs/smoke_train_%j.out
+#SBATCH --error=logs/smoke_train_%j.err
+#SBATCH --time=00:45:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:4
+#SBATCH --cpus-per-task=16
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem=480G
+
+# Multi-GPU FSDP training smoke for Qwen35-FT. Mirrors the real train_loss<N>.job's
+# launch path 1:1 (same accelerate config, same conda env, same overrides pipeline)
+# so a passing smoke proves the prod job will launch cleanly.
+#
+# Smoke deltas vs prod:
+#   * max_steps             = 2          (vs 7500)
+#   * per_device_train_bsz  = 2          (vs 8)
+#   * do_eval               = false
+#   * save_strategy         = no
+#   * logging.log_to        = []
+#   * data.icl_prob         = 0.0        — skip ICL pair loading
+#   * custom_eval.eval_types = []
+#   * walltime              = 45 min
+#
+# Usage:
+#     sbatch --export=ALL,LOSS=1 jobs/smoke_train.job   # CORN
+#     sbatch --export=ALL,LOSS=2 jobs/smoke_train.job   # C51
+
+set -uo pipefail   # NOT -e: we want to capture trainer exit code, not abort
+
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+QWEN35_DIR="${QWEN35_DIR:-$HERE}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/$USER/robometer_frames_hf_full_step2}"
+
+LOSS="${LOSS:?set LOSS=1|2}"
+case "$LOSS" in
+    1) PRESET="loss1_corn.yaml" ;;
+    2) PRESET="loss2_c51.yaml" ;;
+    *) echo "ERROR: LOSS must be 1 or 2 (got: $LOSS)" >&2; exit 2 ;;
+esac
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu}"
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+[[ -x "$PYTHON" && -x "$ACCELERATE" ]] || { echo "ERROR: env binaries missing at $ENV_PREFIX/bin/" >&2; exit 1; }
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+# WandB explicitly disabled — smoke doesn't write a run.
+unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+export WANDB_MODE=disabled
+
+cd "$QWEN35_DIR"
+export PYTHONPATH="$QWEN35_DIR:${PYTHONPATH:-}"
+
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_base.yaml" "$HERE/configs/${PRESET}" \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+SMOKE=$(cat <<'EOF'
+++training.max_steps=2
+++training.per_device_train_batch_size=2
+++training.do_eval=false
+++training.evaluation_strategy=no
+++training.save_strategy=no
+++training.logging_steps=1
+++custom_eval.eval_types=[]
+++custom_eval.policy_ranking_dual_icl=false
+++logging.log_to=[]
+++data.icl_prob=0.0
+++data.use_icl=false
+EOF
+)
+SMOKE_ARGS=$(echo "$SMOKE" | tr '\n' ' ')
+
+WEIGHTS_DIR="/scratch-shared/$USER/Qwen35_FT_smoke/loss${LOSS}_${SLURM_JOB_ID:-local}"
+mkdir -p "$WEIGHTS_DIR"
+
+NUM_PROC="${NUM_PROC:-$(nvidia-smi -L 2>/dev/null | wc -l)}"
+NUM_PROC="${NUM_PROC:-4}"
+
+echo "==================== smoke launch summary ===================="
+echo "LOSS               : $LOSS  (preset: $PRESET)"
+echo "FSDP num_processes : $NUM_PROC"
+echo "ENV_PREFIX         : $ENV_PREFIX"
+echo "HF_DIR             : $HF_DIR"
+echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
+echo "OVERRIDES count    : ${#OVERRIDES[@]}"
+echo "SMOKE overrides    :"
+echo "$SMOKE" | sed 's/^/  /'
+echo "==============================================================="
+
+"$ACCELERATE" launch \
+  --config_file configs/distributed/fsdp_qwen35.yaml \
+  --num_processes="$NUM_PROC" \
+  train.py "${OVERRIDES[@]}" $SMOKE_ARGS \
+  training.output_dir="$WEIGHTS_DIR"
+RC=$?
+
+echo
+echo "==================== smoke exit summary ===================="
+echo "trainer return code: $RC"
+if [[ $RC -eq 0 ]]; then
+    echo "SMOKE PASSED — Loss $LOSS"
+else
+    echo "SMOKE FAILED — Loss $LOSS (rc=$RC)"
+fi
+echo "============================================================"
+exit $RC

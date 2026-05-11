@@ -38,7 +38,10 @@ fsdp_config:
 
   fsdp_use_orig_params: true
 
-  # FULL_STATE_DICT — saves a single consolidated checkpoint (slower but easier to
-  # load downstream). Switch to SHARDED_STATE_DICT for faster checkpointing if I/O
-  # becomes the bottleneck.
-  fsdp_state_dict_type: FULL_STATE_DICT
+  # SHARDED_STATE_DICT — each rank writes its own shard. ~30s save vs ~15min for
+  # FULL_STATE_DICT which all-gathers the model to rank 0 (and trips NCCL watchdog
+  # on a 4B model under cpu_ram_efficient_loading). The checkpoint is a directory
+  # of N shards; resume requires the same FSDP topology (same num_ranks +
+  # wrap policy). For downstream HF-compatible loading, consolidate post-hoc with
+  # `torch.distributed.checkpoint.consolidate`.
+  fsdp_state_dict_type: SHARDED_STATE_DICT

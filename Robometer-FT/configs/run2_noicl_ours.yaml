@@ -1,0 +1,38 @@
+# Run 2 — Robometer-FT (650k no_extras pool) WITHOUT ICL + our loss recipe.
+# Identical to run1_icl_ours.yaml EXCEPT data.use_icl is disabled.
+# See run1_icl_ours.yaml for the recipe rationale.
+
+data.train_datasets: [robometer_frames_train_no_extras]
+
+# Loss 2.
+loss.progress_loss_type: c51_asymmetric
+loss.success_loss_type: bce_asymmetric
+loss.progress_discrete_bins: 10
+loss.asymmetric_lambda: 0.3
+
+# KL anchor.
+loss.failure_kl_weight: 0.1
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+
+# Heads.
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# Sampler.
+data.sample_type_ratio: [0,1,0]
+data.stratified_batch_balance: true
+data.warmup_steps: 0
+data.failure_label_smoothing: linear
+
+# ICL OFF.
+data.use_icl: false
+data.icl_prob: 0.0
+
+training.learning_rate: 1.0e-5
+
+training.exp_name: robometer_ft_run2_noicl_ours

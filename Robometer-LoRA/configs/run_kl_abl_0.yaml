@@ -1,0 +1,12 @@
+# KL ablation, CONTROL — failure_kl_weight=0 (no KL term).
+# Same as l2_c51 with asym λ=0.3 and no KL anchor.
+# From Robometer-4B base for a clean ablation (eliminates warm-start confounds).
+# Trains until walltime (typically ~step 2500 in 24h on H100).
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.0
+training.load_from_checkpoint: robometer/Robometer-4B
+training.learning_rate: 2.0e-5
+training.warmup_ratio: 0.05
+training.max_steps: 7500
+training.exp_name: kl_abl_w0_from_base
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x/pairs_index_train.jsonl

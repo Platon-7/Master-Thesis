@@ -1,0 +1,134 @@
+#!/bin/bash
+#SBATCH --job-name=qwen35_ft_run5
+#SBATCH --output=logs/run5_noicl_ours_%j.out
+#SBATCH --error=logs/run5_noicl_ours_%j.err
+#SBATCH --time=72:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=4
+#SBATCH --cpus-per-task=16
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem=480G
+
+# Full fine-tune of vanilla Qwen3.5-4B with Loss 2 (asymmetric C51 + BCE).
+# Multi-GPU FSDP via accelerate. Defaults to single node 4×H100; pass --nodes=N at
+# submit time to scale up (e.g. --nodes=2 for the 8-H100 production topology):
+#     sbatch --nodes=2 jobs/run5_noicl_ours.job
+#
+# Recipe overrides (set at launch via env vars or `EXTRA="..."`):
+#   * MAX_STEPS=N                              → training.max_steps
+#   * EXTRA="++data.use_icl=false ..."         → arbitrary Hydra overrides (ICL toggle, ICL dropout, lr, etc.)
+#   * WANDB_PROJECT=...                        → WandB project (default Qwen35_FT)
+#   * WEIGHTS_DIR=...                          → checkpoint output root
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+QWEN35_DIR="${QWEN35_DIR:-$HERE}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/$USER/robometer_frames_hf_full_step2}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+# Env interpreter — overrideable via ENV_PREFIX so the same job works on
+# both your local conda env and Leonardo's conda-packed copy.
+ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu}"
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+if [[ ! -x "$PYTHON" ]] || [[ ! -x "$ACCELERATE" ]]; then
+    echo "ERROR: env interpreter / accelerate not executable at $ENV_PREFIX/bin/" >&2
+    echo "  expected: $PYTHON   $ACCELERATE" >&2
+    echo "  build env first: see Qwen35-FT/README.md" >&2
+    exit 1
+fi
+# Put env's bin/ on PATH so `#!/usr/bin/env python3.10` shebangs resolve to
+# the env interpreter (matters for conda-packed envs — conda-unpack only
+# rewrites absolute-path shebangs, not /usr/bin/env-style ones).
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_PROJECT="${WANDB_PROJECT:-Qwen35_FT}"
+export WANDB_API_KEY="${WANDB_API_KEY:-}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+
+# CRITICAL: cd into Qwen35-FT/ so the vendored robometer/ wins on import precedence
+# over Robometer/robometer/. PYTHONPATH prepended belt-and-suspenders.
+cd "$QWEN35_DIR"
+export PYTHONPATH="$QWEN35_DIR:${PYTHONPATH:-}"
+
+# Sed-flatten the YAML configs into Hydra ++key=value overrides. Inline lists [a,b,c]
+# survive; block lists (- item) would break this — see configs/train_base.yaml header.
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_base.yaml" "$HERE/configs/run5_noicl_ours.yaml" \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+# EXTRA env var collects all final-stage Hydra overrides. We fold MAX_STEPS into it
+# so there's a single, predictable override channel. Earlier separate $MAX_STEPS_OVERRIDE
+# slot didn't always reach Hydra (depends on SLURM --export defaults across sites).
+EXTRA="${EXTRA:-}"
+if [[ -n "${MAX_STEPS:-}" ]]; then
+    EXTRA="$EXTRA ++training.max_steps=$MAX_STEPS"
+fi
+if [[ -n "${WANDB_ENTITY:-}" ]]; then
+    EXTRA="$EXTRA logging.wandb_entity=$WANDB_ENTITY"
+fi
+
+WEIGHTS_DIR="${WEIGHTS_DIR:-/projects/prjs1958/Qwen35_FT_weights}"
+mkdir -p "$WEIGHTS_DIR"
+
+# ---------------- multi-node topology ----------------
+NUM_NODES="${SLURM_NNODES:-1}"
+GPUS_PER_NODE="${GPUS_PER_NODE:-4}"
+TOTAL_PROCESSES=$(( NUM_NODES * GPUS_PER_NODE ))
+RDZV_PORT=$(( 10000 + ${SLURM_JOB_ID:-0} % 50000 ))
+NODE_LIST=( $(scontrol show hostnames "$SLURM_JOB_NODELIST") )
+HEAD_NODE="${NODE_LIST[0]}"
+HEAD_NODE_IP=$(srun --nodes=1 --ntasks=1 -w "$HEAD_NODE" hostname --ip-address | head -1)
+
+export NCCL_ASYNC_ERROR_HANDLING=1
+export FI_PROVIDER=efa
+export OMP_NUM_THREADS=1
+# ------------------------------------------------------
+
+echo "==================== launch summary ===================="
+echo "Nodes              : $NUM_NODES  (${NODE_LIST[*]})"
+echo "Head node          : $HEAD_NODE  ($HEAD_NODE_IP)"
+echo "GPUs per node      : $GPUS_PER_NODE"
+echo "TOTAL_PROCESSES    : $TOTAL_PROCESSES"
+echo "Rendezvous port    : $RDZV_PORT"
+echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
+echo "MAX_STEPS          : ${MAX_STEPS:-<from-yaml>}"
+echo "EXTRA              : $EXTRA"
+echo "OVERRIDES count    : ${#OVERRIDES[@]}"
+echo "========================================================"
+
+if [[ "$NUM_NODES" -le 1 ]]; then
+    "$ACCELERATE" launch \
+      --config_file configs/distributed/fsdp_qwen35.yaml \
+      --num_machines=1 \
+      --num_processes="$TOTAL_PROCESSES" \
+      --machine_rank=0 \
+      --main_process_ip="$HEAD_NODE_IP" \
+      --main_process_port="$RDZV_PORT" \
+      train.py "${OVERRIDES[@]}" $EXTRA \
+      training.output_dir="$WEIGHTS_DIR/run5_noicl_ours_${SLURM_JOB_ID:-local}"
+else
+    srun --ntasks-per-node=1 --cpu-bind=none bash -c "
+        export PYTHONPATH=$QWEN35_DIR:\${PYTHONPATH:-}
+        cd $QWEN35_DIR
+        \"$ACCELERATE\" launch \\
+          --config_file configs/distributed/fsdp_qwen35.yaml \\
+          --num_machines=$NUM_NODES \\
+          --num_processes=$TOTAL_PROCESSES \\
+          --machine_rank=\$SLURM_NODEID \\
+          --main_process_ip=$HEAD_NODE_IP \\
+          --main_process_port=$RDZV_PORT \\
+          train.py ${OVERRIDES[*]} $EXTRA \\
+          training.output_dir=$WEIGHTS_DIR/run5_noicl_ours_${SLURM_JOB_ID:-local}
+    "
+fi

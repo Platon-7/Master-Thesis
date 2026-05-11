@@ -89,11 +89,19 @@ class BaseDataset(torch.utils.data.Dataset):
             logger.info(
                 "Progress-only mode detected (sample_type_ratio=[0, 1, 0]), filtering to only successful trajectories"
             )
-            # ESCAPE HATCH for the Robometer-LoRA bake-off: the keyframe dataset
-            # (data_source starting with "robometer_frames_") ships curated per-frame
-            # `frame_labels` on FAILURE trajectories too. Dropping them here would discard
-            # half the training signal, so we leave the dataset unfiltered when any of our
-            # custom sources is present.
+            # ESCAPE HATCH for the Robometer-LoRA bake-off: the keyframe datasets
+            # ship curated per-frame `frame_labels` on FAILURE trajectories too. Dropping
+            # them here would discard half the training signal, so we leave the dataset
+            # unfiltered when any of our custom sources is present.
+            #
+            # Two recognition paths (either is sufficient):
+            #   (a) data_source starts with "robometer_frames_" — the v2_leakfix layout
+            #       used by the bake-off configs.
+            #   (b) any failure row carries a non-None frame_labels — the bare-family
+            #       layout used by the new full_step2 cache (data_source = "droid",
+            #       "metaworld", etc., to match the upstream success-cutoff file). The
+            #       presence of curated frame_labels on failures is the actual signal
+            #       that we own this data and want to keep failures.
             if "data_source" in self.dataset.column_names:
                 sources = set(self.dataset["data_source"])
                 if any(s and s.startswith("robometer_frames_") for s in sources):
@@ -102,6 +110,22 @@ class BaseDataset(torch.utils.data.Dataset):
                         "Detected robometer_frames_* in data_source — keeping failures in the "
                         "training split (they carry curated frame_labels)."
                     )
+                elif "frame_labels" in self.dataset.column_names:
+                    # Sample the first ~500 rows looking for any failure with non-None
+                    # frame_labels. Cheap, conservative; if our bare-family cache has any
+                    # such row in the head, we're confident it's ours.
+                    keep = False
+                    for i in range(min(500, len(self.dataset))):
+                        row = self.dataset[i]
+                        if row.get("quality_label") != "successful" and row.get("frame_labels"):
+                            keep = True
+                            break
+                    if keep:
+                        filter_quality_labels = None
+                        logger.info(
+                            "Detected curated frame_labels on failure trajectories (bare-family "
+                            "data_source layout) — keeping failures in the training split."
+                        )
 
         dataset_type = "evaluation" if is_evaluation else "training"
         logger.info(f"Filtering {dataset_type} dataset with {len(self.dataset)} total trajectories")

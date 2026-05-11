@@ -1,0 +1,20 @@
+# Speed-reference 4-GPU run: ICL OFF + KL=0.
+# Purpose: get a clean per-step number with both expensive overheads removed,
+# so we can project the cost of ICL alone and KL alone.
+#
+# Expected: ~10-14s/step on 4-GPU per_device=4 (no in-context demos shrinks
+# the sequence length substantially; no KL re-forward removes the second
+# frozen-backbone pass).
+#
+# max_steps=100 so the job naturally exits in ~20-25 min wall.
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.0
+training.load_from_checkpoint: robometer/Robometer-4B
+training.learning_rate: 2.0e-5
+training.warmup_ratio: 0.05
+training.max_steps: 100
+training.custom_eval_steps: 999999
+training.exp_name: speed_ref_no_icl_no_kl
+data.use_icl: false
+data.icl_prob: 0.0
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x/pairs_index_train.jsonl

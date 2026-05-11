@@ -1,0 +1,16 @@
+# KL ablation, λ_KL=0.1. Same as run13 but from-base (clean ablation, no
+# warm-start confound), and with the FIXED stratified sampler (3.5:1 success:failure
+# pure-class batches → KL push/consume actually fires).
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.1
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+training.load_from_checkpoint: robometer/Robometer-4B
+training.learning_rate: 2.0e-5
+training.warmup_ratio: 0.05
+training.max_steps: 7500
+training.exp_name: kl_abl_w01_from_base
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x/pairs_index_train.jsonl

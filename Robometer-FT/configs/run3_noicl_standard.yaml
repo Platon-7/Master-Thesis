@@ -1,0 +1,48 @@
+# Run 3 — Robometer-FT (650k no_extras pool) WITHOUT ICL, ORIGINAL Robometer loss.
+#
+# Goal: ablation baseline that isolates the loss formulation. Everything matches
+# runs 1/2 (same data, same sampler, same failure-keeping workaround, same heads)
+# EXCEPT the loss is the upstream paper's plain non-asymmetric version + no KL
+# anchor. Comparison vs run 2 measures the value of our asymmetric+KL recipe
+# given access to the same per-frame failure labels.
+#
+#   * progress_loss_type = discrete (plain soft-CE C51, NO asymmetric weighting)
+#   * success_loss_type  = bce_balanced (Robometer's dynamic class-balanced BCE)
+#   * No KL anchor (failure_kl_weight = 0)
+#   * Heads: progress + success (NO preference head — explicit user choice)
+#   * sample_type_ratio = [0,1,0] (progress-only sampling — same as runs 1/2)
+#   * stratified_batch_balance = true (matches runs 1/2 so the only delta is loss math)
+#   * Failures kept via patched base.py escape hatch (curated frame_labels)
+#   * ICL: off
+#   * LR = 1e-5
+
+data.train_datasets: [robometer_frames_train_no_extras]
+
+# Plain (non-asymmetric) discrete C51 + Robometer's class-balanced BCE.
+loss.progress_loss_type: discrete
+loss.success_loss_type: bce_balanced
+loss.progress_discrete_bins: 10
+
+# No KL anchor (it's our enhancement, not the paper baseline).
+loss.failure_kl_weight: 0.0
+
+# Heads — progress + success on, preference OFF (user-confirmed).
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# Sampler — paper-faithful: uniform sampling (natural class distribution), NO
+# per-batch 50/50 enforcement. Differs from runs 1/2 which use stratified=true.
+# Failures are still kept in the pool via the patched base.py escape hatch.
+data.sample_type_ratio: [0,1,0]
+data.stratified_batch_balance: false
+data.warmup_steps: 0
+data.failure_label_smoothing: linear
+
+# ICL off.
+data.use_icl: false
+data.icl_prob: 0.0
+
+training.learning_rate: 1.0e-5
+
+training.exp_name: robometer_ft_run3_noicl_standard

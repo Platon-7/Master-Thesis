@@ -2,7 +2,7 @@
 #SBATCH --job-name=rbm_step2_noextras
 #SBATCH --output=logs/step2_noextras_%j.out
 #SBATCH --error=logs/step2_noextras_%j.err
-#SBATCH --time=04:00:00
+#SBATCH --time=15:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
 #SBATCH --account=gusei17535
@@ -26,7 +26,8 @@ HF_OUT_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:?set ROBOMETER_PROCESSED_DATASET
 
 source /etc/profile.d/lmod.sh 2>/dev/null || true
 module load 2025 Anaconda3/2025.06-1
-PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_gpu}"
+PYTHON="$ENV_PREFIX/bin/python"
 
 export ROBOMETER_DATASET_PATH="/projects/prjs1958/robometer_frame_dataset"
 export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_OUT_DIR"
@@ -45,7 +46,7 @@ echo "[no_extras] step 2b — preprocess_datasets on the filtered _raw"
 echo "============================================================"
 TMP_PP_YAML="$(mktemp --suffix=.yaml)"
 trap 'rm -f "$TMP_PP_YAML"' EXIT
-sed -e "s|\${oc.env:HF_DIR}|$HF_OUT_DIR|g" \
+sed -e "s|\${oc.env:HF_DIR}|$STEP1_DIR|g" \
     -e "s|\${oc.env:SPLIT}|train_no_extras|g" \
     -e "s|\${oc.env:ROBOMETER_PROCESSED_DATASETS_PATH}|$HF_OUT_DIR|g" \
     "$HERE/configs/preprocess_split.yaml" > "$TMP_PP_YAML"
@@ -55,5 +56,16 @@ cd "$ROBOMETER_DIR"
 "$PYTHON" -m robometer.data.scripts.preprocess_datasets \
     --config "$TMP_PP_YAML" \
     --cache_dir "$HF_OUT_DIR"
+
+# Create short-name symlink the dataset loader expects (see step2_after_array.job
+# for the rationale). For no_extras we know the split is "train_no_extras".
+HASHED="${STEP1_DIR//\//_}_train_no_extras_raw_robometer_frames_train_no_extras"
+SHORT="robometer_frames_train_no_extras"
+if [[ -d "$HF_OUT_DIR/$HASHED" ]]; then
+    ln -sfn "$HASHED" "$HF_OUT_DIR/$SHORT"
+    echo "[no_extras] linked $HF_OUT_DIR/$SHORT -> $HASHED"
+else
+    echo "[no_extras] WARN: expected hashed cache dir not found at $HF_OUT_DIR/$HASHED — skipping symlink"
+fi
 
 echo "[no_extras] DONE"

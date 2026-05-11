@@ -1,0 +1,43 @@
+# Run 1 — Robometer-FT (650k no_extras pool) with ICL + our loss recipe.
+#   * Loss: asymmetric C51 + asymmetric BCE, lambda=0.3, KL anchor weight=0.1
+#   * Active heads: progress + success (no preference head)
+#   * sample_type_ratio = [0,1,0]  (progress-only sampling — failures kept via
+#     base.py escape hatch that recognises bare-family data_source + non-None frame_labels)
+#   * stratified_batch_balance = true (50/50 success/failure batches so KL anchor fires)
+#   * ICL: on (icl_prob=0.5 from train_base.yaml carries through)
+#   * LR = 1e-5
+#
+# Apply on top of train_base.yaml via jobs/run1_icl_ours.job.
+
+# Data pool — 650k (excludes humanoid + human_hand families, matching the LoRA bake-off).
+data.train_datasets: [robometer_frames_train_no_extras]
+
+# Loss 2 — asymmetric C51 + asymmetric BCE, our lambda + KL pilot.
+loss.progress_loss_type: c51_asymmetric
+loss.success_loss_type: bce_asymmetric
+loss.progress_discrete_bins: 10
+loss.asymmetric_lambda: 0.3
+
+# Failure-rehearsal KL anchor — fires on pure-success batches under stratified sampling.
+loss.failure_kl_weight: 0.1
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+
+# Heads — progress + success on, preference off.
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# Sampler — progress-only; stratified so KL actually fires.
+data.sample_type_ratio: [0,1,0]
+data.stratified_batch_balance: true
+data.warmup_steps: 0
+data.failure_label_smoothing: linear
+
+# Learning rate — 1e-5 for Robometer-FT (continues from Robometer-4B checkpoint).
+training.learning_rate: 1.0e-5
+
+training.exp_name: robometer_ft_run1_icl_ours

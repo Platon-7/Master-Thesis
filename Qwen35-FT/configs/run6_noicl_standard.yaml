@@ -1,0 +1,39 @@
+# Run 6 — Qwen3.5-FT (850k full train pool) WITHOUT ICL, ORIGINAL Robometer loss.
+# Same recipe as run3_noicl_standard.yaml in Robometer-FT; differs only in:
+#   * data.train_datasets = robometer_frames_train (850k full pool)
+#   * training.learning_rate = 2.0e-5 (pretraining stage)
+#   * exp_name = qwen35_ft_run6_noicl_standard
+#
+# Goal: ablation baseline for Qwen3.5 pretraining. Matches runs 4/5 in every
+# axis except the loss formulation. See run3 yaml for the full rationale.
+
+data.train_datasets: [robometer_frames_train]
+
+# Plain (non-asymmetric) discrete C51 + Robometer's class-balanced BCE.
+loss.progress_loss_type: discrete
+loss.success_loss_type: bce_balanced
+loss.progress_discrete_bins: 10
+
+# No KL anchor.
+loss.failure_kl_weight: 0.0
+
+# Heads — progress + success on, preference OFF (user-confirmed).
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# Sampler — paper-faithful: uniform sampling (natural class distribution), NO
+# per-batch 50/50 enforcement. Differs from runs 4/5 which use stratified=true.
+# Failures are still kept in the pool via the patched base.py escape hatch.
+data.sample_type_ratio: [0,1,0]
+data.stratified_batch_balance: false
+data.warmup_steps: 0
+data.failure_label_smoothing: linear
+
+# ICL off.
+data.use_icl: false
+data.icl_prob: 0.0
+
+training.learning_rate: 2.0e-5
+
+training.exp_name: qwen35_ft_run6_noicl_standard

@@ -46,6 +46,27 @@ def main():
     ap.add_argument("--n-shards", type=int, required=True)
     args = ap.parse_args()
 
+    # Idempotency / multi-user safety: skip if the merged Arrow already exists
+    # AND its rows already carry absolute frames paths. Multiple users may run
+    # this on a shared /projects cache_dir; without this guard, a second user's
+    # concat would shutil.rmtree the merged Arrow out from under a still-running
+    # preprocess_datasets that is reading from it.
+    merged_root = args.hf_out_dir / f"{args.split}_raw"
+    merged_target = merged_root / f"robometer_frames_{args.split}"
+    if merged_target.exists():
+        try:
+            existing = load_from_disk(str(merged_target))
+            sample = existing[0].get("frames", "")
+            if sample.startswith(str(args.hf_out_dir)):
+                print(f"merged Arrow already present with absolute paths → skipping concat")
+                print(f"  existing: {merged_target}")
+                print(f"  rows    : {len(existing):,}")
+                print(f"  sample  : {sample[:120]}")
+                return
+            print(f"merged Arrow exists but paths look relative — re-running concat")
+        except Exception as e:
+            print(f"merged Arrow exists but failed to inspect ({e}) — re-running concat")
+
     parts = find_part_arrow_dirs(args.hf_out_dir, args.split, args.n_shards)
     print(f"merging {len(parts)} shards:")
     for p in parts:

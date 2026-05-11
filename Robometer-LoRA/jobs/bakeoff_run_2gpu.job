@@ -1,0 +1,114 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_bakeoff_2gpu
+#SBATCH --output=logs/bakeoff_%j_%x.out
+#SBATCH --error=logs/bakeoff_%j_%x.err
+#SBATCH --time=36:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=2
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=256G
+
+# 2-GPU DDP variant of bakeoff_run.job. Used when we want to speed up the
+# per-step time on KL-enabled runs (KL re-forward adds ~13s/step on 1 GPU;
+# with 2-GPU DDP each rank handles roughly half the effective gradient, so
+# step time approximately halves).
+#
+# Effective batch is kept at 16 (matches the 1-GPU runs) by overriding
+# gradient_accumulation_steps from 2 → 1 inside this job: per_device_train_batch_size=8
+# × grad_accum=1 × world_size=2 = 16.
+#
+# The sampler (StratifiedWarmupBatchSampler) is rank-aware: each rank seeds
+# its RNG with `seed + rank` so the SAMPLES differ across ranks while the
+# PURE-CLASS CYCLE (failure batch at positions {0,4} of each 9-cycle) lands
+# at the same step on every rank. KL push/consume fires synchronously on
+# all ranks; each rank maintains its own FIFO buffer over its own failure
+# samples.
+#
+# Usage:
+#   RUN=run_kl_abl_01  LOSS_PRESET=loss2_c51 \
+#     sbatch --export=ALL,RUN=...,LOSS_PRESET=...,ROBOMETER_PROCESSED_DATASETS_PATH=... \
+#       jobs/bakeoff_run_2gpu.job
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf}"
+
+RUN="${RUN:?set RUN=...}"
+LOSS_PRESET="${LOSS_PRESET:?set LOSS_PRESET=loss1_corn|loss2_c51}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_gpu}"
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+if [[ ! -x "$PYTHON" ]] || [[ ! -x "$ACCELERATE" ]]; then
+    echo "ERROR: env interpreter/accelerate not executable at $ENV_PREFIX/bin/" >&2
+    exit 1
+fi
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_LoRA_bakeoff}"
+export WANDB_API_KEY="${WANDB_API_KEY:-}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+# Mirror the env hygiene the Robometer-FT 4-GPU jobs use. NCCL_ASYNC_ERROR_HANDLING
+# surfaces collective failures as Python exceptions instead of hangs; OMP_NUM_THREADS=1
+# avoids oversubscription when each rank spawns its own DataLoader workers.
+export NCCL_ASYNC_ERROR_HANDLING=1
+export OMP_NUM_THREADS=1
+
+# Build Hydra overrides (same logic as bakeoff_run.job).
+for f in "$HERE/configs/train_lora_base.yaml" "$HERE/configs/${LOSS_PRESET}.yaml" "$HERE/configs/${RUN}.yaml"; do
+    if [[ ! -f "$f" ]]; then
+        echo "ERROR: missing config $f" >&2
+        exit 2
+    fi
+done
+
+readarray -t OVERRIDES < <(
+    cat "$HERE/configs/train_lora_base.yaml" \
+        "$HERE/configs/${LOSS_PRESET}.yaml" \
+        "$HERE/configs/${RUN}.yaml" \
+      | grep -v '^[[:space:]]*#' \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+OUT_DIR="${WEIGHTS_DIR:-/projects/prjs1958/LoRA_weights}/${RUN}_${SLURM_JOB_ID:-local}"
+mkdir -p "$OUT_DIR"
+
+cd "$ROBOMETER_DIR"
+
+echo "[bakeoff-2gpu] RUN=$RUN  LOSS_PRESET=$LOSS_PRESET  GPUS=2"
+echo "[bakeoff-2gpu] output: $OUT_DIR"
+echo "[bakeoff-2gpu] full overrides:"
+printf '  %s\n' "${OVERRIDES[@]}"
+
+RESUME_OVERRIDE=""
+if [[ -n "${CKPT_RESUME:-}" ]]; then
+    RESUME_OVERRIDE="++training.resume_from_checkpoint='${CKPT_RESUME}'"
+    echo "[bakeoff-2gpu] resuming from: $CKPT_RESUME"
+fi
+
+# Pick a per-job rendezvous port so multiple 2-GPU bakeoff jobs on the same
+# node don't collide. Use SLURM_JOB_ID modulo 1000 + 29500 base.
+RDZV_PORT=$((29500 + ${SLURM_JOB_ID:-0} % 1000))
+
+"$ACCELERATE" launch \
+  --config_file "$ROBOMETER_DIR/robometer/configs/distributed/ddp.yaml" \
+  --num_machines=1 \
+  --num_processes=2 \
+  --machine_rank=0 \
+  --main_process_port="$RDZV_PORT" \
+  train.py "${OVERRIDES[@]}" \
+  training.output_dir="$OUT_DIR" \
+  ++training.gradient_accumulation_steps=1 \
+  ${EXTRA:-} \
+  ${RESUME_OVERRIDE:+"$RESUME_OVERRIDE"}

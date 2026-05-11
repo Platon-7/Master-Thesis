@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=rbm_ft_l2
-#SBATCH --output=logs/train_loss2_%j.out
-#SBATCH --error=logs/train_loss2_%j.err
+#SBATCH --job-name=rbm_ft_run1
+#SBATCH --output=logs/run1_icl_ours_%j.out
+#SBATCH --error=logs/run1_icl_ours_%j.err
 #SBATCH --time=72:00:00
 #SBATCH --account=gusei17535
 #SBATCH --partition=gpu_h100
@@ -52,7 +52,7 @@ export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_FT}"
 export WANDB_API_KEY="${WANDB_API_KEY:-}"
 export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
 
-for f in "$HERE/configs/train_base.yaml" "$HERE/configs/loss2_c51.yaml" "$HERE/configs/distributed/fsdp.yaml"; do
+for f in "$HERE/configs/train_base.yaml" "$HERE/configs/run1_icl_ours.yaml" "$HERE/configs/distributed/fsdp.yaml"; do
     if [[ ! -f "$f" ]]; then
         echo "ERROR: missing config $f" >&2
         exit 2
@@ -74,7 +74,7 @@ export OMP_NUM_THREADS=1
 # ------------------------------------------------------
 
 readarray -t OVERRIDES < <(
-    cat "$HERE/configs/train_base.yaml" "$HERE/configs/loss2_c51.yaml" \
+    cat "$HERE/configs/train_base.yaml" "$HERE/configs/run1_icl_ours.yaml" \
       | grep -v '^[[:space:]]*#' \
       | sed -e 's/[[:space:]]*#.*//' \
       | grep -v '^[[:space:]]*$' \
@@ -128,7 +128,7 @@ if [[ "$NUM_NODES" -le 1 ]]; then
       --main_process_ip="$HEAD_NODE_IP" \
       --main_process_port="$RDZV_PORT" \
       train.py "${OVERRIDES[@]}" $EXTRA \
-      training.output_dir="$WEIGHTS_DIR/loss2_${SLURM_JOB_ID:-local}"
+      training.output_dir="$WEIGHTS_DIR/run1_icl_ours_${SLURM_JOB_ID:-local}"
 else
     srun --ntasks-per-node=1 --cpu-bind=none bash -c "
         export PYTHONPATH=$ROBOMETER_DIR:\${PYTHONPATH:-}
@@ -142,6 +142,6 @@ else
           --main_process_ip=$HEAD_NODE_IP \\
           --main_process_port=$RDZV_PORT \\
           train.py ${OVERRIDES[*]} $EXTRA \\
-          training.output_dir=$WEIGHTS_DIR/loss2_${SLURM_JOB_ID:-local}
+          training.output_dir=$WEIGHTS_DIR/run1_icl_ours_${SLURM_JOB_ID:-local}
     "
 fi

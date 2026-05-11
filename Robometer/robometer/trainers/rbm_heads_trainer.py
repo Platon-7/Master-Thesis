@@ -215,6 +215,16 @@ class RBMHeadsTrainer(Trainer):
             else:
                 failure_idx.append(i)
 
+        # DDP-aware: pass rank/world_size so each rank draws different samples
+        # while keeping the same pure-class cycle position (failure batch on the
+        # same step across ranks → consistent push/consume of the KL buffer).
+        import torch.distributed as dist
+        if dist.is_available() and dist.is_initialized():
+            _rank = dist.get_rank()
+            _world_size = dist.get_world_size()
+        else:
+            _rank = 0
+            _world_size = 1
         batch_sampler = StratifiedWarmupBatchSampler(
             warmup_indices=warmup_idx,
             failure_indices=failure_idx,
@@ -222,6 +232,8 @@ class RBMHeadsTrainer(Trainer):
             batch_size=self.args.per_device_train_batch_size,
             warmup_steps=int(getattr(self.config.data, "warmup_steps", 0) or 0),
             seed=int(getattr(self.config.data, "seed", 42) or 42),
+            rank=_rank,
+            world_size=_world_size,
         )
         # Sync sampler.current_step from TrainerState on every step. Sampler lives in the
         # main process so the attribute mutation is visible without IPC.
@@ -2774,14 +2786,30 @@ class RBMHeadsTrainer(Trainer):
         if old_logits.dtype != kl_logits_new.dtype:
             old_logits = old_logits.to(kl_logits_new.dtype)
 
+        # KL distillation should anchor on every valid failure frame; intentionally drop
+        # `predict_last_frame_mask` from the KL path. That mask is a partial_success
+        # last-frame-only indicator (roboarena-style sources) and can land at a
+        # different temporal resolution than `target_progress_mask` after the
+        # Qwen-VL frame-downsampling code path, causing a shape mismatch (see traceback
+        # May-11: "tensor a (8) must match tensor b (16) at non-singleton dimension 1").
+        #
+        # `target_progress_mask` is stored per-SAMPLE in the buffer (shape [B]) while
+        # `kl_per_frame` inside compute_failure_kl is per-frame [B, T]. Expand to
+        # [B, T] by replicating the per-sample validity across the T dim so the
+        # broadcast inside compute_failure_kl just multiplies.
         tp_mask = old_inputs_dev.get("target_progress_mask")
-        pl_mask = old_inputs_dev.get("predict_last_frame_mask")
         mask = None
         if tp_mask is not None:
-            mask = tp_mask.to(kl_logits_new.dtype)
-        if pl_mask is not None:
-            pl_mask = pl_mask.to(kl_logits_new.dtype)
-            mask = pl_mask if mask is None else (mask * pl_mask)
+            m = tp_mask.to(kl_logits_new.dtype)
+            # kl_logits_new shape: [..., T, K]. We want mask shape [..., T].
+            target_shape = kl_logits_new.shape[:-1]
+            if m.ndim == len(target_shape) - 1:
+                # [B] → [B, T]
+                m = m.unsqueeze(-1).expand(target_shape)
+            elif m.ndim == len(target_shape) and m.shape[-1] == 1:
+                # [B, 1] → [B, T]
+                m = m.expand(target_shape)
+            mask = m.contiguous()
 
         kl_value = compute_failure_kl(old_logits, kl_logits_new, mask=mask)
         self.log_metadata["loss/failure_kl"] = kl_value.detach().float()

@@ -32,11 +32,11 @@ eval_subsets: []
 # Match the dataset's native frame count — keyframes are pre-extracted at 16/episode.
 max_frames_for_preprocessing: 16
 video_frame_sampling: "uniform"
-num_proc: 4
-num_threads: 4
+num_proc: 1
+num_threads: 16
 # Cached-path detection is flaky when a prior run failed mid-cache-write (marks the dir as
 # existing without a usable processed_dataset inside). Force reprocess — cheap at ~500 ep.
-force_reprocess: true
+force_reprocess: false
 
 cache_dir: ${oc.env:ROBOMETER_PROCESSED_DATASETS_PATH}
 

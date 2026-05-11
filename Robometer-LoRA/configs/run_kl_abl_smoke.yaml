@@ -1,0 +1,28 @@
+# 4-GPU + per_device=4 smoke test config.
+# Same as run_kl_abl_01 (KL=0.1) but trimmed for fast verification:
+#   - max_steps=50 (15-20 min wall on 4-GPU)
+#   - eval disabled (custom_eval_steps=999999 keeps eval out of the smoke)
+#   - same losses, sampler, KL settings — covers the exact code paths the
+#     full runs will use, except eval (already verified on prior 1-GPU runs).
+#
+# Verify before launching full runs:
+#   1. 4 ranks initialize (logs: world_size=4 in sampler init)
+#   2. per_device=4 produces pure-class batches of size 4
+#   3. KL fires: time/failure_kl_reforward present in every Timing raw line
+#      from step ~2 onwards (one failure batch fills buffer at step 0 or 4)
+#   4. Step time ~19-25s amortized
+#   5. No NCCL hang, no OOM, GPU0..GPU3 all active
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.1
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+training.load_from_checkpoint: robometer/Robometer-4B
+training.learning_rate: 2.0e-5
+training.warmup_ratio: 0.05
+training.max_steps: 50
+training.custom_eval_steps: 999999
+training.exp_name: kl_abl_smoke_4gpu
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x/pairs_index_train.jsonl

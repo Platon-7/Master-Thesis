@@ -49,6 +49,8 @@ class StratifiedWarmupBatchSampler(Sampler[List[int]]):
         batch_size: int,
         warmup_steps: int = 0,
         seed: int = 42,
+        rank: int = 0,
+        world_size: int = 1,
     ) -> None:
         # Note: skip Sampler.__init__ — its data_source kwarg signature has churned across
         # torch versions (deprecated in 2.x, removed in some patches). DataLoader is duck-typed
@@ -65,13 +67,22 @@ class StratifiedWarmupBatchSampler(Sampler[List[int]]):
         self.batch_size = int(batch_size)
         self.warmup_steps = int(warmup_steps)
         self.current_step: int = 0
-        self._rng = random.Random(seed)
+        self.rank = int(rank)
+        self.world_size = int(world_size)
+        # Distinct seed per rank → each rank draws DIFFERENT samples within each
+        # batch (so DDP gets a real batch-size multiplier from rank-averaged
+        # gradients), while the class-pattern cycle (set by yield_count) stays
+        # IDENTICAL across ranks. So both ranks push to their own buffers at the
+        # same step on a failure batch, and both consume KL at the same step on
+        # a success batch — no DDP de-sync, no all-reduce of empty buffers.
+        self._rng = random.Random(seed + self.rank)
         logger.info(
             f"[StratifiedWarmupBatchSampler] init: warmup_steps={self.warmup_steps}, "
             f"batch_size={self.batch_size}, "
             f"|warmup|={len(self.warmup_indices)}, "
             f"|fail|={len(self.failure_indices)}, "
-            f"|succ|={len(self.success_indices)}"
+            f"|succ|={len(self.success_indices)}, "
+            f"rank={self.rank}, world_size={self.world_size}"
         )
 
     def _warmup_pool(self) -> List[int]:
@@ -80,28 +91,31 @@ class StratifiedWarmupBatchSampler(Sampler[List[int]]):
 
     def __iter__(self) -> Iterable[List[int]]:
         # Infinite generator. HF Trainer's loop is bounded by max_steps anyway.
+        # Use a 9-batch cycle (2 failure + 7 success → 3.5:1 success:failure ratio,
+        # matching the 3p5x dataset's class composition). Each batch is PURE-class
+        # so detect_batch_quality returns "failure"/"successful" (not None-on-mixed),
+        # which lets the failure-KL anchor's push/consume actually fire on the right
+        # batches. Failure batches at cycle positions {0, 4} give roughly even
+        # spacing within the 9-batch cycle.
+        _CYCLE_LEN = 9
+        _FAIL_POSITIONS = (0, 4)  # 2 of 9 → 3.5:1 success:failure
+        yield_count = 0
         while True:
             if self.current_step < self.warmup_steps:
                 pool = self._warmup_pool()
                 # Sample with replacement: warmup pool is intentionally small (~1500 episodes).
                 batch = [self._rng.choice(pool) for _ in range(self.batch_size)]
             else:
-                n_fail = self.batch_size // 2
-                n_succ = self.batch_size - n_fail
-                # Sample without replacement WITHIN a batch — HF Trainer does many batches per
-                # epoch so cross-batch repetition is fine but in-batch dupes waste compute.
-                fails = (
-                    self._rng.sample(self.failure_indices, n_fail)
-                    if n_fail <= len(self.failure_indices)
-                    else [self._rng.choice(self.failure_indices) for _ in range(n_fail)]
+                if (yield_count % _CYCLE_LEN) in _FAIL_POSITIONS:
+                    pool = self.failure_indices
+                else:
+                    pool = self.success_indices
+                batch = (
+                    self._rng.sample(pool, self.batch_size)
+                    if self.batch_size <= len(pool)
+                    else [self._rng.choice(pool) for _ in range(self.batch_size)]
                 )
-                succs = (
-                    self._rng.sample(self.success_indices, n_succ)
-                    if n_succ <= len(self.success_indices)
-                    else [self._rng.choice(self.success_indices) for _ in range(n_succ)]
-                )
-                batch = fails + succs
-                self._rng.shuffle(batch)
+            yield_count += 1
             yield batch
 
     def __len__(self) -> int:
