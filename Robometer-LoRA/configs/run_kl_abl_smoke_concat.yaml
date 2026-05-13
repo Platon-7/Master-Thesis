@@ -1,0 +1,25 @@
+# Smoke for the concat_batch=true KL fix.
+# Same as run_kl_abl_smoke (4-GPU per_device=4, ICL on, KL=0.1, 50 steps, eval disabled)
+# but with failure_kl_concat_batch=true to exercise the patched code path in
+# rbm_heads_trainer.py (alias model_output = combined_output and slice success_pred
+# back to b_succ before computing the success loss).
+#
+# Acceptance signals to look for in Timing raw:
+#   - time/failure_kl_concat_forward present
+#   - time/failure_kl_reforward ABSENT (sequential path skipped)
+#   - time/training_step ~15-17s on KL-firing steps (vs ~21s sequential)
+#   - No UnboundLocalError, COMPLETED state at step 49
+loss.asymmetric_lambda: 0.3
+loss.failure_kl_weight: 0.1
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: true
+loss.failure_kl_detach_backbone: false
+training.load_from_checkpoint: robometer/Robometer-4B
+training.learning_rate: 2.0e-5
+training.warmup_ratio: 0.05
+training.max_steps: 50
+training.custom_eval_steps: 999999
+training.exp_name: kl_abl_smoke_concat_4gpu
+data.pairs_index_path: /scratch-shared/pkarageorgis1/robometer_frames_splits_3p5x/pairs_index_train.jsonl

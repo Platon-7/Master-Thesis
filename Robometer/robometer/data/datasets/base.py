@@ -148,11 +148,20 @@ class BaseDataset(torch.utils.data.Dataset):
                 f"{dataset_type.capitalize()} dataset filtered with {len(self.dataset)} total trajectories (excluded keywords and min_frames only, no quality label filtering)"
             )
 
-        # Filter out trajectories based on multiple criteria (build indices first, then filter once)
-        self.dataset, self._combined_indices = self._filter_task_based_criteria(
-            dataset=self.dataset,
-            combined_indices=self._combined_indices,
-        )
+        # Filter out trajectories from tasks with no optimal/successful counterpart.
+        # Gated by data.keep_orphan_task_failures (default False = legacy behavior).
+        if not getattr(self.config, "keep_orphan_task_failures", False):
+            self.dataset, self._combined_indices = self._filter_task_based_criteria(
+                dataset=self.dataset,
+                combined_indices=self._combined_indices,
+            )
+        else:
+            logger.info(
+                "SKIPPING task-based filter (data.keep_orphan_task_failures=True) — "
+                "trajectories from tasks with no optimal/successful demos are kept. "
+                "Safe only with sample_type_ratio=[0,1,0], stratified_batch_balance=False, "
+                "failure_kl_weight=0, and no preference head."
+            )
 
         # Set cached fields after filtering
         self._cached_ids = self.dataset["id"]

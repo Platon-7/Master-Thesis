@@ -184,10 +184,51 @@ class RBMHeadsTrainer(Trainer):
             data_source contains 'warmup' (falls back to any failure if no warmup pool).
           * step >= data.warmup_steps : every batch is exactly half failure / half success.
 
-        When data.stratified_batch_balance is False, defers to HF's default sampler.
+        When data.stratified_batch_balance is False AND data.failure_oversample_factor>1.0,
+        installs a WeightedRandomSampler that tilts the draw toward failures (mixed batches,
+        not pure-class). Otherwise defers to HF's default sampler.
         """
+        oversample = float(getattr(self.config.data, "failure_oversample_factor", 1.0) or 1.0)
         if not getattr(self.config.data, "stratified_batch_balance", False):
-            return super().get_train_dataloader()
+            if oversample <= 1.0:
+                return super().get_train_dataloader()
+            # WeightedRandomSampler path. Each rank constructs the same weight tensor and
+            # uses its own rank-seeded generator so DDP ranks draw different indices. Stays
+            # in expectation-mode (no pure-class cycle), so batches are mixed and the KL
+            # anchor's push/consume machinery isn't required.
+            if self.train_dataset is None:
+                raise ValueError("Trainer.get_train_dataloader: train_dataset is None")
+            underlying = getattr(self.train_dataset, "dataset", self.train_dataset)
+            hf_ds = getattr(underlying, "dataset", underlying)
+            try:
+                quality_labels_ws = hf_ds["quality_label"]
+            except (KeyError, TypeError) as e:
+                raise RuntimeError(
+                    "failure_oversample_factor>1 requires 'quality_label' on the train "
+                    "dataset; could not read it: " + str(e)
+                )
+            import torch
+            from torch.utils.data import WeightedRandomSampler
+            weights = torch.tensor(
+                [oversample if lbl != "successful" else 1.0 for lbl in quality_labels_ws],
+                dtype=torch.double,
+            )
+            import torch.distributed as dist
+            _rank_ws = dist.get_rank() if (dist.is_available() and dist.is_initialized()) else 0
+            seed_ws = int(getattr(self.config.data, "seed", 42) or 42) + _rank_ws
+            gen = torch.Generator().manual_seed(seed_ws)
+            sampler = WeightedRandomSampler(
+                weights=weights, num_samples=len(weights), replacement=True, generator=gen,
+            )
+            return DataLoader(
+                self.train_dataset,
+                sampler=sampler,
+                batch_size=self.args.per_device_train_batch_size,
+                collate_fn=self.data_collator,
+                num_workers=self.args.dataloader_num_workers,
+                pin_memory=self.args.dataloader_pin_memory,
+                persistent_workers=self.args.dataloader_persistent_workers if self.args.dataloader_num_workers > 0 else False,
+            )
         if self.train_dataset is None:
             raise ValueError("Trainer.get_train_dataloader: train_dataset is None")
 
@@ -2929,6 +2970,10 @@ class RBMHeadsTrainer(Trainer):
             combined_pred = combined_output.progress_logits["A"]
             progress_pred, kl_logits_new = split_concat_logits(combined_pred, b_succ)
             kl_concat_state = (b_succ, b_fail, kl_logits_new, old_inputs_dev, kl_pre_entry)
+            # Alias for downstream code paths (e.g. success head) that expect
+            # `model_output` to be set; consumers must slice [:b_succ] when in
+            # concat mode since combined_output's rows span success + failure.
+            model_output = combined_output
         else:
             model_output, _ = self.forward_model(model, inputs, sample_type="progress")
             progress_logits = model_output.progress_logits
@@ -2995,6 +3040,9 @@ class RBMHeadsTrainer(Trainer):
         if self.config.model.train_success_head:
             success_logits = model_output.success_logits
             success_pred = success_logits["A"]
+            if use_concat:
+                b_succ_val = kl_concat_state[0]
+                success_pred = success_pred[:b_succ_val]
             success_labels = inputs["success_labels"]
 
             quality_labels = inputs.get("quality_labels", None)

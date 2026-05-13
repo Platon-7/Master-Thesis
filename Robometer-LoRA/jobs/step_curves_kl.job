@@ -1,0 +1,155 @@
+#!/bin/bash
+#SBATCH --job-name=stepcurves_kl
+#SBATCH --output=logs/stepcurves_kl_%A_%a.out
+#SBATCH --error=logs/stepcurves_kl_%A_%a.err
+#SBATCH --time=01:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --gres=gpu:h100:1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
+#SBATCH --array=0-35%10
+
+# Step-curve evals on test_v3 for the KL ablation (kl=0, kl=0.1, kl=0.3).
+# Mirrors jobs/step_curves_all5.job — same recipe (test_v3 pairs index,
+# dual_icl=false, explicit icl_prob 0.0/1.0). All runs use loss2_c51 preset.
+#
+# Layout (36 tasks total — all three runs now have step=3000 ckpts):
+#   kl=0   (22636650): 6 ckpts × 2 ICL = 12 tasks (indices 0..11)
+#   kl=0.1 (22639537): 6 ckpts × 2 ICL = 12 tasks (indices 12..23)
+#   kl=0.3 (22639538): 6 ckpts × 2 ICL = 12 tasks (indices 24..35)
+# Within each model: first half is ICL-off, second half is ICL-on.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/projects/prjs1958/robometer_frames_hf_v2}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_MODE=offline
+# Unsloth phones home to HF for a version/statistics check at model load;
+# when that times out (intermittent), the whole task fails. Disable it.
+export UNSLOTH_DISABLE_STATISTICS=1
+
+cd "$ROBOMETER_DIR"
+
+# Per-model ckpt layouts. All three have 6 ckpts (kl=0 step 3000 was added
+# after the 1-GPU run was stopped at step 3012).
+KL0_STEPS=(500 1000 1500 2000 2500 3000)
+KL01_STEPS=(500 1000 1500 2000 2500 3000)
+KL03_STEPS=(500 1000 1500 2000 2500 3000)
+
+declare -A CKPTS
+KL0_BASE="/projects/prjs1958/LoRA_weights/run_kl_abl_0_22636650/kl_abl_w0_from_base"
+for s in "${KL0_STEPS[@]}"; do
+    if [[ "$s" -eq 3000 ]]; then
+        CKPTS["kl0_${s}"]="$KL0_BASE/ckpt-latest-avg-5metrics=-inf_step=3000"
+    else
+        CKPTS["kl0_${s}"]="$KL0_BASE/ckpt-avg-5metrics=0.0000_step=${s}"
+    fi
+done
+
+KL01_BASE="/projects/prjs1958/LoRA_weights/run_kl_abl_01_22639537/kl_abl_w01_from_base"
+for s in "${KL01_STEPS[@]}"; do
+    if [[ "$s" -eq 3000 ]]; then
+        CKPTS["kl01_${s}"]="$KL01_BASE/ckpt-latest-avg-5metrics=-inf_step=3000"
+    else
+        CKPTS["kl01_${s}"]="$KL01_BASE/ckpt-avg-5metrics=0.0000_step=${s}"
+    fi
+done
+
+KL03_BASE="/projects/prjs1958/LoRA_weights/run_kl_abl_03_22639538/kl_abl_w03_from_base"
+for s in "${KL03_STEPS[@]}"; do
+    if [[ "$s" -eq 3000 ]]; then
+        CKPTS["kl03_${s}"]="$KL03_BASE/ckpt-latest-avg-5metrics=-inf_step=3000"
+    else
+        CKPTS["kl03_${s}"]="$KL03_BASE/ckpt-avg-5metrics=0.0000_step=${s}"
+    fi
+done
+
+# Build the task table: (run_tag, step, icl_tag) — 34 entries.
+TASKS=()
+for s in "${KL0_STEPS[@]}";  do TASKS+=("kl0:${s}:icloff"); done
+for s in "${KL0_STEPS[@]}";  do TASKS+=("kl0:${s}:iclon"); done
+for s in "${KL01_STEPS[@]}"; do TASKS+=("kl01:${s}:icloff"); done
+for s in "${KL01_STEPS[@]}"; do TASKS+=("kl01:${s}:iclon"); done
+for s in "${KL03_STEPS[@]}"; do TASKS+=("kl03:${s}:icloff"); done
+for s in "${KL03_STEPS[@]}"; do TASKS+=("kl03:${s}:iclon"); done
+
+I="${SLURM_ARRAY_TASK_ID:-0}"
+if [[ "$I" -ge "${#TASKS[@]}" ]]; then
+    echo "ERROR: array task $I out of range (have ${#TASKS[@]} tasks)" >&2
+    exit 2
+fi
+
+IFS=':' read -r RUN_TAG STEP MODE_TAG <<<"${TASKS[$I]}"
+CKPT="${CKPTS[${RUN_TAG}_${STEP}]:-}"
+if [[ -z "$CKPT" ]] || [[ ! -d "$CKPT" ]]; then
+    echo "ERROR: no checkpoint dir for $RUN_TAG step=$STEP (looked at: $CKPT)" >&2
+    exit 3
+fi
+
+PRESET="$HERE/configs/loss2_c51.yaml"
+
+OUT_BASE="/scratch-shared/pkarageorgis1/LoRA_step_curves_kl"
+OUTPUT_DIR="$OUT_BASE/${RUN_TAG}_step${STEP}_${MODE_TAG}"
+mkdir -p "$OUTPUT_DIR"
+
+echo "[$I] RUN=$RUN_TAG  STEP=$STEP  ICL=$MODE_TAG"
+echo "[$I] CKPT=$CKPT"
+echo "[$I] OUTPUT_DIR=$OUTPUT_DIR"
+
+# Use the SAME Hydra override translator as the training jobs — base + loss preset.
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_lora_base.yaml" "$PRESET" \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+TEST_OVERRIDES=(
+    "++data.eval_datasets=[robometer_frames_test_v3]"
+    "++custom_eval.policy_ranking=[robometer_frames_test_v3]"
+    "++custom_eval.policy_ranking_dual_icl=false"
+    # Point train_datasets at test_v3 too — eval mode still tries to load a train
+    # dataset (train.py:221 calls setup_dataset(cfg.data) before the mode check),
+    # and the clean cache only contains test_v3. Avoids needing to rebuild the
+    # train cache solely to satisfy a loader that's never used at evaluation.
+    "++data.train_datasets=[robometer_frames_test_v3]"
+)
+
+if [[ "$MODE_TAG" == "iclon" ]]; then
+    ICL_OVERRIDES=(
+        "++data.use_icl=true"
+        "++data.icl_prob=1.0"
+        "++data.pairs_index_path=/scratch-shared/pkarageorgis1/robometer_frames_splits/pairs_index_test_v3.jsonl"
+        "++data.icl_min_coverage=0.0"
+        "++training.per_device_eval_batch_size=4"
+    )
+else
+    ICL_OVERRIDES=(
+        "++data.icl_prob=0.0"
+        "++data.icl_min_coverage=0.0"
+    )
+fi
+
+COMMON_OVERRIDES=(
+    "++mode=evaluate"
+    "training.output_dir=$OUTPUT_DIR"
+    "++training.overwrite_output_dir=true"
+    "logging.wandb_entity=nlp-squad"
+)
+
+RESUME_OVERRIDE="++training.resume_from_checkpoint='$CKPT'"
+
+"$PYTHON" train.py "${OVERRIDES[@]}" "${TEST_OVERRIDES[@]}" "${COMMON_OVERRIDES[@]}" \
+    "$RESUME_OVERRIDE" \
+    "${ICL_OVERRIDES[@]}"
+
+echo "[$I] DONE"

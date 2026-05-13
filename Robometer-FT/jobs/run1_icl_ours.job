@@ -2,10 +2,9 @@
 #SBATCH --job-name=rbm_ft_run1
 #SBATCH --output=logs/run1_icl_ours_%j.out
 #SBATCH --error=logs/run1_icl_ours_%j.err
-#SBATCH --time=72:00:00
-#SBATCH --account=gusei17535
+#SBATCH --time=3-08:00:00
 #SBATCH --partition=gpu_h100
-#SBATCH --nodes=1
+#SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-node=4
 #SBATCH --cpus-per-task=16
@@ -32,9 +31,16 @@ HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/$USER/robometer_fra
 source /etc/profile.d/lmod.sh 2>/dev/null || true
 module load 2025 Anaconda3/2025.06-1
 
-# Env interpreter — overrideable via ENV_PREFIX so the same job works on
-# both your local conda env and Leonardo's conda-packed copy.
-ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_gpu}"
+# Env interpreter — hardcoded to /scratch-shared/$USER/envs/robometer_gpu_fa2.
+# Fails loudly if missing, so Leonardo doesn't silently fall back to a
+# slower env (e.g., FA2 vs SDPA) without noticing the wall-time hit.
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/robometer_gpu_fa2}"
+if [[ ! -x "$ENV_PREFIX/bin/python" ]]; then
+    echo "ERROR: ENV_PREFIX env not found at $ENV_PREFIX" >&2
+    echo "  expected python at: $ENV_PREFIX/bin/python" >&2
+    echo "  did you run 'sbatch jobs/untar_robometer_gpu_fa2.job' first?" >&2
+    exit 1
+fi
 PYTHON="$ENV_PREFIX/bin/python"
 ACCELERATE="$ENV_PREFIX/bin/accelerate"
 if [[ ! -x "$PYTHON" ]] || [[ ! -x "$ACCELERATE" ]]; then

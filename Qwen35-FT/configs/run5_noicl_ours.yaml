@@ -10,7 +10,7 @@ loss.progress_discrete_bins: 10
 loss.asymmetric_lambda: 0.3
 
 # KL anchor.
-loss.failure_kl_weight: 0.1
+loss.failure_kl_weight: 0.0
 loss.failure_kl_buffer_size: 10
 loss.failure_kl_apply_when_buffer_below_size: true
 loss.failure_kl_apply_every_n_success: 1
@@ -24,9 +24,13 @@ model.train_preference_head: false
 
 # Sampler.
 data.sample_type_ratio: [0,1,0]
-data.stratified_batch_balance: true
+data.stratified_batch_balance: false
+data.failure_oversample_factor: 2.61    # → 30% failure batch-fraction (natural 14.1%)
 data.warmup_steps: 0
 data.failure_label_smoothing: linear
+
+# Keep the ~13.6k orphan-task failures (tasks with no successful demo).
+data.keep_orphan_task_failures: true
 
 # ICL OFF.
 data.use_icl: false

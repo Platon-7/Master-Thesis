@@ -1,0 +1,58 @@
+#!/bin/bash
+#SBATCH --job-name=robometer_smoke
+#SBATCH --output=logs/robometer_smoke_%j.out
+#SBATCH --error=logs/robometer_smoke_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+# Smoke-test the Robometer-4B integration in env/robometer_utils.py:
+#   1. Load robometer/Robometer-4B from HF
+#   2. Run a single forward pass on 5 random 224x224 RGB frames
+#   3. Assert progress_reward, success_prob both in [0, 1]
+#
+# Uses the existing robometer_gpu conda env (already has the robometer package's
+# heavy deps installed) — does NOT depend on Chris's demo2reward env, since the
+# RobometerScorer only imports robometer.* + torch + PIL + numpy.
+
+set -uo pipefail
+
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+[[ -x "$PYTHON" ]] || { echo "ERROR: $PYTHON missing" >&2; exit 1; }
+
+export PYTHONPATH="$HERE:$ROBOMETER_DIR${PYTHONPATH:+:$PYTHONPATH}"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+export WANDB_MODE=disabled
+
+echo "==================== smoke launch summary ===================="
+echo "HERE          : $HERE"
+echo "ROBOMETER_DIR : $ROBOMETER_DIR"
+echo "PYTHONPATH    : $PYTHONPATH"
+echo "PYTHON        : $PYTHON"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "==============================================================="
+
+"$PYTHON" tools/robometer_smoke.py
+RC=$?
+
+echo
+echo "==================== smoke exit summary ===================="
+echo "smoke return code: $RC"
+if [[ $RC -eq 0 ]]; then
+    echo "SMOKE PASSED"
+else
+    echo "SMOKE FAILED (rc=$RC)"
+fi
+exit $RC

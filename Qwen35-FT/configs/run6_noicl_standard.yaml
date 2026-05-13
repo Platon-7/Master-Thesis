@@ -30,6 +30,9 @@ data.stratified_batch_balance: false
 data.warmup_steps: 0
 data.failure_label_smoothing: linear
 
+# Keep the ~13.6k orphan-task failures (tasks with no successful demo).
+data.keep_orphan_task_failures: true
+
 # ICL off.
 data.use_icl: false
 data.icl_prob: 0.0

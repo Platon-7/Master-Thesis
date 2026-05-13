@@ -1,0 +1,84 @@
+#!/bin/bash
+#SBATCH --job-name=untar_fa2
+#SBATCH --output=logs/untar_fa2_%j.out
+#SBATCH --error=logs/untar_fa2_%j.err
+#SBATCH --time=06:00:00
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#
+# Extract the conda-packed robometer_gpu_fa2 env to /scratch-shared/$USER/envs/.
+# Uses pigz for parallel decompression.
+#
+# Why scratch, not /projects/prjs1958/envs/: the project inode quota is shared
+# across all prjs1958 users and was being hit during extraction. Scratch is
+# per-user and avoids that bottleneck. Conda envs are path-independent until
+# conda-unpack runs — once unpacked here, they work fine from this path.
+#
+# Usage:
+#   cd /projects/prjs1958/full_ft_run_leonardo/Master-Thesis/Robometer-LoRA
+#   sbatch jobs/untar_robometer_gpu_fa2.job
+#
+# Idempotent: skips if env already exists. Pass FORCE=1 to wipe and re-extract.
+
+set -euo pipefail
+
+TAR_DIR=/projects/prjs1958/envs              # tarball source (read-only)
+OUT_DIR="/scratch-shared/$USER/envs"         # extract destination (per-user scratch)
+ENV_NAME=robometer_gpu_fa2
+TAR="$TAR_DIR/$ENV_NAME.tar.gz"
+OUT="$OUT_DIR/$ENV_NAME"
+
+if [[ ! -f "$TAR" ]]; then
+    echo "ERROR: tar.gz not found at $TAR" >&2
+    exit 1
+fi
+
+if [[ -d "$OUT/bin" ]]; then
+    if [[ "${FORCE:-0}" == "1" ]]; then
+        echo "FORCE=1 set, removing existing $OUT"
+        rm -rf "$OUT"
+    else
+        echo "Env $OUT already extracted (bin/ exists)."
+        echo "Pass FORCE=1 to wipe and re-extract:"
+        echo "  sbatch --export=ALL,FORCE=1 jobs/untar_robometer_gpu_fa2.job"
+        exit 0
+    fi
+fi
+
+echo "============================================================"
+echo "Extracting $TAR"
+echo "         → $OUT"
+echo "  date: $(date)"
+echo "  using pigz -p 8 for parallel decompression"
+echo "============================================================"
+
+mkdir -p "$OUT_DIR"
+mkdir -p "$OUT"
+tar --use-compress-program="pigz -d -p 8" -xf "$TAR" -C "$OUT"
+
+echo ""
+echo "[$(date)] tar finished. Running conda-unpack to fix shebangs/paths..."
+"$OUT/bin/conda-unpack"
+
+echo ""
+echo "============================================================"
+echo "DONE at $(date)"
+echo "============================================================"
+echo ""
+echo "=== verify ==="
+"$OUT/bin/python" -W ignore -c "
+import torch, sys
+print('python:', sys.version.split()[0])
+print('torch:', torch.__version__)
+try:
+    import flash_attn
+    print('flash_attn:', flash_attn.__version__)
+except Exception as e:
+    print('flash_attn: NOT AVAILABLE', type(e).__name__)
+import transformers
+print('transformers:', transformers.__version__)
+"
+echo ""
+echo "Env ready. Use with:"
+echo "  sbatch --export=ALL,ENV_PREFIX=$OUT,... jobs/run1_icl_ours.job"

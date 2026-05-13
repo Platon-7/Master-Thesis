@@ -261,6 +261,31 @@ class DataConfig:
             "as a regularizer against the over-clean monotone t/T signal. Clipped to [0, 1]."
         },
     )
+    failure_oversample_factor: float = field(
+        default=1.0,
+        metadata={
+            "help": (
+                "Multiplicative weight on failure samples for a WeightedRandomSampler. "
+                "1.0 = natural ratio (no oversampling). >1.0 tilts the draw toward failures. "
+                "Active only when data.stratified_batch_balance is False AND value > 1.0; "
+                "otherwise ignored. Produces mixed (not pure-class) batches."
+            ),
+        },
+    )
+    keep_orphan_task_failures: bool = field(
+        default=False,
+        metadata={
+            "help": (
+                "If True, bypass _filter_task_based_criteria so trajectories from tasks that have "
+                "zero `optimal`/`successful` demos are kept in the training pool. Default False "
+                "preserves the upstream recipe assumption that every task has a positive anchor. "
+                "Safe to enable when sample_type_ratio=[0,1,0], stratified_batch_balance=False, "
+                "failure_kl_weight=0, and preference head is off — the progress sampler only "
+                "operates on each trajectory's own frame_labels and any cross-task lookups iterate "
+                "optimal_by_task.keys() (so orphan tasks are naturally skipped as candidates)."
+            )
+        },
+    )
     traj_same_source_prob: float = field(
         default=0.5,
         metadata={

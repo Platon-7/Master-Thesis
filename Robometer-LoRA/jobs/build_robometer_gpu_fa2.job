@@ -1,0 +1,134 @@
+#!/bin/bash
+#SBATCH --job-name=build_rbm_fa2
+#SBATCH --output=logs/build_rbm_fa2_%j.out
+#SBATCH --error=logs/build_rbm_fa2_%j.err
+#SBATCH --time=01:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+#
+# Build a fresh conda env: robometer_gpu_fa2
+#   = exact pip-freeze of the working robometer_gpu env
+#   + flash_attn compiled against this env's torch
+#
+# Why a new env: don't risk breaking the existing robometer_gpu that's running
+# the LoRA bake-off. New env can be selected per-run with ENV_PREFIX=... at sbatch.
+#
+# Why staging (CPU-only) and not a GPU node: flash_attn needs nvcc (CUDA
+# compiler) but NOT a running GPU. We load `module load CUDA/12.8.0` to get
+# nvcc, then set TORCH_CUDA_ARCH_LIST=9.0 to target H100 compute capability.
+# No GPU is consumed at build time. ~30 min compile.
+#
+# After this job finishes, verify with:
+#   /home/$USER/.conda/envs/robometer_gpu_fa2/bin/python -c "import flash_attn; print(flash_attn.__version__)"
+
+set -euo pipefail
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+module load 2025 CUDA/12.8.0   # nvcc + headers for the flash_attn build below
+# Target the GPU arch we'll run on (H100 = sm_90 = compute capability 9.0).
+# Without this, flash_attn's setup.py runs `nvidia-smi` to detect arch and would
+# fail on a CPU-only staging node.
+export TORCH_CUDA_ARCH_LIST="9.0"
+
+NEW_ENV_NAME=robometer_gpu_fa2
+NEW_ENV_PATH=$HOME/.conda/envs/$NEW_ENV_NAME
+REQUIREMENTS=$SLURM_SUBMIT_DIR/requirements-robometer_gpu.txt
+
+if [[ ! -f "$REQUIREMENTS" ]]; then
+    echo "ERROR: requirements file not found at $REQUIREMENTS" >&2
+    echo "  expected: Robometer-LoRA/requirements-robometer_gpu.txt" >&2
+    exit 1
+fi
+
+# Refuse to clobber an existing env unless explicitly forced.
+if [[ -d "$NEW_ENV_PATH" ]] && [[ "${FORCE:-0}" != "1" ]]; then
+    echo "ERROR: $NEW_ENV_PATH already exists. Pass FORCE=1 to wipe and rebuild." >&2
+    exit 2
+fi
+if [[ "${FORCE:-0}" == "1" ]] && [[ -d "$NEW_ENV_PATH" ]]; then
+    echo "FORCE=1 set; removing existing $NEW_ENV_PATH"
+    rm -rf "$NEW_ENV_PATH"
+fi
+
+echo "============================================================"
+echo "Building $NEW_ENV_NAME"
+echo "  on:   $(hostname)"
+echo "  date: $(date)"
+echo "  python 3.10, torch 2.8.0+cu128, transformers 4.57.2"
+echo "  + flash_attn compiled against the env's torch"
+echo "============================================================"
+
+# ---- Step 1: create env with python 3.10 -----------------------------------
+echo ""
+echo "[1/4] creating empty env with python=3.10"
+conda create -n $NEW_ENV_NAME -c conda-forge --override-channels python=3.10 -y
+PY=$NEW_ENV_PATH/bin/python
+PIP=$NEW_ENV_PATH/bin/pip
+
+# ---- Step 2: install CUDA 12.8 torch FIRST so pip doesn't pull a different cuda
+echo ""
+echo "[2/4] installing CUDA 12.8 torch (must come before requirements.txt)"
+"$PIP" install --index-url https://download.pytorch.org/whl/cu128 \
+    torch==2.8.0 torchvision==0.23.0
+
+# Verify torch sees CUDA right after install
+"$PY" -c "import torch; print('  torch:', torch.__version__, 'cuda available:', torch.cuda.is_available())"
+
+# ---- Step 3: install the rest from the pip-freeze --------------------------
+echo ""
+echo "[3/4] installing pip-frozen deps (skip lines that pip-installs torch — already done)"
+# Filter out torch/torchvision lines so we don't reinstall (and risk pulling the
+# wrong cuda build). The pip-freeze does have them pinned with +cu128 suffix
+# already, but pip's resolver can be picky.
+"$PIP" install -r "$REQUIREMENTS"
+
+# ---- Step 4: build flash_attn against THIS env's torch ---------------------
+echo ""
+echo "[4/4] building flash_attn FROM SOURCE (~20-30 min)"
+# --no-binary :all: forces pip to compile from source (don't pull cached wheel).
+#   Previous build failed because pip pulled flash_attn 2.8.3 wheel compiled against
+#   a different torch — ImportError on undefined symbol c10::cuda::SetDevice(signed char)
+# --no-build-isolation: build against THIS env's torch, not a fresh isolated env.
+# MAX_JOBS=4: limit parallel compile workers (default would saturate cores).
+# --no-cache-dir: don't pollute / re-use the pip wheel cache for this install.
+MAX_JOBS=4 "$PIP" install \
+    --no-binary :all: \
+    --no-build-isolation \
+    --no-cache-dir \
+    flash-attn
+
+# ---- Verify ----------------------------------------------------------------
+echo ""
+echo "============================================================"
+echo "Verifying $NEW_ENV_NAME"
+echo "============================================================"
+"$PY" -W ignore -c "
+import sys
+print('python:', sys.version.split()[0])
+print()
+for mod in ['torch', 'transformers', 'datasets', 'accelerate', 'peft', 'safetensors',
+            'numpy', 'sentence_transformers', 'hydra', 'omegaconf', 'einops',
+            'xformers', 'flash_attn', 'bitsandbytes', 'torchvision', 'decord',
+            'qwen_vl_utils', 'unsloth']:
+    try:
+        m = __import__(mod)
+        v = getattr(m, '__version__', '?')
+        print(f'  {mod}: {v}')
+    except Exception as e:
+        print(f'  {mod}: NOT INSTALLED ({type(e).__name__})')
+print()
+import torch
+print(f'  torch.version.cuda: {torch.version.cuda}')
+print('  (no torch.cuda.is_available() check — no GPU on staging node; will verify on first training job)')
+"
+
+echo ""
+echo "============================================================"
+echo "DONE — env at $NEW_ENV_PATH"
+echo ""
+echo "To use this env in a Robometer-FT job:"
+echo "  sbatch --export=ALL,ENV_PREFIX=$NEW_ENV_PATH,... jobs/run1_icl_ours.job"
+echo "============================================================"

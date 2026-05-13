@@ -1,0 +1,102 @@
+#!/bin/bash
+#SBATCH --job-name=d2r_envbuild
+#SBATCH --output=logs/build_demo2reward_%j.out
+#SBATCH --error=logs/build_demo2reward_%j.err
+#SBATCH --time=01:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=60G
+
+# One-shot env build for Chris's vlm_ibrl harness:
+#   1. Create conda env `demo2reward` (python 3.10), if missing or wrong Python.
+#   2. Run install.sh end-to-end:
+#       - torch 2.4 + cu121
+#       - transformers from main   (now requires Python >= 3.10, hence 3.10 here
+#                                   even though Chris's README says 3.9)
+#       - flash-attn 2.7.3         (the long pole, ~30-60 min compile)
+#       - requirements.txt         (metaworld@v2-pin, robosuite@pin, mujoco-py, …)
+#       - make -C common_utils     (C++ pybind11 replay buffer)
+#
+# Idempotent: re-running on a correctly-built env will hit "Requirement already
+# satisfied" for most pip steps. If the env has the wrong Python version it is
+# removed and recreated.
+#
+# Runs on gpu_a100 (1 full A100): gives real CUDA visibility for the flash-attn
+# build at lower cost than gpu_h100.
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+PY_VERSION="3.10"
+MUJOCO_PATH="${MUJOCO_PATH:-$HOME/.mujoco/mujoco210}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+module load 2023 CUDA/12.1.1
+
+# Don't let ~/.local/lib/pythonX.Y/site-packages bleed into pip resolution.
+export PYTHONNOUSERSITE=1
+
+# Surface nvcc + CUDA headers + arch list for flash-attn build.
+export CUDA_HOME="${CUDA_HOME:-$EBROOTCUDA}"
+export PATH="$CUDA_HOME/bin:$PATH"
+export LD_LIBRARY_PATH="$CUDA_HOME/lib64:${LD_LIBRARY_PATH:-}"
+# H100 = sm_90, A100 = sm_80. Build both so the env runs on either at inference.
+export TORCH_CUDA_ARCH_LIST="8.0;9.0"
+
+# MuJoCo paths so mujoco-py compiles against the 2.1 binaries.
+export MUJOCO_PY_MUJOCO_PATH="$MUJOCO_PATH"
+export LD_LIBRARY_PATH="$MUJOCO_PATH/bin:$LD_LIBRARY_PATH"
+
+echo "==================== build summary ===================="
+echo "HERE          : $HERE"
+echo "ENV_NAME      : $ENV_NAME (python=$PY_VERSION)"
+echo "MUJOCO_PATH   : $MUJOCO_PATH"
+echo "CUDA_HOME     : $CUDA_HOME"
+echo "ARCH_LIST     : $TORCH_CUDA_ARCH_LIST"
+nvcc --version 2>/dev/null | tail -2 || echo "nvcc: not found"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "========================================================"
+
+source "$(conda info --base)/etc/profile.d/conda.sh"
+
+# Step 0: ensure env exists with correct Python version.
+ENV_DIR="$HOME/.conda/envs/$ENV_NAME"
+NEED_CREATE=1
+if [ -d "$ENV_DIR" ]; then
+    EXISTING_PY=$("$ENV_DIR/bin/python" -c "import sys; print('%d.%d' % sys.version_info[:2])" 2>/dev/null || echo "missing")
+    if [ "$EXISTING_PY" = "$PY_VERSION" ]; then
+        echo "[build] reusing existing env $ENV_NAME (python=$EXISTING_PY)"
+        NEED_CREATE=0
+    else
+        echo "[build] env $ENV_NAME exists but python=$EXISTING_PY != $PY_VERSION; removing"
+        conda env remove -n "$ENV_NAME" -y
+    fi
+fi
+if [ "$NEED_CREATE" -eq 1 ]; then
+    echo "[build] creating conda env: $ENV_NAME (python=$PY_VERSION)"
+    conda create -n "$ENV_NAME" python="$PY_VERSION" -y
+fi
+conda activate "$ENV_NAME"
+echo "[build] active env: $CONDA_PREFIX"
+which python pip
+
+echo
+echo "==================== install.sh ===================="
+bash install.sh
+RC=$?
+
+echo
+echo "==================== build exit summary ===================="
+echo "install.sh return code: $RC"
+if [[ $RC -eq 0 ]]; then
+    echo "ENV BUILD PASSED — env: $ENV_NAME"
+else
+    echo "ENV BUILD FAILED — env: $ENV_NAME (rc=$RC)"
+fi
+exit $RC

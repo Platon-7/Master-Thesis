@@ -18,7 +18,7 @@ loss.progress_discrete_bins: 10
 loss.asymmetric_lambda: 0.3
 
 # KL anchor.
-loss.failure_kl_weight: 0.1
+loss.failure_kl_weight: 0.0
 loss.failure_kl_buffer_size: 10
 loss.failure_kl_apply_when_buffer_below_size: true
 loss.failure_kl_apply_every_n_success: 1
@@ -32,10 +32,20 @@ model.train_preference_head: false
 
 # Sampler.
 data.sample_type_ratio: [0,1,0]
-data.stratified_batch_balance: true
+data.stratified_batch_balance: false
+data.failure_oversample_factor: 2.61    # → 30% failure batch-fraction (natural 14.1%)
 data.warmup_steps: 0
 data.failure_label_smoothing: linear
 
+# Keep the 13,610 orphan-task failures (mostly roboarena/failsafe). Phase 1 was
+# trained with the filter active; Phase 2 picks this up via this yaml.
+data.keep_orphan_task_failures: true
+
 training.learning_rate: 2.0e-5
 
-training.exp_name: qwen35_ft_run4_icl_ours
+# Phase-1 step count: 6500 pretrain steps. Phase 2 will load this checkpoint and
+# train for an additional 5000 steps at a lower LR (separate sbatch invocation
+# with ++training.load_from_checkpoint=... ++training.max_steps=5000 ++training.learning_rate=1e-5).
+training.max_steps: 6500
+
+training.exp_name: qwen35_ft_run4_icl_ours_phase1

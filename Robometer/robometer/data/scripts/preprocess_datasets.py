@@ -182,8 +182,13 @@ class DatasetPreprocessor:
             cache_key = f"{dataset_path}/{subset}"
             individual_cache_dir = os.path.join(self.config.cache_dir, cache_key.replace("/", "_").replace(":", "_"))
 
-            # Check if already processed
-            if os.path.exists(individual_cache_dir) and not self.config.force_reprocess:
+            # Use the final arrow file as the "cache complete" marker, not the
+            # cache directory itself: a partial run leaves frames/*.npz behind
+            # but no processed_dataset/, and we want such a state to resume
+            # (via the existence check in process_one) rather than be treated
+            # as either a valid cache or grounds for a 130GB wipe.
+            processed_marker = os.path.join(individual_cache_dir, "processed_dataset")
+            if os.path.exists(processed_marker) and not self.config.force_reprocess:
                 rank_0_print(f"    ✅ Cache already exists at {individual_cache_dir}, loading...")
                 self._load_individual_cache(individual_cache_dir, cache_key)
                 continue
@@ -604,6 +609,20 @@ class DatasetPreprocessor:
             if frames_src is None:
                 return idx, None, None, None, None, None
 
+            frames_filename = f"trajectory_{example['id']}.npz"
+            frames_filepath = os.path.join(frames_dir, frames_filename)
+
+            # Resume support: if a prior run already wrote this trajectory's .npz,
+            # short-circuit. Reads only the saved 'shape' header (cheap zip seek);
+            # falls through on any error so files truncated by SIGTERM get redone.
+            if os.path.exists(frames_filepath):
+                try:
+                    with np.load(frames_filepath) as data:
+                        shape = tuple(int(x) for x in data["shape"])
+                    return idx, frames_filepath, shape, None, None, None
+                except Exception:
+                    pass
+
             # If the source is a path string, open with a lightweight reader
             try:
                 # Try decord first (fastest for video decoding)
@@ -628,9 +647,6 @@ class DatasetPreprocessor:
                 rank_0_print(f"Error in _process_one: {e}")
                 return idx, None, None, None, None, None
 
-            # Save frames as npz file
-            frames_filename = f"trajectory_{example['id']}.npz"
-            frames_filepath = os.path.join(frames_dir, frames_filename)
             np.savez_compressed(
                 frames_filepath,
                 frames=frames_array,
