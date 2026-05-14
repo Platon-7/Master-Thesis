@@ -91,6 +91,20 @@ echo "==================== install.sh ===================="
 bash install.sh
 RC=$?
 
+# mujoco-py compiles its EGL shim at first import and needs GLEW headers,
+# which Chris's install.sh assumes are present system-wide. On a clean
+# cluster image they are not, so pull them from conda-forge. Deactivate
+# first so the conda CLI runs against base Python (the env's Python has
+# no `conda` module). `-n $ENV_NAME` installs INTO the env.
+if [[ $RC -eq 0 ]]; then
+    echo
+    echo "==================== conda install GLEW + Mesa ===================="
+    conda deactivate
+    conda install -n "$ENV_NAME" -c conda-forge -y glew mesalib
+    RC=$?
+    conda activate "$ENV_NAME"
+fi
+
 echo
 echo "==================== build exit summary ===================="
 echo "install.sh return code: $RC"

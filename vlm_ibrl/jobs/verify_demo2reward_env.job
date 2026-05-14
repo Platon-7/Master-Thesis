@@ -1,0 +1,57 @@
+#!/bin/bash
+#SBATCH --job-name=d2r_envverify
+#SBATCH --output=logs/verify_demo2reward_%j.out
+#SBATCH --error=logs/verify_demo2reward_%j.err
+#SBATCH --time=00:15:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+
+# Verify the demo2reward env imports every heavy dep cleanly. One short
+# GPU-enabled run so torch.cuda.is_available() is meaningful.
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+MUJOCO_PATH="${MUJOCO_PATH:-$HOME/.mujoco/mujoco210}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+export PYTHONNOUSERSITE=1
+
+# set_env.sh activates conda + sets PYTHONPATH + MuJoCo + bundled NVIDIA libs.
+# IBRL_CONDA_ENV / MUJOCO_PATH already exported above so set_env.sh honors them.
+export IBRL_CONDA_ENV="$ENV_NAME"
+source "$(conda info --base)/etc/profile.d/conda.sh"
+
+# Ensure GLEW + Mesa headers are present for mujoco_py's lazy EGL build.
+# Must happen BEFORE activating demo2reward — once active, `python` is the
+# env's Python which has no `conda` module, so the conda CLI script can't
+# import itself. `-n $ENV_NAME` installs INTO the env from base. Idempotent.
+conda install -n "$ENV_NAME" -c conda-forge -y glew mesalib 2>&1 | tail -5
+
+source set_env.sh
+
+echo "==================== verify summary ===================="
+echo "ENV_NAME : $ENV_NAME"
+echo "python   : $(python -V)"
+echo "exec     : $(which python)"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "========================================================"
+
+python tools/env_verify.py
+RC=$?
+
+echo
+if [[ $RC -eq 0 ]]; then
+    echo "VERIFY PASSED"
+else
+    echo "VERIFY FAILED (rc=$RC)"
+fi
+exit $RC
