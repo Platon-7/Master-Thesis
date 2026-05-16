@@ -88,7 +88,22 @@ def train(cfg: ExperimentConfig):
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
-    checkpoint_to_load = cfg.training.load_from_checkpoint or cfg.training.resume_from_checkpoint
+    # Disambiguate two distinct semantics that previously shared one Hydra knob:
+    #   - load_from_checkpoint   = source of MODEL WEIGHTS for setup_model_and_processor.
+    #                              Must be an HF-format model (Hub repo or local dir with
+    #                              model.safetensors / pytorch_model.bin), because the
+    #                              loading path is from_pretrained().
+    #   - resume_from_checkpoint = full-state RESUME target for HF Trainer (handled
+    #                              downstream via trainer.train(resume_from_checkpoint=...)).
+    #                              Supports FSDP SHARDED_STATE_DICT (pytorch_model_fsdp_0/
+    #                              with distcp shards) + optimizer + scheduler + RNG.
+    # The OLD code was `... or cfg.training.resume_from_checkpoint`, which routed sharded
+    # FSDP checkpoint paths through from_pretrained() and crashed with OSError ("no
+    # model.safetensors or pytorch_model.bin") because distcp shards aren't a flat HF
+    # model. Drop the fall-through: model load comes from load_from_checkpoint (or
+    # cfg.model.base_model_id when unset, via setup_model_and_processor's internal default);
+    # resume_from_checkpoint stays purely as the HF Trainer resume target.
+    checkpoint_to_load = cfg.training.load_from_checkpoint
     if checkpoint_to_load:
         rank_0_info(f"Loading model from checkpoint: {checkpoint_to_load}")
     update_cfg_with_pretrained_ckpt(cfg, checkpoint_to_load)

@@ -201,11 +201,18 @@ def copy_aux_files(base_model_id: str, ckpt_dir: Path, out_dir: Path) -> None:
         processor.save_pretrained(str(out_dir))
         print(f"  saved processor with 6 RBM special tokens added (vocab size {len(tok)})")
 
-    # Save the config with `architectures: ['RBM']` so AutoConfig knows to use the
-    # vendored RBM class. The RBM head metadata (which heads are present, head dims)
-    # should already be in the original training config dump — copy it if it exists.
+    # Keep the BASE model's architectures field (e.g. 'Qwen3_5ForConditionalGeneration').
+    # The production loader calls `Qwen3_5ForConditionalGeneration.from_pretrained(out_dir)`
+    # then wraps the result in RBM and loads head weights via
+    # `_load_checkpoint_weights_from_safetensors`. transformers 5.7's
+    # `_finalize_model_loading` uses the architectures field to resolve the class
+    # and access internal attributes (e.g. all_tied_weights_keys). Setting it to
+    # 'RBM' caused that path to crash with:
+    #   AttributeError: 'RBM' object has no attribute 'all_tied_weights_keys'
+    # The RBM-specific head metadata (which heads are present, head dims) travels
+    # via training_config.yaml (copied below); RBM reads it at construction time.
     cfg_dict = base_config.to_dict()
-    cfg_dict["architectures"] = ["RBM"]
+    # NOTE: architectures stays as base_config emitted it; we no longer overwrite to 'RBM'.
 
     # If the trainer saved a config.yaml alongside the shards, include head info.
     training_config_yaml = ckpt_dir.parent / "config.yaml"
@@ -214,7 +221,7 @@ def copy_aux_files(base_model_id: str, ckpt_dir: Path, out_dir: Path) -> None:
         print(f"  copied training config.yaml for head architecture reference")
 
     (out_dir / "config.json").write_text(json.dumps(cfg_dict, indent=2))
-    print(f"  wrote config.json  (architectures=['RBM'])")
+    print(f"  wrote config.json  (architectures={cfg_dict.get('architectures')})")
 
 
 def main():

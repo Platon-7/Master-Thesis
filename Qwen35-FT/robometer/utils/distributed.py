@@ -4,21 +4,29 @@ from typing import Optional
 
 
 def is_rank_0():
-    """Check if current process is rank 0 (main process)."""
-    # First check environment variables (most reliable for accelerate)
-    if "LOCAL_RANK" in os.environ:
-        return int(os.environ.get("LOCAL_RANK", 0)) == 0
+    """Check if current process is the GLOBAL rank-0 (main process across all nodes).
 
-    # Fallback to torch.distributed
+    Prefer the global RANK env var over LOCAL_RANK so multi-node runs don't fire
+    rank-0-gated side effects (e.g. wandb.init) once per node.
+    """
+    # Global rank — set by torchrun / accelerate for every process.
+    if "RANK" in os.environ:
+        return int(os.environ["RANK"]) == 0
+
+    # Single-node fallback: torchrun also sets LOCAL_RANK; on one node it == RANK.
+    if "LOCAL_RANK" in os.environ:
+        return int(os.environ["LOCAL_RANK"]) == 0
+
+    # Last resort: torch.distributed.
     try:
         import torch.distributed as dist
 
         if dist.is_initialized():
             return dist.get_rank() == 0
         else:
-            return True  # If not distributed, consider it rank 0
-    except:
-        return True  # If distributed module not available, consider it rank 0
+            return True
+    except Exception:
+        return True
 
 
 def rank_0_print(*args, verbose=True, **kwargs):

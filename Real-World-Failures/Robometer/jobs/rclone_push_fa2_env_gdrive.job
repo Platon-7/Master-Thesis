@@ -1,0 +1,48 @@
+#!/bin/bash
+#SBATCH --job-name=rclone_fa2_gd
+#SBATCH --output=/home/pkarageorgis1/Master-Thesis/Real-World-Failures/Robometer/logs/rclone_push_fa2_env_gdrive_%j.out
+#SBATCH --partition=staging
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=2
+#SBATCH --time=01:00:00
+
+# Push robometer_gpu_fa2.tar.gz (~5 GB conda-pack tarball) to Google Drive
+# via rclone. Destination is the user-supplied folder URL:
+#   https://drive.google.com/drive/folders/18stxkmQ0tG6mfULJLV3MXvHWCFn6XY9A
+# resolved via --drive-root-folder-id so we don't need a prior `cd`-style path.
+#
+# Reuses the `robometer_dataset:` remote (type=drive, refreshed May 13 2026).
+
+SRC="/projects/prjs1958/envs/robometer_gpu_fa2.tar.gz"
+FOLDER_ID="18stxkmQ0tG6mfULJLV3MXvHWCFn6XY9A"
+
+echo "============================================================"
+echo "rclone push robometer_gpu_fa2.tar.gz -> Google Drive"
+echo "  Job ID:   $SLURM_JOB_ID"
+echo "  Node:     $(hostname)"
+echo "  Source:   $SRC ($(du -h "$SRC" | cut -f1))"
+echo "  Dest:     robometer_dataset:  (folder id: $FOLDER_ID)"
+echo "  Date:     $(date)"
+echo "============================================================"
+
+rclone --version | head -1
+
+# Drive can handle higher concurrency than OneDrive — no manual throttle needed
+# for a single 5 GB file. Standard retries cover transient 429s.
+rclone copy "$SRC" "robometer_dataset:" \
+    --drive-root-folder-id "$FOLDER_ID" \
+    --transfers 4 \
+    --checkers 8 \
+    --drive-chunk-size 128M \
+    --stats 30s \
+    --stats-one-line \
+    --retries 5 \
+    --low-level-retries 10 \
+    --log-level INFO
+
+RC=$?
+echo "============================================================"
+echo "rclone exit code: $RC"
+echo "Done at: $(date)"
+echo "============================================================"
+exit $RC

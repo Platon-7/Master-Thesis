@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=qwen35_ft_run4
+#SBATCH --job-name=qwen35_ft_run4_p2
 #SBATCH --account=gusei17535
-#SBATCH --output=logs/run4_icl_ours_%j.out
-#SBATCH --error=logs/run4_icl_ours_%j.err
-#SBATCH --time=30:00:00
+#SBATCH --output=logs/run4_icl_ours_phase2_%j.out
+#SBATCH --error=logs/run4_icl_ours_phase2_%j.err
+#SBATCH --time=24:00:00
 #SBATCH --partition=gpu_h100
 #SBATCH --nodes=2
 #SBATCH --gpus-per-node=4
@@ -11,16 +11,22 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem=480G
 
-# Full fine-tune of vanilla Qwen3.5-4B with Loss 2 (asymmetric C51 + BCE).
-# Multi-GPU FSDP via accelerate. Defaults to single node 4×H100; pass --nodes=N at
-# submit time to scale up (e.g. --nodes=2 for the 8-H100 production topology):
-#     sbatch --nodes=2 jobs/run4_icl_ours.job
+# Phase 2 of run4 — fine-tune from Phase 1's consolidated checkpoint at lower LR.
+# Mirrors run4_icl_ours.job 1:1 except for:
+#   * uses configs/run4_icl_ours_phase2.yaml (LR=1e-5, max_steps=5000)
+#   * reads LOAD_FROM_CKPT env to set ++training.load_from_checkpoint=<hf_dir>
 #
-# Recipe overrides (set at launch via env vars or `EXTRA="..."`):
-#   * MAX_STEPS=N                              → training.max_steps
-#   * EXTRA="++data.use_icl=false ..."         → arbitrary Hydra overrides (ICL toggle, ICL dropout, lr, etc.)
-#   * WANDB_PROJECT=...                        → WandB project (default Qwen35_FT)
-#   * WEIGHTS_DIR=...                          → checkpoint output root
+# REQUIRED env (pass via sbatch --export):
+#   LOAD_FROM_CKPT=/projects/prjs1958/Qwen35_FT_phase1_consolidated/run4_step6500
+#                  (HF-format dir produced by jobs/consolidate_phase1.job)
+#
+# Optional:
+#   MAX_STEPS=N         → overrides the yaml's 5000
+#   EXTRA="..."         → additional Hydra overrides
+#   WEIGHTS_DIR=...     → checkpoint output root
+#
+# Usage:
+#   sbatch --export=ALL,LOAD_FROM_CKPT=/path/to/phase1_hf jobs/run4_icl_ours_phase2.job
 
 set -euo pipefail
 cd "$SLURM_SUBMIT_DIR"
@@ -28,30 +34,27 @@ HERE="$(pwd)"
 QWEN35_DIR="${QWEN35_DIR:-$HERE}"
 HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/$USER/robometer_frames_hf_full_step2}"
 
+if [[ -z "${LOAD_FROM_CKPT:-}" ]]; then
+    echo "ERROR: must pass LOAD_FROM_CKPT via --export=ALL,LOAD_FROM_CKPT=/path/to/phase1_hf" >&2
+    echo "  Phase 2 fine-tunes from Phase 1's consolidated HF checkpoint." >&2
+    echo "  Produce one first: sbatch --export=ALL,CKPT_DIR=...,OUT_DIR=... jobs/consolidate_phase1.job" >&2
+    exit 1
+fi
+if [[ ! -d "$LOAD_FROM_CKPT" ]]; then
+    echo "ERROR: LOAD_FROM_CKPT directory does not exist: $LOAD_FROM_CKPT" >&2
+    exit 1
+fi
+
 source /etc/profile.d/lmod.sh 2>/dev/null || true
 module load 2025 Anaconda3/2025.06-1
 
-# Env interpreter — hardcoded to /scratch-shared/$USER/envs/robometer_qwen35_gpu.
-# Fails loudly if missing, so Leonardo doesn't silently fall back to a
-# slower env (e.g., FA2 vs SDPA) without noticing the wall-time hit.
 ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/robometer_qwen35_gpu}"
 if [[ ! -x "$ENV_PREFIX/bin/python" ]]; then
     echo "ERROR: ENV_PREFIX env not found at $ENV_PREFIX" >&2
-    echo "  expected python at: $ENV_PREFIX/bin/python" >&2
-    echo "  did you run 'sbatch jobs/untar_robometer_qwen35_gpu.job' first?" >&2
     exit 1
 fi
 PYTHON="$ENV_PREFIX/bin/python"
 ACCELERATE="$ENV_PREFIX/bin/accelerate"
-if [[ ! -x "$PYTHON" ]] || [[ ! -x "$ACCELERATE" ]]; then
-    echo "ERROR: env interpreter / accelerate not executable at $ENV_PREFIX/bin/" >&2
-    echo "  expected: $PYTHON   $ACCELERATE" >&2
-    echo "  build env first: see Qwen35-FT/README.md" >&2
-    exit 1
-fi
-# Put env's bin/ on PATH so `#!/usr/bin/env python3.10` shebangs resolve to
-# the env interpreter (matters for conda-packed envs — conda-unpack only
-# rewrites absolute-path shebangs, not /usr/bin/env-style ones).
 export PATH="$ENV_PREFIX/bin:$PATH"
 
 export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
@@ -60,24 +63,20 @@ export WANDB_PROJECT="${WANDB_PROJECT:-Qwen35_FT}"
 export WANDB_API_KEY="${WANDB_API_KEY:-}"
 export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
 
-# CRITICAL: cd into Qwen35-FT/ so the vendored robometer/ wins on import precedence
-# over Robometer/robometer/. PYTHONPATH prepended belt-and-suspenders.
 cd "$QWEN35_DIR"
 export PYTHONPATH="$QWEN35_DIR:${PYTHONPATH:-}"
 
-# Sed-flatten the YAML configs into Hydra ++key=value overrides. Inline lists [a,b,c]
-# survive; block lists (- item) would break this — see configs/train_base.yaml header.
 readarray -t OVERRIDES < <(
-    grep -hv '^[[:space:]]*#' "$HERE/configs/train_base.yaml" "$HERE/configs/run4_icl_ours.yaml" \
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_base.yaml" "$HERE/configs/run4_icl_ours_phase2.yaml" \
       | sed -e 's/[[:space:]]*#.*//' \
       | grep -v '^[[:space:]]*$' \
       | sed -e 's/: */=/' -e 's/^/++/'
 )
 
-# EXTRA env var collects all final-stage Hydra overrides. We fold MAX_STEPS into it
-# so there's a single, predictable override channel. Earlier separate $MAX_STEPS_OVERRIDE
-# slot didn't always reach Hydra (depends on SLURM --export defaults across sites).
+# EXTRA collects final-stage overrides. LOAD_FROM_CKPT routes to training.load_from_checkpoint
+# (WEIGHTS-only — fresh optimizer + LR schedule, NOT a HF Trainer resume).
 EXTRA="${EXTRA:-}"
+EXTRA="$EXTRA ++training.load_from_checkpoint=$LOAD_FROM_CKPT"
 if [[ -n "${MAX_STEPS:-}" ]]; then
     EXTRA="$EXTRA ++training.max_steps=$MAX_STEPS"
 fi
@@ -88,7 +87,6 @@ fi
 WEIGHTS_DIR="${WEIGHTS_DIR:-/projects/prjs1958/Qwen35_FT_weights}"
 mkdir -p "$WEIGHTS_DIR"
 
-# ---------------- multi-node topology ----------------
 NUM_NODES="${SLURM_NNODES:-1}"
 GPUS_PER_NODE="${GPUS_PER_NODE:-4}"
 TOTAL_PROCESSES=$(( NUM_NODES * GPUS_PER_NODE ))
@@ -100,19 +98,15 @@ HEAD_NODE_IP=$(srun --nodes=1 --ntasks=1 -w "$HEAD_NODE" hostname --ip-address |
 export NCCL_ASYNC_ERROR_HANDLING=1
 export FI_PROVIDER=efa
 export OMP_NUM_THREADS=1
-# ------------------------------------------------------
 
-echo "==================== launch summary ===================="
+echo "================== PHASE 2 launch summary =================="
+echo "LOAD_FROM_CKPT     : $LOAD_FROM_CKPT"
 echo "Nodes              : $NUM_NODES  (${NODE_LIST[*]})"
-echo "Head node          : $HEAD_NODE  ($HEAD_NODE_IP)"
-echo "GPUs per node      : $GPUS_PER_NODE"
 echo "TOTAL_PROCESSES    : $TOTAL_PROCESSES"
-echo "Rendezvous port    : $RDZV_PORT"
 echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
-echo "MAX_STEPS          : ${MAX_STEPS:-<from-yaml>}"
+echo "MAX_STEPS          : ${MAX_STEPS:-<from-yaml:5000>}"
 echo "EXTRA              : $EXTRA"
-echo "OVERRIDES count    : ${#OVERRIDES[@]}"
-echo "========================================================"
+echo "============================================================"
 
 if [[ "$NUM_NODES" -le 1 ]]; then
     "$ACCELERATE" launch \
@@ -123,7 +117,7 @@ if [[ "$NUM_NODES" -le 1 ]]; then
       --main_process_ip="$HEAD_NODE_IP" \
       --main_process_port="$RDZV_PORT" \
       train.py "${OVERRIDES[@]}" $EXTRA \
-      training.output_dir="$WEIGHTS_DIR/run4_icl_ours_${SLURM_JOB_ID:-local}"
+      training.output_dir="$WEIGHTS_DIR/run4_icl_ours_phase2_${SLURM_JOB_ID:-local}"
 else
     srun --ntasks-per-node=1 --cpu-bind=none bash -c "
         export PYTHONPATH=$QWEN35_DIR:\${PYTHONPATH:-}
@@ -136,6 +130,6 @@ else
           --main_process_ip=$HEAD_NODE_IP \\
           --main_process_port=$RDZV_PORT \\
           train.py ${OVERRIDES[*]} $EXTRA \\
-          training.output_dir=$WEIGHTS_DIR/run4_icl_ours_${SLURM_JOB_ID:-local}
+          training.output_dir=$WEIGHTS_DIR/run4_icl_ours_phase2_${SLURM_JOB_ID:-local}
     "
 fi

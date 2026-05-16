@@ -212,6 +212,7 @@ class VLMRobosuite:
         past_len=4,
         reward_at_truncation=False,
         vlm_camera="agentview",
+        robometer_beta: float = 0.0,
     ):
         assert vlm in VALID_VLMS, f"VLM {vlm} not recognized. Valid: {VALID_VLMS}"
         assert past_len > 0, "past_len must be > 0"
@@ -311,6 +312,11 @@ class VLMRobosuite:
         self.vlm_camera = vlm_camera
 
         self.reward_at_truncation = reward_at_truncation
+        # Robometer reward composition: reward = beta * progress + (1 - beta)
+        # * success_prob. 0.0 = pure success_prob. Ignored for non-Robometer.
+        self.robometer_beta = float(robometer_beta)
+        self._last_progress = 0.0
+        self._last_success_prob = 0.0
         assert len(self.rl_cameras) == 1
 
     @property
@@ -469,9 +475,16 @@ class VLMRobosuite:
     def vlm_reward(self, frames, debug=False):
         if "robometer" in self.vlm_name:
             out = self.scorer(frames, task=self.task_description)
+            self._last_progress = float(out["progress_reward"])
+            self._last_success_prob = float(out["success_prob"])
+            mixed = self.robometer_beta * self._last_progress + (1.0 - self.robometer_beta) * self._last_success_prob
             if debug:
-                print(f"Robometer: progress={out['progress_reward']:.3f} success={out['success_prob']:.3f}")
-            return out["success_prob"]
+                print(
+                    f"Robometer: progress={self._last_progress:.3f} "
+                    f"success={self._last_success_prob:.3f} "
+                    f"beta={self.robometer_beta:.2f} → reward={mixed:.3f}"
+                )
+            return mixed
 
         is_roboreward = "roboreward" in self.vlm_name
         critic_output = single_prompt_eval(

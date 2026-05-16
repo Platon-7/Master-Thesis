@@ -251,7 +251,22 @@ class DataConfig:
             "\"perform the demonstrated task\"); p=1/3 split by whitespace and drop each word "
             "independently with prob 0.1. Goal: encourage the VLM to rely on the demo trajectory "
             "rather than memorizing the exact task wording. Only applies during training (not eval) "
-            "and only when context_trajectory is populated. No-op when use_icl=False."
+            "and only when context_trajectory is populated. No-op when use_icl=False. "
+            "If icl_task_dropout_sources is non-empty, this global flag is IGNORED and the "
+            "per-source list controls activation instead."
+        },
+    )
+    icl_task_dropout_sources: List[str] = field(
+        default_factory=list,
+        metadata={
+            "help": "Per-data_source restriction for icl_task_dropout. When non-empty, the "
+            "corruption recipe (1/3 keep, 1/3 generic, 1/3 word-drop) is applied ONLY to samples "
+            "whose data_source is in this list — every other source keeps its original task text. "
+            "Use case: droid uses a strong text shortcut (95% of failure tasks also appear as "
+            "successes — see analysis); we want to ablate this for droid specifically without "
+            "disrupting metaworld/robometer/failsafe (which DO use vision discriminatively). "
+            "Set e.g. [droid] to target one source. Empty (default) → falls back to the global "
+            "icl_task_dropout flag's behavior."
         },
     )
     success_label_noise_std: float = field(
@@ -269,6 +284,46 @@ class DataConfig:
                 "1.0 = natural ratio (no oversampling). >1.0 tilts the draw toward failures. "
                 "Active only when data.stratified_batch_balance is False AND value > 1.0; "
                 "otherwise ignored. Produces mixed (not pure-class) batches."
+            ),
+        },
+    )
+    success_oversample_per_source: Dict[str, float] = field(
+        default_factory=dict,
+        metadata={
+            "help": (
+                "Per-data_source multiplier applied to SUCCESS-trajectory weights in the "
+                "WeightedRandomSampler. Useful when a particular source (e.g. metaworld, with only "
+                "1,946 successes vs 27,010 failures) is severely undersampled at default weights "
+                "and the model never sees enough successes to learn its target. The multiplier is "
+                "applied on top of the base success weight (1.0) — so a value of 13.0 makes each "
+                "metaworld-success ~13× more likely to be drawn than each non-metaworld success of "
+                "equal natural-weight. Does NOT change failure weights. "
+                "Empty dict {} = no per-source boost (default; legacy behavior). "
+                "Activates the WeightedRandomSampler path even when failure_oversample_factor==1.0, "
+                "so this knob alone is sufficient to enable mixed-weight sampling. "
+                "Default is empty dict (not None) so OmegaConf can merge `++` dict overrides into "
+                "it — merging a dict literal into a None-typed structured-config field crashes "
+                "with AttributeError in _map_merge."
+            ),
+        },
+    )
+    failure_oversample_per_source: Dict[str, float] = field(
+        default_factory=dict,
+        metadata={
+            "help": (
+                "Per-data_source multiplier applied to FAILURE-trajectory weights in the "
+                "WeightedRandomSampler — symmetric of success_oversample_per_source. Useful for "
+                "sources with severe within-source success/failure imbalance in the opposite "
+                "direction from metaworld: droid has 155k successes but only 6k failures, so the "
+                "model's gradient signal is dominated by successes and it never learns to push "
+                "failure predictions DOWN. Setting droid: 9.85 (= 155306/6038/2.61) brings "
+                "droid succ:fail to ~1:1 within droid draws (combined with the existing failure "
+                "_oversample_factor of 2.61), forcing the model to visually discriminate. "
+                "The multiplier is applied on top of the global failure_oversample_factor — so the "
+                "effective per-trajectory weight for a droid failure is "
+                "failure_oversample_factor × failure_oversample_per_source['droid']. "
+                "Empty dict {} = no per-source boost (default; legacy behavior). "
+                "Activates the WeightedRandomSampler path even when failure_oversample_factor==1.0."
             ),
         },
     )

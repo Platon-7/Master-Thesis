@@ -31,13 +31,21 @@ model.train_progress_head: true
 model.train_success_head: true
 model.train_preference_head: false
 
-# Sampler — paper-faithful: uniform sampling (natural class distribution), NO
-# per-batch 50/50 enforcement. Differs from runs 1/2 which use stratified=true.
-# Failures are still kept in the pool via the patched base.py escape hatch.
+# Sampler — "paper-faithful" here means the LOSS MATH (plain discrete + class-
+# balanced BCE, no KL anchor, no asymmetric weighting); the DATA is ours (650k
+# pool with per-frame failure labels feeding both heads). Once failures are in
+# the loss, the data-imbalance fixes from runs 1/2 (failure oversample to 30%
+# batch share; metaworld success oversample to lift coverage from <1× to ~3×
+# per success) are NECESSARY accompaniments to our data choice, not part of the
+# loss recipe. So the ablation isolates ONLY the loss-formulation delta against
+# run 2; data exposure is held equal.
 data.sample_type_ratio: [0,1,0]
 data.stratified_batch_balance: false
+data.failure_oversample_factor: 1.89    # → 30% failure batch-fraction (natural 18.5%) — matches runs 1/2
 data.warmup_steps: 0
 data.failure_label_smoothing: linear
+data.success_oversample_per_source.metaworld: 13.0    # data-exposure fix; see runs 1/2 for rationale
+data.failure_oversample_per_source.droid: 3.0      # boost droid failures (6k vs 155k succ → succ:fail within droid 91:9 → 64:36)
 
 # Keep orphan-task failures (tasks with no successful demo).
 data.keep_orphan_task_failures: true

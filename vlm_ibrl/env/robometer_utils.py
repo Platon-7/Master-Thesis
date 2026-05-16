@@ -32,10 +32,60 @@ class RobometerScorer:
     """
 
     def __init__(self, model_path: str, device: str = "cuda", max_frames: int = None):
-        from robometer.utils.save import load_model_from_hf
-        from robometer.utils.setup_utils import setup_batch_collator
+        import sys
 
-        cfg, tokenizer, processor, model = load_model_from_hf(model_path=model_path, device=device)
+        from robometer.models.rbm import RBM
+        from robometer.utils import setup_utils
+        from robometer.utils.save import load_model_from_hf
+
+        # transformers >=5.x renamed ``_tied_weights_keys`` to
+        # ``all_tied_weights_keys`` on PreTrainedModel and changed its shape
+        # from ``list[str]`` to ``dict[str, str]`` (tied_param -> source). The
+        # new code calls ``.keys()`` on it. Robometer's RBM still only defines
+        # the legacy list. We don't tie weights at inference, so an empty
+        # dict satisfies every call site without changing behavior.
+        if not hasattr(RBM, "all_tied_weights_keys"):
+            RBM.all_tied_weights_keys = {}
+
+        # Two overrides scoped to this load:
+        #
+        # 1. Robometer's released checkpoint sets ``use_unsloth=True`` in its
+        #    config.yaml. The Unsloth runtime requires torch 2.8 + cu128, which
+        #    conflicts with this env's torch 2.4 + cu121. Inference does not
+        #    actually need Unsloth: ``setup_model_and_processor`` has a non-
+        #    Unsloth branch (``_load_base_model_standard`` via Qwen3VLModel)
+        #    that we select by forcing ``cfg.model.use_unsloth = False`` before
+        #    the model is built. The ``unsloth`` module is still imported at
+        #    the top of ``setup_utils`` — satisfied here by the stub at the
+        #    vlm_ibrl repo root (see ``vlm_ibrl/unsloth.py``).
+        #
+        # 2. ``setup_model_and_processor`` probes ``import flash_attn`` and
+        #    picks ``attn_implementation='flash_attention_2'`` when it succeeds.
+        #    Chris's env has flash-attn 2.7.3, but Robometer's RBM wrapper
+        #    rejects FA2 (``RBM does not support Flash Attention 2 yet``). We
+        #    hide flash_attn from ``sys.modules`` for the duration of the load
+        #    so the probe fails and Robometer's loader falls back to ``sdpa``.
+        #    Flash-attn remains available everywhere else in the process.
+        _orig_setup = setup_utils.setup_model_and_processor
+        _SENTINEL = object()
+        _saved_fa = sys.modules.get("flash_attn", _SENTINEL)
+        sys.modules["flash_attn"] = None  # makes ``import flash_attn`` raise
+
+        def _setup_patched(model_cfg, *args, **kwargs):
+            model_cfg.use_unsloth = False
+            return _orig_setup(model_cfg, *args, **kwargs)
+
+        setup_utils.setup_model_and_processor = _setup_patched
+        try:
+            cfg, tokenizer, processor, model = load_model_from_hf(model_path=model_path, device=device)
+        finally:
+            setup_utils.setup_model_and_processor = _orig_setup
+            if _saved_fa is _SENTINEL:
+                sys.modules.pop("flash_attn", None)
+            else:
+                sys.modules["flash_attn"] = _saved_fa
+
+        from robometer.utils.setup_utils import setup_batch_collator
         if model is None:
             raise RuntimeError(f"Failed to load Robometer model from {model_path}")
         model.eval()

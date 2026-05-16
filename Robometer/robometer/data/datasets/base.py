@@ -78,8 +78,22 @@ class BaseDataset(torch.utils.data.Dataset):
         self.dataset, self._combined_indices = self._load_all_datasets()
 
         # Apply all filters simultaneously
+        # Metaworld tasks held out from training so they become held-out eval
+        # targets. Filter applies to TRAIN ONLY (gated on is_evaluation) so the
+        # eval split keeps these tasks. Uses full task descriptions as substring
+        # "keywords" — they're long unique sentences so each matches only its
+        # own task. The 4 hold-outs correspond to metaworld task IDs:
+        #   box-close-v2, stick-pull-v2, coffee-push-v2, assembly-v2
+        # No HF-dataset rebuild needed; filter fires at trainer init in ~1 sec.
         # excluded_keywords = ["rings", "flick"]
         excluded_keywords = []
+        if not is_evaluation:
+            excluded_keywords = [
+                "Grasp the cover and close the box with it.",
+                "Grasp a stick and pull a box with the stick.",
+                "Push a mug under a coffee machine.",
+                "Pick up a nut and place it onto a peg.",
+            ]
         min_frames = config.min_frames_per_trajectory
 
         # Check if we're in progress_only mode (sample_type_ratio == [0, 1, 0])

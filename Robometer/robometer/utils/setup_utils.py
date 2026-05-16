@@ -955,7 +955,9 @@ def setup_model_and_processor(
                     loading_info = {}
 
                 # Diagnostic parity with the PEFT branch (line ~232).
-                mismatched = loading_info.get("mismatched_keys") or []
+                # list() coerces set → list: transformers HEAD returns
+                # mismatched_keys as a set, which doesn't support [:5].
+                mismatched = list(loading_info.get("mismatched_keys") or [])
                 if mismatched:
                     logger.warning(
                         f"Skipping {len(mismatched)} tensor(s) with shape mismatch "
@@ -1242,6 +1244,7 @@ def setup_batch_collator(
         "shuffle_progress_frames": cfg.data.shuffle_progress_frames,
         "inference": is_eval,
         "icl_task_dropout": getattr(cfg.data, "icl_task_dropout", False),
+        "icl_task_dropout_sources": list(getattr(cfg.data, "icl_task_dropout_sources", None) or []),
     }
     # Check for unsupported Molmo2 video mode
     if "Molmo" in cfg.model.base_model_id and not cfg.data.use_multi_image:

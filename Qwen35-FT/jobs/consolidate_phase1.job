@@ -1,0 +1,75 @@
+#!/bin/bash
+#SBATCH --job-name=consolidate_phase1
+#SBATCH --output=logs/consolidate_%j.out
+#SBATCH --error=logs/consolidate_%j.err
+#SBATCH --time=00:45:00
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
+
+# Consolidate a Phase 1 FSDP SHARDED_STATE_DICT checkpoint into HF safetensors
+# format so Phase 2 fine-tuning can load it via `training.load_from_checkpoint`.
+#
+# Phase 1 writes per-rank `pytorch_model_fsdp_0/*.distcp` shards via FSDP
+# SHARDED_STATE_DICT. `from_pretrained()` can't read those — it needs a flat
+# HF model directory with model.safetensors / config.json / tokenizer files.
+# This script (scripts/consolidate_sharded.py) bridges the two formats.
+#
+# Required env vars (pass via sbatch --export):
+#   CKPT_DIR=/projects/prjs1958/Qwen35_FT_weights/run4_icl_ours_NNNN/qwen35_ft_run4_icl_ours_phase1/checkpoint-6500
+#   OUT_DIR=/projects/prjs1958/Qwen35_FT_phase1_consolidated/run4_step6500
+#
+# Optional:
+#   BASE_MODEL_ID=Qwen/Qwen3.5-4B  (default — used to copy tokenizer/processor/config)
+#
+# Usage:
+#   sbatch --export=ALL,CKPT_DIR=/path/to/checkpoint-N,OUT_DIR=/path/to/output \
+#          jobs/consolidate_phase1.job
+#
+# Runs on a CPU node, ~5-15 min. No GPUs needed.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+
+if [[ -z "${CKPT_DIR:-}" ]] || [[ -z "${OUT_DIR:-}" ]]; then
+    echo "ERROR: must pass CKPT_DIR and OUT_DIR via --export=ALL,CKPT_DIR=...,OUT_DIR=..." >&2
+    echo "  CKPT_DIR should be a Phase 1 'checkpoint-N' dir containing pytorch_model_fsdp_0/" >&2
+    echo "  OUT_DIR is where the HF-format model will be written" >&2
+    exit 1
+fi
+BASE_MODEL_ID="${BASE_MODEL_ID:-Qwen/Qwen3.5-4B}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/robometer_qwen35_gpu}"
+if [[ ! -x "$ENV_PREFIX/bin/python" ]]; then
+    echo "ERROR: ENV_PREFIX env not found at $ENV_PREFIX" >&2
+    exit 1
+fi
+PYTHON="$ENV_PREFIX/bin/python"
+export PATH="$ENV_PREFIX/bin:$PATH"
+export PYTHONPATH="$HERE:${PYTHONPATH:-}"
+
+echo "==================== consolidate launch ===================="
+echo "CKPT_DIR       : $CKPT_DIR"
+echo "OUT_DIR        : $OUT_DIR"
+echo "BASE_MODEL_ID  : $BASE_MODEL_ID"
+echo "ENV            : $ENV_PREFIX"
+echo "============================================================"
+
+"$PYTHON" "$HERE/scripts/consolidate_sharded.py" \
+    --ckpt-dir "$CKPT_DIR" \
+    --base-model-id "$BASE_MODEL_ID" \
+    --out-dir "$OUT_DIR"
+
+RC=$?
+echo
+echo "==================== consolidate exit ===================="
+echo "rc=$RC"
+if [[ "$RC" -eq 0 ]]; then
+    echo "  ✓ HF-format model written to: $OUT_DIR"
+    echo "  → Phase 2 launch:  sbatch --export=ALL,LOAD_FROM_CKPT=$OUT_DIR jobs/run<N>_phase2.job"
+fi
+exit $RC

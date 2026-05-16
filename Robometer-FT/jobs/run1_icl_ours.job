@@ -2,7 +2,7 @@
 #SBATCH --job-name=rbm_ft_run1
 #SBATCH --output=logs/run1_icl_ours_%j.out
 #SBATCH --error=logs/run1_icl_ours_%j.err
-#SBATCH --time=3-08:00:00
+#SBATCH --time=30:00:00
 #SBATCH --partition=gpu_h100
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1

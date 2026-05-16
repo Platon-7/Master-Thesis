@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH --job-name=test_sampling
+#SBATCH --output=/gpfs/home3/pkarageorgis1/Master-Thesis/logs/test_sampling_%j.out
+#SBATCH --error=/gpfs/home3/pkarageorgis1/Master-Thesis/logs/test_sampling_%j.err
+#SBATCH --time=00:20:00
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+set -uo pipefail
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1 2>/dev/null || true
+
+/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu/bin/python3 \
+    /gpfs/home3/pkarageorgis1/Master-Thesis/Robometer/scripts/test_sampling_and_filter_fixes.py

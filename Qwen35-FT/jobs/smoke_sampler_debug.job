@@ -1,0 +1,94 @@
+#!/bin/bash
+#SBATCH --job-name=qwen35_smoke_sampler
+#SBATCH --output=logs/smoke_sampler_%j.out
+#SBATCH --error=logs/smoke_sampler_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=4
+#SBATCH --cpus-per-task=16
+#SBATCH --ntasks-per-node=1
+#SBATCH --mem=240G
+
+# Single-node 4-GPU smoke to verify the success_oversample_per_source boost
+# actually activates at runtime. Mirrors run4_icl_ours config 1:1 but:
+#   * max_steps=3   per_device_batch_size=2   do_eval=false   save_strategy=no
+#   * WandB disabled (no run pollution)
+# The trainer has aggressive `print(..., file=sys.stderr, flush=True)` lines in
+# get_train_dataloader that bypass loguru. We grep the stderr log for
+# `[RBM-SAMPLER-DEBUG]` lines to confirm:
+#   1. get_train_dataloader is called
+#   2. self.config.data.success_oversample_per_source is read as {'metaworld':13.0}
+#   3. The WeightedRandomSampler is actually built with boosted weights
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+QWEN35_DIR="${QWEN35_DIR:-$HERE}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/$USER/robometer_frames_hf_full_step2}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu}"
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+[[ -x "$PYTHON" && -x "$ACCELERATE" ]] || { echo "ERROR: env missing at $ENV_PREFIX"; exit 1; }
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+# Disable wandb so we don't pollute the project with smoke runs.
+unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+export WANDB_MODE=disabled
+
+cd "$QWEN35_DIR"
+export PYTHONPATH="$QWEN35_DIR:${PYTHONPATH:-}"
+
+# Same sed pipeline as the real run4 job (train_base + run4_icl_ours)
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_base.yaml" "$HERE/configs/run4_icl_ours.yaml" \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+SMOKE=$(cat <<'EOF'
+++training.max_steps=3
+++training.per_device_train_batch_size=2
+++training.do_eval=false
+++training.evaluation_strategy=no
+++training.save_strategy=no
+++training.logging_steps=1
+++custom_eval.eval_types=[]
+++custom_eval.policy_ranking_dual_icl=false
+++logging.log_to=[]
+EOF
+)
+SMOKE_ARGS=$(echo "$SMOKE" | tr '\n' ' ')
+
+WEIGHTS_DIR="/scratch-shared/$USER/Qwen35_FT_smoke/sampler_${SLURM_JOB_ID:-local}"
+mkdir -p "$WEIGHTS_DIR"
+
+echo "==================== smoke sampler launch ====================="
+echo "config             : run4_icl_ours.yaml (incl. success_oversample_per_source: {metaworld:13.0})"
+echo "GPUs               : 4 (single node)"
+echo "max_steps          : 3"
+echo "OVERRIDES count    : ${#OVERRIDES[@]}"
+echo "==============================================================="
+
+"$ACCELERATE" launch \
+  --config_file configs/distributed/fsdp_qwen35.yaml \
+  --num_processes=4 \
+  train.py "${OVERRIDES[@]}" $SMOKE_ARGS \
+  training.output_dir="$WEIGHTS_DIR"
+RC=$?
+
+echo
+echo "==================== smoke exit ===================="
+echo "rc=$RC"
+echo
+echo "=== Sampler debug lines (proof the boost is active) ==="
+grep "\[RBM-SAMPLER-DEBUG\]" /gpfs/home3/pkarageorgis1/Master-Thesis/Qwen35-FT/logs/smoke_sampler_${SLURM_JOB_ID}.err 2>/dev/null | head -20
+echo "===================================================="
+exit $RC

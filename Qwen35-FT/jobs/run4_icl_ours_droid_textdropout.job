@@ -1,8 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=qwen35_ft_run6
-#SBATCH --output=logs/run6_noicl_standard_%j.out
-#SBATCH --error=logs/run6_noicl_standard_%j.err
-#SBATCH --time=30:00:00
+#SBATCH --job-name=qwen35_ft_run4_textdrop
+#SBATCH --account=gusei17535
+#SBATCH --output=logs/run4_icl_ours_droid_textdropout_%j.out
+#SBATCH --error=logs/run4_icl_ours_droid_textdropout_%j.err
+#SBATCH --time=1-18:00:00
 #SBATCH --partition=gpu_h100
 #SBATCH --nodes=2
 #SBATCH --gpus-per-node=4
@@ -13,7 +14,7 @@
 # Full fine-tune of vanilla Qwen3.5-4B with Loss 2 (asymmetric C51 + BCE).
 # Multi-GPU FSDP via accelerate. Defaults to single node 4×H100; pass --nodes=N at
 # submit time to scale up (e.g. --nodes=2 for the 8-H100 production topology):
-#     sbatch --nodes=2 jobs/run6_noicl_standard.job
+#     sbatch --nodes=2 jobs/run4_icl_ours.job
 #
 # Recipe overrides (set at launch via env vars or `EXTRA="..."`):
 #   * MAX_STEPS=N                              → training.max_steps
@@ -67,7 +68,7 @@ export PYTHONPATH="$QWEN35_DIR:${PYTHONPATH:-}"
 # Sed-flatten the YAML configs into Hydra ++key=value overrides. Inline lists [a,b,c]
 # survive; block lists (- item) would break this — see configs/train_base.yaml header.
 readarray -t OVERRIDES < <(
-    grep -hv '^[[:space:]]*#' "$HERE/configs/train_base.yaml" "$HERE/configs/run6_noicl_standard.yaml" \
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_base.yaml" "$HERE/configs/run4_icl_ours_droid_textdropout.yaml" \
       | sed -e 's/[[:space:]]*#.*//' \
       | grep -v '^[[:space:]]*$' \
       | sed -e 's/: */=/' -e 's/^/++/'
@@ -122,7 +123,7 @@ if [[ "$NUM_NODES" -le 1 ]]; then
       --main_process_ip="$HEAD_NODE_IP" \
       --main_process_port="$RDZV_PORT" \
       train.py "${OVERRIDES[@]}" $EXTRA \
-      training.output_dir="$WEIGHTS_DIR/run6_noicl_standard_${SLURM_JOB_ID:-local}"
+      training.output_dir="$WEIGHTS_DIR/run4_icl_ours_droid_textdropout_${SLURM_JOB_ID:-local}"
 else
     srun --ntasks-per-node=1 --cpu-bind=none bash -c "
         export PYTHONPATH=$QWEN35_DIR:\${PYTHONPATH:-}
@@ -135,6 +136,6 @@ else
           --main_process_ip=$HEAD_NODE_IP \\
           --main_process_port=$RDZV_PORT \\
           train.py ${OVERRIDES[*]} $EXTRA \\
-          training.output_dir=$WEIGHTS_DIR/run6_noicl_standard_${SLURM_JOB_ID:-local}
+          training.output_dir=$WEIGHTS_DIR/run4_icl_ours_droid_textdropout_${SLURM_JOB_ID:-local}
     "
 fi

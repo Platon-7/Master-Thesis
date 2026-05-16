@@ -88,3 +88,22 @@ training.save_steps: 1000
 logging.log_to: [wandb]
 logging.wandb_project: Qwen35_FT
 logging.wandb_entity: nlp-squad
+
+# SaveBest metric_names — OVERRIDE upstream Robometer/robometer/configs/config.yaml:246-251
+# defaults (5 metrics from the LoRA bake-off splits: utd_so101_clean_top, usc_xarm,
+# usc_franka, rfm_new_mit_franka_nowrist, usc_trossen) that our pipeline never emits.
+# Without this override _compute_averaged_score returns -inf every step → SaveBest top-k
+# tracking is non-functional, checkpoint dirs are named *=0.0000_step=N.
+#
+# Two metric-naming conventions co-exist across our 6 runs because dual_icl_active
+# (rbm_heads_trainer.py:1806-1811) requires BOTH policy_ranking_dual_icl=true AND
+# data.use_icl=true:
+#   - ICL-on runs (run1, run4): emit suffixed keys *_iclon and *_icloff (dual pass)
+#   - ICL-off runs (run2, run3, run5, run6): emit unsuffixed keys (single pass)
+# _compute_averaged_score (save.py:332-345) averages whichever subset of metric_names
+# matches the emitted keys (it ignores missing entries — returns -inf only if NONE
+# match). So listing all 12 (4 unsuffixed + 8 suffixed) lets the same train_base.yaml
+# serve both run families: ICL runs match the 8 suffixed, noICL runs match the 4
+# unsuffixed, both produce a real averaged Kendall tau. Higher = better for all.
+logging.save_best.metric_names: [eval_p_rank/kendall_last/robometer_frames_eval_droid,eval_p_rank/kendall_last/robometer_frames_eval_robometer,eval_p_rank/kendall_last/robometer_frames_eval_metaworld,eval_p_rank/kendall_last/robometer_frames_eval_failsafe,eval_p_rank/kendall_last/robometer_frames_eval_droid_iclon,eval_p_rank/kendall_last/robometer_frames_eval_droid_icloff,eval_p_rank/kendall_last/robometer_frames_eval_robometer_iclon,eval_p_rank/kendall_last/robometer_frames_eval_robometer_icloff,eval_p_rank/kendall_last/robometer_frames_eval_metaworld_iclon,eval_p_rank/kendall_last/robometer_frames_eval_metaworld_icloff,eval_p_rank/kendall_last/robometer_frames_eval_failsafe_iclon,eval_p_rank/kendall_last/robometer_frames_eval_failsafe_icloff]
+logging.save_best.greater_is_better: [true,true,true,true,true,true,true,true,true,true,true,true]

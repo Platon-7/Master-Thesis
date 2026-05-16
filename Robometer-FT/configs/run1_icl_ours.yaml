@@ -35,6 +35,10 @@ model.train_preference_head: false
 data.sample_type_ratio: [0,1,0]
 data.stratified_batch_balance: false
 data.failure_oversample_factor: 1.89    # → 30% failure batch-fraction (natural 18.5%)
+# Per-source SUCCESS boost — see run4 yaml for rationale (mw successes severely
+# under-sampled at default weights; 13× brings each to ~3 visits over 7500 steps).
+data.success_oversample_per_source.metaworld: 13.0
+data.failure_oversample_per_source.droid: 3.0      # boost droid failures (6k vs 155k succ → succ:fail within droid 91:9 → 64:36)
 data.warmup_steps: 0
 data.failure_label_smoothing: linear
 

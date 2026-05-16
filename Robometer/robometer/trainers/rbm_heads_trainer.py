@@ -189,8 +189,21 @@ class RBMHeadsTrainer(Trainer):
         not pure-class). Otherwise defers to HF's default sampler.
         """
         oversample = float(getattr(self.config.data, "failure_oversample_factor", 1.0) or 1.0)
+        # Per-source SUCCESS oversample dict: {data_source: multiplier}. Applied on top of
+        # the base success weight (1.0). Activates the WeightedRandomSampler path even when
+        # failure_oversample == 1.0, so this knob alone is sufficient. Use case: severely
+        # undersampled minority successes (e.g. metaworld: 1,946 succ vs 27k fail).
+        succ_per_src = getattr(self.config.data, "success_oversample_per_source", None) or {}
+        succ_per_src = {str(k): float(v) for k, v in succ_per_src.items()} if succ_per_src else {}
+        # Per-source FAILURE oversample dict — symmetric of success_oversample_per_source.
+        # Multiplicative on top of the global failure_oversample_factor: per-traj weight is
+        # `oversample × fail_per_src[src]`. Use case: severely undersampled minority failures
+        # (e.g. droid: 6,038 fail vs 155,306 succ → set droid: 5.5 to mirror the metaworld
+        # success boost level — bringing droid succ:fail within droid draws from 91:9 to 64:36).
+        fail_per_src = getattr(self.config.data, "failure_oversample_per_source", None) or {}
+        fail_per_src = {str(k): float(v) for k, v in fail_per_src.items()} if fail_per_src else {}
         if not getattr(self.config.data, "stratified_batch_balance", False):
-            if oversample <= 1.0:
+            if oversample <= 1.0 and not succ_per_src and not fail_per_src:
                 return super().get_train_dataloader()
             # WeightedRandomSampler path. Each rank constructs the same weight tensor and
             # uses its own rank-seeded generator so DDP ranks draw different indices. Stays
@@ -207,11 +220,45 @@ class RBMHeadsTrainer(Trainer):
                     "failure_oversample_factor>1 requires 'quality_label' on the train "
                     "dataset; could not read it: " + str(e)
                 )
+            # data_source is needed when EITHER per-source dict is non-empty.
+            data_sources_ws: List[Optional[str]]
+            if succ_per_src or fail_per_src:
+                try:
+                    data_sources_ws = hf_ds["data_source"]
+                except (KeyError, TypeError) as e:
+                    raise RuntimeError(
+                        "success_oversample_per_source / failure_oversample_per_source requires "
+                        "'data_source' on the train dataset; could not read it: " + str(e)
+                    )
+            else:
+                data_sources_ws = [None] * len(quality_labels_ws)
             import torch
             from torch.utils.data import WeightedRandomSampler
-            weights = torch.tensor(
-                [oversample if lbl != "successful" else 1.0 for lbl in quality_labels_ws],
-                dtype=torch.double,
+            weights_list = []
+            for lbl, src in zip(quality_labels_ws, data_sources_ws):
+                if lbl != "successful":
+                    w = oversample
+                    if fail_per_src and src in fail_per_src:
+                        w *= fail_per_src[src]
+                    weights_list.append(w)
+                else:
+                    w = 1.0
+                    if succ_per_src and src in succ_per_src:
+                        w *= succ_per_src[src]
+                    weights_list.append(w)
+            weights = torch.tensor(weights_list, dtype=torch.double)
+            # Single concise sampler-init log — visible on stderr so we can confirm
+            # the WeightedRandomSampler path is active at runtime (was previously
+            # silently bypassed when Qwen35-FT loaded a stale shadow copy of this
+            # file; sync confirmed via smoke job 22765848).
+            import sys as _sys
+            print(
+                f"WeightedRandomSampler init: failure_oversample={oversample}, "
+                f"success_oversample_per_source={succ_per_src}, "
+                f"failure_oversample_per_source={fail_per_src} "
+                f"(weights min/max/mean = {weights.min().item():.3f}/"
+                f"{weights.max().item():.3f}/{weights.mean().item():.3f})",
+                file=_sys.stderr, flush=True,
             )
             import torch.distributed as dist
             _rank_ws = dist.get_rank() if (dist.is_available() and dist.is_initialized()) else 0
@@ -289,11 +336,17 @@ class RBMHeadsTrainer(Trainer):
             persistent_workers=self.args.dataloader_persistent_workers if self.args.dataloader_num_workers > 0 else False,
         )
 
-    def create_optimizer(self):
+    def create_optimizer(self, *args, **kwargs):
         """
         Override to create optimizer with separate parameter groups for vision encoder layers.
         If vision_encoder_lr is set, the last N vision encoder layers will use that LR,
         while all other parameters use the default learning rate.
+
+        Signature note: HF Trainer 5.x added a `model` keyword arg
+        (`create_optimizer(self, model=None)`); 4.x had `create_optimizer(self)`. Accept
+        `*args, **kwargs` so this override is signature-compatible across both transformers
+        versions used by Robometer-FT (4.x env) and Qwen35-FT (5.x env). Forward through
+        to super() so HF's own default path receives whatever it expects.
         """
         # Check if we need to create parameter groups for vision encoder
         vision_encoder_lr = self.config.training.vision_encoder_lr
@@ -301,7 +354,7 @@ class RBMHeadsTrainer(Trainer):
 
         if vision_encoder_lr is None or vision_encoder_lr <= 0:
             # No special vision encoder LR, use default optimizer
-            return super().create_optimizer()
+            return super().create_optimizer(*args, **kwargs)
 
         # Get the model
         model = self.model
@@ -310,7 +363,7 @@ class RBMHeadsTrainer(Trainer):
                 "vision_encoder_lr is set but model doesn't have visual encoder. "
                 "Using default optimizer without parameter groups."
             )
-            return super().create_optimizer()
+            return super().create_optimizer(*args, **kwargs)
 
         # Get vision encoder blocks
         visual_encoder = model.model.visual
@@ -2738,6 +2791,14 @@ class RBMHeadsTrainer(Trainer):
                     "image_grid_thw": inputs.get("image_grid_thw", None),
                     "video_grid_thw": inputs.get("video_grid_thw", None),
                     "second_per_grid_ts": inputs.get("second_per_grid_ts", None),
+                    # Qwen3.5 / transformers >= 5.7: required for multimodal RoPE.
+                    # The processor emits this alongside input_ids; without it,
+                    # Qwen3_5Model.compute_3d_position_ids raises ValueError when
+                    # image_grid_thw or video_grid_thw is set. None is safe for
+                    # backward compat with Qwen3-VL / Qwen2.5-VL paths because
+                    # RBM.forward only forwards mm_token_type_ids when not None
+                    # (see robometer/models/rbm.py:1041-1044).
+                    "mm_token_type_ids": inputs.get("mm_token_type_ids", None),
                     # Molmo2-specific parameters
                     "image_grids": inputs.get("image_grids", None),
                     "image_token_pooling": inputs.get("image_token_pooling", None),

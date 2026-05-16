@@ -81,6 +81,10 @@ class MainConfig(common_utils.RunConfig):
     metaworld_data_dir: str = "release/data/metaworld"
     # Number of in-context demo frames for GVL.
     gvl_context_len: int = 9
+    # Robometer reward composition: reward = beta * progress + (1 - beta) * success_prob.
+    # 0.0 = pure success_prob (current default, matches the smoke-tested PoC).
+    # Only meaningful when vlm name contains "robometer".
+    robometer_beta: float = 0.0
 
     def __post_init__(self):
         self.preload_datapath = self.bc_policy
@@ -158,6 +162,7 @@ class Workspace:
             reward_at_truncation=self.cfg.reward_at_truncation,
             metaworld_data_dir=self.cfg.metaworld_data_dir,
             gvl_context_len=self.cfg.gvl_context_len,
+            robometer_beta=self.cfg.robometer_beta,
         )
 
         eval_env_params = self.env_params.copy()
@@ -292,6 +297,13 @@ class Workspace:
                     for vlm_stats_key in ['vlm_reward_TPR', 'vlm_reward_FPR', 'vlm_reward_TNR', 'vlm_reward_FNR']:
                         vlm_stats_value = episode_info[vlm_stats_key]
                         stat[f"data/{vlm_stats_key}"].append(vlm_stats_value/vlm_reward_counts)
+                    if "robometer" in self.cfg.vlm and vlm_reward_counts > 0:
+                        stat["data/vlm_robometer_progress"].append(
+                            episode_info["vlm_robometer_progress_sum"] / vlm_reward_counts
+                        )
+                        stat["data/vlm_robometer_success_prob"].append(
+                            episode_info["vlm_robometer_success_prob_sum"] / vlm_reward_counts
+                        )
 
                     if self.replay.bc_replay is not None:
                         stat["data/bc_replay"].append(self.replay.size(bc=True))

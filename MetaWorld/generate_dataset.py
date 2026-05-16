@@ -157,6 +157,17 @@ def write_episode_dir(out_root, archive, episode_id, frames_steps_labels,
         Image.fromarray(img).convert("RGB").save(ep_dir / fname, quality=92)
         labels.append(int(lbl))
 
+    # frame_labels are a FAILURE-ONLY signal in the training pipeline. The
+    # trainer's target-progress builder (Robometer/robometer/data/samplers/
+    # base.py:1031) checks `if raw_frame_labels is not None` and overrides
+    # target_progress with the rubric mapping {1→0.0, 2→0.25, 3→0.5, 4→0.75}.
+    # Successes are supposed to flow through the success t/T path that ends
+    # at 1.0 at the terminal frame.
+    # Bug: this script used to write `"frame_labels": labels` for BOTH
+    # successes and failures. The simulator's score detector tops out at 4,
+    # so success terminal frames got capped at 0.75 — indistinguishable from
+    # failure terminal frames at the loss level → metaworld eval AUC
+    # collapsed to ~random. Fix: write labels only when label_str == "failure".
     meta = {
         "episode_id": episode_id,
         "archive": archive,
@@ -168,7 +179,7 @@ def write_episode_dir(out_root, archive, episode_id, frames_steps_labels,
         "n_keyframes": N_KEYFRAMES,
         "keyframes_dir": f"{archive}/{episode_id}",
         "paired_success_id": paired_success_id,
-        "frame_labels": labels,
+        "frame_labels": labels if label_str == "failure" else None,
         "fps": fps,
     }
     with open(ep_dir / "meta.json", "w") as fh:

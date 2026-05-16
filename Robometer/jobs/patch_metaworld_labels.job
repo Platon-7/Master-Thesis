@@ -1,0 +1,99 @@
+#!/bin/bash
+#SBATCH --job-name=patch_mw_labels
+#SBATCH --output=/gpfs/home3/pkarageorgis1/Master-Thesis/logs/patch_mw_labels_%j.out
+#SBATCH --error=/gpfs/home3/pkarageorgis1/Master-Thesis/logs/patch_mw_labels_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+# Drop frame_labels from metaworld success rows across step1 (shared) and
+# step2 (per-user) HF datasets. Vectorized PyArrow column rewrite — no
+# frame re-decoding, no NPZ regen. See script docstring for full rationale.
+#
+# Safe to re-run: skips rows whose frame_labels is already None.
+# Atomic per-dataset: writes to .patched_tmp, swaps original to
+# .bak_pre_drop_metaworld_success_labels, then moves tmp into place.
+
+set -uo pipefail
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1 2>/dev/null || true
+
+PY=/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu/bin/python3
+SCRIPT=/gpfs/home3/pkarageorgis1/Master-Thesis/Robometer/scripts/patch_metaworld_success_labels.py
+
+mkdir -p /gpfs/home3/pkarageorgis1/Master-Thesis/logs
+
+echo "================================================================================"
+echo "patch_metaworld_labels job"
+echo "  start: $(date)"
+echo "  user:  $USER"
+echo "  python: $PY"
+echo "  script: $SCRIPT"
+echo "================================================================================"
+
+# Dry-run first so the log captures intended changes alongside the real run.
+echo
+echo "##### DRY RUN ####################################################################"
+"$PY" "$SCRIPT" --dry-run
+RC_DRY=$?
+echo "dry-run exit: $RC_DRY"
+
+if [[ $RC_DRY -ne 0 ]]; then
+    echo "ERROR: dry-run failed (rc=$RC_DRY); aborting before any rewrite"
+    exit $RC_DRY
+fi
+
+echo
+echo "##### LIVE PATCH #################################################################"
+"$PY" "$SCRIPT"
+RC=$?
+echo "live patch exit: $RC"
+
+# Post-patch sanity verification: count metaworld+successful rows whose frame_labels
+# is now None. Should equal the "would clear" counts from dry-run.
+echo
+echo "##### POST-PATCH VERIFICATION ####################################################"
+"$PY" - <<'PY'
+from datasets import load_from_disk
+import os
+
+USER = os.environ.get("USER", "UNKNOWN")
+paths = [
+    "/projects/prjs1958/robometer_frames_hf_full/train_raw/robometer_frames_train",
+    "/projects/prjs1958/robometer_frames_hf_full/train_no_extras_raw/robometer_frames_train_no_extras",
+    "/projects/prjs1958/robometer_frames_hf_full/eval_metaworld_raw/robometer_frames_eval_metaworld",
+    f"/scratch-shared/{USER}/robometer_frames_hf_full_step2/robometer_frames_train/processed_dataset",
+    f"/scratch-shared/{USER}/robometer_frames_hf_full_step2/robometer_frames_train_no_extras/processed_dataset",
+    f"/scratch-shared/{USER}/robometer_frames_hf_full_step2/robometer_frames_eval_metaworld/processed_dataset",
+]
+
+print(f"{'dataset':<90s} {'mw_succ':>8s} {'mw_succ_null_frame_labels':>26s} {'still_have_labels':>17s}")
+print("-" * 145)
+for p in paths:
+    if not os.path.isdir(p):
+        print(f"  SKIP (missing): {p}")
+        continue
+    ds = load_from_disk(p)
+    n_succ = 0
+    n_null = 0
+    n_lab = 0
+    for row in ds:
+        if row["data_source"] != "metaworld": continue
+        if row["quality_label"] != "successful": continue
+        n_succ += 1
+        if row["frame_labels"] is None:
+            n_null += 1
+        else:
+            n_lab += 1
+    short = p.replace("/projects/prjs1958/robometer_frames_hf_full/", "step1:").replace(f"/scratch-shared/{USER}/robometer_frames_hf_full_step2/", "step2:")
+    print(f"  {short:<90s} {n_succ:>8d} {n_null:>26d} {n_lab:>17d}")
+PY
+
+echo
+echo "================================================================================"
+echo "patch_metaworld_labels job complete"
+echo "  end: $(date)"
+echo "  final exit code: $RC"
+echo "================================================================================"
+exit $RC

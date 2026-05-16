@@ -722,6 +722,14 @@ class SaveBestCallback(TrainerCallback):
             logger.info(f"🗑️ Removing previous 'latest' checkpoint: {self._previous_latest_ckpt_dir}")
             shutil.rmtree(self._previous_latest_ckpt_dir, ignore_errors=True)
 
+        # Create checkpoint directory up front. The "best" save path does this
+        # at line 596 and it's necessary here too: on multi-node FSDP+sharded,
+        # save_model() called from rank 0 alone does not create the directory,
+        # so the subsequent shutil.copy(trainer_state.json, ckpt_dir) would
+        # otherwise create ckpt_dir as a FILE, and metrics.json open() then
+        # raises NotADirectoryError → rank 0 exits 1 → SIGTERM cascade.
+        os.makedirs(ckpt_dir, exist_ok=True)
+
         # Save model, trainer state, and metrics
         self._save_checkpoint_files(args, ckpt_dir, metrics, step)
         logger.info(f"✅ Saved 'latest' checkpoint at step {step}")

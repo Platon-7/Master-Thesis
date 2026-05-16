@@ -105,3 +105,7 @@ Robometer.bak_pre_revert/
 # Top-level SLURM logs dir (per-job artifacts, regenerated each run)
 /logs/
 Robometer-FT/logs/
+
+# Diagnostic image dumps from Robometer/scripts/sample_*.py — regenerable, large
+droid_samples/
+metaworld_samples/

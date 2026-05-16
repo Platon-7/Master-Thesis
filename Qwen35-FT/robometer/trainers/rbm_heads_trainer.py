@@ -2,6 +2,7 @@ import collections
 import copy
 import io
 import json
+import logging
 import os
 import random
 from typing import Dict, List, Tuple, Optional, Any, final
@@ -138,6 +139,28 @@ class RBMHeadsTrainer(Trainer):
         self._ddp_static_graph_set = False  # Flag to track if DDP static graph has been set
         self._fsdp_diagnostics_logged = False  # Flag to track if FSDP diagnostics have been logged
 
+        # Failure-rehearsal KL anchor (losses.md §Loss 3). Buffer is only created when
+        # the feature is actually enabled (failure_kl_weight > 0). When disabled this
+        # branch is a no-op and existing run behavior is bit-identical.
+        self._failure_kl_buffer = None
+        self._failure_kl_success_step_count = 0
+        self._failure_kl_skipped_total = 0
+        if getattr(self.config.loss, "failure_kl_weight", 0.0) > 0.0:
+            from robometer.trainers.failure_kl import FailureKLBuffer
+            buffer_size = int(getattr(self.config.loss, "failure_kl_buffer_size", 10))
+            self._failure_kl_buffer = FailureKLBuffer(maxlen=buffer_size)
+            # Use stdlib logging directly here — the `logger` arg may be the project's
+            # custom Logger class which lacks `.info`. Stdlib is safe and will route to
+            # whatever handlers are already attached.
+            logging.getLogger(__name__).info(
+                f"Failure-rehearsal KL anchor ENABLED: weight={self.config.loss.failure_kl_weight}, "
+                f"buffer_size={buffer_size}, "
+                f"apply_when_below_size={getattr(self.config.loss, 'failure_kl_apply_when_buffer_below_size', True)}, "
+                f"detach_backbone={getattr(self.config.loss, 'failure_kl_detach_backbone', False)}, "
+                f"concat_batch={getattr(self.config.loss, 'failure_kl_concat_batch', False)}, "
+                f"apply_every_n_success={getattr(self.config.loss, 'failure_kl_apply_every_n_success', 1)}"
+            )
+
         if logger is not None:
             self.logger = logger
         else:
@@ -161,10 +184,98 @@ class RBMHeadsTrainer(Trainer):
             data_source contains 'warmup' (falls back to any failure if no warmup pool).
           * step >= data.warmup_steps : every batch is exactly half failure / half success.
 
-        When data.stratified_batch_balance is False, defers to HF's default sampler.
+        When data.stratified_batch_balance is False AND data.failure_oversample_factor>1.0,
+        installs a WeightedRandomSampler that tilts the draw toward failures (mixed batches,
+        not pure-class). Otherwise defers to HF's default sampler.
         """
+        oversample = float(getattr(self.config.data, "failure_oversample_factor", 1.0) or 1.0)
+        # Per-source SUCCESS oversample dict: {data_source: multiplier}. Applied on top of
+        # the base success weight (1.0). Activates the WeightedRandomSampler path even when
+        # failure_oversample == 1.0, so this knob alone is sufficient. Use case: severely
+        # undersampled minority successes (e.g. metaworld: 1,946 succ vs 27k fail).
+        succ_per_src = getattr(self.config.data, "success_oversample_per_source", None) or {}
+        succ_per_src = {str(k): float(v) for k, v in succ_per_src.items()} if succ_per_src else {}
+        # Per-source FAILURE oversample dict — symmetric of success_oversample_per_source.
+        # Multiplicative on top of the global failure_oversample_factor: per-traj weight is
+        # `oversample × fail_per_src[src]`. Use case: severely undersampled minority failures
+        # (e.g. droid: 6,038 fail vs 155,306 succ → set droid: 5.5 to mirror the metaworld
+        # success boost level — bringing droid succ:fail within droid draws from 91:9 to 64:36).
+        fail_per_src = getattr(self.config.data, "failure_oversample_per_source", None) or {}
+        fail_per_src = {str(k): float(v) for k, v in fail_per_src.items()} if fail_per_src else {}
         if not getattr(self.config.data, "stratified_batch_balance", False):
-            return super().get_train_dataloader()
+            if oversample <= 1.0 and not succ_per_src and not fail_per_src:
+                return super().get_train_dataloader()
+            # WeightedRandomSampler path. Each rank constructs the same weight tensor and
+            # uses its own rank-seeded generator so DDP ranks draw different indices. Stays
+            # in expectation-mode (no pure-class cycle), so batches are mixed and the KL
+            # anchor's push/consume machinery isn't required.
+            if self.train_dataset is None:
+                raise ValueError("Trainer.get_train_dataloader: train_dataset is None")
+            underlying = getattr(self.train_dataset, "dataset", self.train_dataset)
+            hf_ds = getattr(underlying, "dataset", underlying)
+            try:
+                quality_labels_ws = hf_ds["quality_label"]
+            except (KeyError, TypeError) as e:
+                raise RuntimeError(
+                    "failure_oversample_factor>1 requires 'quality_label' on the train "
+                    "dataset; could not read it: " + str(e)
+                )
+            # data_source is needed when EITHER per-source dict is non-empty.
+            data_sources_ws: List[Optional[str]]
+            if succ_per_src or fail_per_src:
+                try:
+                    data_sources_ws = hf_ds["data_source"]
+                except (KeyError, TypeError) as e:
+                    raise RuntimeError(
+                        "success_oversample_per_source / failure_oversample_per_source requires "
+                        "'data_source' on the train dataset; could not read it: " + str(e)
+                    )
+            else:
+                data_sources_ws = [None] * len(quality_labels_ws)
+            import torch
+            from torch.utils.data import WeightedRandomSampler
+            weights_list = []
+            for lbl, src in zip(quality_labels_ws, data_sources_ws):
+                if lbl != "successful":
+                    w = oversample
+                    if fail_per_src and src in fail_per_src:
+                        w *= fail_per_src[src]
+                    weights_list.append(w)
+                else:
+                    w = 1.0
+                    if succ_per_src and src in succ_per_src:
+                        w *= succ_per_src[src]
+                    weights_list.append(w)
+            weights = torch.tensor(weights_list, dtype=torch.double)
+            # Single concise sampler-init log — visible on stderr so we can confirm
+            # the WeightedRandomSampler path is active at runtime (was previously
+            # silently bypassed when Qwen35-FT loaded a stale shadow copy of this
+            # file; sync confirmed via smoke job 22765848).
+            import sys as _sys
+            print(
+                f"WeightedRandomSampler init: failure_oversample={oversample}, "
+                f"success_oversample_per_source={succ_per_src}, "
+                f"failure_oversample_per_source={fail_per_src} "
+                f"(weights min/max/mean = {weights.min().item():.3f}/"
+                f"{weights.max().item():.3f}/{weights.mean().item():.3f})",
+                file=_sys.stderr, flush=True,
+            )
+            import torch.distributed as dist
+            _rank_ws = dist.get_rank() if (dist.is_available() and dist.is_initialized()) else 0
+            seed_ws = int(getattr(self.config.data, "seed", 42) or 42) + _rank_ws
+            gen = torch.Generator().manual_seed(seed_ws)
+            sampler = WeightedRandomSampler(
+                weights=weights, num_samples=len(weights), replacement=True, generator=gen,
+            )
+            return DataLoader(
+                self.train_dataset,
+                sampler=sampler,
+                batch_size=self.args.per_device_train_batch_size,
+                collate_fn=self.data_collator,
+                num_workers=self.args.dataloader_num_workers,
+                pin_memory=self.args.dataloader_pin_memory,
+                persistent_workers=self.args.dataloader_persistent_workers if self.args.dataloader_num_workers > 0 else False,
+            )
         if self.train_dataset is None:
             raise ValueError("Trainer.get_train_dataloader: train_dataset is None")
 
@@ -192,6 +303,16 @@ class RBMHeadsTrainer(Trainer):
             else:
                 failure_idx.append(i)
 
+        # DDP-aware: pass rank/world_size so each rank draws different samples
+        # while keeping the same pure-class cycle position (failure batch on the
+        # same step across ranks → consistent push/consume of the KL buffer).
+        import torch.distributed as dist
+        if dist.is_available() and dist.is_initialized():
+            _rank = dist.get_rank()
+            _world_size = dist.get_world_size()
+        else:
+            _rank = 0
+            _world_size = 1
         batch_sampler = StratifiedWarmupBatchSampler(
             warmup_indices=warmup_idx,
             failure_indices=failure_idx,
@@ -199,6 +320,8 @@ class RBMHeadsTrainer(Trainer):
             batch_size=self.args.per_device_train_batch_size,
             warmup_steps=int(getattr(self.config.data, "warmup_steps", 0) or 0),
             seed=int(getattr(self.config.data, "seed", 42) or 42),
+            rank=_rank,
+            world_size=_world_size,
         )
         # Sync sampler.current_step from TrainerState on every step. Sampler lives in the
         # main process so the attribute mutation is visible without IPC.
@@ -213,16 +336,17 @@ class RBMHeadsTrainer(Trainer):
             persistent_workers=self.args.dataloader_persistent_workers if self.args.dataloader_num_workers > 0 else False,
         )
 
-    def create_optimizer(self, model=None):
+    def create_optimizer(self, *args, **kwargs):
         """
         Override to create optimizer with separate parameter groups for vision encoder layers.
         If vision_encoder_lr is set, the last N vision encoder layers will use that LR,
         while all other parameters use the default learning rate.
 
-        transformers >= 5.7 calls Trainer.create_optimizer(self, model=None); accept the
-        kwarg for forward-compat. We still operate on self.model below — the `model`
-        arg is only used by the base Trainer when a model isn't yet attached, which
-        is never our case.
+        Signature note: HF Trainer 5.x added a `model` keyword arg
+        (`create_optimizer(self, model=None)`); 4.x had `create_optimizer(self)`. Accept
+        `*args, **kwargs` so this override is signature-compatible across both transformers
+        versions used by Robometer-FT (4.x env) and Qwen35-FT (5.x env). Forward through
+        to super() so HF's own default path receives whatever it expects.
         """
         # Check if we need to create parameter groups for vision encoder
         vision_encoder_lr = self.config.training.vision_encoder_lr
@@ -230,10 +354,7 @@ class RBMHeadsTrainer(Trainer):
 
         if vision_encoder_lr is None or vision_encoder_lr <= 0:
             # No special vision encoder LR, use default optimizer
-            try:
-                return super().create_optimizer(model)  # transformers >= 5.7
-            except TypeError:
-                return super().create_optimizer()       # transformers < 5.7
+            return super().create_optimizer(*args, **kwargs)
 
         # Get the model
         model = self.model
@@ -242,7 +363,7 @@ class RBMHeadsTrainer(Trainer):
                 "vision_encoder_lr is set but model doesn't have visual encoder. "
                 "Using default optimizer without parameter groups."
             )
-            return super().create_optimizer()
+            return super().create_optimizer(*args, **kwargs)
 
         # Get vision encoder blocks
         visual_encoder = model.model.visual
@@ -1067,9 +1188,19 @@ class RBMHeadsTrainer(Trainer):
         is_discrete_mode = self.config.loss.progress_loss_type.lower() in ("discrete", "c51_asymmetric")
         num_bins = self.config.loss.progress_discrete_bins if is_discrete_mode else None
 
-        data_source = None
-        if eval_results and len(eval_results) > 0:
-            data_source = eval_results[0]["data_source"]
+        # `data_source` here is consumed by run_policy_ranking_eval / run_reward_alignment_eval
+        # to decide whether to use the partial_success-based ranking path
+        # (`"roboreward" in data_source.lower() or "roboarena" in data_source.lower()`).
+        # The legacy implementation took eval_results[0]["data_source"] — a per-trajectory
+        # field. After the eval splits were rebuilt to mix sources within one split (post-Apr-30),
+        # this means a single roboarena-tagged trajectory at index 0 flips use_partial_success=True
+        # for the whole batch, then every other trajectory's partial_success=None gets `continue`d
+        # in compile_results.py:1196 → empty dump → "No valid policy ranking data found".
+        # Use the eval-split name (`ds_name`, e.g. "robometer_frames_eval_robometer") instead —
+        # it never matches the "roboreward"/"roboarena" substring trigger, so heterogeneous-source
+        # splits use the quality_label path uniformly. Splits that genuinely require partial_success
+        # would need a name like "robometer_frames_eval_roboarena" to opt in (none currently do).
+        data_source = ds_name
 
         if eval_type == "reward_alignment":
             eval_metrics, plots, video_frames_list, trajectory_progress_data = run_reward_alignment_eval_per_trajectory(
@@ -2663,9 +2794,10 @@ class RBMHeadsTrainer(Trainer):
                     # Qwen3.5 / transformers >= 5.7: required for multimodal RoPE.
                     # The processor emits this alongside input_ids; without it,
                     # Qwen3_5Model.compute_3d_position_ids raises ValueError when
-                    # image_grid_thw or video_grid_thw is set. Default to None for
-                    # backward compat with Qwen3-VL/Qwen2.5-VL paths (RBM.forward
-                    # only forwards it when not None).
+                    # image_grid_thw or video_grid_thw is set. None is safe for
+                    # backward compat with Qwen3-VL / Qwen2.5-VL paths because
+                    # RBM.forward only forwards mm_token_type_ids when not None
+                    # (see robometer/models/rbm.py:1041-1044).
                     "mm_token_type_ids": inputs.get("mm_token_type_ids", None),
                     # Molmo2-specific parameters
                     "image_grids": inputs.get("image_grids", None),
@@ -2687,6 +2819,168 @@ class RBMHeadsTrainer(Trainer):
             self.timing_raw.update(model_timing_raw)
             return model_output, model_timing_raw
 
+    def _infer_pad_token_id(self) -> int:
+        """Best-effort lookup of the tokenizer's pad_token_id for concat-batch padding.
+        Falls back to 0 when the tokenizer / processor isn't accessible — padded positions
+        get attention_mask=0 anyway, so the model treats them as no-ops regardless of the
+        underlying token id."""
+        # Cached on the trainer instance to avoid repeated lookups.
+        if getattr(self, "_cached_pad_token_id", None) is not None:
+            return self._cached_pad_token_id
+        pad_id = 0
+        try:
+            inner = self.model.module if hasattr(self.model, "module") else self.model
+            for attr in ("tokenizer", "processor"):
+                holder = getattr(inner, attr, None)
+                if holder is None:
+                    continue
+                tok = getattr(holder, "tokenizer", holder)
+                pid = getattr(tok, "pad_token_id", None)
+                if isinstance(pid, int):
+                    pad_id = pid
+                    break
+        except Exception:
+            pass
+        self._cached_pad_token_id = int(pad_id)
+        return self._cached_pad_token_id
+
+    def _failure_kl_will_apply(self, inputs):
+        """Pre-flight check: would the KL term fire on THIS batch (success-side gating)?
+
+        Returns the buffer entry to use (not yet consumed) on a hit, None on a miss.
+        The caller decides what to do based on the failure_kl_concat_batch flag —
+        concat path consumes pre-forward; sequential path consumes post-forward.
+        """
+        from robometer.trainers.failure_kl import detect_batch_quality
+
+        loss_cfg = self.config.loss
+        if float(getattr(loss_cfg, "failure_kl_weight", 0.0)) <= 0.0:
+            return None
+        if self._failure_kl_buffer is None:
+            return None
+        quality = detect_batch_quality(inputs.get("quality_labels"))
+        if quality != "successful":
+            return None  # only fires on success batches
+        if len(self._failure_kl_buffer) == 0:
+            return None
+        # Apply-every-N: peek the counter without incrementing (we'll increment in the
+        # apply path so the count tracks ACTUAL KL applications, not pre-flight checks).
+        next_count = self._failure_kl_success_step_count + 1
+        apply_every_n = max(1, int(getattr(loss_cfg, "failure_kl_apply_every_n_success", 1)))
+        if next_count % apply_every_n != 0:
+            return None
+        # Below-size retention rule (peek-when-below-N is in consume_head; this is the
+        # apply gate — when False, we wait for buffer to reach N before any KL fires).
+        apply_when_below = bool(getattr(loss_cfg, "failure_kl_apply_when_buffer_below_size", True))
+        if (not self._failure_kl_buffer.is_full) and (not apply_when_below):
+            return None
+        return self._failure_kl_buffer.peek_head()
+
+    def _failure_kl_compute_term(self, kl_logits_new, kl_entry, old_inputs_dev):
+        """Build the KL loss term given the current model's logits on the buffered failure
+        input + the snapshot. Used by both the sequential and concat paths."""
+        from robometer.trainers.failure_kl import compute_failure_kl
+
+        loss_cfg = self.config.loss
+        kl_weight = float(loss_cfg.failure_kl_weight)
+        # Move stored logits to device + match dtype of new logits.
+        old_logits = kl_entry.logits.to(kl_logits_new.device)
+        if old_logits.dtype != kl_logits_new.dtype:
+            old_logits = old_logits.to(kl_logits_new.dtype)
+
+        # KL distillation should anchor on every valid failure frame; intentionally drop
+        # `predict_last_frame_mask` from the KL path. That mask is a partial_success
+        # last-frame-only indicator (roboarena-style sources) and can land at a
+        # different temporal resolution than `target_progress_mask` after the
+        # Qwen-VL frame-downsampling code path, causing a shape mismatch (see traceback
+        # May-11: "tensor a (8) must match tensor b (16) at non-singleton dimension 1").
+        #
+        # `target_progress_mask` is stored per-SAMPLE in the buffer (shape [B]) while
+        # `kl_per_frame` inside compute_failure_kl is per-frame [B, T]. Expand to
+        # [B, T] by replicating the per-sample validity across the T dim so the
+        # broadcast inside compute_failure_kl just multiplies.
+        tp_mask = old_inputs_dev.get("target_progress_mask")
+        mask = None
+        if tp_mask is not None:
+            m = tp_mask.to(kl_logits_new.dtype)
+            # kl_logits_new shape: [..., T, K]. We want mask shape [..., T].
+            target_shape = kl_logits_new.shape[:-1]
+            if m.ndim == len(target_shape) - 1:
+                # [B] → [B, T]
+                m = m.unsqueeze(-1).expand(target_shape)
+            elif m.ndim == len(target_shape) and m.shape[-1] == 1:
+                # [B, 1] → [B, T]
+                m = m.expand(target_shape)
+            mask = m.contiguous()
+
+        kl_value = compute_failure_kl(old_logits, kl_logits_new, mask=mask)
+        self.log_metadata["loss/failure_kl"] = kl_value.detach().float()
+        self.log_metadata["loss/failure_kl_buffer_fill"] = float(len(self._failure_kl_buffer))
+        return kl_weight * kl_value
+
+    def _progress_head_only_forward(self, model, old_inputs_dev):
+        """Detach-backbone fast path: run backbone in no_grad to capture the input that
+        would feed the progress head, then re-run only the progress head with autograd
+        ON the detached input. KL gradient flows ONLY through the head's parameters.
+
+        Implementation: register a forward_pre_hook on `progress_head` to capture its
+        per-sample inputs during the no_grad backbone pass. After the backbone pass
+        (which itself does the demo-frame slicing internally), we re-call progress_head
+        on each captured input with grad enabled.
+
+        Returns: progress_logits["A"]-shaped tensor [B, T, K] with autograd attached
+        through the head's parameters only.
+        """
+        inner = model.module if hasattr(model, "module") else model
+        if not hasattr(inner, "progress_head"):
+            # Fallback: we can't isolate the head. Do a full forward (gradient flows through
+            # backbone too — silently weaker semantic, but correctness is preserved).
+            if not getattr(self, "_failure_kl_detach_fallback_warned", False):
+                logger.warning(
+                    "failure_kl_detach_backbone=True but model lacks .progress_head; "
+                    "falling back to full forward (gradient through backbone too)."
+                )
+                self._failure_kl_detach_fallback_warned = True
+            kl_out, _ = self.forward_model(model, old_inputs_dev, sample_type="progress")
+            return kl_out.progress_logits["A"]
+
+        captured_inputs: list[torch.Tensor] = []
+
+        def _pre_hook(module, args):
+            # The head's first positional arg is the input hidden states. Stash it.
+            if args:
+                captured_inputs.append(args[0])
+
+        handle = inner.progress_head.register_forward_pre_hook(_pre_hook)
+        try:
+            with torch.no_grad():
+                self.forward_model(model, old_inputs_dev, sample_type="progress")
+        finally:
+            handle.remove()
+
+        if not captured_inputs:
+            # Hook didn't fire (model went down a code path that bypasses progress_head).
+            # Fall back to a full re-forward so we still have correct logits.
+            kl_out, _ = self.forward_model(model, old_inputs_dev, sample_type="progress")
+            return kl_out.progress_logits["A"]
+
+        # Re-run the head on each captured input with autograd. We mirror the model's
+        # internal behavior in _apply_heads_to_hidden_states: per-sample head call,
+        # stack to [B, T, K]. detach() severs the gradient through the backbone — only
+        # the head's parameters receive gradient.
+        head_outputs: list[torch.Tensor] = []
+        for hidden in captured_inputs:
+            if hidden.shape[0] > 0:
+                head_outputs.append(inner.progress_head(hidden.detach()))
+            else:
+                # Empty sample (no prog tokens) — match the model's empty-tensor convention.
+                head_outputs.append(torch.empty(0, device=hidden.device))
+        # Stack matches the [B, T, K] format that _compute_progress_loss_helper expects.
+        if not head_outputs:
+            kl_out, _ = self.forward_model(model, old_inputs_dev, sample_type="progress")
+            return kl_out.progress_logits["A"]
+        return torch.stack(head_outputs)
+
     def _compute_progress_loss(self, model, inputs, return_outputs=False, training=True, stratify_by_strategy=True):
         """
         Compute progress prediction loss.
@@ -2699,9 +2993,53 @@ class RBMHeadsTrainer(Trainer):
             stratify_by_strategy: Whether to stratify metrics by data_gen_strategy (default: True)
                                  Set to False for single-frame training where strategies aren't used
         """
-        model_output, _ = self.forward_model(model, inputs, sample_type="progress")
-        progress_logits = model_output.progress_logits
-        progress_pred = progress_logits["A"]
+        # ============================================================================
+        # Failure-rehearsal KL anchor — pre-flight (losses.md §Loss 3).
+        # If KL would fire on this success batch AND failure_kl_concat_batch=True, build
+        # one combined batch (success + buffered failure) and run a single forward pass.
+        # Otherwise, do the normal forward and (if KL fires) re-forward the buffered
+        # failure input separately on the sequential path.
+        # ============================================================================
+        kl_pre_entry = None
+        kl_concat_state = None  # holds (b_succ, b_fail, kl_logits_new, old_inputs_dev) on concat hit
+        if training and self._failure_kl_buffer is not None:
+            kl_pre_entry = self._failure_kl_will_apply(inputs)
+        use_concat = (
+            kl_pre_entry is not None
+            and bool(getattr(self.config.loss, "failure_kl_concat_batch", False))
+        )
+
+        if use_concat:
+            from robometer.trainers.failure_kl import (
+                build_concat_batch,
+                move_entry_to_device,
+                split_concat_logits,
+            )
+            # Move buffered failure inputs to current device, matching dtype of the model's
+            # compute path (progress_pred dtype isn't known yet — use the success-batch
+            # pixel dtype as a stand-in; the model's forward will recast as needed).
+            device = inputs["input_ids"].device
+            old_inputs_dev, _old_logits_dev = move_entry_to_device(kl_pre_entry, device)
+            pad_token_id = self._infer_pad_token_id()
+            combined_inputs, b_succ, b_fail = build_concat_batch(
+                inputs, old_inputs_dev, pad_token_id=pad_token_id
+            )
+            with _timer("time/failure_kl_concat_forward", timing_raw=self.timing_raw):
+                combined_output, _ = self.forward_model(
+                    model, combined_inputs, sample_type="progress"
+                )
+            combined_pred = combined_output.progress_logits["A"]
+            progress_pred, kl_logits_new = split_concat_logits(combined_pred, b_succ)
+            kl_concat_state = (b_succ, b_fail, kl_logits_new, old_inputs_dev, kl_pre_entry)
+            # Alias for downstream code paths (e.g. success head) that expect
+            # `model_output` to be set; consumers must slice [:b_succ] when in
+            # concat mode since combined_output's rows span success + failure.
+            model_output = combined_output
+        else:
+            model_output, _ = self.forward_model(model, inputs, sample_type="progress")
+            progress_logits = model_output.progress_logits
+            progress_pred = progress_logits["A"]
+
         progress_target = inputs["target_progress"]
         progress_target_mask = inputs["target_progress_mask"].unsqueeze(-1)
         predict_last_frame_mask = inputs["predict_last_frame_mask"]
@@ -2712,9 +3050,60 @@ class RBMHeadsTrainer(Trainer):
         final_loss = 0
 
         final_loss += progress_loss
+
+        # ============================================================================
+        # Failure-rehearsal KL anchor — post-forward push/term (losses.md §Loss 3).
+        # Either path (concat or sequential) lands here; the concat case has its KL
+        # logits already computed via the combined forward, the sequential case
+        # re-forwards now. Failure batches push their snapshot to the buffer.
+        # ============================================================================
+        if training and self._failure_kl_buffer is not None:
+            from robometer.trainers.failure_kl import (
+                build_buffer_entry,
+                detect_batch_quality,
+                move_entry_to_device,
+            )
+            quality = detect_batch_quality(inputs.get("quality_labels"))
+            if quality == "failure":
+                self._failure_kl_buffer.push(build_buffer_entry(inputs, progress_pred))
+                self.log_metadata["loss/failure_kl_buffer_fill"] = float(len(self._failure_kl_buffer))
+            elif kl_pre_entry is not None:
+                # KL fires on this success step. Always increment the apply-counter so
+                # downstream every-N gating stays in phase.
+                self._failure_kl_success_step_count += 1
+                if use_concat:
+                    b_succ, b_fail, kl_logits_new, old_inputs_dev, entry = kl_concat_state
+                    # Consume the entry now that we've used it. consume_head pops only if
+                    # buffer was at capacity (peek-when-below-N retention rule).
+                    self._failure_kl_buffer.consume_head()
+                    kl_term = self._failure_kl_compute_term(kl_logits_new, entry, old_inputs_dev)
+                    final_loss = final_loss + kl_term
+                else:
+                    # Sequential path: re-forward the buffered input through current model.
+                    entry = self._failure_kl_buffer.consume_head()
+                    if entry is not None:
+                        device = progress_pred.device
+                        compute_dtype = progress_pred.dtype
+                        old_inputs_dev, _ = move_entry_to_device(entry, device, dtype=compute_dtype)
+                        detach_backbone = bool(
+                            getattr(self.config.loss, "failure_kl_detach_backbone", False)
+                        )
+                        with _timer("time/failure_kl_reforward", timing_raw=self.timing_raw):
+                            if detach_backbone:
+                                kl_logits_new = self._progress_head_only_forward(model, old_inputs_dev)
+                            else:
+                                kl_out, _ = self.forward_model(
+                                    model, old_inputs_dev, sample_type="progress"
+                                )
+                                kl_logits_new = kl_out.progress_logits["A"]
+                        kl_term = self._failure_kl_compute_term(kl_logits_new, entry, old_inputs_dev)
+                        final_loss = final_loss + kl_term
         if self.config.model.train_success_head:
             success_logits = model_output.success_logits
             success_pred = success_logits["A"]
+            if use_concat:
+                b_succ_val = kl_concat_state[0]
+                success_pred = success_pred[:b_succ_val]
             success_labels = inputs["success_labels"]
 
             quality_labels = inputs.get("quality_labels", None)

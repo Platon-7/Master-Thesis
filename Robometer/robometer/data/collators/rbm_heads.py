@@ -16,7 +16,7 @@ from .utils import convert_frames_to_pil_images, pad_list_to_max, write_mp4
 from robometer.data.dataset_types import PreferenceSample, ProgressSample
 from robometer.data.dataset_category import is_preference_only_ds
 from robometer.data.datasets.helpers import DataGenStrat
-from typing import List, Dict, Union
+from typing import List, Dict, Optional, Union
 from robometer.models.utils import convert_discrete_target_to_continuous
 from PIL import Image
 
@@ -145,6 +145,7 @@ class RBMBatchCollator(BaseCollator):
         shuffle_progress_frames: bool = False,
         inference: bool = False,
         icl_task_dropout: bool = False,
+        icl_task_dropout_sources: List[str] = None,
         **kwargs,
     ):
         super().__init__(
@@ -176,29 +177,77 @@ class RBMBatchCollator(BaseCollator):
         self.shuffle_progress_frames = shuffle_progress_frames
         self.inference = inference
         self.icl_task_dropout = icl_task_dropout
+        # Per-source restriction set. Empty (default) → fall back to global flag's behavior.
+        # Non-empty → corruption fires ONLY when sample.data_source is in this set.
+        self.icl_task_dropout_sources = set(icl_task_dropout_sources) if icl_task_dropout_sources else set()
+        # Permanent diagnostic counters — let us verify at runtime that corruption is
+        # firing on the expected sources at the expected rate. The first N corruptions
+        # also print a one-line stderr sample so we can eyeball the actual transformed text.
+        self._task_corrupt_stats = {"by_src_attempted": {}, "by_src_corrupted": {}}
+        self._task_corrupt_examples_printed = 0
+        self._TASK_CORRUPT_MAX_EXAMPLES = 6
 
     # Generic replacements used by ICL task-instruction dropout (Chris's recipe). Module-private
     # constant — kept as instance-readable for testing/inspection.
     _ICL_TASK_GENERIC_REPLACEMENTS = ("", "do the task", "perform the demonstrated task")
 
-    def _maybe_corrupt_task_for_icl(self, task: str) -> str:
-        """Stochastically corrupt the natural-language task instruction for ICL samples.
-        Per-call coin flip; called only when icl_task_dropout=True AND a demo is attached AND
-        we're in training mode (not inference). Recipe (per Chris):
+    def _maybe_corrupt_task_for_icl(
+        self,
+        task: str,
+        data_source: Optional[str] = None,
+        has_icl_demo: bool = True,
+    ) -> str:
+        """Stochastically corrupt the natural-language task instruction. Per-call coin flip,
+        only fires in training mode. Recipe (per Chris):
           p=1/3 → keep original
           p=1/3 → replace with a generic string (uniform over _ICL_TASK_GENERIC_REPLACEMENTS)
           p=1/3 → split by whitespace, drop each word independently with p=0.1
+
+        Gating logic:
+          - inference mode → no-op (always)
+          - icl_task_dropout_sources non-empty → corruption fires when data_source is in
+            that set, REGARDLESS of has_icl_demo (per-source mode). The global
+            icl_task_dropout flag is ignored in this mode.
+          - icl_task_dropout_sources empty AND icl_task_dropout=True AND has_icl_demo=True
+            → fires globally (legacy ICL-only path).
+          - everything else → no-op (preserves original task text).
         """
-        if not self.icl_task_dropout or self.inference or not task:
+        if self.inference or not task:
             return task
+        # Per-source mode takes precedence over the global flag and fires regardless of ICL.
+        if self.icl_task_dropout_sources:
+            if data_source not in self.icl_task_dropout_sources:
+                return task
+        else:
+            # Legacy global path: only fires when ICL demo is attached (preserves prior behavior).
+            if not (self.icl_task_dropout and has_icl_demo):
+                return task
+        # Bookkeeping: count attempts per source so runtime evidence is verifiable.
+        src_key = data_source or "<unknown>"
+        self._task_corrupt_stats["by_src_attempted"][src_key] = \
+            self._task_corrupt_stats["by_src_attempted"].get(src_key, 0) + 1
         choice = _stdlib_random.random()
         if choice < 1 / 3:
-            return task
-        if choice < 2 / 3:
-            return _stdlib_random.choice(self._ICL_TASK_GENERIC_REPLACEMENTS)
-        words = task.split()
-        kept = [w for w in words if _stdlib_random.random() >= 0.1]
-        return " ".join(kept) if kept else ""
+            new_task = task
+        elif choice < 2 / 3:
+            new_task = _stdlib_random.choice(self._ICL_TASK_GENERIC_REPLACEMENTS)
+        else:
+            words = task.split()
+            kept = [w for w in words if _stdlib_random.random() >= 0.1]
+            new_task = " ".join(kept) if kept else ""
+        if new_task != task:
+            self._task_corrupt_stats["by_src_corrupted"][src_key] = \
+                self._task_corrupt_stats["by_src_corrupted"].get(src_key, 0) + 1
+            # Print a few examples so we can eyeball at runtime that this is working.
+            if self._task_corrupt_examples_printed < self._TASK_CORRUPT_MAX_EXAMPLES:
+                import sys as _sys
+                print(
+                    f"[task-dropout] src={src_key}  ICL_demo={has_icl_demo}  "
+                    f"orig='{task[:80]}'  →  new='{new_task[:80]}'",
+                    file=_sys.stderr, flush=True,
+                )
+                self._task_corrupt_examples_printed += 1
+        return new_task
 
     def _prepare_frames_for_conversation(self, frames: List, prefix: str = "tmp") -> tuple[Union[List, str], dict]:
         """
@@ -423,7 +472,11 @@ class RBMBatchCollator(BaseCollator):
                 )
                 demo_frames_counts.append(len(demo_pil_frames))
 
-                task_text = self._maybe_corrupt_task_for_icl(sample.trajectory.task)
+                task_text = self._maybe_corrupt_task_for_icl(
+                    sample.trajectory.task,
+                    data_source=getattr(sample.trajectory, "data_source", None),
+                    has_icl_demo=True,
+                )
                 prompt = (
                     f"The task for the robot is '{task_text}'. "
                     "Below is a successful demonstration of this task, followed by a trajectory to evaluate. "
@@ -442,8 +495,15 @@ class RBMBatchCollator(BaseCollator):
             else:
                 demo_frames_counts.append(0)
 
+                # Per-source corruption fires regardless of ICL demo presence; pass
+                # has_icl_demo=False so the legacy global-flag path stays gated to ICL only.
+                task_text = self._maybe_corrupt_task_for_icl(
+                    sample.trajectory.task,
+                    data_source=getattr(sample.trajectory, "data_source", None),
+                    has_icl_demo=False,
+                )
                 # Create conversation for progress evaluation
-                prompt = f"The task for the robot is '{sample.trajectory.task}'. Given the trajectory video, predict the task progress at each frame, how far along the robot is towards completing the task, a float between 0 and 1, where 0 is the starting state and 1 is when the task is completed. If the robot is not performing the same task, predict 0 progress."
+                prompt = f"The task for the robot is '{task_text}'. Given the trajectory video, predict the task progress at each frame, how far along the robot is towards completing the task, a float between 0 and 1, where 0 is the starting state and 1 is when the task is completed. If the robot is not performing the same task, predict 0 progress."
 
                 # Build content list
                 content_list = [{"type": "text", "text": prompt}]
@@ -552,12 +612,13 @@ class RBMBatchCollator(BaseCollator):
             )
             rejected_video_field, _ = self._prepare_frames_for_conversation(rejected_frames, prefix="tmp_rejected")
 
-            # Apply task-instruction dropout when ICL is attached to this sample. _maybe_corrupt
-            # is a no-op unless self.icl_task_dropout=True AND we're in training mode; gating on
-            # context_trajectory ensures non-ICL samples never have their task wording mangled.
-            _task_for_prompt = sample.chosen_trajectory.task
-            if sample.context_trajectory is not None:
-                _task_for_prompt = self._maybe_corrupt_task_for_icl(_task_for_prompt)
+            # Apply task-instruction dropout. Per-source corruption fires regardless of ICL;
+            # legacy global flag only fires when an ICL demo is attached.
+            _task_for_prompt = self._maybe_corrupt_task_for_icl(
+                sample.chosen_trajectory.task,
+                data_source=getattr(sample.chosen_trajectory, "data_source", None),
+                has_icl_demo=(sample.context_trajectory is not None),
+            )
             prompt = f"Given these two trajectories for the task '{_task_for_prompt}', evaluate which one makes more progress towards the task. Return A for the first trajectory and B for the second trajectory."
 
             if self.prog_pref:

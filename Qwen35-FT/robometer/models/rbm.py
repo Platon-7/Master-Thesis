@@ -62,6 +62,15 @@ class RBM(PredictionHeadsMixin, PreTrainedModel):
     # "RBM does not support Flash Attention 2 yet" even when the underlying
     # base model supports it. Keep both for cross-version safety.
     _supports_flash_attn = True
+    # transformers >= 5.7's `_finalize_model_loading` accesses `self.all_tied_weights_keys`
+    # during the from_pretrained path (modeling_utils.py:4665). Normally PreTrainedModel.__init__
+    # sets this on the instance, but RBM's `super().__init__(...)` follows the MRO through
+    # PredictionHeadsMixin which doesn't pass through to PreTrainedModel.__init__, so the
+    # instance-level set never happens. RBM's three heads aren't tied to anything else
+    # (each head is independent), so an empty dict is the correct value. Without this
+    # attribute, full-FT RBM.from_pretrained() crashes with:
+    #   AttributeError: 'RBM' object has no attribute 'all_tied_weights_keys'
+    all_tied_weights_keys = {}
 
     def __init__(self, config, processor, tokenizer, base_model=None, base_model_id=None, model_config=None):
         if "SmolVLM" in base_model_id:

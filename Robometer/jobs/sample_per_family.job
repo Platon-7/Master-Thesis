@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --job-name=sample_families
+#SBATCH --output=/gpfs/home3/pkarageorgis1/Master-Thesis/logs/sample_families_%j.out
+#SBATCH --error=/gpfs/home3/pkarageorgis1/Master-Thesis/logs/sample_families_%j.err
+#SBATCH --time=01:00:00
+#SBATCH --partition=staging
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+set -uo pipefail
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1 2>/dev/null || true
+
+PY=/home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu/bin/python3
+SCRIPT=/gpfs/home3/pkarageorgis1/Master-Thesis/Robometer/scripts/sample_per_family_trajectories.py
+
+echo "================================================================================"
+echo "sample_per_family job  $(date)"
+echo "================================================================================"
+
+"$PY" "$SCRIPT"
+RC=$?
+
+echo
+echo "================================================================================"
+echo "exit: $RC   $(date)"
+echo "================================================================================"
+exit $RC

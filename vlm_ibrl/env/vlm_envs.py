@@ -163,6 +163,15 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         self.end_on_success = kwargs["end_on_success"]
         self.reward_at_truncation = kwargs.pop("reward_at_truncation", 0)
 
+        # Reward composition for Robometer-style critics (which expose both a
+        # progress head and a success head). Final reward = beta * progress
+        # + (1 - beta) * success_prob. Default 0.0 = pure success_prob, i.e.
+        # behavior identical to the original integration. Ignored for non-
+        # Robometer VLMs.
+        self.robometer_beta = float(kwargs.pop("robometer_beta", 0.0))
+        self._last_progress = 0.0
+        self._last_success_prob = 0.0
+
         # Configurable: where GVL looks up its in-context demos.
         self.metaworld_data_dir = kwargs.pop("metaworld_data_dir", DEFAULT_METAWORLD_DATA_DIR)
         # Number of in-context demo frames (matches paper's Suppl. A.2).
@@ -269,7 +278,15 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             "vlm_reward_FNR": 0,
             "vlm_reward_counts": 0,
             "early_termination": 0,
+            # Robometer-style critics expose progress + success heads; sum
+            # them per-episode so the train loop can divide by reward_counts
+            # to get a per-episode mean (matches the existing CM pattern).
+            # Zero for non-Robometer VLMs.
+            "vlm_robometer_progress_sum": 0.0,
+            "vlm_robometer_success_prob_sum": 0.0,
         }
+        self._last_progress = 0.0
+        self._last_success_prob = 0.0
         self.vid_t = 1
         return rl_obs, image_obs
 
@@ -310,6 +327,9 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
                     self.episode_stats["vlm_reward_TNR"] += 1
                 else:
                     self.episode_stats["vlm_reward_FPR"] += 1
+            if "robometer" in self.vlm_name:
+                self.episode_stats["vlm_robometer_progress_sum"] += self._last_progress
+                self.episode_stats["vlm_robometer_success_prob_sum"] += self._last_success_prob
 
         if self.end_on_success and not self.most_recent_info["truncated"]:
             vlm_terminal = False
@@ -341,9 +361,16 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
 
         if "robometer" in self.vlm_name:
             out = self.scorer(frames, task=self.task_description)
+            self._last_progress = float(out["progress_reward"])
+            self._last_success_prob = float(out["success_prob"])
+            mixed = self.robometer_beta * self._last_progress + (1.0 - self.robometer_beta) * self._last_success_prob
             if debug:
-                print(f"Robometer: progress={out['progress_reward']:.3f} success={out['success_prob']:.3f}")
-            return out["success_prob"]
+                print(
+                    f"Robometer: progress={self._last_progress:.3f} "
+                    f"success={self._last_success_prob:.3f} "
+                    f"beta={self.robometer_beta:.2f} → reward={mixed:.3f}"
+                )
+            return mixed
 
         is_roboreward = "roboreward" in self.vlm_name
         critic_output = single_prompt_eval(

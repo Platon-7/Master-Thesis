@@ -1,6 +1,5 @@
-# Run 2 — Robometer-FT (650k no_extras pool) WITHOUT ICL + our loss recipe.
-# Identical to run1_icl_ours.yaml EXCEPT data.use_icl is disabled.
-# See run1_icl_ours.yaml for the recipe rationale.
+# Run 5 PHASE 2 — Qwen3.5-FT fine-tune (no ICL), continues from Phase 1.
+# Identical to run4_icl_ours_phase2.yaml EXCEPT data.use_icl is disabled.
 
 data.train_datasets: [robometer_frames_train_no_extras]
 
@@ -23,23 +22,23 @@ model.train_progress_head: true
 model.train_success_head: true
 model.train_preference_head: false
 
-# Sampler.
+# Sampler — same as phase 1.
 data.sample_type_ratio: [0,1,0]
 data.stratified_batch_balance: false
-data.failure_oversample_factor: 1.89    # → 30% failure batch-fraction (natural 18.5%)
-# Per-source SUCCESS boost — see run1 yaml for rationale.
+data.failure_oversample_factor: 1.89    # → 30% failure batch-fraction (natural 18.5% of no_extras pool)
 data.success_oversample_per_source.metaworld: 13.0
-data.failure_oversample_per_source.droid: 3.0      # boost droid failures (6k vs 155k succ → succ:fail within droid 91:9 → 64:36)
+data.failure_oversample_per_source.droid: 3.0
 data.warmup_steps: 0
 data.failure_label_smoothing: linear
 
-# Keep orphan-task failures (tasks with no successful demo).
 data.keep_orphan_task_failures: true
 
 # ICL OFF.
 data.use_icl: false
 data.icl_prob: 0.0
 
+# Phase 2 LR + step budget.
 training.learning_rate: 1.0e-5
+training.max_steps: 5000
 
-training.exp_name: robometer_ft_run2_noicl_ours
+training.exp_name: qwen35_ft_run5_noicl_ours_phase2

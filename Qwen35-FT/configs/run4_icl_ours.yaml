@@ -34,6 +34,12 @@ model.train_preference_head: false
 data.sample_type_ratio: [0,1,0]
 data.stratified_batch_balance: false
 data.failure_oversample_factor: 2.61    # → 30% failure batch-fraction (natural 14.1%)
+# Per-source SUCCESS boost. Without this, metaworld successes (only 1,946 in the
+# pool vs 27,010 failures) get <0.1 visits each in 3000 steps. 13× pushes
+# expected visits to ~3 per success over a 7500-step run (~94% unique coverage).
+# Only sampler weights are affected; no change to the loss / model.
+data.success_oversample_per_source.metaworld: 13.0
+data.failure_oversample_per_source.droid: 3.0      # boost droid failures (6k vs 155k succ → succ:fail within droid 91:9 → 64:36)
 data.warmup_steps: 0
 data.failure_label_smoothing: linear
 

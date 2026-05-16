@@ -1,0 +1,61 @@
+# Run 4 variant — Qwen3.5-FT WITH droid task-text dropout, for the A/B test
+# against the parallel run currently using only the 5.5× droid failure boost.
+#
+# Same as run4_icl_ours.yaml EXCEPT:
+#   * data.icl_task_dropout_sources: [droid]    (corruption recipe fires for droid samples
+#                                                regardless of ICL — applies to BOTH ICL and
+#                                                non-ICL prompts since corruption is now
+#                                                applied at both call sites in the collator)
+#   * training.max_steps: 1000                  (just enough to see whether droid eval AUC
+#                                                trajectory diverges from the no-dropout twin)
+#   * training.exp_name: ..._droid_textdropout_1000
+#
+# Pair this with the running run4 22776712 (which has 5.5× droid fail boost but NO text
+# dropout). At step 500 / step 1000 we get two eval points for droid_iclon/icloff for both
+# recipes — direct comparison.
+
+data.train_datasets: [robometer_frames_train]
+
+# Loss 2.
+loss.progress_loss_type: c51_asymmetric
+loss.success_loss_type: bce_asymmetric
+loss.progress_discrete_bins: 10
+loss.asymmetric_lambda: 0.3
+
+# KL anchor.
+loss.failure_kl_weight: 0.0
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+
+# Heads.
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# Sampler — same as run4 main.
+data.sample_type_ratio: [0,1,0]
+data.stratified_batch_balance: false
+data.failure_oversample_factor: 2.61
+data.success_oversample_per_source.metaworld: 13.0
+data.failure_oversample_per_source.droid: 3.0
+data.warmup_steps: 0
+data.failure_label_smoothing: linear
+
+# NEW: per-source task-text dropout for droid. Applies regardless of ICL — every
+# droid sample (including no-ICL ones) has a 2/3 probability of having its task
+# corrupted (1/3 keep, 1/3 generic, 1/3 word-drop). Tests whether the model's
+# droid AUC ceiling of ~0.59 is driven by text shortcut.
+data.icl_task_dropout_sources: [droid]
+
+data.keep_orphan_task_failures: true
+
+training.learning_rate: 2.0e-5
+
+# Short A/B run — 1000 steps is enough to see if the droid eval trajectory diverges
+# from the parallel boost-only run. Two evals will land at steps 500 and 1000.
+training.max_steps: 1000
+
+training.exp_name: qwen35_ft_run4_icl_ours_droid_textdropout_1000

@@ -15,7 +15,7 @@ Tests:
 
 Run from any directory:
     /home/pkarageorgis1/.conda/envs/robometer_qwen35_gpu/bin/python3 \
-        /gpfs/home3/pkarageorgis1/Master-Thesis/test_keep_orphan_task_failures.py
+        /gpfs/home3/pkarageorgis1/Master-Thesis/Robometer/scripts/test_keep_orphan_task_failures.py
 """
 from __future__ import annotations
 

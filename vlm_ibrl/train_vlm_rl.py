@@ -78,6 +78,9 @@ class MainConfig(common_utils.RunConfig):
     past_len: int = 4
     train_end_on_success: int = 1
     reward_at_truncation: int = 0
+    # Robometer reward composition: reward = beta * progress + (1 - beta) * success_prob.
+    # 0.0 = pure success_prob (default). Only meaningful when vlm contains "robometer".
+    robometer_beta: float = 0.0
 
     def __post_init__(self):
         self.rl_cameras = self.rl_camera.split("+")
@@ -211,6 +214,7 @@ class Workspace:
             vlm=self.cfg.vlm,
             past_len=self.cfg.past_len,
             reward_at_truncation=bool(self.cfg.reward_at_truncation),
+            robometer_beta=self.cfg.robometer_beta,
         )
         self.eval_env_params = dict(
             env_name=self.cfg.task_name,

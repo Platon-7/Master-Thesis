@@ -1,0 +1,39 @@
+# Run 6 PHASE 2 — Qwen3.5-FT fine-tune (no ICL, standard/paper-faithful loss),
+# continues from Phase 1. Same recipe as run6_noicl_standard.yaml EXCEPT
+# lower LR and reduced max_steps (mirror run4/5 phase 2 pattern).
+
+data.train_datasets: [robometer_frames_train_no_extras]
+
+# Plain (non-asymmetric) discrete C51 + Robometer's class-balanced BCE.
+loss.progress_loss_type: discrete
+loss.success_loss_type: bce_balanced
+loss.progress_discrete_bins: 10
+
+# No KL anchor.
+loss.failure_kl_weight: 0.0
+
+# Heads — progress + success on, preference OFF.
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# Sampler — same as phase 1 (data-exposure fixes held equal across loss-formulation ablation).
+data.sample_type_ratio: [0,1,0]
+data.stratified_batch_balance: false
+data.failure_oversample_factor: 1.89    # → 30% failure batch-fraction (natural 18.5% of no_extras pool)
+data.warmup_steps: 0
+data.failure_label_smoothing: linear
+data.success_oversample_per_source.metaworld: 13.0
+data.failure_oversample_per_source.droid: 3.0
+
+data.keep_orphan_task_failures: true
+
+# ICL off.
+data.use_icl: false
+data.icl_prob: 0.0
+
+# Phase 2 LR + step budget.
+training.learning_rate: 1.0e-5
+training.max_steps: 5000
+
+training.exp_name: qwen35_ft_run6_noicl_standard_phase2
