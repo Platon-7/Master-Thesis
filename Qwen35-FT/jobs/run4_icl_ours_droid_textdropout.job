@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=qwen35_ft_run4_textdrop
-#SBATCH --account=gusei17535
 #SBATCH --output=logs/run4_icl_ours_droid_textdropout_%j.out
 #SBATCH --error=logs/run4_icl_ours_droid_textdropout_%j.err
 #SBATCH --time=1-18:00:00

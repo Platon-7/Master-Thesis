@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=qwen35_ft_run4_p2
-#SBATCH --account=gusei17535
 #SBATCH --output=logs/run4_icl_ours_phase2_%j.out
 #SBATCH --error=logs/run4_icl_ours_phase2_%j.err
 #SBATCH --time=24:00:00
