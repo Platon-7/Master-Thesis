@@ -84,6 +84,13 @@ if [[ -n "${WANDB_ENTITY:-}" ]]; then
     EXTRA="$EXTRA logging.wandb_entity=$WANDB_ENTITY"
 fi
 
+# Full-state resume hook — mirrors Robometer-FT/jobs/run1_icl_ours.job. Pass
+# CKPT_RESUME=<path-to-checkpoint-NNNN> at sbatch time to resume training from
+# that checkpoint (optimizer + scheduler + RNG + step counter, all restored).
+if [[ -n "${CKPT_RESUME:-}" ]]; then
+    EXTRA="$EXTRA ++training.resume_from_checkpoint='${CKPT_RESUME}'"
+fi
+
 WEIGHTS_DIR="${WEIGHTS_DIR:-/projects/prjs1958/Qwen35_FT_weights}"
 mkdir -p "$WEIGHTS_DIR"
 
