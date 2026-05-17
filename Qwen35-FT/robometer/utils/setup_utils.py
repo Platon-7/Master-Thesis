@@ -1206,7 +1206,7 @@ def create_training_arguments(cfg: TrainingConfig, output_dir: str, is_eval: boo
         "dataloader_num_workers": cfg.dataloader_num_workers,
         "dataloader_persistent_workers": cfg.dataloader_persistent_workers,
         "save_safetensors": True,
-        "save_total_limit": 2,
+        "save_total_limit": getattr(cfg, "save_total_limit", None),
         # Evaluation settings
         "eval_strategy": cfg.evaluation_strategy,
         "per_device_eval_batch_size": cfg.per_device_eval_batch_size,
