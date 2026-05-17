@@ -95,9 +95,12 @@ if [[ -n "${WANDB_ENTITY:-}" ]]; then
     EXTRA="$EXTRA logging.wandb_entity=$WANDB_ENTITY"
 fi
 
+# Strip whitespace from CKPT_RESUME — defends against terminal copy-paste injecting
+# a newline mid-path (caused job 22819750 to die loading TrainerState from a truncated path).
+CKPT_RESUME="$(printf %s "${CKPT_RESUME:-}" | tr -d '[:space:]')"
 RESUME_OVERRIDE=""
 if [[ -n "${CKPT_RESUME:-}" ]]; then
-    RESUME_OVERRIDE="++training.resume_from_checkpoint='${CKPT_RESUME}'"
+    RESUME_OVERRIDE="++training.resume_from_checkpoint=${CKPT_RESUME}"
     EXTRA="$EXTRA $RESUME_OVERRIDE"
 fi
 
