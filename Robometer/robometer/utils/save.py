@@ -540,25 +540,26 @@ class SaveBestCallback(TrainerCallback):
         """
         Callback triggered after evaluation.
         Metrics are already gathered across all processes by the trainer before being passed here.
+        FSDP fix: do NOT early-return on non-rank-0. save_model() under FSDP SHARDED_STATE_DICT
+        calls save_fsdp_model() which is a collective op requiring all ranks. Bookkeeping and
+        logging stay rank-0-only; the actual model save runs on all ranks.
         """
         step = state.global_step
+        is_main = self._is_main_process(self._trainer)
 
-        # Only rank 0 needs to process metrics and save checkpoints
-        if not self._is_main_process(self._trainer):
-            logger.debug("Skipping checkpoint save (not main process)")
-            return control
-
-        logger.info(f"SaveBestCallback.on_evaluate called at step {step} with {len(metrics)} metrics")
-
+        # Score computation is deterministic across ranks (metrics already gathered).
+        # Running it on every rank keeps _best_val / _saved state in sync without broadcast.
         score, missing_metrics = self._compute_averaged_score(metrics)
 
         if missing_metrics:
-            logger.warning(f"⚠️ Metrics {missing_metrics} not found in evaluation metrics")
-            logger.warning(f"Available metrics: {metrics.keys()}")
+            if is_main:
+                logger.warning(f"⚠️ Metrics {missing_metrics} not found in evaluation metrics")
+                logger.warning(f"Available metrics: {metrics.keys()}")
             # If all metrics are missing, use a dummy score for filename but still save
             if score == float("-inf"):  # All metrics missing
                 score_for_filename = 0.0  # Dummy value for filename
-                logger.warning("⚠️ All metrics missing, using dummy score 0.0 in checkpoint filename")
+                if is_main:
+                    logger.warning("⚠️ All metrics missing, using dummy score 0.0 in checkpoint filename")
             else:
                 score_for_filename = score
         else:
@@ -566,52 +567,57 @@ class SaveBestCallback(TrainerCallback):
 
         improved = (self._best_val is None) or (score > self._best_val)
 
-        # Check if this score is worth saving (top-k logic)
+        # Top-k decision — deterministic given identical _saved state across ranks.
         should_save = False
         if len(self._saved) < self.keep_top_k:
-            # We haven't reached top-k yet, always save
             should_save = True
         else:
-            # Check if this score beats the worst in our top-k
-            worst_score = self._saved[-1][0]  # Last item is worst (sorted best -> worst)
-            should_save = score > worst_score  # Always use > since we normalized scores
+            worst_score = self._saved[-1][0]
+            should_save = score > worst_score
 
         if should_save and self._trainer:
             # Update overall best for reference (only if we have a valid score)
             if improved and score != float("-inf"):
                 self._best_val = score
 
-            # Make a descriptive dir name
-            step = state.global_step
+            # Build descriptive dir name — deterministic across ranks
             metric_short = self._build_metric_short_name()
             tag = f"{metric_short}={score_for_filename:.4f}_step={step}"
             ckpt_dir = os.path.join(args.output_dir, f"ckpt-{tag}")
 
-            metrics_str = self._build_metrics_detail_string(metrics)
-            logger.info(
-                f"💾 Saving ckpt: {ckpt_dir} | avg_score: {score_for_filename:.6f} | {metrics_str} (rank {len(self._saved) + 1}/{self.keep_top_k})"
-            )
+            if is_main:
+                logger.info(f"SaveBestCallback.on_evaluate called at step {step} with {len(metrics)} metrics")
+                metrics_str = self._build_metrics_detail_string(metrics)
+                logger.info(
+                    f"💾 Saving ckpt: {ckpt_dir} | avg_score: {score_for_filename:.6f} | {metrics_str} (rank {len(self._saved) + 1}/{self.keep_top_k})"
+                )
+                os.makedirs(ckpt_dir, exist_ok=True)
 
-            # Create checkpoint directory
-            os.makedirs(ckpt_dir, exist_ok=True)
+            # Barrier so all ranks see the new dir before FSDP collective save
+            import torch.distributed as dist
+            if dist.is_available() and dist.is_initialized():
+                dist.barrier()
 
-            # Save model, trainer state, and metrics
+            # CRITICAL: ALL RANKS must reach _save_checkpoint_files. Inside, save_model()
+            # under FSDP calls save_fsdp_model() which is a collective op. Previously
+            # non-rank-0 ranks returned early, causing every SaveBest dir to be metadata-
+            # only (no pytorch_model_fsdp_0/__N_0.distcp shards written).
             self._save_checkpoint_files(args, ckpt_dir, metrics, step)
             self._cleanup_memory()
 
-            # Track that we saved a best checkpoint at this step
+            # Track that we saved a best checkpoint at this step (state stays in sync
+            # across ranks since the decision and ckpt_dir were deterministic).
             self._last_best_save_step = step
-
-            # Add to saved list and sort (always best -> worst since we normalized scores)
             self._saved.append((score, ckpt_dir))
             self._saved.sort(key=lambda x: x[0], reverse=True)
 
-            # Remove old checkpoint if we exceed keep_top_k
+            # Remove old checkpoint if we exceed keep_top_k — rank 0 only (single deleter)
             if len(self._saved) > self.keep_top_k:
                 _, path_to_rm = self._saved.pop(-1)
-                logger.info(f"🗑️ Removing old checkpoint: {path_to_rm}")
-                if os.path.isdir(path_to_rm):
-                    shutil.rmtree(path_to_rm, ignore_errors=True)
+                if is_main:
+                    logger.info(f"🗑️ Removing old checkpoint: {path_to_rm}")
+                    if os.path.isdir(path_to_rm):
+                        shutil.rmtree(path_to_rm, ignore_errors=True)
 
             # Upload to Hub if enabled and frequency check passes
             should_upload_to_hub = False
