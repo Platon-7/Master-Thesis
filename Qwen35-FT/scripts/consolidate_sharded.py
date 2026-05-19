@@ -215,10 +215,16 @@ def copy_aux_files(base_model_id: str, ckpt_dir: Path, out_dir: Path) -> None:
     # NOTE: architectures stays as base_config emitted it; we no longer overwrite to 'RBM'.
 
     # If the trainer saved a config.yaml alongside the shards, include head info.
+    # Robometer's load_model_from_hf (utils/save.py:903) requires `config.yaml`
+    # in the consolidated dir, NOT `training_config.yaml`. Write both names so
+    # the consolidated checkpoint is directly loadable while keeping the alias
+    # for any downstream code that expected the old name.
     training_config_yaml = ckpt_dir.parent / "config.yaml"
     if training_config_yaml.is_file():
         shutil.copy2(training_config_yaml, out_dir / "training_config.yaml")
-        print(f"  copied training config.yaml for head architecture reference")
+        shutil.copy2(training_config_yaml, out_dir / "config.yaml")
+        print(f"  copied training config.yaml (also as config.yaml so "
+              f"load_model_from_hf can find it)")
 
     (out_dir / "config.json").write_text(json.dumps(cfg_dict, indent=2))
     print(f"  wrote config.json  (architectures={cfg_dict.get('architectures')})")
