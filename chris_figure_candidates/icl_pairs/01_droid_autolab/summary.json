@@ -1,0 +1,11 @@
+{
+  "kind": "icl_pair",
+  "source": "droid",
+  "archive": "AUTOLab",
+  "task": "pour circular tokens into a bowl",
+  "failure_episode_id": "AUTOLab_2023-07-07_Fri_Jul__7_10-44-04_2023",
+  "success_episode_id": "AUTOLab_2023-07-07_Fri_Jul__7_10-44-59_2023",
+  "tier": "1_exact",
+  "n_keyframes_each": 16,
+  "is_real_world": true
+}

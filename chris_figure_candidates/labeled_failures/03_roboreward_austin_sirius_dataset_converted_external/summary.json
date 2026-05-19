@@ -1,0 +1,27 @@
+{
+  "kind": "labeled_failure",
+  "source": "roboreward",
+  "archive": "austin_sirius_dataset_converted_externally_to_rlds",
+  "task": "Open the Kcup holder, insert the Kcup into the holder, and close the Kcup holder",
+  "episode_id": "austin_sirius_dataset_converted_externally_to_rlds_originalsplit_train_index_4_attempt_1_score_1",
+  "n_keyframes": 16,
+  "frame_labels": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "is_real_world": true
+}

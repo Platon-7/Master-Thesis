@@ -1,0 +1,30 @@
+{
+  "episode_id": "ep_000018_e2815be7-45bc-4b0e-96a0-5f99721efb6f",
+  "archive": "aliangdw_usc_franka_policy_ranking_usc_franka_policy_ranking",
+  "family": "usc_franka",
+  "task": "Stack the red cube on the gray cube",
+  "label": "failure",
+  "terminal_reward": 2,
+  "n_source_frames": 32,
+  "n_keyframes": 16,
+  "keyframes_dir": "aliangdw_usc_franka_policy_ranking_usc_franka_policy_ranking/ep_000018_e2815be7-45bc-4b0e-96a0-5f99721efb6f",
+  "paired_success_id": null,
+  "frame_labels": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+  ]
+}

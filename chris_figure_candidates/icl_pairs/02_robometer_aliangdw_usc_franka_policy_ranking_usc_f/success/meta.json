@@ -1,0 +1,1 @@
+{"episode_id": "ep_000023_7632e0d1-14f7-414a-a189-db733a056634", "archive": "aliangdw_usc_franka_policy_ranking_usc_franka_policy_ranking", "family": "usc_franka", "task": "Stack the red cube on the gray cube", "label": "successful", "orphan": false, "n_source_frames": 32, "n_keyframes": 16, "fps": 8.0, "trajectory_index": 23, "uuid": "7632e0d1-14f7-414a-a189-db733a056634"}

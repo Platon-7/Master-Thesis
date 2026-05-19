@@ -1,0 +1,10 @@
+{
+  "kind": "labeled_failure",
+  "source": "droid",
+  "archive": "CLVR",
+  "task": "Hang or unhang object (ex: towel on hook, clothes over chair)",
+  "episode_id": "CLVR_2023-05-29_Mon_May_29_21-58-16_2023",
+  "n_keyframes": 16,
+  "frame_labels": [],
+  "is_real_world": true
+}

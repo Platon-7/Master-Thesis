@@ -1,0 +1,11 @@
+{
+  "kind": "icl_pair",
+  "source": "robometer",
+  "archive": "aliangdw_usc_franka_policy_ranking_usc_franka_policy_ranking",
+  "task": "Stack the red cube on the gray cube",
+  "failure_episode_id": "ep_000018_e2815be7-45bc-4b0e-96a0-5f99721efb6f",
+  "success_episode_id": "ep_000023_7632e0d1-14f7-414a-a189-db733a056634",
+  "tier": "1_same_task_fresh",
+  "n_keyframes_each": 16,
+  "is_real_world": true
+}

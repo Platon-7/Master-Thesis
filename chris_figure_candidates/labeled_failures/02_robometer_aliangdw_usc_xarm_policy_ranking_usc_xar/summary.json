@@ -1,0 +1,27 @@
+{
+  "kind": "labeled_failure",
+  "source": "robometer",
+  "archive": "aliangdw_usc_xarm_policy_ranking_usc_xarm_policy_ranking",
+  "task": "Put the eggplant in the black bowl",
+  "episode_id": "ep_000024_cf7eae7e-b5fe-42d7-ae66-c629302fa884",
+  "n_keyframes": 16,
+  "frame_labels": [
+    1,
+    1,
+    1,
+    2,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3
+  ],
+  "is_real_world": true
+}

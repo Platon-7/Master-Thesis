@@ -1,0 +1,11 @@
+{
+  "kind": "icl_pair",
+  "source": "metaworld",
+  "archive": "metaworld_assembly_v3",
+  "task": "Pick up a nut and place it onto a peg.",
+  "failure_episode_id": "metaworld_assembly_v3_score1_inst0000_noise_score_1",
+  "success_episode_id": "metaworld_assembly_v3_success_inst0005_corner2",
+  "tier": "same_task",
+  "n_keyframes_each": 16,
+  "is_real_world": false
+}

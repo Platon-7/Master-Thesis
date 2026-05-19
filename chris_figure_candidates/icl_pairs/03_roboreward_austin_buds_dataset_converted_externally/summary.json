@@ -1,0 +1,11 @@
+{
+  "kind": "icl_pair",
+  "source": "roboreward",
+  "archive": "austin_buds_dataset_converted_externally_to_rlds",
+  "task": "Take the lid off the pot, put the pot on the plate, and use the tool to push the pot to the front of the table.",
+  "failure_episode_id": "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_10_attempt_1_score_1",
+  "success_episode_id": "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_9",
+  "tier": "1_exact",
+  "n_keyframes_each": 16,
+  "is_real_world": true
+}

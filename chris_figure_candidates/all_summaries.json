@@ -1,0 +1,141 @@
+{
+  "icl_pairs": [
+    {
+      "kind": "icl_pair",
+      "source": "droid",
+      "archive": "AUTOLab",
+      "task": "pour circular tokens into a bowl",
+      "failure_episode_id": "AUTOLab_2023-07-07_Fri_Jul__7_10-44-04_2023",
+      "success_episode_id": "AUTOLab_2023-07-07_Fri_Jul__7_10-44-59_2023",
+      "tier": "1_exact",
+      "n_keyframes_each": 16,
+      "is_real_world": true
+    },
+    {
+      "kind": "icl_pair",
+      "source": "robometer",
+      "archive": "aliangdw_usc_franka_policy_ranking_usc_franka_policy_ranking",
+      "task": "Stack the red cube on the gray cube",
+      "failure_episode_id": "ep_000018_e2815be7-45bc-4b0e-96a0-5f99721efb6f",
+      "success_episode_id": "ep_000023_7632e0d1-14f7-414a-a189-db733a056634",
+      "tier": "1_same_task_fresh",
+      "n_keyframes_each": 16,
+      "is_real_world": true
+    },
+    {
+      "kind": "icl_pair",
+      "source": "roboreward",
+      "archive": "austin_buds_dataset_converted_externally_to_rlds",
+      "task": "Take the lid off the pot, put the pot on the plate, and use the tool to push the pot to the front of the table.",
+      "failure_episode_id": "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_10_attempt_1_score_1",
+      "success_episode_id": "austin_buds_dataset_converted_externally_to_rlds_originalsplit_train_index_9",
+      "tier": "1_exact",
+      "n_keyframes_each": 16,
+      "is_real_world": true
+    },
+    {
+      "kind": "icl_pair",
+      "source": "metaworld",
+      "archive": "metaworld_assembly_v3",
+      "task": "Pick up a nut and place it onto a peg.",
+      "failure_episode_id": "metaworld_assembly_v3_score1_inst0000_noise_score_1",
+      "success_episode_id": "metaworld_assembly_v3_success_inst0005_corner2",
+      "tier": "same_task",
+      "n_keyframes_each": 16,
+      "is_real_world": false
+    }
+  ],
+  "labeled_failures": [
+    {
+      "kind": "labeled_failure",
+      "source": "droid",
+      "archive": "CLVR",
+      "task": "Hang or unhang object (ex: towel on hook, clothes over chair)",
+      "episode_id": "CLVR_2023-05-29_Mon_May_29_21-58-16_2023",
+      "n_keyframes": 16,
+      "frame_labels": [],
+      "is_real_world": true
+    },
+    {
+      "kind": "labeled_failure",
+      "source": "robometer",
+      "archive": "aliangdw_usc_xarm_policy_ranking_usc_xarm_policy_ranking",
+      "task": "Put the eggplant in the black bowl",
+      "episode_id": "ep_000024_cf7eae7e-b5fe-42d7-ae66-c629302fa884",
+      "n_keyframes": 16,
+      "frame_labels": [
+        1,
+        1,
+        1,
+        2,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "is_real_world": true
+    },
+    {
+      "kind": "labeled_failure",
+      "source": "roboreward",
+      "archive": "austin_sirius_dataset_converted_externally_to_rlds",
+      "task": "Open the Kcup holder, insert the Kcup into the holder, and close the Kcup holder",
+      "episode_id": "austin_sirius_dataset_converted_externally_to_rlds_originalsplit_train_index_4_attempt_1_score_1",
+      "n_keyframes": 16,
+      "frame_labels": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "is_real_world": true
+    },
+    {
+      "kind": "labeled_failure",
+      "source": "failsafe",
+      "archive": "failsafe_pick",
+      "task": "Pick up the red cube and lift it to the goal position.",
+      "episode_id": "failsafe_pick_pick_s1_away_inst0000_score_1",
+      "n_keyframes": 16,
+      "frame_labels": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "is_real_world": false
+    }
+  ]
+}

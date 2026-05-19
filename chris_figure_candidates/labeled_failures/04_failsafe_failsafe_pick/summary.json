@@ -1,0 +1,27 @@
+{
+  "kind": "labeled_failure",
+  "source": "failsafe",
+  "archive": "failsafe_pick",
+  "task": "Pick up the red cube and lift it to the goal position.",
+  "episode_id": "failsafe_pick_pick_s1_away_inst0000_score_1",
+  "n_keyframes": 16,
+  "frame_labels": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "is_real_world": false
+}
