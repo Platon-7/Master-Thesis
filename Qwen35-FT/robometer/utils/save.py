@@ -477,8 +477,33 @@ class SaveBestCallback(TrainerCallback):
                 )
         else:
             logger.info("Detected non-PEFT model - using standard save_model()")
-            # For non-PEFT models, use standard save_model()
+            # For non-PEFT models, use standard save_model(). Under FSDP
+            # FULL_STATE_DICT this writes the gathered weights; under
+            # SHARDED_STATE_DICT save_model is a no-op in transformers 5.7
+            # (the SHARDED branch was deleted upstream), so we explicitly call
+            # save_fsdp_model() below to write the per-rank .distcp shards.
             self._trainer.save_model(ckpt_dir)
+            if getattr(self._trainer, "is_fsdp_enabled", False):
+                try:
+                    fsdp_plugin = self._trainer.accelerator.state.fsdp_plugin
+                    state_dict_type = str(fsdp_plugin.state_dict_type)
+                    if "SHARDED_STATE_DICT" in state_dict_type:
+                        from accelerate.utils import save_fsdp_model
+
+                        # Collective op: must be called on ALL ranks. The
+                        # SaveBestCallback.on_evaluate path is now non-rank-gated
+                        # (commit bfb5a94), so every rank reaches here.
+                        save_fsdp_model(
+                            fsdp_plugin,
+                            self._trainer.accelerator,
+                            self._trainer.model,
+                            ckpt_dir,
+                        )
+                        logger.info(
+                            f"💾 FSDP SHARDED shards written to {ckpt_dir}/pytorch_model_fsdp_0/"
+                        )
+                except Exception as e:
+                    logger.error(f"Failed to save FSDP sharded weights: {e}", exc_info=True)
 
         if args.should_save:
             self._trainer.save_state()  # trainer_state.json etc. in output_dir
