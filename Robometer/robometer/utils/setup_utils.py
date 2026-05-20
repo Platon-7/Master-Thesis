@@ -59,6 +59,24 @@ logger = get_logger()
 from robometer.utils.save import parse_hf_model_id_and_revision, resolve_checkpoint_path
 
 
+def _load_custom_heads_from_safetensors(model: "RBM", checkpoint_path: str) -> bool:
+    """Load custom RBM heads (success_head, progress_head, etc.) from a dedicated
+    custom_heads.safetensors file in the checkpoint directory if present.
+
+    Restored from upstream Robometer (removed in vendoring commit 7d30fe0). Without
+    this call, model_cls.from_pretrained loads only the backbone+language_model — the
+    custom heads stay at their nn.Module random init.
+    """
+    custom_heads_path = Path(checkpoint_path) / "custom_heads.safetensors"
+    if not custom_heads_path.exists():
+        return False
+
+    custom_state = load_file(str(custom_heads_path))
+    model.load_state_dict(custom_state, strict=False)
+    logger.info(f"Loaded {len(custom_state)} custom head tensors from {custom_heads_path}")
+    return True
+
+
 def _load_checkpoint_weights_from_safetensors(
     model, checkpoint_path: str, cfg: ModelConfig, load_adapters: bool = True
 ) -> None:
@@ -922,21 +940,12 @@ def setup_model_and_processor(
                         "lm_layer": model.model.language_model.layers[0].mlp.up_proj.weight,
                     }
 
-                # Load the model from the evaluation path.
-                # ignore_mismatched_sizes=True handles the embed_tokens row mismatch
-                # caused by registering <|demo_end|> (vocab grew by +1 row vs. the
-                # released Robometer-4B checkpoint). The new row stays at fresh init,
-                # which is correct for a freshly-added special token. Mirrors the
-                # shape-mismatch filter in `_load_checkpoint_weights_from_safetensors`
-                # that the use_peft=true branch already uses.
-                #
-                # output_loading_info=True so we can log which tensors actually got
-                # silently random-init'd. ignore_mismatched_sizes will swallow ANY
-                # shape mismatch, not just the embed_tokens one — without explicit
-                # logging, future checkpoint drift could leave tensors at random init
-                # without anyone noticing. Mirrors the diagnostic behavior of the
-                # PEFT branch's `_load_checkpoint_weights_from_safetensors`.
-                load_result = model_cls.from_pretrained(
+                # Load the model from the evaluation path. Matches upstream Robometer
+                # (no ignore_mismatched_sizes — that flag silently DROPS the entire
+                # tensor on shape mismatch instead of copying the loadable rows,
+                # which left embed_tokens at random init in baseline-Robometer-4B
+                # loads. Tracked back to vendoring commit 7d30fe0).
+                model = model_cls.from_pretrained(
                     repo_id,
                     processor=processor,
                     tokenizer=tokenizer,
@@ -944,28 +953,12 @@ def setup_model_and_processor(
                     base_model_id=cfg.base_model_id,
                     model_config=cfg,
                     revision=revision_to_load,
-                    ignore_mismatched_sizes=True,
-                    output_loading_info=True,
                 )
-                if isinstance(load_result, tuple):
-                    model, loading_info = load_result
-                else:
-                    # Fallback if a future override stops returning loading_info
-                    model = load_result
-                    loading_info = {}
 
-                # Diagnostic parity with the PEFT branch (line ~232).
-                # list() coerces set → list: transformers HEAD returns
-                # mismatched_keys as a set, which doesn't support [:5].
-                mismatched = list(loading_info.get("mismatched_keys") or [])
-                if mismatched:
-                    logger.warning(
-                        f"Skipping {len(mismatched)} tensor(s) with shape mismatch "
-                        f"(left at random init): {mismatched[:5]}"
-                        + (f" … and {len(mismatched)-5} more" if len(mismatched) > 5 else "")
-                    )
-                else:
-                    logger.info("Checkpoint loaded with no shape mismatches.")
+                # Load custom heads (success_head, progress_head, etc.) from the
+                # dedicated custom_heads.safetensors if present. from_pretrained loads
+                # only backbone+lm; without this call, heads stay at random init.
+                _load_custom_heads_from_safetensors(model, checkpoint_path)
 
                 # Verify weights were loaded
                 if before_weights:
