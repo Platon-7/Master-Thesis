@@ -566,85 +566,116 @@ class SaveBestCallback(TrainerCallback):
     def on_evaluate(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, metrics, **kwargs):
         """
         Callback triggered after evaluation.
-        Metrics are already gathered across all processes by the trainer before being passed here.
-        FSDP fix: do NOT early-return on non-rank-0. save_model() under FSDP SHARDED_STATE_DICT
-        calls save_fsdp_model() which is a collective op requiring all ranks. Bookkeeping and
-        logging stay rank-0-only; the actual model save runs on all ranks.
+
+        FSDP-aware save flow:
+          1. Skip fires that don't contain any of our expected metrics (e.g., HF Trainer's
+             standard eval emits eval_loss only — not what we track). Otherwise SaveBest
+             would write a dummy `score=0.0000` dir on every standard-eval fire.
+          2. Compute the save decision on rank 0, BROADCAST it via torch.distributed so
+             ALL ranks make the identical decision (essential for FSDP collective save).
+             Previously each rank ran the decision independently using its own _saved
+             state; if any rank diverged once, _saved went out of sync forever, leading
+             to partial-rank participation in save_fsdp_model (we saw 1/8 and 7/8 shard
+             counts in run1 22921460).
+          3. ALL ranks call save_fsdp_model — required collective for SHARDED_STATE_DICT.
+          4. Bookkeeping (logging, rmtree of pruned dirs) stays rank-0-only.
         """
         step = state.global_step
         is_main = self._is_main_process(self._trainer)
 
-        # Score computation is deterministic across ranks (metrics already gathered).
-        # Running it on every rank keeps _best_val / _saved state in sync without broadcast.
-        score, missing_metrics = self._compute_averaged_score(metrics)
+        import torch.distributed as dist
+        dist_active = dist.is_available() and dist.is_initialized()
 
-        if missing_metrics:
-            if is_main:
+        # --- (1) Filter out fires that don't carry our metrics (HF Trainer standard eval) ---
+        # If NONE of our expected metric_names appear in the gathered metrics dict, this
+        # on_evaluate fire is from somewhere else (typically HF Trainer's loss eval).
+        # Skip it cleanly so we don't create dummy 0.0000_step=* dirs.
+        any_match = any(m in metrics for m in self.metric_names)
+        if dist_active:
+            # Broadcast the decision from rank 0 to be safe — different ranks might see
+            # slightly different gathered metrics dicts.
+            am_tensor = torch.tensor([1 if any_match else 0],
+                                     device=self._trainer.accelerator.device if self._trainer else "cpu")
+            dist.broadcast(am_tensor, src=0)
+            any_match = bool(am_tensor.item())
+        if not any_match:
+            return control
+
+        # --- (2) Compute score and decision on rank 0, broadcast to all ranks ---
+        # All ranks SHOULD see identical metrics post-gather, but we don't rely on it.
+        if is_main:
+            score, missing_metrics = self._compute_averaged_score(metrics)
+            if missing_metrics:
                 logger.warning(f"⚠️ Metrics {missing_metrics} not found in evaluation metrics")
-                logger.warning(f"Available metrics: {metrics.keys()}")
-            # If all metrics are missing, use a dummy score for filename but still save
-            if score == float("-inf"):  # All metrics missing
-                score_for_filename = 0.0  # Dummy value for filename
-                if is_main:
-                    logger.warning("⚠️ All metrics missing, using dummy score 0.0 in checkpoint filename")
+                logger.warning(f"Available metrics: {list(metrics.keys())[:8]}...")
+            score_for_filename = 0.0 if score == float("-inf") else score
+            improved = (self._best_val is None) or (score > self._best_val)
+
+            should_save = False
+            if len(self._saved) < self.keep_top_k:
+                should_save = True
             else:
-                score_for_filename = score
+                worst_score = self._saved[-1][0]
+                should_save = score > worst_score
         else:
-            score_for_filename = score
+            score = 0.0
+            score_for_filename = 0.0
+            improved = False
+            should_save = False
 
-        improved = (self._best_val is None) or (score > self._best_val)
+        # Broadcast (should_save, score, score_for_filename) from rank 0 → all ranks
+        if dist_active:
+            dev = self._trainer.accelerator.device if self._trainer else "cpu"
+            decision_tensor = torch.tensor([1 if should_save else 0], device=dev)
+            score_tensor = torch.tensor([float(score) if score != float("-inf") else -1e18,
+                                         float(score_for_filename)], device=dev)
+            dist.broadcast(decision_tensor, src=0)
+            dist.broadcast(score_tensor, src=0)
+            should_save = bool(decision_tensor.item())
+            score = float(score_tensor[0].item())
+            if score < -1e17:
+                score = float("-inf")
+            score_for_filename = float(score_tensor[1].item())
 
-        # Top-k decision — deterministic given identical _saved state across ranks.
-        should_save = False
-        if len(self._saved) < self.keep_top_k:
-            should_save = True
-        else:
-            worst_score = self._saved[-1][0]
-            should_save = score > worst_score
+        if not should_save or not self._trainer:
+            return control
 
-        if should_save and self._trainer:
-            # Update overall best for reference (only if we have a valid score)
-            if improved and score != float("-inf"):
-                self._best_val = score
+        # --- (3) Build path and save on ALL ranks ---
+        if is_main and improved and score != float("-inf"):
+            self._best_val = score
 
-            # Build descriptive dir name — deterministic across ranks
-            metric_short = self._build_metric_short_name()
-            tag = f"{metric_short}={score_for_filename:.4f}_step={step}"
-            ckpt_dir = os.path.join(args.output_dir, f"ckpt-{tag}")
+        metric_short = self._build_metric_short_name()
+        tag = f"{metric_short}={score_for_filename:.4f}_step={step}"
+        ckpt_dir = os.path.join(args.output_dir, f"ckpt-{tag}")
 
+        if is_main:
+            logger.info(f"SaveBestCallback.on_evaluate called at step {step} with {len(metrics)} metrics")
+            metrics_str = self._build_metrics_detail_string(metrics)
+            logger.info(
+                f"💾 Saving ckpt: {ckpt_dir} | avg_score: {score_for_filename:.6f} | {metrics_str} (rank {len(self._saved) + 1}/{self.keep_top_k})"
+            )
+            os.makedirs(ckpt_dir, exist_ok=True)
+
+        # Barrier so all ranks see the new dir before FSDP collective save
+        if dist_active:
+            dist.barrier()
+
+        # CRITICAL: ALL RANKS must reach _save_checkpoint_files (FSDP collective op inside).
+        self._save_checkpoint_files(args, ckpt_dir, metrics, step)
+        self._cleanup_memory()
+
+        # --- (4) Bookkeeping on ALL ranks so _saved stays in sync ---
+        self._last_best_save_step = step
+        self._saved.append((score, ckpt_dir))
+        self._saved.sort(key=lambda x: x[0], reverse=True)
+
+        # Remove old checkpoint if we exceed keep_top_k — rank 0 only does the rmtree
+        if len(self._saved) > self.keep_top_k:
+            _, path_to_rm = self._saved.pop(-1)
             if is_main:
-                logger.info(f"SaveBestCallback.on_evaluate called at step {step} with {len(metrics)} metrics")
-                metrics_str = self._build_metrics_detail_string(metrics)
-                logger.info(
-                    f"💾 Saving ckpt: {ckpt_dir} | avg_score: {score_for_filename:.6f} | {metrics_str} (rank {len(self._saved) + 1}/{self.keep_top_k})"
-                )
-                os.makedirs(ckpt_dir, exist_ok=True)
-
-            # Barrier so all ranks see the new dir before FSDP collective save
-            import torch.distributed as dist
-            if dist.is_available() and dist.is_initialized():
-                dist.barrier()
-
-            # CRITICAL: ALL RANKS must reach _save_checkpoint_files. Inside, save_model()
-            # under FSDP calls save_fsdp_model() which is a collective op. Previously
-            # non-rank-0 ranks returned early, causing every SaveBest dir to be metadata-
-            # only (no pytorch_model_fsdp_0/__N_0.distcp shards written).
-            self._save_checkpoint_files(args, ckpt_dir, metrics, step)
-            self._cleanup_memory()
-
-            # Track that we saved a best checkpoint at this step (state stays in sync
-            # across ranks since the decision and ckpt_dir were deterministic).
-            self._last_best_save_step = step
-            self._saved.append((score, ckpt_dir))
-            self._saved.sort(key=lambda x: x[0], reverse=True)
-
-            # Remove old checkpoint if we exceed keep_top_k — rank 0 only (single deleter)
-            if len(self._saved) > self.keep_top_k:
-                _, path_to_rm = self._saved.pop(-1)
-                if is_main:
-                    logger.info(f"🗑️ Removing old checkpoint: {path_to_rm}")
-                    if os.path.isdir(path_to_rm):
-                        shutil.rmtree(path_to_rm, ignore_errors=True)
+                logger.info(f"🗑️ Removing old checkpoint: {path_to_rm}")
+                if os.path.isdir(path_to_rm):
+                    shutil.rmtree(path_to_rm, ignore_errors=True)
 
             # Upload to Hub if enabled and frequency check passes
             should_upload_to_hub = False
