@@ -761,7 +761,17 @@ def _verify_checkpoint_loading(cfg: ModelConfig, model: Any, before_weights: dic
         logger.warning(
             "Before and after progress head are the same! Check if you loaded the pretrained model correctly"
         )
-    if torch.allclose(before_lm_embed_tokens, after_lm_embed_tokens):
+    # before_lm_embed_tokens was captured at pre-load vocab; after is at post-load
+    # vocab. With the two-stage resize fix (f048519), those shapes differ by design
+    # whenever the checkpoint adds tokens (e.g., baseline Robometer-4B: N → N+1).
+    # Only run allclose when shapes match — otherwise the resize itself is proof
+    # the embedding was reinitialized, and torch.allclose would raise on shape diff.
+    if before_lm_embed_tokens.shape != after_lm_embed_tokens.shape:
+        logger.info(
+            f"LM embed_tokens resized during load: "
+            f"{tuple(before_lm_embed_tokens.shape)} → {tuple(after_lm_embed_tokens.shape)}"
+        )
+    elif torch.allclose(before_lm_embed_tokens, after_lm_embed_tokens):
         logger.warning(
             "Before and after LM embed tokens are the same! Check if you loaded the pretrained model correctly"
         )
