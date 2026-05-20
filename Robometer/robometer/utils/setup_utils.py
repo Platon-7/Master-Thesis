@@ -1137,6 +1137,7 @@ def create_training_arguments(cfg: TrainingConfig, output_dir: str, is_eval: boo
         "per_device_train_batch_size": cfg.per_device_train_batch_size,
         "gradient_accumulation_steps": cfg.gradient_accumulation_steps,
         "ddp_find_unused_parameters": cfg.ddp_find_unused_parameters,
+        "ddp_timeout": getattr(cfg, "ddp_timeout", 1800),
         "learning_rate": cfg.learning_rate,
         "save_strategy": cfg.save_strategy,
         "logging_steps": cfg.logging_steps,

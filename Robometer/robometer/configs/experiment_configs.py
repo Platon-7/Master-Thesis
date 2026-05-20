@@ -567,6 +567,11 @@ class TrainingConfig:
     gradient_checkpointing: bool = field(default=True)
     ddp_find_unused_parameters: bool = field(default=False)
     ddp_bucket_cap_mb: int = field(default=25)
+    # NCCL/distributed collective timeout in seconds. Default 1800 (30 min) matches HF
+    # TrainingArguments. Bump to e.g. 7200 (2h) when FSDP shard writes on GPFS may take
+    # longer than 30 min (cf. run4 22864336 crash: ALLGATHER timed out exactly at 1800s
+    # while one rank was still writing its 50 GB shard).
+    ddp_timeout: int = field(default=1800)
     max_steps: Optional[int] = field(default=-1)  # -1 means no limit, use num_train_epochs instead
     save_steps: int = field(default=100)
     dataloader_pin_memory: bool = field(default=True)
