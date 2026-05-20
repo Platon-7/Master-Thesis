@@ -547,16 +547,58 @@ def _setup_processor_and_tokenizer(cfg: ModelConfig) -> AutoProcessor:
     return processor
 
 
-def _add_special_tokens_and_resize(cfg: ModelConfig, processor: AutoProcessor, base_model: Any) -> None:
+def _detect_saved_vocab_size(checkpoint_path: Optional[str]) -> Optional[int]:
+    """Read the saved vocab_size from a checkpoint's config.json so we can pre-resize
+    embed_tokens to MATCH the checkpoint (avoiding shape mismatch in from_pretrained).
+
+    Returns None if checkpoint_path is None, the file is missing, or the field
+    can't be located — callers should treat None as "register all known tokens".
+
+    Why: the released Robometer-4B was trained with 5 RBM special tokens (vocab N),
+    while local recipes also register <|demo_end|> for ICL (vocab N+1). Loading the
+    baseline into a pre-resized [N+1, D] target raises a shape mismatch (HF refuses
+    to interleave [N, D] into the first N rows automatically). Pre-detecting saved
+    vocab lets us register only N tokens before load, then add the (N+1)-th token
+    post-load via resize_token_embeddings (which DOES correctly preserve loaded
+    rows and append fresh init).
     """
-    Add RBM special tokens and resize token embeddings if needed.
+    if not checkpoint_path:
+        return None
+    import json
+    path = Path(checkpoint_path) / "config.json"
+    if not path.exists():
+        return None
+    try:
+        config = json.load(open(path))
+    except Exception:
+        return None
+    # Qwen3-VL stores vocab inside text_config; Qwen2.5 stores at top level.
+    text_config = config.get("text_config") or {}
+    return text_config.get("vocab_size") or config.get("vocab_size")
+
+
+def _add_special_tokens_and_resize(
+    cfg: ModelConfig,
+    processor: AutoProcessor,
+    base_model: Any,
+    target_vocab_size: Optional[int] = None,
+) -> None:
+    """
+    Add RBM special tokens and resize token embeddings.
 
     Args:
         cfg: Model configuration
         processor: Processor with tokenizer
         base_model: Base model to resize embeddings for
+        target_vocab_size: If given, stop registering tokens once vocab reaches this
+            size. Used when loading a checkpoint with fewer tokens than the local
+            recipe wants (e.g. baseline Robometer-4B at N vs local + <|demo_end|>
+            at N+1). The caller is expected to call this function AGAIN post-load
+            without target_vocab_size to register the remaining tokens.
     """
-    # Add RBM special tokens if they don't exist
+    # Add RBM special tokens if they don't exist. Order matters when target_vocab_size
+    # is set: tokens earlier in the list are registered first. <|demo_end|> is last so
+    # baseline Robometer-4B (which lacks demo_end) ends at the correct vocab.
     special_tokens = [
         "<|split_token|>",
         "<|reward_token|>",
@@ -568,6 +610,12 @@ def _add_special_tokens_and_resize(cfg: ModelConfig, processor: AutoProcessor, b
     logger.info(f"Before adding special tokens: {len(processor.tokenizer.get_vocab())}")
     num_added = 0
     for token in special_tokens:
+        if target_vocab_size is not None and len(processor.tokenizer) >= target_vocab_size:
+            logger.info(
+                f"Reached target_vocab_size={target_vocab_size}; skipping remaining "
+                f"tokens (next: {token}). Will be added post-load."
+            )
+            break
         if token not in processor.tokenizer.get_vocab():
             added = processor.tokenizer.add_special_tokens({"additional_special_tokens": [token]})
             num_added += added
@@ -870,8 +918,15 @@ def setup_model_and_processor(
                     "Failed to apply PEFT to base_model. Cannot load adapter weights without PeftModel structure."
                 )
 
-        # Add special tokens and resize embeddings
-        _add_special_tokens_and_resize(cfg, processor, base_model)
+        # Add special tokens and resize embeddings. When loading a checkpoint, pre-resize
+        # ONLY up to the checkpoint's saved vocab so from_pretrained sees matching shapes.
+        # Any remaining tokens (e.g., <|demo_end|> when loading baseline Robometer-4B) are
+        # added post-load via a second call below.
+        pre_load_target_vocab = _detect_saved_vocab_size(checkpoint_path_for_load) if loading_from_checkpoint else None
+        if pre_load_target_vocab is not None:
+            logger.info(f"Checkpoint at {checkpoint_path_for_load} declares vocab_size={pre_load_target_vocab}; "
+                        f"pre-resize will stop at that size.")
+        _add_special_tokens_and_resize(cfg, processor, base_model, target_vocab_size=pre_load_target_vocab)
 
         # Initialize RBM model wrapper with the pre-loaded base model
         logger.info("Initializing RBM model...")
@@ -959,6 +1014,13 @@ def setup_model_and_processor(
                 # dedicated custom_heads.safetensors if present. from_pretrained loads
                 # only backbone+lm; without this call, heads stay at random init.
                 _load_custom_heads_from_safetensors(model, checkpoint_path)
+
+                # Register any RBM special tokens that the checkpoint's vocab didn't
+                # include (e.g., <|demo_end|> when loading baseline Robometer-4B with
+                # 5 RBM tokens vs local recipe's 6). resize_token_embeddings preserves
+                # the loaded rows and appends fresh init for new ones — the exact
+                # semantics the original ignore_mismatched_sizes comment was reaching for.
+                _add_special_tokens_and_resize(cfg, processor, model.model)
 
                 # Verify weights were loaded
                 if before_weights:
