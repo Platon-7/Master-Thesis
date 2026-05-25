@@ -3119,14 +3119,17 @@ class RBMHeadsTrainer(Trainer):
             else:
                 logger.warning(f"NaN detected in success loss")
 
-        # Check for NaN in final loss. The recovery (warn + zero out) is enough on its
-        # own; the previous ipdb.set_trace() under `if training:` was a leftover dev
-        # breakpoint that crashed any env without ipdb installed (Luca's Phase-2 job
-        # 23092336 hit this immediately on the first NaN, which is expected for
-        # asymmetric-loss checkpoints on cold GPUs — see memory:qwen35_ft_warmup_bug).
+        # Check for NaN in final loss. Use torch.nan_to_num so the autograd graph stays
+        # attached — replacing with a fresh torch.tensor(0.0) creates a leaf tensor with
+        # no grad_fn, and backward() then crashes with "element 0 of tensors does not
+        # require grad and does not have a grad_fn" (hit in Luca's Phase-2 23104545
+        # after we removed the ipdb breakpoint that previously masked this bug).
+        # nan_to_num is differentiable: the resulting loss preserves the graph back to
+        # whichever module produced the NaN, so backward() runs cleanly. HF Trainer's
+        # built-in NaN/Inf gradient handling takes over from there.
         if torch.isnan(final_loss).any():
-            logger.warning(f"NaN detected in progress loss, replacing with 0.0")
-            final_loss = torch.tensor(0.0, device=final_loss.device, dtype=final_loss.dtype)
+            logger.warning(f"NaN detected in progress loss, applying nan_to_num to keep graph attached")
+            final_loss = torch.nan_to_num(final_loss, nan=0.0, posinf=0.0, neginf=0.0)
 
         if return_outputs:
             outputs_dict = {}
