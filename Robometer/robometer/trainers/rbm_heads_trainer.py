@@ -2374,14 +2374,22 @@ class RBMHeadsTrainer(Trainer):
         success_probs_flat = success_probs[combined_mask > 0]
         success_labels_flat = success_labels[combined_mask > 0]
 
-        # Compute AUPRC across all valid frames
-        if success_probs_flat.numel() > 0 and len(torch.unique(success_labels_flat)) > 1:
+        # Compute AUPRC across all valid frames. Skip if probs contain NaN — the
+        # cold-GPU asymmetric-loss bug produces NaN logits on first forward, and
+        # sklearn's average_precision_score rejects them with "ValueError: Input
+        # contains NaN" (hit in Luca's run4 Phase-2 23106502 on step 1). Returning
+        # 0.0 is better than crashing; the warning printed alongside the loss-side
+        # NaN already signals the issue.
+        has_nan = torch.isnan(success_probs_flat).any() or torch.isnan(success_labels_flat).any()
+        if success_probs_flat.numel() > 0 and len(torch.unique(success_labels_flat)) > 1 and not has_nan:
             auprc = average_precision_score(
                 t2n(success_labels_flat),
                 t2n(success_probs_flat),
             )
             batch_auprc = torch.tensor(auprc, device=success_loss.device, dtype=torch.float32)
         else:
+            if has_nan:
+                logger.warning("NaN in success_probs/labels; skipping AUPRC for this batch")
             batch_auprc = torch.tensor(0.0, device=success_loss.device, dtype=torch.float32)
 
         metrics = {
