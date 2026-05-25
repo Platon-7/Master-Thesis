@@ -2223,9 +2223,8 @@ class RBMHeadsTrainer(Trainer):
                             f"Trajectory {i} has quality_label='{quality_label}' but success_labels are not all 0s. "
                             f"Found non-zero labels: {(sample_success_labels != 0.0).sum().item()} out of {len(sample_success_labels)}"
                         )
-                        import ipdb
-
-                        ipdb.set_trace()
+                        # NOTE: ipdb.set_trace() previously here — removed because it crashed
+                        # production jobs without ipdb. The debug-level log above is enough.
 
                     # Include all frames for this trajectory in the mask
                     quality_mask[i, :] = 1.0
@@ -3120,12 +3119,12 @@ class RBMHeadsTrainer(Trainer):
             else:
                 logger.warning(f"NaN detected in success loss")
 
-        # Check for NaN in final loss
+        # Check for NaN in final loss. The recovery (warn + zero out) is enough on its
+        # own; the previous ipdb.set_trace() under `if training:` was a leftover dev
+        # breakpoint that crashed any env without ipdb installed (Luca's Phase-2 job
+        # 23092336 hit this immediately on the first NaN, which is expected for
+        # asymmetric-loss checkpoints on cold GPUs — see memory:qwen35_ft_warmup_bug).
         if torch.isnan(final_loss).any():
-            if training:
-                import ipdb
-
-                ipdb.set_trace()
             logger.warning(f"NaN detected in progress loss, replacing with 0.0")
             final_loss = torch.tensor(0.0, device=final_loss.device, dtype=final_loss.dtype)
 
