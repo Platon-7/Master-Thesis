@@ -25,3 +25,10 @@ class Logger:
     def flush(self):
         # for python 3 compatibility.
         pass
+
+    def isatty(self):
+        # transformers >= 5.7 loading_report calls sys.stdout.isatty(); when
+        # the IBRL training script replaces sys.stdout with this Logger the
+        # call AttributeErrors. Return False so terminal-style escapes are
+        # disabled in the loading report.
+        return False

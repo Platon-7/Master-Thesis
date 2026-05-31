@@ -109,3 +109,12 @@ Robometer-FT/logs/
 # Diagnostic image dumps from Robometer/scripts/sample_*.py — regenerable, large
 droid_samples/
 metaworld_samples/
+
+# Generated analysis artifacts (plots + data dumps) — keep scripts + docs only
+loss-debug/*.png
+loss-debug/*.pdf
+loss-debug/*.csv
+loss-debug/sp_dist/
+loss-debug/score4_diag/
+vlm_ibrl/results/
+Qwen35-FT/scripts/_out/

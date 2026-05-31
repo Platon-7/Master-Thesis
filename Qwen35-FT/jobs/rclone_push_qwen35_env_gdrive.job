@@ -1,0 +1,47 @@
+#!/bin/bash
+#SBATCH --job-name=rclone_qwen35_gd
+#SBATCH --output=logs/rclone_push_qwen35_env_gdrive_%j.out
+#SBATCH --error=logs/rclone_push_qwen35_env_gdrive_%j.err
+#SBATCH --partition=staging
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=2
+#SBATCH --time=01:00:00
+
+# Push robometer_qwen35_gpu.tar.gz (~3.6 GB conda-pack tarball) to Google Drive
+# via rclone. Destination folder:
+#   https://drive.google.com/drive/folders/1SHJ9www-3IWSqnXUUVs4fIv7JGJImcIs
+# resolved via --drive-root-folder-id so we don't need a prior `cd`-style path.
+#
+# Reuses the `robometer_dataset:` remote (type=drive).
+
+SRC="/projects/prjs1958/envs/robometer_qwen35_gpu.tar.gz"
+FOLDER_ID="1SHJ9www-3IWSqnXUUVs4fIv7JGJImcIs"
+
+echo "============================================================"
+echo "rclone push robometer_qwen35_gpu.tar.gz -> Google Drive"
+echo "  Job ID:   $SLURM_JOB_ID"
+echo "  Node:     $(hostname)"
+echo "  Source:   $SRC ($(du -h "$SRC" | cut -f1))"
+echo "  Dest:     robometer_dataset:  (folder id: $FOLDER_ID)"
+echo "  Date:     $(date)"
+echo "============================================================"
+
+rclone --version | head -1
+
+rclone copy "$SRC" "robometer_dataset:" \
+    --drive-root-folder-id "$FOLDER_ID" \
+    --transfers 4 \
+    --checkers 8 \
+    --drive-chunk-size 128M \
+    --stats 30s \
+    --stats-one-line \
+    --retries 5 \
+    --low-level-retries 10 \
+    --log-level INFO
+
+RC=$?
+echo "============================================================"
+echo "rclone exit code: $RC"
+echo "Done at: $(date)"
+echo "============================================================"
+exit $RC

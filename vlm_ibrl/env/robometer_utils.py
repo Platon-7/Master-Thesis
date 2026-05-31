@@ -33,6 +33,37 @@ class RobometerScorer:
 
     def __init__(self, model_path: str, device: str = "cuda", max_frames: int = None):
         import sys
+        import os
+        import yaml
+
+        # Disable cuDNN autotune. Some Robometer-family checkpoints (e.g.
+        # Robometer-4B baseline and Robometer-FT step-5000) consistently fall
+        # into a cuDNN bf16 fast-path that produces ALL-NaN success_logits.
+        # Forcing deterministic (slower) kernel selection avoids this pathology.
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+
+        # Qwen3.5 dispatch lives only in Qwen35-FT/robometer/utils/setup_utils.py
+        # (per the "intentional divergence" rule — Robometer/ keeps the Qwen3-VL
+        # codepath; Qwen35-FT/ adds Qwen3.5 on top). When the consolidated
+        # checkpoint's config.yaml declares a Qwen3.5 base, prepend Qwen35-FT/ to
+        # sys.path BEFORE the deferred `from robometer.* import` lines below so
+        # the Qwen3.5-aware copy wins. Robometer-4B (Qwen3-VL) falls through
+        # unchanged — the Qwen35-FT copy still has the Qwen3-VL branch.
+        cfg_yaml = os.path.join(model_path, "config.yaml")
+        if os.path.isfile(cfg_yaml):
+            try:
+                with open(cfg_yaml) as f:
+                    bid = (yaml.safe_load(f) or {}).get("model", {}).get("base_model_id", "")
+            except Exception:
+                bid = ""
+            if "qwen3.5" in bid.lower():
+                qwen35_repo = os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                    "Qwen35-FT",
+                )
+                if os.path.isdir(qwen35_repo) and qwen35_repo not in sys.path:
+                    sys.path.insert(0, qwen35_repo)
 
         from robometer.models.rbm import RBM
         from robometer.utils import setup_utils
@@ -117,6 +148,45 @@ class RobometerScorer:
         self.max_frames = int(max_frames)
         self.device = next(model.parameters()).device
 
+        # Force fp32 if requested (env var ROBOMETER_FORCE_FP32=1). For specific
+        # checkpoints (e.g. Robometer-FT step-5000 with ICL) the bf16 kernels
+        # consistently produce NaN regardless of warm-up.
+        if os.environ.get("ROBOMETER_FORCE_FP32") == "1":
+            self.model = self.model.to(torch.float32)
+            for m in self.model.modules():
+                for p in m.parameters(recurse=False):
+                    p.data = p.data.float()
+                for b_name, b in m.named_buffers(recurse=False):
+                    if b.is_floating_point():
+                        try:
+                            setattr(m, b_name, b.to(torch.float32))
+                        except Exception:
+                            pass
+
+        # Warm-up: run dummy forward passes on random frames until we get a
+        # non-NaN output (up to a max attempt count). Without this, certain
+        # asymmetric-loss-trained checkpoints produce ALL-NaN success_logits
+        # on their first few forwards when loaded onto a fresh GPU — we
+        # traced the failure mode to a cuDNN/bf16 fast-path that gets
+        # initialized incorrectly on cold start. Looping until non-NaN
+        # forces stabilization regardless of which kernel was picked.
+        import math
+        for attempt in range(10):
+            n_frames = (8, 16, 32, 4, 24, 16, 8, 12, 20, 28)[attempt]
+            if n_frames > self.max_frames * 2:
+                continue
+            try:
+                dummy = [
+                    np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)
+                    for _ in range(n_frames)
+                ]
+                out = self(dummy, task="warm up", episode_id=-1)
+                sp = out.get("success_prob")
+                if sp is not None and not (isinstance(sp, float) and math.isnan(sp)):
+                    break  # got a real value — GPU stabilized
+            except Exception:
+                pass
+
     @staticmethod
     def _frames_to_uint8(frames: Sequence[_FrameLike]) -> np.ndarray:
         """Stack a sequence of PIL.Image / ndarray frames into ``(T, H, W, C)`` uint8."""
@@ -130,7 +200,8 @@ class RobometerScorer:
             arrs.append(arr.astype(np.uint8, copy=False))
         return np.stack(arrs, axis=0)
 
-    def __call__(self, frames: Sequence[_FrameLike], task: str, episode_id: int = 0) -> dict:
+    def __call__(self, frames: Sequence[_FrameLike], task: str, episode_id: int = 0,
+                 icl_frames: Sequence[_FrameLike] | None = None) -> dict:
         from robometer.evals.eval_server import process_batch_helper
         from robometer.evals.eval_utils import (
             extract_rewards_from_output,
@@ -148,6 +219,22 @@ class RobometerScorer:
             text_embedding=None,
         )
         sample = raw_dict_to_sample(raw_data=raw, max_frames=self.max_frames, sample_type="progress")
+
+        # If ICL frames provided, build a successful-demo context trajectory and
+        # attach. The collator (when context_trajectory is not None) inserts
+        # `<|demo_end|>` between demo and query — same format used at training time.
+        if icl_frames is not None and len(icl_frames) > 0:
+            icl_np = self._frames_to_uint8(icl_frames)
+            icl_raw = dict(
+                frames=icl_np,
+                task=task,
+                id=int(episode_id) + 1_000_000,
+                metadata=dict(subsequence_length=int(icl_np.shape[0])),
+                video_embeddings=None,
+                text_embedding=None,
+            )
+            icl_sample = raw_dict_to_sample(raw_data=icl_raw, max_frames=self.max_frames, sample_type="progress")
+            sample.context_trajectory = icl_sample.trajectory
 
         with torch.inference_mode():
             outputs = process_batch_helper(

@@ -56,7 +56,9 @@ python -c "import sys, unsloth; print('python   :', sys.version.split()[0]); pri
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
 echo "==============================================================="
 
-python tools/robometer_smoke.py
+MODEL_PATH="${ROBOMETER_MODEL_PATH:-robometer/Robometer-4B}"
+echo "MODEL_PATH    : $MODEL_PATH"
+python tools/robometer_smoke.py --model-path "$MODEL_PATH"
 RC=$?
 
 echo

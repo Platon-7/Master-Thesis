@@ -1,0 +1,66 @@
+#!/bin/bash
+#SBATCH --job-name=sp_dist_eval
+#SBATCH --output=logs/sp_dist_eval_%j.out
+#SBATCH --error=logs/sp_dist_eval_%j.err
+#SBATCH --time=00:45:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+# Roll out a saved IBRL policy for N episodes, dump per-episode
+# (env_success, vlm_sp, vlm_progress) CSV. Test whether the VLM's sp
+# distribution shifts under IBRL-policy trajectories vs offline eval data.
+#
+# Submit with:
+#   sbatch --export=ALL,IBRL_CONDA_ENV=<env>,RUN_DIR=<run_dir>,OUT_CSV=<csv>,NUM_EP=200 \
+#          [optional ROBOMETER_FORCE_FP32=1 / QWEN35_FT_PATH=... / ROBOMETER_FT_PATH=...] \
+#          jobs/eval_sp_distribution.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+RUN_DIR="${RUN_DIR:?must set RUN_DIR}"
+OUT_CSV="${OUT_CSV:?must set OUT_CSV}"
+NUM_EP="${NUM_EP:-200}"
+SEED="${SP_DIST_SEED:-12345}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+
+# Re-export ICL env vars (needed for Robometer-family with ICL training)
+if [[ -n "${ROBOMETER_ICL_DEMO_PATH:-}" ]]; then
+    export ROBOMETER_ICL_DEMO_PATH
+    export ROBOMETER_ICL_DEMO_IDX="${ROBOMETER_ICL_DEMO_IDX:-0}"
+    export ROBOMETER_ICL_FRAMES="${ROBOMETER_ICL_FRAMES:-16}"
+    echo "ICL_DEMO_PATH = $ROBOMETER_ICL_DEMO_PATH"
+fi
+
+echo "==================== sp_dist_eval summary ===================="
+echo "ENV_NAME       : $ENV_NAME"
+echo "RUN_DIR        : $RUN_DIR"
+echo "OUT_CSV        : $OUT_CSV"
+echo "NUM_EP / SEED  : $NUM_EP / $SEED"
+echo "FORCE_FP32     : ${ROBOMETER_FORCE_FP32:-<unset>}"
+echo "QWEN35_FT_PATH : ${QWEN35_FT_PATH:-<unset>}"
+echo "ROBOMETER_FT_PATH: ${ROBOMETER_FT_PATH:-<unset>}"
+echo "python         : $(which python)"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "==============================================================="
+
+python tools/eval_sp_distribution.py \
+    --run-dir "$RUN_DIR" \
+    --num-episodes "$NUM_EP" \
+    --seed "$SEED" \
+    --out-csv "$OUT_CSV"

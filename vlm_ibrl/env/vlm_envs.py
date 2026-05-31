@@ -1,3 +1,4 @@
+import os
 import random
 import time
 from pathlib import Path
@@ -48,6 +49,8 @@ VALID_VLMS = (
     "demo2reward_qwen3_32b",
     "roboreward_8b",
     "robometer_4b",
+    "robometer_ft",   # user's fine-tuned variant; checkpoint via ROBOMETER_FT_PATH env var
+    "qwen35_ft",      # alternative FT (Qwen3.5 base); checkpoint via QWEN35_FT_PATH env var
     "gvl_qwen3_32b",
     "gvl_qwen3_8b",
 )
@@ -169,8 +172,57 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         # behavior identical to the original integration. Ignored for non-
         # Robometer VLMs.
         self.robometer_beta = float(kwargs.pop("robometer_beta", 0.0))
+        # Optional binarization threshold: if > 0, the mixed reward is
+        # rewritten to 1.0 if it exceeds the threshold, else 0.0. Designed
+        # for FT models whose success_prob lives in a small range like
+        # [0.001, 0.08] — a calibrated threshold turns the soft output into
+        # a usable IBRL sparse-reward signal. 0.0 = no thresholding (default).
+        self.robometer_threshold = float(kwargs.pop("robometer_threshold", 0.0))
+        # Optional reward scale applied before thresholding. Use when FT
+        # outputs live in a small range and we want to keep the reward
+        # continuous (no threshold) but bring it into IBRL's expected
+        # [0, 1]-ish range. Order of operations: mixed *= scale → optional
+        # threshold. Default 1.0 = no scaling.
+        self.robometer_reward_scale = float(kwargs.pop("robometer_reward_scale", 1.0))
         self._last_progress = 0.0
         self._last_success_prob = 0.0
+
+        # ICL context for Robometer-family scorers. When ROBOMETER_ICL_DEMO_PATH
+        # is set (a directory of `{demo_idx}_NNN.png` frames), pick N uniform
+        # frames from the chosen demo and pass them to every scorer call as
+        # the in-context demonstration. Matches training-time ICL recipe.
+        self.icl_frames = None
+        icl_path = os.environ.get("ROBOMETER_ICL_DEMO_PATH", "")
+        print(
+            f"[ICL debug] env var ROBOMETER_ICL_DEMO_PATH="
+            f"{icl_path!r}  vlm={vlm!r}  → will load ICL: "
+            f"{bool(icl_path and 'robometer' in vlm)}",
+            flush=True,
+        )
+        if icl_path and "robometer" in vlm:
+            from pathlib import Path as _P
+            from PIL import Image as _PIL
+            icl_demo_idx = int(os.environ.get("ROBOMETER_ICL_DEMO_IDX", "0"))
+            icl_n = int(os.environ.get("ROBOMETER_ICL_FRAMES", "16"))
+            frames_dir = _P(icl_path)
+            available = sorted(
+                p for p in frames_dir.iterdir()
+                if p.name.startswith(f"{icl_demo_idx}_") and p.suffix == ".png"
+            )
+            if not available:
+                raise FileNotFoundError(
+                    f"ROBOMETER_ICL_DEMO_PATH={icl_path} has no frames for "
+                    f"demo {icl_demo_idx}"
+                )
+            picks = np.linspace(0, len(available) - 1, icl_n).round().astype(int)
+            self.icl_frames = [
+                np.asarray(_PIL.open(available[i]).convert("RGB"), dtype=np.uint8)
+                for i in picks
+            ]
+            print(
+                f"[ICL] loaded {icl_n} frames from demo {icl_demo_idx} of "
+                f"{icl_path} (indices {picks.tolist()})"
+            )
 
         # Configurable: where GVL looks up its in-context demos.
         self.metaworld_data_dir = kwargs.pop("metaworld_data_dir", DEFAULT_METAWORLD_DATA_DIR)
@@ -223,11 +275,23 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             self.prompt_vlm = prompt_roboreward
             self.system_prompt = roboreward_prompt
             self.prompt = f"{roboreward_prompt}\n\nTask: {task}"
-        elif vlm == "robometer_4b":
-            # Robometer has its own inference path (progress + success heads,
-            # not generative). The scorer encapsulates model/processor/collator;
-            # self.vlm is set so the shared ``self.vlm.eval()`` below works.
-            self.scorer = get_robometer_4b()
+        elif vlm in ("robometer_4b", "robometer_ft", "qwen35_ft"):
+            # Robometer-family critics (progress + success heads, not
+            # generative). All variants share one loader; only the
+            # checkpoint path differs. FT variants read their path from an
+            # env var so the SLURM job stays generic.
+            _ckpt_map = {
+                "robometer_4b": "robometer/Robometer-4B",
+                "robometer_ft": os.environ.get("ROBOMETER_FT_PATH", ""),
+                "qwen35_ft":    os.environ.get("QWEN35_FT_PATH", ""),
+            }
+            ckpt = _ckpt_map[vlm]
+            if not ckpt:
+                raise ValueError(
+                    f"--vlm {vlm} requires the matching env var (ROBOMETER_FT_PATH "
+                    f"or QWEN35_FT_PATH) pointing at a consolidated checkpoint dir."
+                )
+            self.scorer = get_robometer_4b(model_path=ckpt)
             self.vlm = self.scorer
             self.processor = None
             self.prompt_vlm = None
@@ -305,8 +369,14 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         if self.reward_at_truncation and not truncated:
             vlm_reward = 0.0
         else:
-            if "roboreward" in self.vlm_name:
-                # RoboReward consumes the full video.
+            if "roboreward" in self.vlm_name or "robometer" in self.vlm_name or self.vlm_name == "qwen35_ft":
+                # RoboReward and Robometer consume the full video. Robometer's
+                # internal collator (linspace_subsample_frames) reduces to its
+                # configured max_frames (16). Passing only past_len+1=5 frames
+                # collapses the trained success signal — verified empirically
+                # on a known-success training trajectory:
+                #   16-frame input → success_prob ≈ 0.59 (correct)
+                #    5-frame input → success_prob ≈ 0.009 (collapsed)
                 vlm_reward = self.vlm_reward(self.current_video)
             else:
                 # Demo2Reward and GVL consume a sparsely sampled set of frames.
@@ -327,7 +397,7 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
                     self.episode_stats["vlm_reward_TNR"] += 1
                 else:
                     self.episode_stats["vlm_reward_FPR"] += 1
-            if "robometer" in self.vlm_name:
+            if "robometer" in self.vlm_name or self.vlm_name == "qwen35_ft":
                 self.episode_stats["vlm_robometer_progress_sum"] += self._last_progress
                 self.episode_stats["vlm_robometer_success_prob_sum"] += self._last_success_prob
 
@@ -359,18 +429,24 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
                 test_frames=rest_frames,
             )
 
-        if "robometer" in self.vlm_name:
-            out = self.scorer(frames, task=self.task_description)
+        if "robometer" in self.vlm_name or self.vlm_name == "qwen35_ft":
+            out = self.scorer(frames, task=self.task_description, icl_frames=self.icl_frames)
             self._last_progress = float(out["progress_reward"])
             self._last_success_prob = float(out["success_prob"])
             mixed = self.robometer_beta * self._last_progress + (1.0 - self.robometer_beta) * self._last_success_prob
+            mixed *= self.robometer_reward_scale
+            if self.robometer_threshold > 0:
+                reward = 1.0 if mixed > self.robometer_threshold else 0.0
+            else:
+                reward = mixed
             if debug:
                 print(
-                    f"Robometer: progress={self._last_progress:.3f} "
-                    f"success={self._last_success_prob:.3f} "
-                    f"beta={self.robometer_beta:.2f} → reward={mixed:.3f}"
+                    f"Robometer: progress={self._last_progress:.4f} "
+                    f"success={self._last_success_prob:.4f} "
+                    f"beta={self.robometer_beta:.2f} scale={self.robometer_reward_scale:g} "
+                    f"mixed={mixed:.4f} thr={self.robometer_threshold:.4f} → reward={reward:.3f}"
                 )
-            return mixed
+            return reward
 
         is_roboreward = "roboreward" in self.vlm_name
         critic_output = single_prompt_eval(

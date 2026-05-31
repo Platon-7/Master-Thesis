@@ -168,6 +168,10 @@ def forward_model(
                 image_grid_thw=batch_inputs.get("image_grid_thw", None),
                 video_grid_thw=batch_inputs.get("video_grid_thw", None),
                 second_per_grid_ts=batch_inputs.get("second_per_grid_ts", None),
+                # Qwen3.5 / transformers >=5.7 needs mm_token_type_ids for M-RoPE.
+                # RBM.forward forwards it only when not None, so passing .get(...) here
+                # is a no-op for Qwen3-VL / Qwen2.5-VL paths (collator doesn't emit it).
+                mm_token_type_ids=batch_inputs.get("mm_token_type_ids", None),
                 sample_type=sample_type,
                 timing_raw=None,
             )

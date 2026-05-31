@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=ibrl_poc_rbm4b
-#SBATCH --output=logs/ibrl_poc_%j.out
-#SBATCH --error=logs/ibrl_poc_%j.err
-#SBATCH --time=00:30:00
+#SBATCH --job-name=ibrl_sweep
+#SBATCH --output=logs/ibrl_sweep_%j.out
+#SBATCH --error=logs/ibrl_sweep_%j.err
+#SBATCH --time=04:30:00
 #SBATCH --account=gusei17535
 #SBATCH --partition=gpu_a100
 #SBATCH --nodes=1
@@ -11,16 +11,13 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=80G
 
-# IBRL PoC: train an IBRL policy on MetaWorld CoffeePush using Robometer-4B
-# as the (sparse, end-of-episode) reward signal. One seed, 20k env steps —
-# matches paper Fig 5c grid. Validates the full pipeline end-to-end:
-#   IBRL policy <-> MuJoCo env <-> Robometer-4B scorer
+# Full IBRL run for HP sweep (β × threshold grid). 1 seed, 300k env steps,
+# 4h30min walltime, training-timeout wrapper at 4h15min to catch the
+# Python-shutdown hang before SLURM kills the job.
 #
-# Prereqs:
-#   - demo2reward env built and verified (jobs/build_demo2reward_env.job,
-#     jobs/verify_demo2reward_env.job)
-#   - release/data + release/model unpacked under vlm_ibrl/
-#   - Robometer-4B HF-cached on the allocated node (smoke job did this)
+# Overrides via sbatch --export=ALL,...:
+#   VLM_NAME, BC_POLICY, ROBOMETER_BETA, ROBOMETER_THRESHOLD,
+#   ROBOMETER_REWARD_SCALE, NUM_TRAIN_STEP, SEED, SAVE_BASE
 
 set -uo pipefail
 
@@ -46,6 +43,17 @@ source set_env.sh
 # (HERE) first; appending Robometer/.
 export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
 
+# Re-export ICL env vars so they're visible to the python child process even
+# if SLURM's --export didn't carry them all the way through conda activation.
+if [[ -n "${ROBOMETER_ICL_DEMO_PATH:-}" ]]; then
+    export ROBOMETER_ICL_DEMO_PATH
+    export ROBOMETER_ICL_DEMO_IDX="${ROBOMETER_ICL_DEMO_IDX:-0}"
+    export ROBOMETER_ICL_FRAMES="${ROBOMETER_ICL_FRAMES:-16}"
+    echo "ICL_DEMO_PATH         : $ROBOMETER_ICL_DEMO_PATH"
+    echo "ICL_DEMO_IDX          : $ROBOMETER_ICL_DEMO_IDX"
+    echo "ICL_FRAMES            : $ROBOMETER_ICL_FRAMES"
+fi
+
 # Headless MuJoCo via EGL (set_env.sh leaves MUJOCO_GL unset; metaworld
 # wrappers default to glfw, but the cluster nodes only have EGL/OSMesa).
 export MUJOCO_GL="${MUJOCO_GL:-egl}"
@@ -56,8 +64,9 @@ export MUJOCO_GL="${MUJOCO_GL:-egl}"
 # training completed in ~13 min. Telemetry (scalars/curves) still goes up.
 export WANDB_DISABLE_ARTIFACTS=true
 
-# Pick a roomy save dir on scratch — checkpoints + replay can grow.
-SAVE_DIR="/scratch-shared/$USER/vlm_ibrl_poc/${BC_POLICY:-coffeepush}_${VLM_NAME:-robometer_4b}_${SLURM_JOB_ID:-local}"
+# Save checkpoints + replay on /projects (durable, multi-day retention).
+SAVE_BASE="${SAVE_BASE:-/projects/prjs1958/$USER/vlm_ibrl_sweep}"
+SAVE_DIR="${SAVE_BASE}/${BC_POLICY:-coffeepush}_${VLM_NAME:-robometer_ft}_b${ROBOMETER_BETA:-0.0}_t${ROBOMETER_THRESHOLD:-0.0}_${SLURM_JOB_ID:-local}"
 mkdir -p "$SAVE_DIR"
 
 echo "==================== ibrl poc summary ===================="
@@ -76,13 +85,17 @@ echo "==========================================================="
 # for hours (CUDA/MuJoCo/pybind destructor not terminating). 20 min covers
 # 14 min training + 1 min sync + 5 min buffer; everything past that is
 # guaranteed-dead time. SIGKILL after grace period.
-TRAIN_TIMEOUT="${TRAIN_TIMEOUT:-20m}"
-VLM_NAME="${VLM_NAME:-robometer_4b}"   # robometer_4b | robometer_ft | qwen35_ft
+#
+# IMPORTANT: GNU `timeout` accepts only single-unit specs ('4h' or '255m',
+# NOT '4h15m'). Earlier submissions with '4h15m' failed at 38 s with
+# rc=125 before training started (see job 22897715). Use seconds.
+TRAIN_TIMEOUT="${TRAIN_TIMEOUT:-15300}"  # 4h15m = 15300s
+VLM_NAME="${VLM_NAME:-robometer_ft}"
 ROBOMETER_BETA="${ROBOMETER_BETA:-0.0}"
 ROBOMETER_THRESHOLD="${ROBOMETER_THRESHOLD:-0.0}"
 ROBOMETER_REWARD_SCALE="${ROBOMETER_REWARD_SCALE:-1.0}"
 SEED="${SEED:-1}"
-NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-20000}"
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-300000}"
 BC_POLICY="${BC_POLICY:-coffeepush}"
 
 echo "VLM_NAME               : $VLM_NAME"
@@ -116,11 +129,12 @@ RC=$?
 # the per-step log line ``20000:`` is present and the run is functionally
 # successful — treat as PASS.
 if [[ $RC -eq 124 || $RC -eq 137 ]]; then
-    if grep -q "^20000: " "$SAVE_DIR/train.log" 2>/dev/null; then
-        echo "[wrapper] timeout fired but training reached step 20000 — treating as PASS"
+    if grep -q "^${NUM_TRAIN_STEP}: " "$SAVE_DIR/train.log" 2>/dev/null; then
+        echo "[wrapper] timeout fired but training reached step ${NUM_TRAIN_STEP} — treating as PASS"
         RC=0
     else
-        echo "[wrapper] timeout fired BEFORE training reached step 20000 — real timeout"
+        LAST=$(grep -E "^[0-9]+: " "$SAVE_DIR/train.log" 2>/dev/null | awk -F: '{print $1}' | sort -un | tail -1)
+        echo "[wrapper] timeout fired BEFORE reaching ${NUM_TRAIN_STEP} — last step logged: ${LAST}"
     fi
 fi
 

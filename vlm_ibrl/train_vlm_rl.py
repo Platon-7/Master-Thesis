@@ -81,6 +81,11 @@ class MainConfig(common_utils.RunConfig):
     # Robometer reward composition: reward = beta * progress + (1 - beta) * success_prob.
     # 0.0 = pure success_prob (default). Only meaningful when vlm contains "robometer".
     robometer_beta: float = 0.0
+    # Optional threshold to binarize the mixed Robometer reward. See
+    # mw_main/train_rl_vlm_mw.py for rationale. 0.0 = no thresholding.
+    robometer_threshold: float = 0.0
+    # Optional reward scale applied before thresholding. 1.0 = none.
+    robometer_reward_scale: float = 1.0
 
     def __post_init__(self):
         self.rl_cameras = self.rl_camera.split("+")
@@ -215,6 +220,8 @@ class Workspace:
             past_len=self.cfg.past_len,
             reward_at_truncation=bool(self.cfg.reward_at_truncation),
             robometer_beta=self.cfg.robometer_beta,
+            robometer_threshold=self.cfg.robometer_threshold,
+            robometer_reward_scale=self.cfg.robometer_reward_scale,
         )
         self.eval_env_params = dict(
             env_name=self.cfg.task_name,

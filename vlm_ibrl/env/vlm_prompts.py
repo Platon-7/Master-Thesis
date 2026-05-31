@@ -34,10 +34,16 @@ Rubric for end-of-episode progress (judge only the final state without time limi
 # ---------------------------------------------------------------------------
 
 METAWORLD_TASK_DESCRIPTIONS = {
-    "Assembly": "pick up a nut and place it onto a peg",
-    "BoxClose": "grasp the cover and close the box with it",
-    "CoffeePush": "push a mug under a coffee machine",
-    "StickPull": "grasp a stick and pull a box with the stick",
+    # Exact-match to the Robometer-FT training prompts in
+    # /projects/prjs1958/robometer_frame_dataset/metaworld/scores/*.jsonl
+    # (capital first letter, trailing period). This keeps the input
+    # distribution to Robometer-family critics identical between training
+    # and inference. The Qwen3-VL family critics (VLM-SD, Demo2Reward, GVL)
+    # are not sensitive to this casing difference.
+    "Assembly":   "Pick up a nut and place it onto a peg.",
+    "BoxClose":   "Grasp the cover and close the box with it.",
+    "CoffeePush": "Push a mug under a coffee machine.",
+    "StickPull":  "Grasp a stick and pull a box with the stick.",
 }
 
 # Demo2Reward-optimized task instructions for MetaWorld.

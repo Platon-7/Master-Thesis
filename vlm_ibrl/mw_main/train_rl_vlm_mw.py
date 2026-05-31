@@ -85,6 +85,14 @@ class MainConfig(common_utils.RunConfig):
     # 0.0 = pure success_prob (current default, matches the smoke-tested PoC).
     # Only meaningful when vlm name contains "robometer".
     robometer_beta: float = 0.0
+    # Optional threshold: if > 0, binarize the mixed reward (1 if above, 0 if below).
+    # Useful for FT critics whose success_prob lives in a narrow low range
+    # (e.g., 0.001-0.08) — calibrated threshold restores [0,1] sparse-reward
+    # shape that IBRL is tuned for. 0.0 = no thresholding.
+    robometer_threshold: float = 0.0
+    # Optional scale applied to the mixed reward BEFORE thresholding. Use to
+    # bring a low-range FT output into IBRL's expected magnitude. 1.0 = none.
+    robometer_reward_scale: float = 1.0
 
     def __post_init__(self):
         self.preload_datapath = self.bc_policy
@@ -163,6 +171,8 @@ class Workspace:
             metaworld_data_dir=self.cfg.metaworld_data_dir,
             gvl_context_len=self.cfg.gvl_context_len,
             robometer_beta=self.cfg.robometer_beta,
+            robometer_threshold=self.cfg.robometer_threshold,
+            robometer_reward_scale=self.cfg.robometer_reward_scale,
         )
 
         eval_env_params = self.env_params.copy()

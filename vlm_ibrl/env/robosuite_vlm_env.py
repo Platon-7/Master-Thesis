@@ -27,6 +27,8 @@ VALID_VLMS = (
     "demo2reward_qwen3_32b",
     "roboreward_8b",
     "robometer_4b",
+    "robometer_ft",
+    "qwen35_ft",
 )
 
 
@@ -213,6 +215,8 @@ class VLMRobosuite:
         reward_at_truncation=False,
         vlm_camera="agentview",
         robometer_beta: float = 0.0,
+        robometer_threshold: float = 0.0,
+        robometer_reward_scale: float = 1.0,
     ):
         assert vlm in VALID_VLMS, f"VLM {vlm} not recognized. Valid: {VALID_VLMS}"
         assert past_len > 0, "past_len must be > 0"
@@ -291,11 +295,20 @@ class VLMRobosuite:
             self.prompt_vlm = prompt_roboreward
             self.system_prompt = roboreward_prompt
             self.prompt = f"{roboreward_prompt}\n\nTask: {task}"
-        elif vlm == "robometer_4b":
-            # Robometer has its own inference path (progress + success heads,
-            # not generative). The scorer encapsulates model/processor/collator;
-            # self.vlm is set so the shared ``self.vlm.eval()`` below works.
-            self.scorer = get_robometer_4b()
+        elif vlm in ("robometer_4b", "robometer_ft", "qwen35_ft"):
+            import os
+            _ckpt_map = {
+                "robometer_4b": "robometer/Robometer-4B",
+                "robometer_ft": os.environ.get("ROBOMETER_FT_PATH", ""),
+                "qwen35_ft":    os.environ.get("QWEN35_FT_PATH", ""),
+            }
+            ckpt = _ckpt_map[vlm]
+            if not ckpt:
+                raise ValueError(
+                    f"--vlm {vlm} requires the matching env var (ROBOMETER_FT_PATH "
+                    f"or QWEN35_FT_PATH) pointing at a consolidated checkpoint dir."
+                )
+            self.scorer = get_robometer_4b(model_path=ckpt)
             self.vlm = self.scorer
             self.processor = None
             self.prompt_vlm = None
@@ -315,6 +328,10 @@ class VLMRobosuite:
         # Robometer reward composition: reward = beta * progress + (1 - beta)
         # * success_prob. 0.0 = pure success_prob. Ignored for non-Robometer.
         self.robometer_beta = float(robometer_beta)
+        # Optional binarization (see env/vlm_envs.py for rationale).
+        self.robometer_threshold = float(robometer_threshold)
+        # Optional reward scale applied before thresholding.
+        self.robometer_reward_scale = float(robometer_reward_scale)
         self._last_progress = 0.0
         self._last_success_prob = 0.0
         assert len(self.rl_cameras) == 1
@@ -478,13 +495,19 @@ class VLMRobosuite:
             self._last_progress = float(out["progress_reward"])
             self._last_success_prob = float(out["success_prob"])
             mixed = self.robometer_beta * self._last_progress + (1.0 - self.robometer_beta) * self._last_success_prob
+            mixed *= self.robometer_reward_scale
+            if self.robometer_threshold > 0:
+                reward = 1.0 if mixed > self.robometer_threshold else 0.0
+            else:
+                reward = mixed
             if debug:
                 print(
-                    f"Robometer: progress={self._last_progress:.3f} "
-                    f"success={self._last_success_prob:.3f} "
-                    f"beta={self.robometer_beta:.2f} → reward={mixed:.3f}"
+                    f"Robometer: progress={self._last_progress:.4f} "
+                    f"success={self._last_success_prob:.4f} "
+                    f"beta={self.robometer_beta:.2f} scale={self.robometer_reward_scale:g} "
+                    f"mixed={mixed:.4f} thr={self.robometer_threshold:.4f} → reward={reward:.3f}"
                 )
-            return mixed
+            return reward
 
         is_roboreward = "roboreward" in self.vlm_name
         critic_output = single_prompt_eval(
