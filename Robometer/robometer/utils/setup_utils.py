@@ -4,7 +4,18 @@ Shared setup utilities for RBM training.
 This file contains setup functions that can be reused across different training scripts.
 """
 
-from unsloth import FastVisionModel
+# unsloth is only needed for use_unsloth=True (Qwen training-time fast path). It is
+# NOT used for inference/eval of standard from_pretrained checkpoints (e.g. the
+# policy_ranking harness on consolidated Qwen3.5 checkpoints), so import it lazily —
+# an eager top-level import would crash the harness in envs without unsloth even
+# though FastVisionModel is never called. Mirrors the HAS_QWEN3 guard below.
+try:
+    from unsloth import FastVisionModel
+
+    HAS_UNSLOTH = True
+except ImportError:
+    HAS_UNSLOTH = False
+    FastVisionModel = None
 
 import re
 import os
@@ -400,6 +411,13 @@ def _load_base_model_with_unsloth(
     Returns:
         Tuple of (base_model, tokenizer)
     """
+    if not HAS_UNSLOTH:
+        raise ImportError(
+            "use_unsloth=True but the 'unsloth' package is not installed in this "
+            "environment. unsloth is only required for the Qwen training fast path; "
+            "inference/eval of standard checkpoints uses from_pretrained and does not "
+            "need it. Set use_unsloth=False or install unsloth to use this path."
+        )
     logger.info("Using Unsloth for faster training with Qwen model")
 
     # Load model with unsloth

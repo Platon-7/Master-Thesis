@@ -1,0 +1,9 @@
+model,label,frames,kendall_last,kendall_rewind_last,ranking_acc_sum
+baseline,Robometer-4B,8,0.6384,0.7479,0.813
+run1_s4000,4B asym+ICL,16,0.3158,0.445,0.664
+run1_s5000,4B asym+ICL,16,0.2949,0.3791,0.648
+run2_s5000,4B asym,16,0.2904,0.3659,0.655
+run3_s5000,4B paper-std,16,-0.0489,0.0354,0.49
+run4_s6500,Qwen3.5 asym+ICL,16,-0.0185,-0.1675,0.482
+run5_s6500,Qwen3.5 asym,16,0.0684,0.1341,0.553
+run6_s6500,Qwen3.5 paper-std,16,0.1335,0.1618,0.596

@@ -114,7 +114,7 @@ timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
         --bc_policy "$BC_POLICY" \
         --vlm "$VLM_NAME" \
         --train_end_on_success 0 \
-        --reward_at_truncation 1 \
+        --reward_at_truncation ${REWARD_AT_TRUNC:-1} \
         --num_train_step "$NUM_TRAIN_STEP" \
         --seed "$SEED" \
         --use_wb 1 \

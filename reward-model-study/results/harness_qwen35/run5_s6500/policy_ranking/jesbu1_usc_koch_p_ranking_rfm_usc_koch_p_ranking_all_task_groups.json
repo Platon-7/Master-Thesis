@@ -1,0 +1,1222 @@
+{
+  "Open the green trash bin": [
+    {
+      "final_predicted_reward_last": 0.12890625,
+      "final_predicted_reward_avg": 0.12890625,
+      "final_predicted_reward_sum": 0.12890625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_08bc9c61-e12b-4e36-97e6-d119775b4e63.npz",
+      "id": "08bc9c61-e12b-4e36-97e6-d119775b4e63",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.034423828125,
+      "final_predicted_reward_avg": 0.034423828125,
+      "final_predicted_reward_sum": 0.034423828125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_2c110916-1338-4325-9e1d-afc39c3151dd.npz",
+      "id": "2c110916-1338-4325-9e1d-afc39c3151dd",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.0869140625,
+      "final_predicted_reward_avg": 0.0869140625,
+      "final_predicted_reward_sum": 0.0869140625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_fe914e4a-f225-4a22-9ef3-a0a819e5454c.npz",
+      "id": "fe914e4a-f225-4a22-9ef3-a0a819e5454c",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.051513671875,
+      "final_predicted_reward_avg": 0.051513671875,
+      "final_predicted_reward_sum": 0.051513671875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_63a34c67-9eac-41d4-a3fe-2be6d170d76c.npz",
+      "id": "63a34c67-9eac-41d4-a3fe-2be6d170d76c",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.0732421875,
+      "final_predicted_reward_avg": 0.0732421875,
+      "final_predicted_reward_sum": 0.0732421875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_f1252038-b407-434c-b899-334a91e32260.npz",
+      "id": "f1252038-b407-434c-b899-334a91e32260",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.068359375,
+      "final_predicted_reward_avg": 0.068359375,
+      "final_predicted_reward_sum": 0.068359375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_30c60d16-6a86-4633-bf92-b863f2678144.npz",
+      "id": "30c60d16-6a86-4633-bf92-b863f2678144",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.0439453125,
+      "final_predicted_reward_avg": 0.0439453125,
+      "final_predicted_reward_sum": 0.0439453125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_fa572545-c44e-49ba-ad5e-67a0c33849c0.npz",
+      "id": "fa572545-c44e-49ba-ad5e-67a0c33849c0",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1025390625,
+      "final_predicted_reward_avg": 0.1025390625,
+      "final_predicted_reward_sum": 0.1025390625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_5ec07eda-241d-4945-8bb2-c1a52ab90b70.npz",
+      "id": "5ec07eda-241d-4945-8bb2-c1a52ab90b70",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.07666015625,
+      "final_predicted_reward_avg": 0.07666015625,
+      "final_predicted_reward_sum": 0.07666015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_50f966ad-feba-4975-a135-e4936d8e07f9.npz",
+      "id": "50f966ad-feba-4975-a135-e4936d8e07f9",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1337890625,
+      "final_predicted_reward_avg": 0.1337890625,
+      "final_predicted_reward_sum": 0.1337890625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_2bbd6f5f-e955-4942-bd78-628e3039f57b.npz",
+      "id": "2bbd6f5f-e955-4942-bd78-628e3039f57b",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.07421875,
+      "final_predicted_reward_avg": 0.07421875,
+      "final_predicted_reward_sum": 0.07421875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_96d5a08a-1c2a-4a51-bb30-614917e3c538.npz",
+      "id": "96d5a08a-1c2a-4a51-bb30-614917e3c538",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.09423828125,
+      "final_predicted_reward_avg": 0.09423828125,
+      "final_predicted_reward_sum": 0.09423828125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_0e54554d-ff0c-41b2-9e32-adb0d1b24dfb.npz",
+      "id": "0e54554d-ff0c-41b2-9e32-adb0d1b24dfb",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.126953125,
+      "final_predicted_reward_avg": 0.126953125,
+      "final_predicted_reward_sum": 0.126953125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_275d593c-ae54-4c7f-8819-2f3a78b682c9.npz",
+      "id": "275d593c-ae54-4c7f-8819-2f3a78b682c9",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12255859375,
+      "final_predicted_reward_avg": 0.12255859375,
+      "final_predicted_reward_sum": 0.12255859375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_9b67e2d2-9f37-427a-a9b1-b2cd1ab0bca1.npz",
+      "id": "9b67e2d2-9f37-427a-a9b1-b2cd1ab0bca1",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.09716796875,
+      "final_predicted_reward_avg": 0.09716796875,
+      "final_predicted_reward_sum": 0.09716796875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_9157d9c1-2d8b-4648-bad6-5b6bb8d536b9.npz",
+      "id": "9157d9c1-2d8b-4648-bad6-5b6bb8d536b9",
+      "quality_label": "suboptimal"
+    }
+  ],
+  "Separate the purple and red cups": [
+    {
+      "final_predicted_reward_last": 0.1767578125,
+      "final_predicted_reward_avg": 0.1767578125,
+      "final_predicted_reward_sum": 0.1767578125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_d4c76bc6-4201-426e-b211-4b2e7996ba5e.npz",
+      "id": "d4c76bc6-4201-426e-b211-4b2e7996ba5e",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.16015625,
+      "final_predicted_reward_avg": 0.16015625,
+      "final_predicted_reward_sum": 0.16015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_6f7c7065-9ba5-4091-83bf-ec3f80dfdf42.npz",
+      "id": "6f7c7065-9ba5-4091-83bf-ec3f80dfdf42",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1474609375,
+      "final_predicted_reward_avg": 0.1474609375,
+      "final_predicted_reward_sum": 0.1474609375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_7357e296-45ea-475f-97f5-c5b7949164fe.npz",
+      "id": "7357e296-45ea-475f-97f5-c5b7949164fe",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.162109375,
+      "final_predicted_reward_avg": 0.162109375,
+      "final_predicted_reward_sum": 0.162109375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_912af1e9-ced1-4226-b399-5fbfea976395.npz",
+      "id": "912af1e9-ced1-4226-b399-5fbfea976395",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.177734375,
+      "final_predicted_reward_avg": 0.177734375,
+      "final_predicted_reward_sum": 0.177734375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_355e9e4f-1654-45d5-9de5-225ac7b141fd.npz",
+      "id": "355e9e4f-1654-45d5-9de5-225ac7b141fd",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.140625,
+      "final_predicted_reward_avg": 0.140625,
+      "final_predicted_reward_sum": 0.140625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_96cf8a4e-60cb-46b5-ad70-469a34cb6ecd.npz",
+      "id": "96cf8a4e-60cb-46b5-ad70-469a34cb6ecd",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.19140625,
+      "final_predicted_reward_avg": 0.19140625,
+      "final_predicted_reward_sum": 0.19140625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_d10aedae-3a9d-4adc-9bed-916d61ec32e9.npz",
+      "id": "d10aedae-3a9d-4adc-9bed-916d61ec32e9",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.15234375,
+      "final_predicted_reward_avg": 0.15234375,
+      "final_predicted_reward_sum": 0.15234375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_a9703c8b-5157-4d74-872a-c7e5c41b03f6.npz",
+      "id": "a9703c8b-5157-4d74-872a-c7e5c41b03f6",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.162109375,
+      "final_predicted_reward_avg": 0.162109375,
+      "final_predicted_reward_sum": 0.162109375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_8d6e578e-07ad-4449-8b12-dd0a2c0b4e60.npz",
+      "id": "8d6e578e-07ad-4449-8b12-dd0a2c0b4e60",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1865234375,
+      "final_predicted_reward_avg": 0.1865234375,
+      "final_predicted_reward_sum": 0.1865234375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_9fdf39f0-c530-4da3-892c-865b6c07e738.npz",
+      "id": "9fdf39f0-c530-4da3-892c-865b6c07e738",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1484375,
+      "final_predicted_reward_avg": 0.1484375,
+      "final_predicted_reward_sum": 0.1484375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_3b8f2481-0214-490b-9316-096f83d1611b.npz",
+      "id": "3b8f2481-0214-490b-9316-096f83d1611b",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1728515625,
+      "final_predicted_reward_avg": 0.1728515625,
+      "final_predicted_reward_sum": 0.1728515625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_f3fba738-9171-4640-9a39-959479cbce71.npz",
+      "id": "f3fba738-9171-4640-9a39-959479cbce71",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.037841796875,
+      "final_predicted_reward_avg": 0.037841796875,
+      "final_predicted_reward_sum": 0.037841796875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_8e34e80d-3c80-44cf-80b5-dbdece3ea563.npz",
+      "id": "8e34e80d-3c80-44cf-80b5-dbdece3ea563",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1416015625,
+      "final_predicted_reward_avg": 0.1416015625,
+      "final_predicted_reward_sum": 0.1416015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_31f76422-0b77-482b-a1d4-a557f5752b18.npz",
+      "id": "31f76422-0b77-482b-a1d4-a557f5752b18",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1611328125,
+      "final_predicted_reward_avg": 0.1611328125,
+      "final_predicted_reward_sum": 0.1611328125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_4fcf2555-aee2-4854-a830-1097079eb472.npz",
+      "id": "4fcf2555-aee2-4854-a830-1097079eb472",
+      "quality_label": "suboptimal"
+    }
+  ],
+  "Throw the black marker away in the blue trash can": [
+    {
+      "final_predicted_reward_last": 0.0693359375,
+      "final_predicted_reward_avg": 0.0693359375,
+      "final_predicted_reward_sum": 0.0693359375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_10738f07-36f6-4e86-889f-c6a6a023b584.npz",
+      "id": "10738f07-36f6-4e86-889f-c6a6a023b584",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.087890625,
+      "final_predicted_reward_avg": 0.087890625,
+      "final_predicted_reward_sum": 0.087890625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_6c22dc10-94d0-4aed-9c6a-1f404423d73f.npz",
+      "id": "6c22dc10-94d0-4aed-9c6a-1f404423d73f",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.08642578125,
+      "final_predicted_reward_avg": 0.08642578125,
+      "final_predicted_reward_sum": 0.08642578125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_a32e97c0-3118-47b5-8873-ef61f1f1da90.npz",
+      "id": "a32e97c0-3118-47b5-8873-ef61f1f1da90",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.08447265625,
+      "final_predicted_reward_avg": 0.08447265625,
+      "final_predicted_reward_sum": 0.08447265625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_89c24939-b4d3-4a06-a82b-37f98cabfa8f.npz",
+      "id": "89c24939-b4d3-4a06-a82b-37f98cabfa8f",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.076171875,
+      "final_predicted_reward_avg": 0.076171875,
+      "final_predicted_reward_sum": 0.076171875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_5199b88e-5af9-483d-b5e4-7581146cab75.npz",
+      "id": "5199b88e-5af9-483d-b5e4-7581146cab75",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11572265625,
+      "final_predicted_reward_avg": 0.11572265625,
+      "final_predicted_reward_sum": 0.11572265625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_28f0edd3-86e5-4369-b8f9-0b78584e93de.npz",
+      "id": "28f0edd3-86e5-4369-b8f9-0b78584e93de",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.083984375,
+      "final_predicted_reward_avg": 0.083984375,
+      "final_predicted_reward_sum": 0.083984375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_0aac0f74-f75b-47d5-b1f7-6d3ed3f2a10e.npz",
+      "id": "0aac0f74-f75b-47d5-b1f7-6d3ed3f2a10e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.10595703125,
+      "final_predicted_reward_avg": 0.10595703125,
+      "final_predicted_reward_sum": 0.10595703125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_fafd7248-f5b0-4150-addf-ef525df6fb7b.npz",
+      "id": "fafd7248-f5b0-4150-addf-ef525df6fb7b",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1064453125,
+      "final_predicted_reward_avg": 0.1064453125,
+      "final_predicted_reward_sum": 0.1064453125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_2d46106d-27b5-40fd-9006-0da9268e4ff5.npz",
+      "id": "2d46106d-27b5-40fd-9006-0da9268e4ff5",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.09326171875,
+      "final_predicted_reward_avg": 0.09326171875,
+      "final_predicted_reward_sum": 0.09326171875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_bfe6ec62-9dd3-4a7b-bf1f-5f6539edfd48.npz",
+      "id": "bfe6ec62-9dd3-4a7b-bf1f-5f6539edfd48",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.08447265625,
+      "final_predicted_reward_avg": 0.08447265625,
+      "final_predicted_reward_sum": 0.08447265625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_287078d8-2d86-4151-b7a6-8e4f7e7e7714.npz",
+      "id": "287078d8-2d86-4151-b7a6-8e4f7e7e7714",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.09130859375,
+      "final_predicted_reward_avg": 0.09130859375,
+      "final_predicted_reward_sum": 0.09130859375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_fd8f2049-8e02-47bf-a068-baaadffa7ee2.npz",
+      "id": "fd8f2049-8e02-47bf-a068-baaadffa7ee2",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.14453125,
+      "final_predicted_reward_avg": 0.14453125,
+      "final_predicted_reward_sum": 0.14453125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_fab5c3f5-d2c1-42c1-bf45-73acc6bae669.npz",
+      "id": "fab5c3f5-d2c1-42c1-bf45-73acc6bae669",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.111328125,
+      "final_predicted_reward_avg": 0.111328125,
+      "final_predicted_reward_sum": 0.111328125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_47a1bdf1-b0f3-427d-baf9-baeb65435e57.npz",
+      "id": "47a1bdf1-b0f3-427d-baf9-baeb65435e57",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.099609375,
+      "final_predicted_reward_avg": 0.099609375,
+      "final_predicted_reward_sum": 0.099609375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_bf4c2541-17a7-4946-a1be-b9e9333c0595.npz",
+      "id": "bf4c2541-17a7-4946-a1be-b9e9333c0595",
+      "quality_label": "failure"
+    }
+  ],
+  "Throw the orange cup away in the red trash can": [
+    {
+      "final_predicted_reward_last": 0.16015625,
+      "final_predicted_reward_avg": 0.16015625,
+      "final_predicted_reward_sum": 0.16015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_67788b47-1157-431c-aa19-0b365a2cebc1.npz",
+      "id": "67788b47-1157-431c-aa19-0b365a2cebc1",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11328125,
+      "final_predicted_reward_avg": 0.11328125,
+      "final_predicted_reward_sum": 0.11328125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_c566fc45-a510-4dd4-8c87-8f2a124a1cf5.npz",
+      "id": "c566fc45-a510-4dd4-8c87-8f2a124a1cf5",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1171875,
+      "final_predicted_reward_avg": 0.1171875,
+      "final_predicted_reward_sum": 0.1171875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_387487f6-c485-4d78-8718-5e4b69536943.npz",
+      "id": "387487f6-c485-4d78-8718-5e4b69536943",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.09765625,
+      "final_predicted_reward_avg": 0.09765625,
+      "final_predicted_reward_sum": 0.09765625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_4cbbc339-a54c-4c34-845c-3229df29d5f7.npz",
+      "id": "4cbbc339-a54c-4c34-845c-3229df29d5f7",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.0908203125,
+      "final_predicted_reward_avg": 0.0908203125,
+      "final_predicted_reward_sum": 0.0908203125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_10550479-108e-452b-9a37-9bd3c79997bf.npz",
+      "id": "10550479-108e-452b-9a37-9bd3c79997bf",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.162109375,
+      "final_predicted_reward_avg": 0.162109375,
+      "final_predicted_reward_sum": 0.162109375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_6e6c49fd-858c-4d17-95b1-b8c0396f8d41.npz",
+      "id": "6e6c49fd-858c-4d17-95b1-b8c0396f8d41",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.017333984375,
+      "final_predicted_reward_avg": 0.017333984375,
+      "final_predicted_reward_sum": 0.017333984375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_20bfb27d-6135-4920-aa7c-366acbf61314.npz",
+      "id": "20bfb27d-6135-4920-aa7c-366acbf61314",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1298828125,
+      "final_predicted_reward_avg": 0.1298828125,
+      "final_predicted_reward_sum": 0.1298828125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_7e501857-0c1e-4f7f-86f1-08685913aee7.npz",
+      "id": "7e501857-0c1e-4f7f-86f1-08685913aee7",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.095703125,
+      "final_predicted_reward_avg": 0.095703125,
+      "final_predicted_reward_sum": 0.095703125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_7fb726c4-a0ae-4874-9a59-4468d7ff048e.npz",
+      "id": "7fb726c4-a0ae-4874-9a59-4468d7ff048e",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.11376953125,
+      "final_predicted_reward_avg": 0.11376953125,
+      "final_predicted_reward_sum": 0.11376953125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_8900750c-9765-4eff-99cb-1d6d60d9a61e.npz",
+      "id": "8900750c-9765-4eff-99cb-1d6d60d9a61e",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.03271484375,
+      "final_predicted_reward_avg": 0.03271484375,
+      "final_predicted_reward_sum": 0.03271484375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_89c4f488-7582-4bd5-beb5-291527ac5b13.npz",
+      "id": "89c4f488-7582-4bd5-beb5-291527ac5b13",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.11328125,
+      "final_predicted_reward_avg": 0.11328125,
+      "final_predicted_reward_sum": 0.11328125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_90a13c58-6589-4254-8c7b-2b1c2817d097.npz",
+      "id": "90a13c58-6589-4254-8c7b-2b1c2817d097",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.051513671875,
+      "final_predicted_reward_avg": 0.051513671875,
+      "final_predicted_reward_sum": 0.051513671875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_6e70e65f-f49e-49f9-8acc-ce66609aa707.npz",
+      "id": "6e70e65f-f49e-49f9-8acc-ce66609aa707",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.125,
+      "final_predicted_reward_avg": 0.125,
+      "final_predicted_reward_sum": 0.125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_5780836d-fd35-4ee0-bd5b-1e3a32fe7873.npz",
+      "id": "5780836d-fd35-4ee0-bd5b-1e3a32fe7873",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1025390625,
+      "final_predicted_reward_avg": 0.1025390625,
+      "final_predicted_reward_sum": 0.1025390625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_0e817f94-4533-46d3-9eb7-57cdaaf6e5b6.npz",
+      "id": "0e817f94-4533-46d3-9eb7-57cdaaf6e5b6",
+      "quality_label": "successful"
+    }
+  ],
+  "Separate the purple and orange cups": [
+    {
+      "final_predicted_reward_last": 0.1435546875,
+      "final_predicted_reward_avg": 0.1435546875,
+      "final_predicted_reward_sum": 0.1435546875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_9b31b249-3845-4fe6-8c4a-2657cc674916.npz",
+      "id": "9b31b249-3845-4fe6-8c4a-2657cc674916",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.08203125,
+      "final_predicted_reward_avg": 0.08203125,
+      "final_predicted_reward_sum": 0.08203125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_0b3567c9-fd4a-4256-90b9-76cfd88517b8.npz",
+      "id": "0b3567c9-fd4a-4256-90b9-76cfd88517b8",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1259765625,
+      "final_predicted_reward_avg": 0.1259765625,
+      "final_predicted_reward_sum": 0.1259765625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_ee894a67-bd43-455a-9751-3363a926c013.npz",
+      "id": "ee894a67-bd43-455a-9751-3363a926c013",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1806640625,
+      "final_predicted_reward_avg": 0.1806640625,
+      "final_predicted_reward_sum": 0.1806640625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_1b07d471-63a3-47f7-b0bd-6440f1981616.npz",
+      "id": "1b07d471-63a3-47f7-b0bd-6440f1981616",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.123046875,
+      "final_predicted_reward_avg": 0.123046875,
+      "final_predicted_reward_sum": 0.123046875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_66ca6c90-81f7-48a5-b7d0-38181c10cf88.npz",
+      "id": "66ca6c90-81f7-48a5-b7d0-38181c10cf88",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1591796875,
+      "final_predicted_reward_avg": 0.1591796875,
+      "final_predicted_reward_sum": 0.1591796875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_5b301c3e-7154-4b06-958c-977d7061e01a.npz",
+      "id": "5b301c3e-7154-4b06-958c-977d7061e01a",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.10107421875,
+      "final_predicted_reward_avg": 0.10107421875,
+      "final_predicted_reward_sum": 0.10107421875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_8b2f17d0-76a6-4c64-857b-10e070e8fa93.npz",
+      "id": "8b2f17d0-76a6-4c64-857b-10e070e8fa93",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.201171875,
+      "final_predicted_reward_avg": 0.201171875,
+      "final_predicted_reward_sum": 0.201171875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_db22fcd9-d4ee-4fc1-8bd8-0857a0e052a8.npz",
+      "id": "db22fcd9-d4ee-4fc1-8bd8-0857a0e052a8",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1455078125,
+      "final_predicted_reward_avg": 0.1455078125,
+      "final_predicted_reward_sum": 0.1455078125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_8cd48e63-86bd-4ade-9bf0-847be67378b7.npz",
+      "id": "8cd48e63-86bd-4ade-9bf0-847be67378b7",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1416015625,
+      "final_predicted_reward_avg": 0.1416015625,
+      "final_predicted_reward_sum": 0.1416015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_3ae78bec-1e41-4652-a603-d8c8a04b45af.npz",
+      "id": "3ae78bec-1e41-4652-a603-d8c8a04b45af",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1728515625,
+      "final_predicted_reward_avg": 0.1728515625,
+      "final_predicted_reward_sum": 0.1728515625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_62b2428e-6f67-4ae0-8464-94e51d224e08.npz",
+      "id": "62b2428e-6f67-4ae0-8464-94e51d224e08",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1298828125,
+      "final_predicted_reward_avg": 0.1298828125,
+      "final_predicted_reward_sum": 0.1298828125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_c09ca2e2-0be7-4f41-a201-f164474fc551.npz",
+      "id": "c09ca2e2-0be7-4f41-a201-f164474fc551",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1396484375,
+      "final_predicted_reward_avg": 0.1396484375,
+      "final_predicted_reward_sum": 0.1396484375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_d36b76d1-0f02-49dc-9bc9-084a7b713e6e.npz",
+      "id": "d36b76d1-0f02-49dc-9bc9-084a7b713e6e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1640625,
+      "final_predicted_reward_avg": 0.1640625,
+      "final_predicted_reward_sum": 0.1640625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_8f8bc327-a2f3-405e-ac5c-d5302653f708.npz",
+      "id": "8f8bc327-a2f3-405e-ac5c-d5302653f708",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.16015625,
+      "final_predicted_reward_avg": 0.16015625,
+      "final_predicted_reward_sum": 0.16015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_f7ea530f-5c3b-4806-8a4f-8fc213849407.npz",
+      "id": "f7ea530f-5c3b-4806-8a4f-8fc213849407",
+      "quality_label": "successful"
+    }
+  ],
+  "Move the orange cup from right to left": [
+    {
+      "final_predicted_reward_last": 0.1884765625,
+      "final_predicted_reward_avg": 0.1884765625,
+      "final_predicted_reward_sum": 0.1884765625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_fc3accb0-5083-4fe7-95bb-ecfba16510c6.npz",
+      "id": "fc3accb0-5083-4fe7-95bb-ecfba16510c6",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.10888671875,
+      "final_predicted_reward_avg": 0.10888671875,
+      "final_predicted_reward_sum": 0.10888671875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_2bd101ed-ac6f-4187-a822-23fc6b1fed5f.npz",
+      "id": "2bd101ed-ac6f-4187-a822-23fc6b1fed5f",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.16015625,
+      "final_predicted_reward_avg": 0.16015625,
+      "final_predicted_reward_sum": 0.16015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_e6b9b8e8-e3dd-4171-9b7e-49f361514c9f.npz",
+      "id": "e6b9b8e8-e3dd-4171-9b7e-49f361514c9f",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1298828125,
+      "final_predicted_reward_avg": 0.1298828125,
+      "final_predicted_reward_sum": 0.1298828125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_e8d5e89e-6868-49ff-bac5-182040b5036b.npz",
+      "id": "e8d5e89e-6868-49ff-bac5-182040b5036b",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.15625,
+      "final_predicted_reward_avg": 0.15625,
+      "final_predicted_reward_sum": 0.15625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_b5b727b6-ff18-4bc7-b8b9-31aec3ae4d4d.npz",
+      "id": "b5b727b6-ff18-4bc7-b8b9-31aec3ae4d4d",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.158203125,
+      "final_predicted_reward_avg": 0.158203125,
+      "final_predicted_reward_sum": 0.158203125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_8e5d7cca-30cc-4087-a581-7f8092c63e4f.npz",
+      "id": "8e5d7cca-30cc-4087-a581-7f8092c63e4f",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.150390625,
+      "final_predicted_reward_avg": 0.150390625,
+      "final_predicted_reward_sum": 0.150390625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_b5d8a81a-aaa5-4de0-9466-2e10a9468e09.npz",
+      "id": "b5d8a81a-aaa5-4de0-9466-2e10a9468e09",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.18359375,
+      "final_predicted_reward_avg": 0.18359375,
+      "final_predicted_reward_sum": 0.18359375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_c60ea776-698e-41cb-9470-bdfd99cc43d5.npz",
+      "id": "c60ea776-698e-41cb-9470-bdfd99cc43d5",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.173828125,
+      "final_predicted_reward_avg": 0.173828125,
+      "final_predicted_reward_sum": 0.173828125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_2bc6e4aa-01fe-493b-aee5-96006704d383.npz",
+      "id": "2bc6e4aa-01fe-493b-aee5-96006704d383",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.158203125,
+      "final_predicted_reward_avg": 0.158203125,
+      "final_predicted_reward_sum": 0.158203125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_a91fcc1c-4b56-4a14-ae12-fec10eee138c.npz",
+      "id": "a91fcc1c-4b56-4a14-ae12-fec10eee138c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.16015625,
+      "final_predicted_reward_avg": 0.16015625,
+      "final_predicted_reward_sum": 0.16015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_34b7583e-0575-40cf-b0af-2b2867b44332.npz",
+      "id": "34b7583e-0575-40cf-b0af-2b2867b44332",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.2001953125,
+      "final_predicted_reward_avg": 0.2001953125,
+      "final_predicted_reward_sum": 0.2001953125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_a2468022-0e45-4b0d-8833-6b40025d9e41.npz",
+      "id": "a2468022-0e45-4b0d-8833-6b40025d9e41",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.16015625,
+      "final_predicted_reward_avg": 0.16015625,
+      "final_predicted_reward_sum": 0.16015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_45340a3e-4038-4d15-96b8-cbcbd981979c.npz",
+      "id": "45340a3e-4038-4d15-96b8-cbcbd981979c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.162109375,
+      "final_predicted_reward_avg": 0.162109375,
+      "final_predicted_reward_sum": 0.162109375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_09718a08-74e9-472e-9708-0f4fabdf3bee.npz",
+      "id": "09718a08-74e9-472e-9708-0f4fabdf3bee",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1767578125,
+      "final_predicted_reward_avg": 0.1767578125,
+      "final_predicted_reward_sum": 0.1767578125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_b961db36-b0ab-4249-9f7a-5e8580bd0165.npz",
+      "id": "b961db36-b0ab-4249-9f7a-5e8580bd0165",
+      "quality_label": "failure"
+    }
+  ],
+  "Separate the red and orange cups": [
+    {
+      "final_predicted_reward_last": 0.1708984375,
+      "final_predicted_reward_avg": 0.1708984375,
+      "final_predicted_reward_sum": 0.1708984375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_f3f80059-9174-416d-90c4-f77760a35047.npz",
+      "id": "f3f80059-9174-416d-90c4-f77760a35047",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1455078125,
+      "final_predicted_reward_avg": 0.1455078125,
+      "final_predicted_reward_sum": 0.1455078125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_850153bc-10f5-4b4f-97ed-a17ac8524137.npz",
+      "id": "850153bc-10f5-4b4f-97ed-a17ac8524137",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1689453125,
+      "final_predicted_reward_avg": 0.1689453125,
+      "final_predicted_reward_sum": 0.1689453125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_3df95ade-3a0a-4373-b91b-7410e49568b9.npz",
+      "id": "3df95ade-3a0a-4373-b91b-7410e49568b9",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1552734375,
+      "final_predicted_reward_avg": 0.1552734375,
+      "final_predicted_reward_sum": 0.1552734375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_af39974f-5c93-466a-ba22-e3efefc06341.npz",
+      "id": "af39974f-5c93-466a-ba22-e3efefc06341",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.15234375,
+      "final_predicted_reward_avg": 0.15234375,
+      "final_predicted_reward_sum": 0.15234375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_a630c0f9-97bb-4cf0-8a23-d0a3bad7d488.npz",
+      "id": "a630c0f9-97bb-4cf0-8a23-d0a3bad7d488",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.146484375,
+      "final_predicted_reward_avg": 0.146484375,
+      "final_predicted_reward_sum": 0.146484375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_e7323131-f772-43ba-be29-19c8bed7f3ef.npz",
+      "id": "e7323131-f772-43ba-be29-19c8bed7f3ef",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.16796875,
+      "final_predicted_reward_avg": 0.16796875,
+      "final_predicted_reward_sum": 0.16796875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_58511910-3710-4f2b-a50c-e520ec0a79c6.npz",
+      "id": "58511910-3710-4f2b-a50c-e520ec0a79c6",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1279296875,
+      "final_predicted_reward_avg": 0.1279296875,
+      "final_predicted_reward_sum": 0.1279296875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_6b14a2f6-ac83-4745-a75f-b1d1ad8b2d80.npz",
+      "id": "6b14a2f6-ac83-4745-a75f-b1d1ad8b2d80",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1416015625,
+      "final_predicted_reward_avg": 0.1416015625,
+      "final_predicted_reward_sum": 0.1416015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_fe9c0ae2-94e4-4599-a5d4-68f44db1cc4f.npz",
+      "id": "fe9c0ae2-94e4-4599-a5d4-68f44db1cc4f",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.10107421875,
+      "final_predicted_reward_avg": 0.10107421875,
+      "final_predicted_reward_sum": 0.10107421875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_f590695a-5eeb-4b19-b0fd-45975fda6bc1.npz",
+      "id": "f590695a-5eeb-4b19-b0fd-45975fda6bc1",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.162109375,
+      "final_predicted_reward_avg": 0.162109375,
+      "final_predicted_reward_sum": 0.162109375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_6615298a-27ae-47a6-a8d7-f078c1b6bb64.npz",
+      "id": "6615298a-27ae-47a6-a8d7-f078c1b6bb64",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.134765625,
+      "final_predicted_reward_avg": 0.134765625,
+      "final_predicted_reward_sum": 0.134765625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_7d0adc75-3022-4929-98fe-452d0b690e7f.npz",
+      "id": "7d0adc75-3022-4929-98fe-452d0b690e7f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1689453125,
+      "final_predicted_reward_avg": 0.1689453125,
+      "final_predicted_reward_sum": 0.1689453125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_e7ac91bb-ae4d-40b6-8968-8b48f96ea199.npz",
+      "id": "e7ac91bb-ae4d-40b6-8968-8b48f96ea199",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.0888671875,
+      "final_predicted_reward_avg": 0.0888671875,
+      "final_predicted_reward_sum": 0.0888671875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_0b2c7140-7999-4b8b-9342-a4f17f5ab9cc.npz",
+      "id": "0b2c7140-7999-4b8b-9342-a4f17f5ab9cc",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1728515625,
+      "final_predicted_reward_avg": 0.1728515625,
+      "final_predicted_reward_sum": 0.1728515625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_4f34be97-eedf-4b4d-b95b-e49bed243a4a.npz",
+      "id": "4f34be97-eedf-4b4d-b95b-e49bed243a4a",
+      "quality_label": "successful"
+    }
+  ],
+  "Open the blue trash bin": [
+    {
+      "final_predicted_reward_last": 0.06201171875,
+      "final_predicted_reward_avg": 0.06201171875,
+      "final_predicted_reward_sum": 0.06201171875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_b77b9c55-f674-4c14-a530-c2bbc2d9a1ad.npz",
+      "id": "b77b9c55-f674-4c14-a530-c2bbc2d9a1ad",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.03076171875,
+      "final_predicted_reward_avg": 0.03076171875,
+      "final_predicted_reward_sum": 0.03076171875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_3fce91c4-2475-4ec3-9673-893f3481389c.npz",
+      "id": "3fce91c4-2475-4ec3-9673-893f3481389c",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.08349609375,
+      "final_predicted_reward_avg": 0.08349609375,
+      "final_predicted_reward_sum": 0.08349609375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_55f2ebd2-9d5e-47e4-bcb8-9ec695025069.npz",
+      "id": "55f2ebd2-9d5e-47e4-bcb8-9ec695025069",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.07470703125,
+      "final_predicted_reward_avg": 0.07470703125,
+      "final_predicted_reward_sum": 0.07470703125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_b0d82714-baba-45d0-9821-6f20e26dfac4.npz",
+      "id": "b0d82714-baba-45d0-9821-6f20e26dfac4",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.09423828125,
+      "final_predicted_reward_avg": 0.09423828125,
+      "final_predicted_reward_sum": 0.09423828125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_b8d16295-9a8e-42ab-9f67-43366dfda804.npz",
+      "id": "b8d16295-9a8e-42ab-9f67-43366dfda804",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11669921875,
+      "final_predicted_reward_avg": 0.11669921875,
+      "final_predicted_reward_sum": 0.11669921875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_f73c31e3-af59-457c-9a5e-ea7bf623f7a7.npz",
+      "id": "f73c31e3-af59-457c-9a5e-ea7bf623f7a7",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.0947265625,
+      "final_predicted_reward_avg": 0.0947265625,
+      "final_predicted_reward_sum": 0.0947265625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_fba2a316-5ed6-410a-8f0e-134733c65cc4.npz",
+      "id": "fba2a316-5ed6-410a-8f0e-134733c65cc4",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.08935546875,
+      "final_predicted_reward_avg": 0.08935546875,
+      "final_predicted_reward_sum": 0.08935546875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_735d04d1-9a73-4a13-946d-3d7460521ba4.npz",
+      "id": "735d04d1-9a73-4a13-946d-3d7460521ba4",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.055908203125,
+      "final_predicted_reward_avg": 0.055908203125,
+      "final_predicted_reward_sum": 0.055908203125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_7163eb41-f256-4d33-bb01-d3c0ec6ba6e2.npz",
+      "id": "7163eb41-f256-4d33-bb01-d3c0ec6ba6e2",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.07373046875,
+      "final_predicted_reward_avg": 0.07373046875,
+      "final_predicted_reward_sum": 0.07373046875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_4c5dac5c-ba9a-470f-a3ee-0af741bcb702.npz",
+      "id": "4c5dac5c-ba9a-470f-a3ee-0af741bcb702",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.10498046875,
+      "final_predicted_reward_avg": 0.10498046875,
+      "final_predicted_reward_sum": 0.10498046875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_93a04e2a-e460-43c7-b4ee-8099f52142cc.npz",
+      "id": "93a04e2a-e460-43c7-b4ee-8099f52142cc",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0751953125,
+      "final_predicted_reward_avg": 0.0751953125,
+      "final_predicted_reward_sum": 0.0751953125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_70b3dd78-1bd0-46f1-ad24-64cfc58669f8.npz",
+      "id": "70b3dd78-1bd0-46f1-ad24-64cfc58669f8",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12158203125,
+      "final_predicted_reward_avg": 0.12158203125,
+      "final_predicted_reward_sum": 0.12158203125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_d4f5ad53-591f-4065-b1fa-2ca8bb1b3abb.npz",
+      "id": "d4f5ad53-591f-4065-b1fa-2ca8bb1b3abb",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0439453125,
+      "final_predicted_reward_avg": 0.0439453125,
+      "final_predicted_reward_sum": 0.0439453125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_df6bb0e1-0272-48ba-ba1a-4f98db3ca2d6.npz",
+      "id": "df6bb0e1-0272-48ba-ba1a-4f98db3ca2d6",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.0296630859375,
+      "final_predicted_reward_avg": 0.0296630859375,
+      "final_predicted_reward_sum": 0.0296630859375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_ef4e1532-e168-4f4a-9982-3b7261c20f91.npz",
+      "id": "ef4e1532-e168-4f4a-9982-3b7261c20f91",
+      "quality_label": "failure"
+    }
+  ],
+  "Move the orange cup from left to right": [
+    {
+      "final_predicted_reward_last": 0.04296875,
+      "final_predicted_reward_avg": 0.04296875,
+      "final_predicted_reward_sum": 0.04296875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_18575326-4623-4b93-bf61-854456e59b0e.npz",
+      "id": "18575326-4623-4b93-bf61-854456e59b0e",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.2001953125,
+      "final_predicted_reward_avg": 0.2001953125,
+      "final_predicted_reward_sum": 0.2001953125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_19cbb8d5-d8d0-41ff-a188-87d92dbf6523.npz",
+      "id": "19cbb8d5-d8d0-41ff-a188-87d92dbf6523",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.189453125,
+      "final_predicted_reward_avg": 0.189453125,
+      "final_predicted_reward_sum": 0.189453125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_aedfe60a-6aa3-4621-92be-c021bf435e65.npz",
+      "id": "aedfe60a-6aa3-4621-92be-c021bf435e65",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1572265625,
+      "final_predicted_reward_avg": 0.1572265625,
+      "final_predicted_reward_sum": 0.1572265625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_f257ee60-1dc5-47a0-a87f-46b55fa32144.npz",
+      "id": "f257ee60-1dc5-47a0-a87f-46b55fa32144",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.146484375,
+      "final_predicted_reward_avg": 0.146484375,
+      "final_predicted_reward_sum": 0.146484375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_54f8502f-2f37-4da6-90fa-234b9422e00d.npz",
+      "id": "54f8502f-2f37-4da6-90fa-234b9422e00d",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.173828125,
+      "final_predicted_reward_avg": 0.173828125,
+      "final_predicted_reward_sum": 0.173828125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_c2aac95c-5b31-46b0-85c7-f1a2d34dda1a.npz",
+      "id": "c2aac95c-5b31-46b0-85c7-f1a2d34dda1a",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1826171875,
+      "final_predicted_reward_avg": 0.1826171875,
+      "final_predicted_reward_sum": 0.1826171875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_ea65dc8a-0c36-4ffc-a492-7f2fbf72c1a7.npz",
+      "id": "ea65dc8a-0c36-4ffc-a492-7f2fbf72c1a7",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1748046875,
+      "final_predicted_reward_avg": 0.1748046875,
+      "final_predicted_reward_sum": 0.1748046875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_0623b422-5019-41e7-85d0-360ad7538db1.npz",
+      "id": "0623b422-5019-41e7-85d0-360ad7538db1",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1171875,
+      "final_predicted_reward_avg": 0.1171875,
+      "final_predicted_reward_sum": 0.1171875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_8165986b-3de7-4773-87a3-9440eca2c13a.npz",
+      "id": "8165986b-3de7-4773-87a3-9440eca2c13a",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1572265625,
+      "final_predicted_reward_avg": 0.1572265625,
+      "final_predicted_reward_sum": 0.1572265625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_0c15f816-c8a8-4843-a74e-75751ac2e3d5.npz",
+      "id": "0c15f816-c8a8-4843-a74e-75751ac2e3d5",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.15625,
+      "final_predicted_reward_avg": 0.15625,
+      "final_predicted_reward_sum": 0.15625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_b9623f03-4eda-4dfb-87f9-d7ca70610816.npz",
+      "id": "b9623f03-4eda-4dfb-87f9-d7ca70610816",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1884765625,
+      "final_predicted_reward_avg": 0.1884765625,
+      "final_predicted_reward_sum": 0.1884765625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_b02d7dee-0cb9-4cfb-9b40-c634f54ccb31.npz",
+      "id": "b02d7dee-0cb9-4cfb-9b40-c634f54ccb31",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12890625,
+      "final_predicted_reward_avg": 0.12890625,
+      "final_predicted_reward_sum": 0.12890625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_9109165f-953b-4f1b-ada3-ef1735db3af8.npz",
+      "id": "9109165f-953b-4f1b-ada3-ef1735db3af8",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1279296875,
+      "final_predicted_reward_avg": 0.1279296875,
+      "final_predicted_reward_sum": 0.1279296875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_1aff9f1a-da70-40b9-a264-6d2b93c0d633.npz",
+      "id": "1aff9f1a-da70-40b9-a264-6d2b93c0d633",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1748046875,
+      "final_predicted_reward_avg": 0.1748046875,
+      "final_predicted_reward_sum": 0.1748046875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_f5bbd024-176c-486b-9ab7-212096ef4b91.npz",
+      "id": "f5bbd024-176c-486b-9ab7-212096ef4b91",
+      "quality_label": "successful"
+    }
+  ],
+  "Open the red trash bin": [
+    {
+      "final_predicted_reward_last": 0.158203125,
+      "final_predicted_reward_avg": 0.158203125,
+      "final_predicted_reward_sum": 0.158203125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_bddecc0c-d91f-4b4e-8e6c-0f6e2ae72272.npz",
+      "id": "bddecc0c-d91f-4b4e-8e6c-0f6e2ae72272",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1767578125,
+      "final_predicted_reward_avg": 0.1767578125,
+      "final_predicted_reward_sum": 0.1767578125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_f7225e96-0bfb-4aac-9b81-f601b6f46819.npz",
+      "id": "f7225e96-0bfb-4aac-9b81-f601b6f46819",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.10791015625,
+      "final_predicted_reward_avg": 0.10791015625,
+      "final_predicted_reward_sum": 0.10791015625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_d6ae8dbb-e361-4c65-9845-9d869c21324f.npz",
+      "id": "d6ae8dbb-e361-4c65-9845-9d869c21324f",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.169921875,
+      "final_predicted_reward_avg": 0.169921875,
+      "final_predicted_reward_sum": 0.169921875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_413ba9d0-bc7e-4204-9d80-84f8588bbe6a.npz",
+      "id": "413ba9d0-bc7e-4204-9d80-84f8588bbe6a",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.10205078125,
+      "final_predicted_reward_avg": 0.10205078125,
+      "final_predicted_reward_sum": 0.10205078125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_d028b5d8-702f-4f0f-b7f5-7c2273b9c9c3.npz",
+      "id": "d028b5d8-702f-4f0f-b7f5-7c2273b9c9c3",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0947265625,
+      "final_predicted_reward_avg": 0.0947265625,
+      "final_predicted_reward_sum": 0.0947265625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_132b740f-329c-4028-bd24-d712ae1642a6.npz",
+      "id": "132b740f-329c-4028-bd24-d712ae1642a6",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.162109375,
+      "final_predicted_reward_avg": 0.162109375,
+      "final_predicted_reward_sum": 0.162109375,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_283249c4-15cf-4f5e-93c6-87886f71e90b.npz",
+      "id": "283249c4-15cf-4f5e-93c6-87886f71e90b",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1611328125,
+      "final_predicted_reward_avg": 0.1611328125,
+      "final_predicted_reward_sum": 0.1611328125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_3017c615-831c-4acd-b89e-7bb6455e7b5f.npz",
+      "id": "3017c615-831c-4acd-b89e-7bb6455e7b5f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.126953125,
+      "final_predicted_reward_avg": 0.126953125,
+      "final_predicted_reward_sum": 0.126953125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_5b331b11-7deb-423d-a31f-774240739535.npz",
+      "id": "5b331b11-7deb-423d-a31f-774240739535",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1669921875,
+      "final_predicted_reward_avg": 0.1669921875,
+      "final_predicted_reward_sum": 0.1669921875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_eb749f9f-3f7f-4ec7-bcdd-6198a89eefcd.npz",
+      "id": "eb749f9f-3f7f-4ec7-bcdd-6198a89eefcd",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.142578125,
+      "final_predicted_reward_avg": 0.142578125,
+      "final_predicted_reward_sum": 0.142578125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_4b5ce181-9c82-4690-9aba-6b2c102ac73b.npz",
+      "id": "4b5ce181-9c82-4690-9aba-6b2c102ac73b",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0230712890625,
+      "final_predicted_reward_avg": 0.0230712890625,
+      "final_predicted_reward_sum": 0.0230712890625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_ca49e7dd-5b00-46b1-86ea-622a42dbd14d.npz",
+      "id": "ca49e7dd-5b00-46b1-86ea-622a42dbd14d",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.08056640625,
+      "final_predicted_reward_avg": 0.08056640625,
+      "final_predicted_reward_sum": 0.08056640625,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_c85dbd3f-7930-47be-bd07-f3172f81e482.npz",
+      "id": "c85dbd3f-7930-47be-bd07-f3172f81e482",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.14453125,
+      "final_predicted_reward_avg": 0.14453125,
+      "final_predicted_reward_sum": 0.14453125,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_19728bda-5da2-4a40-9963-af9bfc87e187.npz",
+      "id": "19728bda-5da2-4a40-9963-af9bfc87e187",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.091796875,
+      "final_predicted_reward_avg": 0.091796875,
+      "final_predicted_reward_sum": 0.091796875,
+      "video_path": "./processed_datasets/jesbu1_usc_koch_p_ranking_rfm_usc_koch_p_ranking_all/frames/trajectory_c2997029-2c08-490c-a394-7ef05033dfbb.npz",
+      "id": "c2997029-2c08-490c-a394-7ef05033dfbb",
+      "quality_label": "failure"
+    }
+  ]
+}

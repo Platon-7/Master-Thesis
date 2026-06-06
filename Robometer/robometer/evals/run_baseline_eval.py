@@ -844,6 +844,10 @@ def main(cfg: DictConfig):
     data_cfg = DataConfig(
         max_frames=baseline_cfg.max_frames,
         load_embeddings=True if "rewind" in baseline_cfg.reward_model else False,
+        use_icl=baseline_cfg.use_icl,
+        icl_prob=baseline_cfg.icl_prob,
+        pairs_index_path=baseline_cfg.pairs_index_path,
+        icl_min_coverage=baseline_cfg.icl_min_coverage,
     )
 
     display_config(data_cfg)

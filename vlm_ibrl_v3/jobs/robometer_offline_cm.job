@@ -1,0 +1,108 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_cm
+#SBATCH --output=logs/robometer_offline_cm_%j.out
+#SBATCH --error=logs/robometer_offline_cm_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+# Offline CM eval: run both Robometer-4B (public SOTA) and Robometer-FT
+# (whatever ROBOMETER_FT_PATH points at) on the same MetaWorld demo set
+# and dump confusion matrices + per-class success_prob distributions.
+#
+# Overrides (env vars on sbatch --export=ALL,...):
+#   TASK          = CoffeePush (default) | Assembly | BoxClose | StickPull
+#   PAST_LEN      = 4
+#   PREFIX_STRIDE = 5
+#   THRESHOLD     = 0.5
+#   ROBOMETER_FT_PATH = /scratch-shared/...   (REQUIRED for FT half)
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+export IBRL_CONDA_ENV="$ENV_NAME"
+
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+unset WANDB_PROJECT WANDB_ENTITY
+export WANDB_MODE=disabled
+
+TASK="${TASK:-CoffeePush}"
+PAST_LEN="${PAST_LEN:-4}"
+PREFIX_STRIDE="${PREFIX_STRIDE:-5}"
+THRESHOLD="${THRESHOLD:-0.5}"
+FULL_CLIP_FLAG="${FULL_CLIP:+--full-clip}"
+OUT_DIR="${OUT_DIR:-/scratch-shared/$USER/vlm_ibrl_cm/${SLURM_JOB_ID:-local}}"
+mkdir -p "$OUT_DIR"
+
+echo "==================== CM eval summary ===================="
+echo "TASK              : $TASK"
+echo "PAST_LEN          : $PAST_LEN"
+echo "PREFIX_STRIDE     : $PREFIX_STRIDE"
+echo "THRESHOLD         : $THRESHOLD"
+echo "FULL_CLIP         : ${FULL_CLIP:-<no — using past_len subsample>}"
+echo "ROBOMETER_FT_PATH : ${ROBOMETER_FT_PATH:-<unset — FT half will be skipped>}"
+echo "OUT_DIR           : $OUT_DIR"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "==========================================================="
+
+# Robometer-4B (baseline) — skip if SKIP_4B=1 (e.g. when reusing an earlier dump)
+if [[ "${SKIP_4B:-0}" != "1" ]]; then
+    echo
+    echo "########## Robometer-4B (public SOTA) ##########"
+    python tools/robometer_offline_cm.py \
+        --model-path "robometer/Robometer-4B" \
+        --task "$TASK" \
+        --past-len "$PAST_LEN" \
+        --prefix-stride "$PREFIX_STRIDE" \
+        --threshold "$THRESHOLD" \
+        $FULL_CLIP_FLAG \
+        --output "$OUT_DIR/cm_robometer_4b_${TASK}.json"
+    RC_4B=$?
+else
+    echo "[skip] Robometer-4B — SKIP_4B=1 (reuse existing 4B dump from earlier job)"
+    RC_4B=0
+fi
+
+# Robometer-FT (your fine-tune)
+if [[ -n "${ROBOMETER_FT_PATH:-}" ]]; then
+    echo
+    echo "########## Robometer-FT  (${ROBOMETER_FT_PATH}) ##########"
+    python tools/robometer_offline_cm.py \
+        --model-path "$ROBOMETER_FT_PATH" \
+        --task "$TASK" \
+        --past-len "$PAST_LEN" \
+        --prefix-stride "$PREFIX_STRIDE" \
+        --threshold "$THRESHOLD" \
+        $FULL_CLIP_FLAG \
+        --output "$OUT_DIR/cm_robometer_ft_${TASK}.json"
+    RC_FT=$?
+else
+    echo "[skip] Robometer-FT — ROBOMETER_FT_PATH not set"
+    RC_FT=0
+fi
+
+echo
+echo "==================== CM eval exit ===================="
+echo "4B return code : $RC_4B"
+echo "FT return code : $RC_FT"
+if [[ $RC_4B -eq 0 && $RC_FT -eq 0 ]]; then
+    echo "CM EVAL PASSED"
+    exit 0
+else
+    echo "CM EVAL FAILED"
+    exit 1
+fi

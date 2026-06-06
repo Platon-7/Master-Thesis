@@ -1,0 +1,102 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_ood_eval
+#SBATCH --output=logs/inference_eval_set_%j.out
+#SBATCH --error=logs/inference_eval_set_%j.err
+#SBATCH --time=02:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_mig
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=6
+#SBATCH --mem=32G
+
+# Run trajectory-level inference over the canonical rbm-1m-ood (782 episodes)
+# for one Robometer-arch checkpoint. Output is one parquet → consumed by
+# tools/build_results_table.py downstream.
+#
+# Overrides via sbatch --export=ALL,...
+#   MODEL_PATH   (required) — HF id or local path
+#   OUT_PATH     (required) — output parquet
+#   EVAL_ROOT    (optional) — defaults to /projects/prjs1958/robometer_frame_eval_dataset/raw_hf
+#   LIMIT        (optional) — smoke-test n episodes (default: all 782)
+#
+# Memory note: the mp4 is decoded into CPU RAM once (~5.4 GB for 25024 frames
+# at 240×320 uint8). 32 GB --mem leaves headroom for the Qwen3VL processor's
+# working buffers. gpu_mig QOS caps shared jobs at 6826 MiB/core, so
+# --cpus-per-task=6 → ~40 GiB effective ceiling.
+#
+# GPU note: gpu_mig gives a single MIG slice (typically 1g.10gb on Snellius
+# A100s). Robometer-4B loads at bf16 (~8 GB weights) via the non-Unsloth
+# path. Activations for a single 16-frame clip fit, but if you see CUDA
+# OOM swap partition to gpu_a100.
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+export IBRL_CONDA_ENV="$ENV_NAME"
+
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+
+# This script does no wandb logging.
+unset WANDB_PROJECT WANDB_ENTITY
+export WANDB_MODE=disabled
+
+if [[ -z "${MODEL_PATH:-}" ]]; then
+    echo "ERROR: MODEL_PATH not set (sbatch --export=ALL,MODEL_PATH=...)" >&2
+    exit 2
+fi
+if [[ -z "${OUT_PATH:-}" ]]; then
+    echo "ERROR: OUT_PATH not set (sbatch --export=ALL,OUT_PATH=...)" >&2
+    exit 2
+fi
+SOURCE="${SOURCE:-raw_hf}"   # raw_hf | packed
+case "$SOURCE" in
+    raw_hf) EVAL_ROOT_DEFAULT=/projects/prjs1958/robometer_frame_eval_dataset/raw_hf ;;
+    packed) EVAL_ROOT_DEFAULT=/projects/prjs1958/robometer_frame_eval_dataset ;;
+    *) echo "ERROR: SOURCE must be raw_hf or packed (got: $SOURCE)" >&2; exit 2 ;;
+esac
+EVAL_ROOT="${EVAL_ROOT:-$EVAL_ROOT_DEFAULT}"
+LIMIT_FLAG="${LIMIT:+--limit $LIMIT}"
+
+mkdir -p "$(dirname "$OUT_PATH")"
+mkdir -p logs
+
+echo "==================== rbm-1m-ood inference summary ===================="
+echo "MODEL_PATH : $MODEL_PATH"
+echo "OUT_PATH   : $OUT_PATH"
+echo "SOURCE     : $SOURCE"
+echo "EVAL_ROOT  : $EVAL_ROOT"
+echo "LIMIT      : ${LIMIT:-<all 782>}"
+echo "HERE       : $HERE"
+echo "ENV_NAME   : $ENV_NAME"
+echo "python     : $(which python)"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "======================================================================"
+
+python tools/inference_eval_set.py \
+    --model-path "$MODEL_PATH" \
+    --out "$OUT_PATH" \
+    --source "$SOURCE" \
+    --eval-root "$EVAL_ROOT" \
+    $LIMIT_FLAG
+RC=$?
+
+echo
+echo "==================== rbm-1m-ood inference exit ===================="
+echo "return code: $RC"
+if [[ $RC -eq 0 ]]; then
+    echo "INFERENCE PASSED"
+else
+    echo "INFERENCE FAILED (rc=$RC)"
+fi
+exit $RC

@@ -1,0 +1,150 @@
+#!/bin/bash
+#SBATCH --job-name=ibrl_sweep
+#SBATCH --output=logs/ibrl_sweep_%j.out
+#SBATCH --error=logs/ibrl_sweep_%j.err
+#SBATCH --time=04:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=80G
+
+# Full IBRL run for HP sweep (β × threshold grid). 1 seed, 300k env steps,
+# 4h30min walltime, training-timeout wrapper at 4h15min to catch the
+# Python-shutdown hang before SLURM kills the job.
+#
+# Overrides via sbatch --export=ALL,...:
+#   VLM_NAME, BC_POLICY, ROBOMETER_BETA, ROBOMETER_THRESHOLD,
+#   ROBOMETER_REWARD_SCALE, NUM_TRAIN_STEP, SEED, SAVE_BASE
+
+set -uo pipefail
+
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+MUJOCO_PATH="${MUJOCO_PATH:-$HOME/.mujoco/mujoco210}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+export PYTHONNOUSERSITE=1
+export IBRL_CONDA_ENV="$ENV_NAME"
+export MUJOCO_PATH="$MUJOCO_PATH"
+
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+
+# Robometer/ must be on PYTHONPATH so `from robometer.evals.eval_server
+# import process_batch_helper` resolves. set_env.sh already put vlm_ibrl/
+# (HERE) first; appending Robometer/.
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+
+# Re-export ICL env vars so they're visible to the python child process even
+# if SLURM's --export didn't carry them all the way through conda activation.
+if [[ -n "${ROBOMETER_ICL_DEMO_PATH:-}" ]]; then
+    export ROBOMETER_ICL_DEMO_PATH
+    export ROBOMETER_ICL_DEMO_IDX="${ROBOMETER_ICL_DEMO_IDX:-0}"
+    export ROBOMETER_ICL_FRAMES="${ROBOMETER_ICL_FRAMES:-16}"
+    echo "ICL_DEMO_PATH         : $ROBOMETER_ICL_DEMO_PATH"
+    echo "ICL_DEMO_IDX          : $ROBOMETER_ICL_DEMO_IDX"
+    echo "ICL_FRAMES            : $ROBOMETER_ICL_FRAMES"
+fi
+
+# Headless MuJoCo via EGL (set_env.sh leaves MUJOCO_GL unset; metaworld
+# wrappers default to glfw, but the cluster nodes only have EGL/OSMesa).
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+
+# Don't sync model checkpoints to W&B at end of run — they're already on
+# scratch in $SAVE_DIR, and the upload (~160MB) was hanging wandb.finish()
+# for 2h+ on job 22757287, eating all the walltime after the actual
+# training completed in ~13 min. Telemetry (scalars/curves) still goes up.
+export WANDB_DISABLE_ARTIFACTS=true
+
+# Save checkpoints + replay on /projects (durable, multi-day retention).
+SAVE_BASE="${SAVE_BASE:-/projects/prjs1958/$USER/vlm_ibrl_sweep}"
+SAVE_DIR="${SAVE_BASE}/${BC_POLICY:-coffeepush}_${VLM_NAME:-robometer_ft}_b${ROBOMETER_BETA:-0.0}_t${ROBOMETER_THRESHOLD:-0.0}_${SLURM_JOB_ID:-local}"
+mkdir -p "$SAVE_DIR"
+
+echo "==================== ibrl poc summary ===================="
+echo "ENV_NAME       : $ENV_NAME"
+echo "HERE           : $HERE"
+echo "ROBOMETER_DIR  : $ROBOMETER_DIR"
+echo "SAVE_DIR       : $SAVE_DIR"
+echo "MUJOCO_GL      : $MUJOCO_GL"
+echo "python         : $(which python)"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "==========================================================="
+
+# Wrap the python call in `timeout` to side-step the Python-shutdown hang
+# observed on jobs 22757287 and 22764141: training completes in ~14 min,
+# wandb.finish() returns within seconds, but the interpreter then sits idle
+# for hours (CUDA/MuJoCo/pybind destructor not terminating). 20 min covers
+# 14 min training + 1 min sync + 5 min buffer; everything past that is
+# guaranteed-dead time. SIGKILL after grace period.
+#
+# IMPORTANT: GNU `timeout` accepts only single-unit specs ('4h' or '255m',
+# NOT '4h15m'). Earlier submissions with '4h15m' failed at 38 s with
+# rc=125 before training started (see job 22897715). Use seconds.
+TRAIN_TIMEOUT="${TRAIN_TIMEOUT:-15300}"  # 4h15m = 15300s
+VLM_NAME="${VLM_NAME:-robometer_ft}"
+ROBOMETER_BETA="${ROBOMETER_BETA:-0.0}"
+ROBOMETER_THRESHOLD="${ROBOMETER_THRESHOLD:-0.0}"
+ROBOMETER_REWARD_SCALE="${ROBOMETER_REWARD_SCALE:-1.0}"
+SEED="${SEED:-1}"
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-300000}"
+BC_POLICY="${BC_POLICY:-coffeepush}"
+
+echo "VLM_NAME               : $VLM_NAME"
+echo "BC_POLICY              : $BC_POLICY"
+echo "ROBOMETER_BETA         : $ROBOMETER_BETA"
+echo "ROBOMETER_THRESHOLD    : $ROBOMETER_THRESHOLD"
+echo "ROBOMETER_REWARD_SCALE : $ROBOMETER_REWARD_SCALE"
+echo "SEED                   : $SEED"
+echo "NUM_TRAIN_STEP         : $NUM_TRAIN_STEP"
+echo "TRAIN_END_ON_SUCCESS   : ${TRAIN_END_ON_SUCCESS:-0}"
+echo "ROBOMETER_FT_PATH      : ${ROBOMETER_FT_PATH:-<unset>}"
+echo "QWEN35_FT_PATH         : ${QWEN35_FT_PATH:-<unset>}"
+
+timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
+    python mw_main/train_rl_vlm_mw.py \
+        --config_path release/cfgs/metaworld/ibrl_long.yaml \
+        --bc_policy "$BC_POLICY" \
+        --vlm "$VLM_NAME" \
+        --train_end_on_success ${TRAIN_END_ON_SUCCESS:-0} \
+        --reward_at_truncation ${REWARD_AT_TRUNC:-1} \
+        --num_train_step "$NUM_TRAIN_STEP" \
+        --seed "$SEED" \
+        --use_wb 1 \
+        --robometer_beta "$ROBOMETER_BETA" \
+        --robometer_threshold "$ROBOMETER_THRESHOLD" \
+        --robometer_reward_scale "$ROBOMETER_REWARD_SCALE" \
+        --save_dir "$SAVE_DIR"
+RC=$?
+
+# timeout returns 124 (graceful) or 137 (SIGKILL after kill-after) when the
+# wall budget is hit. If training reached its target step before the kill,
+# the per-step log line ``20000:`` is present and the run is functionally
+# successful — treat as PASS.
+if [[ $RC -eq 124 || $RC -eq 137 ]]; then
+    if grep -q "^${NUM_TRAIN_STEP}: " "$SAVE_DIR/train.log" 2>/dev/null; then
+        echo "[wrapper] timeout fired but training reached step ${NUM_TRAIN_STEP} — treating as PASS"
+        RC=0
+    else
+        LAST=$(grep -E "^[0-9]+: " "$SAVE_DIR/train.log" 2>/dev/null | awk -F: '{print $1}' | sort -un | tail -1)
+        echo "[wrapper] timeout fired BEFORE reaching ${NUM_TRAIN_STEP} — last step logged: ${LAST}"
+    fi
+fi
+
+echo
+echo "==================== ibrl poc exit ===================="
+echo "return code: $RC"
+if [[ $RC -eq 0 ]]; then
+    echo "IBRL PoC PASSED"
+else
+    echo "IBRL PoC FAILED (rc=$RC)"
+fi
+exit $RC

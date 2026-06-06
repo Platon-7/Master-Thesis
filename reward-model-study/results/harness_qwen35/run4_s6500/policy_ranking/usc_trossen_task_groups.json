@@ -1,0 +1,194 @@
+{
+  "Remove the lid from the pot": [
+    {
+      "final_predicted_reward_last": 0.12890625,
+      "final_predicted_reward_avg": 0.12890625,
+      "final_predicted_reward_sum": 0.12890625,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_remove_lid_ep_000001.npz",
+      "id": "ykorkmaz__aloha_remove_lid_ep_000001",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1796875,
+      "final_predicted_reward_avg": 0.1796875,
+      "final_predicted_reward_sum": 0.1796875,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_remove_lid_suboptimal_ep_000000.npz",
+      "id": "ykorkmaz__aloha_remove_lid_suboptimal_ep_000000",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.181640625,
+      "final_predicted_reward_avg": 0.181640625,
+      "final_predicted_reward_sum": 0.181640625,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_remove_lid_suboptimal_ep_000001.npz",
+      "id": "ykorkmaz__aloha_remove_lid_suboptimal_ep_000001",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.19140625,
+      "final_predicted_reward_avg": 0.19140625,
+      "final_predicted_reward_sum": 0.19140625,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_remove_lid_ep_000000.npz",
+      "id": "ykorkmaz__aloha_remove_lid_ep_000000",
+      "quality_label": "successful"
+    }
+  ],
+  "Unzip the pencil case": [
+    {
+      "final_predicted_reward_last": 0.2041015625,
+      "final_predicted_reward_avg": 0.2041015625,
+      "final_predicted_reward_sum": 0.2041015625,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_unzip_case_ep_000001.npz",
+      "id": "ykorkmaz__aloha_unzip_case_ep_000001",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.177734375,
+      "final_predicted_reward_avg": 0.177734375,
+      "final_predicted_reward_sum": 0.177734375,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_unzip_case_ep_000002.npz",
+      "id": "ykorkmaz__aloha_unzip_case_ep_000002",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1845703125,
+      "final_predicted_reward_avg": 0.1845703125,
+      "final_predicted_reward_sum": 0.1845703125,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_unzip_case_failure_ep_000001.npz",
+      "id": "ykorkmaz__aloha_unzip_case_failure_ep_000001",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1884765625,
+      "final_predicted_reward_avg": 0.1884765625,
+      "final_predicted_reward_sum": 0.1884765625,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_unzip_case_ep_000000.npz",
+      "id": "ykorkmaz__aloha_unzip_case_ep_000000",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.19921875,
+      "final_predicted_reward_avg": 0.19921875,
+      "final_predicted_reward_sum": 0.19921875,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_unzip_case_failure_ep_000000.npz",
+      "id": "ykorkmaz__aloha_unzip_case_failure_ep_000000",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1982421875,
+      "final_predicted_reward_avg": 0.1982421875,
+      "final_predicted_reward_sum": 0.1982421875,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_unzip_case_suboptimal_ep_000000.npz",
+      "id": "ykorkmaz__aloha_unzip_case_suboptimal_ep_000000",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1953125,
+      "final_predicted_reward_avg": 0.1953125,
+      "final_predicted_reward_sum": 0.1953125,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_unzip_case_suboptimal_ep_000001.npz",
+      "id": "ykorkmaz__aloha_unzip_case_suboptimal_ep_000001",
+      "quality_label": "suboptimal"
+    }
+  ],
+  "Open the bottle": [
+    {
+      "final_predicted_reward_last": 0.2177734375,
+      "final_predicted_reward_avg": 0.2177734375,
+      "final_predicted_reward_sum": 0.2177734375,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_bottle_failure_ep_000001.npz",
+      "id": "ykorkmaz__aloha_open_bottle_failure_ep_000001",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1943359375,
+      "final_predicted_reward_avg": 0.1943359375,
+      "final_predicted_reward_sum": 0.1943359375,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_bottle_ep_000001.npz",
+      "id": "ykorkmaz__aloha_open_bottle_ep_000001",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1806640625,
+      "final_predicted_reward_avg": 0.1806640625,
+      "final_predicted_reward_sum": 0.1806640625,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_bottle_failure_ep_000000.npz",
+      "id": "ykorkmaz__aloha_open_bottle_failure_ep_000000",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.2080078125,
+      "final_predicted_reward_avg": 0.2080078125,
+      "final_predicted_reward_sum": 0.2080078125,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_bottle_ep_000000.npz",
+      "id": "ykorkmaz__aloha_open_bottle_ep_000000",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1884765625,
+      "final_predicted_reward_avg": 0.1884765625,
+      "final_predicted_reward_sum": 0.1884765625,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_bottle_ep_000002.npz",
+      "id": "ykorkmaz__aloha_open_bottle_ep_000002",
+      "quality_label": "successful"
+    }
+  ],
+  "Open the red drawer": [
+    {
+      "final_predicted_reward_last": 0.1884765625,
+      "final_predicted_reward_avg": 0.1884765625,
+      "final_predicted_reward_sum": 0.1884765625,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_drawer_ep_000000.npz",
+      "id": "ykorkmaz__aloha_open_drawer_ep_000000",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.2060546875,
+      "final_predicted_reward_avg": 0.2060546875,
+      "final_predicted_reward_sum": 0.2060546875,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_drawer_failure_ep_000000.npz",
+      "id": "ykorkmaz__aloha_open_drawer_failure_ep_000000",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.193359375,
+      "final_predicted_reward_avg": 0.193359375,
+      "final_predicted_reward_sum": 0.193359375,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_drawer_ep_000002.npz",
+      "id": "ykorkmaz__aloha_open_drawer_ep_000002",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.203125,
+      "final_predicted_reward_avg": 0.203125,
+      "final_predicted_reward_sum": 0.203125,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_drawer_suboptimal_ep_000000.npz",
+      "id": "ykorkmaz__aloha_open_drawer_suboptimal_ep_000000",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.2177734375,
+      "final_predicted_reward_avg": 0.2177734375,
+      "final_predicted_reward_sum": 0.2177734375,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_drawer_failure_ep_000001.npz",
+      "id": "ykorkmaz__aloha_open_drawer_failure_ep_000001",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.201171875,
+      "final_predicted_reward_avg": 0.201171875,
+      "final_predicted_reward_sum": 0.201171875,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_drawer_ep_000001.npz",
+      "id": "ykorkmaz__aloha_open_drawer_ep_000001",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.2001953125,
+      "final_predicted_reward_avg": 0.2001953125,
+      "final_predicted_reward_sum": 0.2001953125,
+      "video_path": "./processed_datasets/ykorkmaz_usc_trossen_rfm_usc_trossen/frames/trajectory_ykorkmaz__aloha_open_drawer_suboptimal_ep_000001.npz",
+      "id": "ykorkmaz__aloha_open_drawer_suboptimal_ep_000001",
+      "quality_label": "suboptimal"
+    }
+  ]
+}

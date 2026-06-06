@@ -1,0 +1,29 @@
+#!/bin/bash
+#SBATCH --job-name=bc_succ_v3
+#SBATCH --output=logs/bc_succ_v3_%j.out
+#SBATCH --error=logs/bc_succ_v3_%j.err
+#SBATCH --time=00:40:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+ENV_NAME="${IBRL_CONDA_ENV:-/gpfs/scratch1/shared/pkarageorgis1/envs/demo2reward_v3}"
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+export IBRL_CONDA_ENV="$ENV_NAME"
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+RUN_DIR="${RUN_DIR:-/projects/prjs1958/pkarageorgis1/vlm_ibrl_sweep/coffeepush_gtv3_rt1_seed1_23505183}"
+nvidia-smi --query-gpu=name --format=csv,noheader | head -1
+echo "RUN_DIR=$RUN_DIR"
+echo "############### ZOOM OFF (default v3 corner2) ###############"
+V3_CORNER2_ZOOM=0 python -u tools/bc_success_v3.py --run-dir "$RUN_DIR" --num-episodes 50
+echo "############### ZOOM ON (v2 corner2 framing) ###############"
+V3_CORNER2_ZOOM=1 python -u tools/bc_success_v3.py --run-dir "$RUN_DIR" --num-episodes 50

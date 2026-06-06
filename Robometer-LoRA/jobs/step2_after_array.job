@@ -74,7 +74,8 @@ cat "$TMP_PP_YAML"
 cd "$ROBOMETER_DIR"
 "$PYTHON" -m robometer.data.scripts.preprocess_datasets \
     --config "$TMP_PP_YAML" \
-    --cache_dir "$HF_OUT_DIR"
+    --cache_dir "$HF_OUT_DIR" \
+    ${FORCE_REPROCESS:+--force_reprocess $FORCE_REPROCESS}
 
 # ----- (c) Create short-name symlink the dataset loader expects --------------
 # preprocess_datasets writes to <cache>/<full-path-with-slashes-as-underscores>/,

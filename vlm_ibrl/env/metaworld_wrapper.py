@@ -366,6 +366,15 @@ class RewardAtTruncationWrapper(gym.Wrapper):
     def __init__(self, env):
         super().__init__(env)
         self._had_success = False
+        # FP dose-response study: inject controlled false positives into the
+        # TRAIN reward only (this wrapper is added only when reward_at_truncation
+        # is True, i.e. the train env; the eval env uses reward_at_truncation=
+        # False so its true-success metric is untouched). With prob
+        # FP_INJECT_RATE, a true-failure episode is rewarded as success at
+        # truncation — emulating a reward model with a known false-positive rate,
+        # to measure how much FP a policy tolerates before it collapses.
+        import os
+        self._fp_inject = float(os.environ.get("FP_INJECT_RATE", "0.0"))
 
     def reset(self):
         self._had_success = False
@@ -377,6 +386,9 @@ class RewardAtTruncationWrapper(gym.Wrapper):
             self._had_success = True
         if info['truncated'] and self._had_success:
             rat_reward = 1.0
+        elif info['truncated'] and self._fp_inject > 0.0 and np.random.random() < self._fp_inject:
+            rat_reward = 1.0          # injected false positive: true failure rewarded as success
+            info['fp_injected'] = True
         else:
             rat_reward = 0.0
         return obs, rat_reward, done, info

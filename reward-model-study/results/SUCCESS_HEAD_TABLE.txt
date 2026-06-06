@@ -1,0 +1,9 @@
+model        src-avg AUPRC   TPR@5%FPR     AUC   per-source AUPRC
+--------------------------------------------------------------------------------
+baseline             0.580       0.181   0.628   dro=0.835 met=0.325
+run1_fa2     (pending — correct-env dump not present)
+run2_fa2     (pending — correct-env dump not present)
+run3_fa2     (pending — correct-env dump not present)
+run4_asym            0.545       0.481   0.838   met=0.545
+run5_asym            0.407       0.240   0.701   met=0.407
+run6_std             0.596       0.101   0.579   dro=0.774 met=0.338 rob=0.677

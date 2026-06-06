@@ -1,0 +1,63 @@
+#!/bin/bash
+#SBATCH --job-name=ibrl_gt
+#SBATCH --output=logs/ibrl_gt_%j.out
+#SBATCH --error=logs/ibrl_gt_%j.err
+#SBATCH --time=00:35:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=80G
+
+# GROUND-TRUTH-REWARD IBRL control. Same RL setup / BC policy / task / budget
+# as the VLM IBRL runs, but uses the env's ground-truth reward (train_rl_mw.py
+# with plain PixelMetaWorld — no VLM). Answers: does the IBRL loop train
+# CoffeePush ABOVE the BC baseline when given a perfect reward?
+#
+# Override via env: REWARD_AT_TRUNC (1=sparse, matched to VLM; 0=dense), SEED.
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+export WANDB_DISABLE_ARTIFACTS=true
+
+REWARD_AT_TRUNC="${REWARD_AT_TRUNC:-1}"
+SEED="${SEED:-1}"
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-300000}"
+TRAIN_TIMEOUT="${TRAIN_TIMEOUT:-1500}"
+TAG="${TAG:-gt}"
+SAVE_BASE="${SAVE_BASE:-/projects/prjs1958/$USER/vlm_ibrl_sweep}"
+SAVE_DIR="${SAVE_BASE}/coffeepush_${TAG}_rt${REWARD_AT_TRUNC}_seed${SEED}_${SLURM_JOB_ID:-local}"
+mkdir -p "$SAVE_DIR"
+
+echo "==================== ibrl GT control ===================="
+echo "REWARD_AT_TRUNC : $REWARD_AT_TRUNC   (1=sparse/matched, 0=dense)"
+echo "SEED            : $SEED"
+echo "NUM_TRAIN_STEP  : $NUM_TRAIN_STEP"
+echo "SAVE_DIR        : $SAVE_DIR"
+nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1
+echo "========================================================="
+
+timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
+    python mw_main/train_rl_mw.py \
+        --config_path release/cfgs/metaworld/ibrl_long.yaml \
+        --bc_policy coffeepush \
+        --train_end_on_success 0 \
+        --reward_at_truncation "$REWARD_AT_TRUNC" \
+        --num_train_step "$NUM_TRAIN_STEP" \
+        --seed "$SEED" \
+        --use_wb 1 \
+        --save_dir "$SAVE_DIR"
+RC=$?
+echo "return code: $RC (124/137 = timeout wrapper fired, expected)"

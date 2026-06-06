@@ -1078,8 +1078,15 @@ def run_policy_ranking_eval(
     For datasets without partial_success: Uses quality_label and quality_order for ranking.
     For datasets with partial_success: Uses partial_success for ranking (no quality_order computation).
     """
-    # Check if data_source contains roboreward or roboarena to determine if we should use partial_success logic
-    use_partial_success = "roboreward" in str(data_source).lower() or "roboarena" in str(data_source).lower()
+    # Check if data_source contains roboreward or roboarena to determine if we should use partial_success logic.
+    # NOTE: data_source here is taken from results[0] (run_baseline_eval.py:628), which is an arbitrary
+    # trajectory of a MIXED dataset (e.g. robometer_frames_eval_robometer = racer/soar/libero/.../roboarena).
+    # Guard against the order-dependent misfire: only use the partial_success path when partial_success
+    # values are ACTUALLY present; otherwise fall back to the quality_label path (which is what these
+    # all-None binary datasets need, and what training computed).
+    use_partial_success = (
+        "roboreward" in str(data_source).lower() or "roboarena" in str(data_source).lower()
+    ) and any(r.get("partial_success") is not None for r in results)
 
     # Group results by trajectory_id
     unique_trajectory_ids = set()

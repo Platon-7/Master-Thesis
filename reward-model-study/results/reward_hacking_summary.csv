@@ -1,0 +1,5 @@
+model,reward_checkpoint,threshold,offline_FPR_BC,onpolicy_FPR,reward_banked,onpolicy_TPR,true_success,ibrl_peak
+Robometer-FT,run1_s3000_asym+ICL,0.35,0.10,0.41,0.43,0.01,0.042,0.10
+Robometer-4B,baseline,0.60,0.14,0.52,0.55,0.03,0.050,0.14
+Qwen3.5-FT,run4_s6500,0.20,0.00,0.62,0.62,0.00,0.011,0.04
+GT-reward,control,NA,NA,NA,NA,NA,0.82,0.82

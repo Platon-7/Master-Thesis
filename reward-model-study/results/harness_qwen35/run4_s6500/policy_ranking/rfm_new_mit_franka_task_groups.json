@@ -1,0 +1,2448 @@
+{
+  "Pick up the banana from the blue plate and place it on the green plate": [
+    {
+      "final_predicted_reward_last": 0.10693359375,
+      "final_predicted_reward_avg": 0.10693359375,
+      "final_predicted_reward_sum": 0.10693359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_6e7cff79-921c-4cf0-8277-4df267baaf39.npz",
+      "id": "6e7cff79-921c-4cf0-8277-4df267baaf39",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1279296875,
+      "final_predicted_reward_avg": 0.1279296875,
+      "final_predicted_reward_sum": 0.1279296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_97ca5d91-1468-4a9d-bf2b-a97f7b249562.npz",
+      "id": "97ca5d91-1468-4a9d-bf2b-a97f7b249562",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.2099609375,
+      "final_predicted_reward_avg": 0.2099609375,
+      "final_predicted_reward_sum": 0.2099609375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_92dbd635-8771-43c0-a320-c9a4abad6acb.npz",
+      "id": "92dbd635-8771-43c0-a320-c9a4abad6acb",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1669921875,
+      "final_predicted_reward_avg": 0.1669921875,
+      "final_predicted_reward_sum": 0.1669921875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_948f905c-ffbd-4007-8564-66b96e1c8d63.npz",
+      "id": "948f905c-ffbd-4007-8564-66b96e1c8d63",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.115234375,
+      "final_predicted_reward_avg": 0.115234375,
+      "final_predicted_reward_sum": 0.115234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8c86402c-cc66-4682-a76b-22ae8d46b3c2.npz",
+      "id": "8c86402c-cc66-4682-a76b-22ae8d46b3c2",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.2294921875,
+      "final_predicted_reward_avg": 0.2294921875,
+      "final_predicted_reward_sum": 0.2294921875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_6a8e0288-213e-412f-9f47-977e452bca3d.npz",
+      "id": "6a8e0288-213e-412f-9f47-977e452bca3d",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.0927734375,
+      "final_predicted_reward_avg": 0.0927734375,
+      "final_predicted_reward_sum": 0.0927734375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8bd26697-462c-429e-b34a-2331b7e8077a.npz",
+      "id": "8bd26697-462c-429e-b34a-2331b7e8077a",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.08544921875,
+      "final_predicted_reward_avg": 0.08544921875,
+      "final_predicted_reward_sum": 0.08544921875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a4a808b1-f6a4-45db-b172-f04c0e02c72d.npz",
+      "id": "a4a808b1-f6a4-45db-b172-f04c0e02c72d",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1044921875,
+      "final_predicted_reward_avg": 0.1044921875,
+      "final_predicted_reward_sum": 0.1044921875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a9c66932-a68f-4515-98f2-13f09dd14030.npz",
+      "id": "a9c66932-a68f-4515-98f2-13f09dd14030",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.103515625,
+      "final_predicted_reward_avg": 0.103515625,
+      "final_predicted_reward_sum": 0.103515625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9aeeabea-6e33-4fba-8d63-f363425c1575.npz",
+      "id": "9aeeabea-6e33-4fba-8d63-f363425c1575",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1611328125,
+      "final_predicted_reward_avg": 0.1611328125,
+      "final_predicted_reward_sum": 0.1611328125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_dfe52485-b736-4c13-815f-a0d2391b2029.npz",
+      "id": "dfe52485-b736-4c13-815f-a0d2391b2029",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.173828125,
+      "final_predicted_reward_avg": 0.173828125,
+      "final_predicted_reward_sum": 0.173828125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_adfd50d6-4f2e-442f-95b6-af4c636a36d5.npz",
+      "id": "adfd50d6-4f2e-442f-95b6-af4c636a36d5",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.154296875,
+      "final_predicted_reward_avg": 0.154296875,
+      "final_predicted_reward_sum": 0.154296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7e879db4-487c-4f30-9e47-aeeccd70f615.npz",
+      "id": "7e879db4-487c-4f30-9e47-aeeccd70f615",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.154296875,
+      "final_predicted_reward_avg": 0.154296875,
+      "final_predicted_reward_sum": 0.154296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_6f323c1c-3f85-40de-9162-0dd2d6a9afe6.npz",
+      "id": "6f323c1c-3f85-40de-9162-0dd2d6a9afe6",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1806640625,
+      "final_predicted_reward_avg": 0.1806640625,
+      "final_predicted_reward_sum": 0.1806640625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_31bd76d7-88e2-45ae-a476-bdfdad5cac6e.npz",
+      "id": "31bd76d7-88e2-45ae-a476-bdfdad5cac6e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.162109375,
+      "final_predicted_reward_avg": 0.162109375,
+      "final_predicted_reward_sum": 0.162109375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b86688e7-54fb-4eb1-85c9-afdb75644ba8.npz",
+      "id": "b86688e7-54fb-4eb1-85c9-afdb75644ba8",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.212890625,
+      "final_predicted_reward_avg": 0.212890625,
+      "final_predicted_reward_sum": 0.212890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_acab345b-902f-4fe9-9a9e-d5b818a7db9f.npz",
+      "id": "acab345b-902f-4fe9-9a9e-d5b818a7db9f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1494140625,
+      "final_predicted_reward_avg": 0.1494140625,
+      "final_predicted_reward_sum": 0.1494140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_001b7b48-0c26-444e-a335-17b49c774e2b.npz",
+      "id": "001b7b48-0c26-444e-a335-17b49c774e2b",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1796875,
+      "final_predicted_reward_avg": 0.1796875,
+      "final_predicted_reward_sum": 0.1796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_6d93e705-5701-499c-a5d9-4030e5ff3e61.npz",
+      "id": "6d93e705-5701-499c-a5d9-4030e5ff3e61",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1259765625,
+      "final_predicted_reward_avg": 0.1259765625,
+      "final_predicted_reward_sum": 0.1259765625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_fbc37ee4-4904-4739-9d4e-3ed57e33759f.npz",
+      "id": "fbc37ee4-4904-4739-9d4e-3ed57e33759f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.10595703125,
+      "final_predicted_reward_avg": 0.10595703125,
+      "final_predicted_reward_sum": 0.10595703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d24ed1a2-4a11-425d-9ea9-c170ed50a451.npz",
+      "id": "d24ed1a2-4a11-425d-9ea9-c170ed50a451",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.10400390625,
+      "final_predicted_reward_avg": 0.10400390625,
+      "final_predicted_reward_sum": 0.10400390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a134a228-d3e1-40d0-99c7-530aeddf2620.npz",
+      "id": "a134a228-d3e1-40d0-99c7-530aeddf2620",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1142578125,
+      "final_predicted_reward_avg": 0.1142578125,
+      "final_predicted_reward_sum": 0.1142578125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_54b64eee-3459-4687-b3e1-f79384476255.npz",
+      "id": "54b64eee-3459-4687-b3e1-f79384476255",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0693359375,
+      "final_predicted_reward_avg": 0.0693359375,
+      "final_predicted_reward_sum": 0.0693359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e9a1775b-9991-4997-8d32-0c78ffc7e7de.npz",
+      "id": "e9a1775b-9991-4997-8d32-0c78ffc7e7de",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.119140625,
+      "final_predicted_reward_avg": 0.119140625,
+      "final_predicted_reward_sum": 0.119140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_377a86e2-77fa-4b56-a5d5-42a64ededa7b.npz",
+      "id": "377a86e2-77fa-4b56-a5d5-42a64ededa7b",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12890625,
+      "final_predicted_reward_avg": 0.12890625,
+      "final_predicted_reward_sum": 0.12890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_610928cc-4c18-4f5a-b479-6e6651a4daa3.npz",
+      "id": "610928cc-4c18-4f5a-b479-6e6651a4daa3",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1337890625,
+      "final_predicted_reward_avg": 0.1337890625,
+      "final_predicted_reward_sum": 0.1337890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ff5538e8-5cfa-46de-8cc4-5116d86e8f55.npz",
+      "id": "ff5538e8-5cfa-46de-8cc4-5116d86e8f55",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1259765625,
+      "final_predicted_reward_avg": 0.1259765625,
+      "final_predicted_reward_sum": 0.1259765625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_4967a38f-397e-4ad4-b4fb-830a6ee220d8.npz",
+      "id": "4967a38f-397e-4ad4-b4fb-830a6ee220d8",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1494140625,
+      "final_predicted_reward_avg": 0.1494140625,
+      "final_predicted_reward_sum": 0.1494140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a50e7cd3-7621-4ce6-910a-36ddeeb4dc03.npz",
+      "id": "a50e7cd3-7621-4ce6-910a-36ddeeb4dc03",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1494140625,
+      "final_predicted_reward_avg": 0.1494140625,
+      "final_predicted_reward_sum": 0.1494140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a2eaf9e3-810b-4905-8362-83be1bad566b.npz",
+      "id": "a2eaf9e3-810b-4905-8362-83be1bad566b",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1630859375,
+      "final_predicted_reward_avg": 0.1630859375,
+      "final_predicted_reward_sum": 0.1630859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8a0a35c0-6491-4fb5-992c-53a90274d1b0.npz",
+      "id": "8a0a35c0-6491-4fb5-992c-53a90274d1b0",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1748046875,
+      "final_predicted_reward_avg": 0.1748046875,
+      "final_predicted_reward_sum": 0.1748046875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_98403f2d-b4d2-4f0f-956b-0323b9c75ab5.npz",
+      "id": "98403f2d-b4d2-4f0f-956b-0323b9c75ab5",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.125,
+      "final_predicted_reward_avg": 0.125,
+      "final_predicted_reward_sum": 0.125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_989ad1a4-aeb0-4a42-a362-f9940f6014a7.npz",
+      "id": "989ad1a4-aeb0-4a42-a362-f9940f6014a7",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.150390625,
+      "final_predicted_reward_avg": 0.150390625,
+      "final_predicted_reward_sum": 0.150390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7a1a3d42-5af1-48a5-9b77-ed73570e67ed.npz",
+      "id": "7a1a3d42-5af1-48a5-9b77-ed73570e67ed",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.08203125,
+      "final_predicted_reward_avg": 0.08203125,
+      "final_predicted_reward_sum": 0.08203125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e8b32ec7-8369-494c-86ff-6bd256b390e5.npz",
+      "id": "e8b32ec7-8369-494c-86ff-6bd256b390e5",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0869140625,
+      "final_predicted_reward_avg": 0.0869140625,
+      "final_predicted_reward_sum": 0.0869140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d49be231-06bd-496a-9859-a99e40ff3e99.npz",
+      "id": "d49be231-06bd-496a-9859-a99e40ff3e99",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1044921875,
+      "final_predicted_reward_avg": 0.1044921875,
+      "final_predicted_reward_sum": 0.1044921875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_aad5e9a4-50be-4ad8-a67e-52c3e4691da9.npz",
+      "id": "aad5e9a4-50be-4ad8-a67e-52c3e4691da9",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1533203125,
+      "final_predicted_reward_avg": 0.1533203125,
+      "final_predicted_reward_sum": 0.1533203125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f90a2a10-a81d-4dac-9d6e-85eace4496ee.npz",
+      "id": "f90a2a10-a81d-4dac-9d6e-85eace4496ee",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.2021484375,
+      "final_predicted_reward_avg": 0.2021484375,
+      "final_predicted_reward_sum": 0.2021484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c41d5eb0-fba0-4b5d-b712-8c19a34f476b.npz",
+      "id": "c41d5eb0-fba0-4b5d-b712-8c19a34f476b",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.11181640625,
+      "final_predicted_reward_avg": 0.11181640625,
+      "final_predicted_reward_sum": 0.11181640625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_4ef30988-a622-46c4-8471-a720fda4bf88.npz",
+      "id": "4ef30988-a622-46c4-8471-a720fda4bf88",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.09521484375,
+      "final_predicted_reward_avg": 0.09521484375,
+      "final_predicted_reward_sum": 0.09521484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_3cfbc452-c613-48d5-89fd-38e90415c0b0.npz",
+      "id": "3cfbc452-c613-48d5-89fd-38e90415c0b0",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1171875,
+      "final_predicted_reward_avg": 0.1171875,
+      "final_predicted_reward_sum": 0.1171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7eb66584-06ec-4b42-be15-08fad20058c4.npz",
+      "id": "7eb66584-06ec-4b42-be15-08fad20058c4",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1943359375,
+      "final_predicted_reward_avg": 0.1943359375,
+      "final_predicted_reward_sum": 0.1943359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_32c61ba5-773f-40ad-8804-ecf471e7b2d0.npz",
+      "id": "32c61ba5-773f-40ad-8804-ecf471e7b2d0",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1689453125,
+      "final_predicted_reward_avg": 0.1689453125,
+      "final_predicted_reward_sum": 0.1689453125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_cc0551be-5aba-4aa0-9818-33a24984832f.npz",
+      "id": "cc0551be-5aba-4aa0-9818-33a24984832f",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.09375,
+      "final_predicted_reward_avg": 0.09375,
+      "final_predicted_reward_sum": 0.09375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_2e7e7045-d661-48e3-8600-326125223aa7.npz",
+      "id": "2e7e7045-d661-48e3-8600-326125223aa7",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0947265625,
+      "final_predicted_reward_avg": 0.0947265625,
+      "final_predicted_reward_sum": 0.0947265625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_41c9b5d3-7e0c-4223-ac98-b2651a02c635.npz",
+      "id": "41c9b5d3-7e0c-4223-ac98-b2651a02c635",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1171875,
+      "final_predicted_reward_avg": 0.1171875,
+      "final_predicted_reward_sum": 0.1171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_fb97ee88-a41b-408e-b4ae-6f5fc13e82aa.npz",
+      "id": "fb97ee88-a41b-408e-b4ae-6f5fc13e82aa",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.150390625,
+      "final_predicted_reward_avg": 0.150390625,
+      "final_predicted_reward_sum": 0.150390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_dfd882b9-976c-4640-a47a-e894a92f4291.npz",
+      "id": "dfd882b9-976c-4640-a47a-e894a92f4291",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.193359375,
+      "final_predicted_reward_avg": 0.193359375,
+      "final_predicted_reward_sum": 0.193359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_0121968a-d696-45f8-adfc-f1946bd779cc.npz",
+      "id": "0121968a-d696-45f8-adfc-f1946bd779cc",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1748046875,
+      "final_predicted_reward_avg": 0.1748046875,
+      "final_predicted_reward_sum": 0.1748046875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9c4b05e1-90a5-4607-acdf-32f169ea5545.npz",
+      "id": "9c4b05e1-90a5-4607-acdf-32f169ea5545",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.11767578125,
+      "final_predicted_reward_avg": 0.11767578125,
+      "final_predicted_reward_sum": 0.11767578125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_2c2490a2-78c4-4472-9f9a-2b056b7abc01.npz",
+      "id": "2c2490a2-78c4-4472-9f9a-2b056b7abc01",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.138671875,
+      "final_predicted_reward_avg": 0.138671875,
+      "final_predicted_reward_sum": 0.138671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c9ec4ab0-6a25-4c59-83d5-48b9ceff8750.npz",
+      "id": "c9ec4ab0-6a25-4c59-83d5-48b9ceff8750",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.125,
+      "final_predicted_reward_avg": 0.125,
+      "final_predicted_reward_sum": 0.125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9ca4c517-aa4f-4ca4-9025-45a143e78fc8.npz",
+      "id": "9ca4c517-aa4f-4ca4-9025-45a143e78fc8",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0966796875,
+      "final_predicted_reward_avg": 0.0966796875,
+      "final_predicted_reward_sum": 0.0966796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d9a557d8-4d5a-4d1e-931a-492c696534a3.npz",
+      "id": "d9a557d8-4d5a-4d1e-931a-492c696534a3",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.146484375,
+      "final_predicted_reward_avg": 0.146484375,
+      "final_predicted_reward_sum": 0.146484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f2f29962-f6f2-4d24-8743-c18b5767f315.npz",
+      "id": "f2f29962-f6f2-4d24-8743-c18b5767f315",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1904296875,
+      "final_predicted_reward_avg": 0.1904296875,
+      "final_predicted_reward_sum": 0.1904296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ac31afbe-dca3-459e-b653-836869217379.npz",
+      "id": "ac31afbe-dca3-459e-b653-836869217379",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1767578125,
+      "final_predicted_reward_avg": 0.1767578125,
+      "final_predicted_reward_sum": 0.1767578125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d03465d8-e375-4ed8-8f11-f0845092346a.npz",
+      "id": "d03465d8-e375-4ed8-8f11-f0845092346a",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.2041015625,
+      "final_predicted_reward_avg": 0.2041015625,
+      "final_predicted_reward_sum": 0.2041015625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_17d17511-7065-43f2-8eab-657cc5330c13.npz",
+      "id": "17d17511-7065-43f2-8eab-657cc5330c13",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1630859375,
+      "final_predicted_reward_avg": 0.1630859375,
+      "final_predicted_reward_sum": 0.1630859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_5642cd04-2d5c-48d4-bf7d-adb38c2fdedb.npz",
+      "id": "5642cd04-2d5c-48d4-bf7d-adb38c2fdedb",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11474609375,
+      "final_predicted_reward_avg": 0.11474609375,
+      "final_predicted_reward_sum": 0.11474609375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_630711b3-c5c7-48fb-b7ca-b6fadc9a9603.npz",
+      "id": "630711b3-c5c7-48fb-b7ca-b6fadc9a9603",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1328125,
+      "final_predicted_reward_avg": 0.1328125,
+      "final_predicted_reward_sum": 0.1328125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_63bdc28d-85df-42cb-84c5-2cbc781a44f0.npz",
+      "id": "63bdc28d-85df-42cb-84c5-2cbc781a44f0",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1875,
+      "final_predicted_reward_avg": 0.1875,
+      "final_predicted_reward_sum": 0.1875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a3695b73-7590-4442-b60d-352d6413ab29.npz",
+      "id": "a3695b73-7590-4442-b60d-352d6413ab29",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1748046875,
+      "final_predicted_reward_avg": 0.1748046875,
+      "final_predicted_reward_sum": 0.1748046875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_6b256b10-b8ef-4c3c-a99d-32ce12595b01.npz",
+      "id": "6b256b10-b8ef-4c3c-a99d-32ce12595b01",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12158203125,
+      "final_predicted_reward_avg": 0.12158203125,
+      "final_predicted_reward_sum": 0.12158203125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_290904c3-43f5-4953-acd3-e6294482edbc.npz",
+      "id": "290904c3-43f5-4953-acd3-e6294482edbc",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1259765625,
+      "final_predicted_reward_avg": 0.1259765625,
+      "final_predicted_reward_sum": 0.1259765625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a4a5fbe8-8baf-49e3-95d0-9f2e15ddfc1d.npz",
+      "id": "a4a5fbe8-8baf-49e3-95d0-9f2e15ddfc1d",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1474609375,
+      "final_predicted_reward_avg": 0.1474609375,
+      "final_predicted_reward_sum": 0.1474609375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_6618bb6a-0ce3-470a-ade7-75314484e7a6.npz",
+      "id": "6618bb6a-0ce3-470a-ade7-75314484e7a6",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12451171875,
+      "final_predicted_reward_avg": 0.12451171875,
+      "final_predicted_reward_sum": 0.12451171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c7f91dd7-1007-4fd7-aa60-11a2fa462080.npz",
+      "id": "c7f91dd7-1007-4fd7-aa60-11a2fa462080",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.212890625,
+      "final_predicted_reward_avg": 0.212890625,
+      "final_predicted_reward_sum": 0.212890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_19640059-8b6d-4834-b651-6312ddb360c7.npz",
+      "id": "19640059-8b6d-4834-b651-6312ddb360c7",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1376953125,
+      "final_predicted_reward_avg": 0.1376953125,
+      "final_predicted_reward_sum": 0.1376953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_eaa42025-0edc-405c-83c0-c48b9dea8283.npz",
+      "id": "eaa42025-0edc-405c-83c0-c48b9dea8283",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1806640625,
+      "final_predicted_reward_avg": 0.1806640625,
+      "final_predicted_reward_sum": 0.1806640625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1910b1b0-493e-4fb6-b2f6-25061e3af82e.npz",
+      "id": "1910b1b0-493e-4fb6-b2f6-25061e3af82e",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.19140625,
+      "final_predicted_reward_avg": 0.19140625,
+      "final_predicted_reward_sum": 0.19140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_91f339f8-bc57-494e-b1b9-b52de422ccef.npz",
+      "id": "91f339f8-bc57-494e-b1b9-b52de422ccef",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.171875,
+      "final_predicted_reward_avg": 0.171875,
+      "final_predicted_reward_sum": 0.171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b07151b4-dbbd-409d-b966-c895b7ebebbe.npz",
+      "id": "b07151b4-dbbd-409d-b966-c895b7ebebbe",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1240234375,
+      "final_predicted_reward_avg": 0.1240234375,
+      "final_predicted_reward_sum": 0.1240234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d34a1561-d16e-4062-8792-4e181ea9bf48.npz",
+      "id": "d34a1561-d16e-4062-8792-4e181ea9bf48",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11083984375,
+      "final_predicted_reward_avg": 0.11083984375,
+      "final_predicted_reward_sum": 0.11083984375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_2a17c406-2c21-49e0-9014-47bca47e93a6.npz",
+      "id": "2a17c406-2c21-49e0-9014-47bca47e93a6",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.10595703125,
+      "final_predicted_reward_avg": 0.10595703125,
+      "final_predicted_reward_sum": 0.10595703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d6274d72-df03-40ff-8b00-59496aa364ab.npz",
+      "id": "d6274d72-df03-40ff-8b00-59496aa364ab",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.173828125,
+      "final_predicted_reward_avg": 0.173828125,
+      "final_predicted_reward_sum": 0.173828125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_2e9447de-e2d0-4f4b-81a8-b6c5838760bd.npz",
+      "id": "2e9447de-e2d0-4f4b-81a8-b6c5838760bd",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12060546875,
+      "final_predicted_reward_avg": 0.12060546875,
+      "final_predicted_reward_sum": 0.12060546875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_19856be7-2ad3-4408-86cb-85ab0869868c.npz",
+      "id": "19856be7-2ad3-4408-86cb-85ab0869868c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1015625,
+      "final_predicted_reward_avg": 0.1015625,
+      "final_predicted_reward_sum": 0.1015625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f5b7e6c7-597d-422d-8ee2-36b05c4113cb.npz",
+      "id": "f5b7e6c7-597d-422d-8ee2-36b05c4113cb",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.146484375,
+      "final_predicted_reward_avg": 0.146484375,
+      "final_predicted_reward_sum": 0.146484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7f3d9e9b-bc6f-472b-911c-90b2037e9614.npz",
+      "id": "7f3d9e9b-bc6f-472b-911c-90b2037e9614",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1337890625,
+      "final_predicted_reward_avg": 0.1337890625,
+      "final_predicted_reward_sum": 0.1337890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e1d25f52-ce6b-41d8-9835-c065f4aae18e.npz",
+      "id": "e1d25f52-ce6b-41d8-9835-c065f4aae18e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.13671875,
+      "final_predicted_reward_avg": 0.13671875,
+      "final_predicted_reward_sum": 0.13671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_51e14af5-21df-45ec-b45f-2e6ee32f5808.npz",
+      "id": "51e14af5-21df-45ec-b45f-2e6ee32f5808",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1376953125,
+      "final_predicted_reward_avg": 0.1376953125,
+      "final_predicted_reward_sum": 0.1376953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c3e60ad3-d91e-49cd-ab25-d50ba4381d50.npz",
+      "id": "c3e60ad3-d91e-49cd-ab25-d50ba4381d50",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1796875,
+      "final_predicted_reward_avg": 0.1796875,
+      "final_predicted_reward_sum": 0.1796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1672cda0-0f0b-46d4-b04e-157c39b49584.npz",
+      "id": "1672cda0-0f0b-46d4-b04e-157c39b49584",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.158203125,
+      "final_predicted_reward_avg": 0.158203125,
+      "final_predicted_reward_sum": 0.158203125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d8d33864-572d-4514-9009-486d873f73e8.npz",
+      "id": "d8d33864-572d-4514-9009-486d873f73e8",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1875,
+      "final_predicted_reward_avg": 0.1875,
+      "final_predicted_reward_sum": 0.1875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b3eda721-fc85-4ea4-99b6-6716d4283f86.npz",
+      "id": "b3eda721-fc85-4ea4-99b6-6716d4283f86",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.119140625,
+      "final_predicted_reward_avg": 0.119140625,
+      "final_predicted_reward_sum": 0.119140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_deedcebc-8ba1-4dae-bc09-57ceebbc6698.npz",
+      "id": "deedcebc-8ba1-4dae-bc09-57ceebbc6698",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1064453125,
+      "final_predicted_reward_avg": 0.1064453125,
+      "final_predicted_reward_sum": 0.1064453125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_459cf58f-8686-49e7-b190-f37633bd5d60.npz",
+      "id": "459cf58f-8686-49e7-b190-f37633bd5d60",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1455078125,
+      "final_predicted_reward_avg": 0.1455078125,
+      "final_predicted_reward_sum": 0.1455078125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_42a8b167-67f4-4d88-b317-97c168c66cb3.npz",
+      "id": "42a8b167-67f4-4d88-b317-97c168c66cb3",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1376953125,
+      "final_predicted_reward_avg": 0.1376953125,
+      "final_predicted_reward_sum": 0.1376953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_3cb60017-4158-4624-85ef-e91f79601acd.npz",
+      "id": "3cb60017-4158-4624-85ef-e91f79601acd",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.130859375,
+      "final_predicted_reward_avg": 0.130859375,
+      "final_predicted_reward_sum": 0.130859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_3cfcc457-365a-46da-999d-32cc01fa4f24.npz",
+      "id": "3cfcc457-365a-46da-999d-32cc01fa4f24",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.189453125,
+      "final_predicted_reward_avg": 0.189453125,
+      "final_predicted_reward_sum": 0.189453125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_df48ad72-0455-478b-ba69-b83d4483f538.npz",
+      "id": "df48ad72-0455-478b-ba69-b83d4483f538",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.10693359375,
+      "final_predicted_reward_avg": 0.10693359375,
+      "final_predicted_reward_sum": 0.10693359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_4b88d189-8a0e-4c07-bf98-4176adaa6fec.npz",
+      "id": "4b88d189-8a0e-4c07-bf98-4176adaa6fec",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1787109375,
+      "final_predicted_reward_avg": 0.1787109375,
+      "final_predicted_reward_sum": 0.1787109375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_06e6e097-b44c-4f39-97f6-6e90a5e62bd6.npz",
+      "id": "06e6e097-b44c-4f39-97f6-6e90a5e62bd6",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.109375,
+      "final_predicted_reward_avg": 0.109375,
+      "final_predicted_reward_sum": 0.109375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_dfd7b2d0-f294-45ae-a7b0-061793900922.npz",
+      "id": "dfd7b2d0-f294-45ae-a7b0-061793900922",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1279296875,
+      "final_predicted_reward_avg": 0.1279296875,
+      "final_predicted_reward_sum": 0.1279296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_0997620f-d29e-40d8-9d9e-0b80bbd92926.npz",
+      "id": "0997620f-d29e-40d8-9d9e-0b80bbd92926",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.08544921875,
+      "final_predicted_reward_avg": 0.08544921875,
+      "final_predicted_reward_sum": 0.08544921875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7f1291f6-ac22-4362-b6ec-abc24ffa6d5b.npz",
+      "id": "7f1291f6-ac22-4362-b6ec-abc24ffa6d5b",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0654296875,
+      "final_predicted_reward_avg": 0.0654296875,
+      "final_predicted_reward_sum": 0.0654296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_07bf557d-832c-4b02-a55b-4704610b2130.npz",
+      "id": "07bf557d-832c-4b02-a55b-4704610b2130",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12890625,
+      "final_predicted_reward_avg": 0.12890625,
+      "final_predicted_reward_sum": 0.12890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_3f2c9f70-a8cd-439b-b47b-32b8f20a0751.npz",
+      "id": "3f2c9f70-a8cd-439b-b47b-32b8f20a0751",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1865234375,
+      "final_predicted_reward_avg": 0.1865234375,
+      "final_predicted_reward_sum": 0.1865234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_34646cd2-85cb-48e2-bd0e-08851f36cca8.npz",
+      "id": "34646cd2-85cb-48e2-bd0e-08851f36cca8",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12109375,
+      "final_predicted_reward_avg": 0.12109375,
+      "final_predicted_reward_sum": 0.12109375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_872c309c-3bfb-4014-ba93-ab5cad3a620c.npz",
+      "id": "872c309c-3bfb-4014-ba93-ab5cad3a620c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.15234375,
+      "final_predicted_reward_avg": 0.15234375,
+      "final_predicted_reward_sum": 0.15234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f466d2f7-87da-4c25-942b-0579ff2b39d7.npz",
+      "id": "f466d2f7-87da-4c25-942b-0579ff2b39d7",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1953125,
+      "final_predicted_reward_avg": 0.1953125,
+      "final_predicted_reward_sum": 0.1953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8aa52041-8e21-4ec6-8bb5-3da9c0ed12fd.npz",
+      "id": "8aa52041-8e21-4ec6-8bb5-3da9c0ed12fd",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1328125,
+      "final_predicted_reward_avg": 0.1328125,
+      "final_predicted_reward_sum": 0.1328125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ff69389d-9b2e-4de9-9c8e-b989097cf137.npz",
+      "id": "ff69389d-9b2e-4de9-9c8e-b989097cf137",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11376953125,
+      "final_predicted_reward_avg": 0.11376953125,
+      "final_predicted_reward_sum": 0.11376953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8fe802a9-38c0-47b0-aa8c-bc3fc52ff7ac.npz",
+      "id": "8fe802a9-38c0-47b0-aa8c-bc3fc52ff7ac",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.09912109375,
+      "final_predicted_reward_avg": 0.09912109375,
+      "final_predicted_reward_sum": 0.09912109375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b8f8f053-9ac1-4ecd-884b-0c4b5d089bb0.npz",
+      "id": "b8f8f053-9ac1-4ecd-884b-0c4b5d089bb0",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.125,
+      "final_predicted_reward_avg": 0.125,
+      "final_predicted_reward_sum": 0.125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9fedfbff-fd9d-4c26-95a9-217b2f456e49.npz",
+      "id": "9fedfbff-fd9d-4c26-95a9-217b2f456e49",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.20703125,
+      "final_predicted_reward_avg": 0.20703125,
+      "final_predicted_reward_sum": 0.20703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e42bfb75-869f-46c8-99c8-42912dc66bb2.npz",
+      "id": "e42bfb75-869f-46c8-99c8-42912dc66bb2",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.07080078125,
+      "final_predicted_reward_avg": 0.07080078125,
+      "final_predicted_reward_sum": 0.07080078125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f241bd67-415a-4266-825b-f6ba2a6b7243.npz",
+      "id": "f241bd67-415a-4266-825b-f6ba2a6b7243",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.146484375,
+      "final_predicted_reward_avg": 0.146484375,
+      "final_predicted_reward_sum": 0.146484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_00419b1a-cad3-4038-9777-b0fa26824157.npz",
+      "id": "00419b1a-cad3-4038-9777-b0fa26824157",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.123046875,
+      "final_predicted_reward_avg": 0.123046875,
+      "final_predicted_reward_sum": 0.123046875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_503f40f8-85e6-4b77-9d30-db39c92de0d8.npz",
+      "id": "503f40f8-85e6-4b77-9d30-db39c92de0d8",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.087890625,
+      "final_predicted_reward_avg": 0.087890625,
+      "final_predicted_reward_sum": 0.087890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e9a22ba1-b552-4542-a5c3-dd7bd25d85d0.npz",
+      "id": "e9a22ba1-b552-4542-a5c3-dd7bd25d85d0",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.189453125,
+      "final_predicted_reward_avg": 0.189453125,
+      "final_predicted_reward_sum": 0.189453125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b308a649-b00c-4a65-af72-064c1a97fdfc.npz",
+      "id": "b308a649-b00c-4a65-af72-064c1a97fdfc",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1318359375,
+      "final_predicted_reward_avg": 0.1318359375,
+      "final_predicted_reward_sum": 0.1318359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c4f1e84b-0770-492c-8468-f1b972758c8a.npz",
+      "id": "c4f1e84b-0770-492c-8468-f1b972758c8a",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.076171875,
+      "final_predicted_reward_avg": 0.076171875,
+      "final_predicted_reward_sum": 0.076171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_dc29f859-f906-484e-950a-b8f2bd00e3b1.npz",
+      "id": "dc29f859-f906-484e-950a-b8f2bd00e3b1",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1640625,
+      "final_predicted_reward_avg": 0.1640625,
+      "final_predicted_reward_sum": 0.1640625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e89af5a6-c865-44a4-8521-f33b1f710d89.npz",
+      "id": "e89af5a6-c865-44a4-8521-f33b1f710d89",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.181640625,
+      "final_predicted_reward_avg": 0.181640625,
+      "final_predicted_reward_sum": 0.181640625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_12503401-211d-4c15-9024-1b7c531f0905.npz",
+      "id": "12503401-211d-4c15-9024-1b7c531f0905",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0654296875,
+      "final_predicted_reward_avg": 0.0654296875,
+      "final_predicted_reward_sum": 0.0654296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_5bba1272-48d3-427d-ae2c-b51d9d5f8561.npz",
+      "id": "5bba1272-48d3-427d-ae2c-b51d9d5f8561",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1396484375,
+      "final_predicted_reward_avg": 0.1396484375,
+      "final_predicted_reward_sum": 0.1396484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_35a2b63f-9869-4df1-8f52-7a461b4f452b.npz",
+      "id": "35a2b63f-9869-4df1-8f52-7a461b4f452b",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.224609375,
+      "final_predicted_reward_avg": 0.224609375,
+      "final_predicted_reward_sum": 0.224609375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ec69b830-b57f-4d2e-86a9-931b42936db1.npz",
+      "id": "ec69b830-b57f-4d2e-86a9-931b42936db1",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1123046875,
+      "final_predicted_reward_avg": 0.1123046875,
+      "final_predicted_reward_sum": 0.1123046875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ac086cb9-2c2e-47de-9074-8bd9de5c69f3.npz",
+      "id": "ac086cb9-2c2e-47de-9074-8bd9de5c69f3",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.095703125,
+      "final_predicted_reward_avg": 0.095703125,
+      "final_predicted_reward_sum": 0.095703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_53c5d14b-2870-4f54-84f5-55865ed6e06d.npz",
+      "id": "53c5d14b-2870-4f54-84f5-55865ed6e06d",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1455078125,
+      "final_predicted_reward_avg": 0.1455078125,
+      "final_predicted_reward_sum": 0.1455078125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a3b14be2-d2c4-481c-bac1-ec0c76aa8246.npz",
+      "id": "a3b14be2-d2c4-481c-bac1-ec0c76aa8246",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1220703125,
+      "final_predicted_reward_avg": 0.1220703125,
+      "final_predicted_reward_sum": 0.1220703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_dadeae2f-6769-4272-803a-aa3b81da35d8.npz",
+      "id": "dadeae2f-6769-4272-803a-aa3b81da35d8",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1982421875,
+      "final_predicted_reward_avg": 0.1982421875,
+      "final_predicted_reward_sum": 0.1982421875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_fbc16338-4485-422a-8d42-ea73c2155568.npz",
+      "id": "fbc16338-4485-422a-8d42-ea73c2155568",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.09765625,
+      "final_predicted_reward_avg": 0.09765625,
+      "final_predicted_reward_sum": 0.09765625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_bb8361a4-c3d7-4e87-a3c5-079d358c650b.npz",
+      "id": "bb8361a4-c3d7-4e87-a3c5-079d358c650b",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.10107421875,
+      "final_predicted_reward_avg": 0.10107421875,
+      "final_predicted_reward_sum": 0.10107421875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_4c7be76d-135a-4c57-8e5d-53bf4015ebf7.npz",
+      "id": "4c7be76d-135a-4c57-8e5d-53bf4015ebf7",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12060546875,
+      "final_predicted_reward_avg": 0.12060546875,
+      "final_predicted_reward_sum": 0.12060546875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1766d36f-3736-475e-89ba-5b62d4e5f51e.npz",
+      "id": "1766d36f-3736-475e-89ba-5b62d4e5f51e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.13671875,
+      "final_predicted_reward_avg": 0.13671875,
+      "final_predicted_reward_sum": 0.13671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7cc93cde-0a3a-47ce-8efd-4efbe30798d6.npz",
+      "id": "7cc93cde-0a3a-47ce-8efd-4efbe30798d6",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12255859375,
+      "final_predicted_reward_avg": 0.12255859375,
+      "final_predicted_reward_sum": 0.12255859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_cee7c7af-cce3-4883-92b9-6c894ee09e7c.npz",
+      "id": "cee7c7af-cce3-4883-92b9-6c894ee09e7c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.146484375,
+      "final_predicted_reward_avg": 0.146484375,
+      "final_predicted_reward_sum": 0.146484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8098f4ab-a2d7-4e1d-b73c-6196263c1ced.npz",
+      "id": "8098f4ab-a2d7-4e1d-b73c-6196263c1ced",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.150390625,
+      "final_predicted_reward_avg": 0.150390625,
+      "final_predicted_reward_sum": 0.150390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f33deae7-5418-4f76-8e58-bd679f64cf7c.npz",
+      "id": "f33deae7-5418-4f76-8e58-bd679f64cf7c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.16796875,
+      "final_predicted_reward_avg": 0.16796875,
+      "final_predicted_reward_sum": 0.16796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_df682cfa-4c74-4ddb-9313-f5750a938333.npz",
+      "id": "df682cfa-4c74-4ddb-9313-f5750a938333",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1298828125,
+      "final_predicted_reward_avg": 0.1298828125,
+      "final_predicted_reward_sum": 0.1298828125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_08988673-3d64-4367-8ddc-ce077442fa0f.npz",
+      "id": "08988673-3d64-4367-8ddc-ce077442fa0f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1767578125,
+      "final_predicted_reward_avg": 0.1767578125,
+      "final_predicted_reward_sum": 0.1767578125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b546ff7c-be2b-425b-840e-97f2c0954358.npz",
+      "id": "b546ff7c-be2b-425b-840e-97f2c0954358",
+      "quality_label": "successful"
+    }
+  ],
+  "Pick up the mouse and place it right next to the laptop, while avoiding spilling coffee": [
+    {
+      "final_predicted_reward_last": 0.119140625,
+      "final_predicted_reward_avg": 0.119140625,
+      "final_predicted_reward_sum": 0.119140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_85ac7683-c1d6-4918-81c8-f3f928545a02.npz",
+      "id": "85ac7683-c1d6-4918-81c8-f3f928545a02",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.08251953125,
+      "final_predicted_reward_avg": 0.08251953125,
+      "final_predicted_reward_sum": 0.08251953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_15f6ace4-7902-4a06-ab45-146db2f75ceb.npz",
+      "id": "15f6ace4-7902-4a06-ab45-146db2f75ceb",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1171875,
+      "final_predicted_reward_avg": 0.1171875,
+      "final_predicted_reward_sum": 0.1171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_154d0916-2527-46c6-b08b-dc247c2a4734.npz",
+      "id": "154d0916-2527-46c6-b08b-dc247c2a4734",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1962890625,
+      "final_predicted_reward_avg": 0.1962890625,
+      "final_predicted_reward_sum": 0.1962890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ece25539-3668-4119-898f-31a8f74f391a.npz",
+      "id": "ece25539-3668-4119-898f-31a8f74f391a",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.2451171875,
+      "final_predicted_reward_avg": 0.2451171875,
+      "final_predicted_reward_sum": 0.2451171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b2fbab76-84ef-40e7-a48a-4410b06019ab.npz",
+      "id": "b2fbab76-84ef-40e7-a48a-4410b06019ab",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.16015625,
+      "final_predicted_reward_avg": 0.16015625,
+      "final_predicted_reward_sum": 0.16015625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7bbb3197-dda7-4caa-8a89-02f012db210f.npz",
+      "id": "7bbb3197-dda7-4caa-8a89-02f012db210f",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1806640625,
+      "final_predicted_reward_avg": 0.1806640625,
+      "final_predicted_reward_sum": 0.1806640625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_89bddb7a-710c-4205-aa48-76d162f5fa58.npz",
+      "id": "89bddb7a-710c-4205-aa48-76d162f5fa58",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.212890625,
+      "final_predicted_reward_avg": 0.212890625,
+      "final_predicted_reward_sum": 0.212890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b86b713b-6474-4019-8fe6-807392822764.npz",
+      "id": "b86b713b-6474-4019-8fe6-807392822764",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1455078125,
+      "final_predicted_reward_avg": 0.1455078125,
+      "final_predicted_reward_sum": 0.1455078125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b6137e21-f409-4884-a6d9-a2958dfc1cc5.npz",
+      "id": "b6137e21-f409-4884-a6d9-a2958dfc1cc5",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12255859375,
+      "final_predicted_reward_avg": 0.12255859375,
+      "final_predicted_reward_sum": 0.12255859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_81394969-3618-4561-bf47-f64967b795d2.npz",
+      "id": "81394969-3618-4561-bf47-f64967b795d2",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.171875,
+      "final_predicted_reward_avg": 0.171875,
+      "final_predicted_reward_sum": 0.171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_4e474c51-bff6-4879-bf03-11ff1f4fb80f.npz",
+      "id": "4e474c51-bff6-4879-bf03-11ff1f4fb80f",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.13671875,
+      "final_predicted_reward_avg": 0.13671875,
+      "final_predicted_reward_sum": 0.13671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8f84f2bb-1cfa-43d5-8674-58f462d96a5a.npz",
+      "id": "8f84f2bb-1cfa-43d5-8674-58f462d96a5a",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.087890625,
+      "final_predicted_reward_avg": 0.087890625,
+      "final_predicted_reward_sum": 0.087890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b5c132a0-3260-436f-9cea-215db7848845.npz",
+      "id": "b5c132a0-3260-436f-9cea-215db7848845",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1337890625,
+      "final_predicted_reward_avg": 0.1337890625,
+      "final_predicted_reward_sum": 0.1337890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_6cdb5822-01ff-4b38-b692-2a27389d57da.npz",
+      "id": "6cdb5822-01ff-4b38-b692-2a27389d57da",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1396484375,
+      "final_predicted_reward_avg": 0.1396484375,
+      "final_predicted_reward_sum": 0.1396484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_fca26b04-c8c6-4a62-a481-384256372a2c.npz",
+      "id": "fca26b04-c8c6-4a62-a481-384256372a2c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.171875,
+      "final_predicted_reward_avg": 0.171875,
+      "final_predicted_reward_sum": 0.171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a5d31e12-8128-47ae-a29e-19b5b55ba900.npz",
+      "id": "a5d31e12-8128-47ae-a29e-19b5b55ba900",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.19140625,
+      "final_predicted_reward_avg": 0.19140625,
+      "final_predicted_reward_sum": 0.19140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_3933ad51-a57c-4e25-b8d6-bcc5db6e37c5.npz",
+      "id": "3933ad51-a57c-4e25-b8d6-bcc5db6e37c5",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1083984375,
+      "final_predicted_reward_avg": 0.1083984375,
+      "final_predicted_reward_sum": 0.1083984375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7e6adb12-cea2-43e1-974f-648ab6db9dec.npz",
+      "id": "7e6adb12-cea2-43e1-974f-648ab6db9dec",
+      "quality_label": "successful"
+    }
+  ],
+  "Pick up the spoon and place it inside the cup": [
+    {
+      "final_predicted_reward_last": 0.11279296875,
+      "final_predicted_reward_avg": 0.11279296875,
+      "final_predicted_reward_sum": 0.11279296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_884deab8-107e-4032-8975-3042b300f430.npz",
+      "id": "884deab8-107e-4032-8975-3042b300f430",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12353515625,
+      "final_predicted_reward_avg": 0.12353515625,
+      "final_predicted_reward_sum": 0.12353515625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_817f67e4-48a5-4ced-94a7-f5cecda93ac3.npz",
+      "id": "817f67e4-48a5-4ced-94a7-f5cecda93ac3",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.138671875,
+      "final_predicted_reward_avg": 0.138671875,
+      "final_predicted_reward_sum": 0.138671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_634ec9c6-5e48-4fba-904d-29c321274ced.npz",
+      "id": "634ec9c6-5e48-4fba-904d-29c321274ced",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.11572265625,
+      "final_predicted_reward_avg": 0.11572265625,
+      "final_predicted_reward_sum": 0.11572265625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_84406be6-df91-4f3c-ada6-5138fc226da7.npz",
+      "id": "84406be6-df91-4f3c-ada6-5138fc226da7",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.09619140625,
+      "final_predicted_reward_avg": 0.09619140625,
+      "final_predicted_reward_sum": 0.09619140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9aaeaaad-52cb-45c9-916e-dd4040f026a0.npz",
+      "id": "9aaeaaad-52cb-45c9-916e-dd4040f026a0",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1396484375,
+      "final_predicted_reward_avg": 0.1396484375,
+      "final_predicted_reward_sum": 0.1396484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1aa49f3c-d105-4617-8220-6bb157ad2621.npz",
+      "id": "1aa49f3c-d105-4617-8220-6bb157ad2621",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1494140625,
+      "final_predicted_reward_avg": 0.1494140625,
+      "final_predicted_reward_sum": 0.1494140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ccc60f70-da8e-402d-8174-79272d107826.npz",
+      "id": "ccc60f70-da8e-402d-8174-79272d107826",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1357421875,
+      "final_predicted_reward_avg": 0.1357421875,
+      "final_predicted_reward_sum": 0.1357421875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c00cc021-99d7-415e-8468-981140b7410d.npz",
+      "id": "c00cc021-99d7-415e-8468-981140b7410d",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1318359375,
+      "final_predicted_reward_avg": 0.1318359375,
+      "final_predicted_reward_sum": 0.1318359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f0bb7c1c-f7df-4836-b2d4-9ac6d73f016c.npz",
+      "id": "f0bb7c1c-f7df-4836-b2d4-9ac6d73f016c",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.111328125,
+      "final_predicted_reward_avg": 0.111328125,
+      "final_predicted_reward_sum": 0.111328125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_11fe6638-4590-4361-8d00-1cefe9272ac0.npz",
+      "id": "11fe6638-4590-4361-8d00-1cefe9272ac0",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.10888671875,
+      "final_predicted_reward_avg": 0.10888671875,
+      "final_predicted_reward_sum": 0.10888671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f24349d9-5279-4435-b7cd-2640579efcff.npz",
+      "id": "f24349d9-5279-4435-b7cd-2640579efcff",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.130859375,
+      "final_predicted_reward_avg": 0.130859375,
+      "final_predicted_reward_sum": 0.130859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_237a7f5e-82e6-4353-9c35-f949d4bffed7.npz",
+      "id": "237a7f5e-82e6-4353-9c35-f949d4bffed7",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11962890625,
+      "final_predicted_reward_avg": 0.11962890625,
+      "final_predicted_reward_sum": 0.11962890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_75fe5138-fd22-4490-a6c1-c2b5c5a6b197.npz",
+      "id": "75fe5138-fd22-4490-a6c1-c2b5c5a6b197",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1083984375,
+      "final_predicted_reward_avg": 0.1083984375,
+      "final_predicted_reward_sum": 0.1083984375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d00647e8-1db4-4622-b78b-80413972a5b0.npz",
+      "id": "d00647e8-1db4-4622-b78b-80413972a5b0",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.07080078125,
+      "final_predicted_reward_avg": 0.07080078125,
+      "final_predicted_reward_sum": 0.07080078125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_2d7960af-b588-4e22-979e-817b7949a49e.npz",
+      "id": "2d7960af-b588-4e22-979e-817b7949a49e",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1953125,
+      "final_predicted_reward_avg": 0.1953125,
+      "final_predicted_reward_sum": 0.1953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_85127ac6-0ea1-412e-b58d-1b58dd105f3c.npz",
+      "id": "85127ac6-0ea1-412e-b58d-1b58dd105f3c",
+      "quality_label": "suboptimal"
+    }
+  ],
+  "Pick up the spatula and stir the beans in the pot": [
+    {
+      "final_predicted_reward_last": 0.1767578125,
+      "final_predicted_reward_avg": 0.1767578125,
+      "final_predicted_reward_sum": 0.1767578125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f5d6e8cd-7265-4aa2-94c7-5dae4f9ad8e1.npz",
+      "id": "f5d6e8cd-7265-4aa2-94c7-5dae4f9ad8e1",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.142578125,
+      "final_predicted_reward_avg": 0.142578125,
+      "final_predicted_reward_sum": 0.142578125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_25a4a004-9073-489f-af72-d58e1db3add3.npz",
+      "id": "25a4a004-9073-489f-af72-d58e1db3add3",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.08984375,
+      "final_predicted_reward_avg": 0.08984375,
+      "final_predicted_reward_sum": 0.08984375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_81f6b8ea-8321-4209-b112-fd356988b355.npz",
+      "id": "81f6b8ea-8321-4209-b112-fd356988b355",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1357421875,
+      "final_predicted_reward_avg": 0.1357421875,
+      "final_predicted_reward_sum": 0.1357421875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_12d72ae5-a158-4299-a1c7-450e04e6245b.npz",
+      "id": "12d72ae5-a158-4299-a1c7-450e04e6245b",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1357421875,
+      "final_predicted_reward_avg": 0.1357421875,
+      "final_predicted_reward_sum": 0.1357421875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_0734cbfb-56cc-485d-b71c-5d664db1c069.npz",
+      "id": "0734cbfb-56cc-485d-b71c-5d664db1c069",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1328125,
+      "final_predicted_reward_avg": 0.1328125,
+      "final_predicted_reward_sum": 0.1328125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_038e22e1-e3c0-45a3-8895-b48e42f6cf37.npz",
+      "id": "038e22e1-e3c0-45a3-8895-b48e42f6cf37",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.16796875,
+      "final_predicted_reward_avg": 0.16796875,
+      "final_predicted_reward_sum": 0.16796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_0f7b08fb-83bf-4d6e-baac-6b31b11d59fb.npz",
+      "id": "0f7b08fb-83bf-4d6e-baac-6b31b11d59fb",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.14453125,
+      "final_predicted_reward_avg": 0.14453125,
+      "final_predicted_reward_sum": 0.14453125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f9fc6ee8-8239-430f-8228-e5afa3eff248.npz",
+      "id": "f9fc6ee8-8239-430f-8228-e5afa3eff248",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.11328125,
+      "final_predicted_reward_avg": 0.11328125,
+      "final_predicted_reward_sum": 0.11328125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_38bd9f42-f0e3-46a4-b27f-1369db3291c3.npz",
+      "id": "38bd9f42-f0e3-46a4-b27f-1369db3291c3",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1787109375,
+      "final_predicted_reward_avg": 0.1787109375,
+      "final_predicted_reward_sum": 0.1787109375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_02060fe1-c631-4125-8a17-f2c8b740462e.npz",
+      "id": "02060fe1-c631-4125-8a17-f2c8b740462e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.09130859375,
+      "final_predicted_reward_avg": 0.09130859375,
+      "final_predicted_reward_sum": 0.09130859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_460df66b-2632-4512-a1ec-a61559e3e083.npz",
+      "id": "460df66b-2632-4512-a1ec-a61559e3e083",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1884765625,
+      "final_predicted_reward_avg": 0.1884765625,
+      "final_predicted_reward_sum": 0.1884765625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_16ba9e7f-cc87-4f37-8d8e-e6f2d374b575.npz",
+      "id": "16ba9e7f-cc87-4f37-8d8e-e6f2d374b575",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1318359375,
+      "final_predicted_reward_avg": 0.1318359375,
+      "final_predicted_reward_sum": 0.1318359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_92cdcde3-a5dc-4d65-961e-c6cb629fa7b5.npz",
+      "id": "92cdcde3-a5dc-4d65-961e-c6cb629fa7b5",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.220703125,
+      "final_predicted_reward_avg": 0.220703125,
+      "final_predicted_reward_sum": 0.220703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f824d001-86c3-48dd-af6b-cddb7e08c917.npz",
+      "id": "f824d001-86c3-48dd-af6b-cddb7e08c917",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.2470703125,
+      "final_predicted_reward_avg": 0.2470703125,
+      "final_predicted_reward_sum": 0.2470703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_53cb94cb-3add-4cc5-bb9d-54ab369376c0.npz",
+      "id": "53cb94cb-3add-4cc5-bb9d-54ab369376c0",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.095703125,
+      "final_predicted_reward_avg": 0.095703125,
+      "final_predicted_reward_sum": 0.095703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f371ead9-87cf-4c68-85d4-ca8839c30b65.npz",
+      "id": "f371ead9-87cf-4c68-85d4-ca8839c30b65",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1845703125,
+      "final_predicted_reward_avg": 0.1845703125,
+      "final_predicted_reward_sum": 0.1845703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8fd61e37-3ba3-4681-85ba-a464fdc10c4d.npz",
+      "id": "8fd61e37-3ba3-4681-85ba-a464fdc10c4d",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1884765625,
+      "final_predicted_reward_avg": 0.1884765625,
+      "final_predicted_reward_sum": 0.1884765625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a6755ce4-1149-4f82-ac29-2d5f225306c5.npz",
+      "id": "a6755ce4-1149-4f82-ac29-2d5f225306c5",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.11767578125,
+      "final_predicted_reward_avg": 0.11767578125,
+      "final_predicted_reward_sum": 0.11767578125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1840d0e8-b9fc-4522-82b8-b322145b10fc.npz",
+      "id": "1840d0e8-b9fc-4522-82b8-b322145b10fc",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.126953125,
+      "final_predicted_reward_avg": 0.126953125,
+      "final_predicted_reward_sum": 0.126953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_291b5f16-b12e-49a3-8ff0-67894ae97349.npz",
+      "id": "291b5f16-b12e-49a3-8ff0-67894ae97349",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.130859375,
+      "final_predicted_reward_avg": 0.130859375,
+      "final_predicted_reward_sum": 0.130859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_57d77356-fd3d-468c-9b7c-ed43471f5396.npz",
+      "id": "57d77356-fd3d-468c-9b7c-ed43471f5396",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12060546875,
+      "final_predicted_reward_avg": 0.12060546875,
+      "final_predicted_reward_sum": 0.12060546875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_da36adda-bc19-4e26-bf98-bd7d19271b09.npz",
+      "id": "da36adda-bc19-4e26-bf98-bd7d19271b09",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.181640625,
+      "final_predicted_reward_avg": 0.181640625,
+      "final_predicted_reward_sum": 0.181640625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_4ebd35eb-60db-4fee-be15-edeb83fa7934.npz",
+      "id": "4ebd35eb-60db-4fee-be15-edeb83fa7934",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.15625,
+      "final_predicted_reward_avg": 0.15625,
+      "final_predicted_reward_sum": 0.15625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_994fde7f-f522-4fcd-b931-ae597d3a35f8.npz",
+      "id": "994fde7f-f522-4fcd-b931-ae597d3a35f8",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1328125,
+      "final_predicted_reward_avg": 0.1328125,
+      "final_predicted_reward_sum": 0.1328125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d008ca48-fd29-4eae-bfd4-42110b3c808b.npz",
+      "id": "d008ca48-fd29-4eae-bfd4-42110b3c808b",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.21484375,
+      "final_predicted_reward_avg": 0.21484375,
+      "final_predicted_reward_sum": 0.21484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ce773b96-6f38-4edd-b816-952f3c6922a5.npz",
+      "id": "ce773b96-6f38-4edd-b816-952f3c6922a5",
+      "quality_label": "successful"
+    }
+  ],
+  "Pour the pebbles from the cup onto the plate": [
+    {
+      "final_predicted_reward_last": 0.1494140625,
+      "final_predicted_reward_avg": 0.1494140625,
+      "final_predicted_reward_sum": 0.1494140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e6c3f1f2-2fe6-4588-aae8-04b479d68b08.npz",
+      "id": "e6c3f1f2-2fe6-4588-aae8-04b479d68b08",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1318359375,
+      "final_predicted_reward_avg": 0.1318359375,
+      "final_predicted_reward_sum": 0.1318359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ec42d141-8946-4312-ad9f-055bfff358de.npz",
+      "id": "ec42d141-8946-4312-ad9f-055bfff358de",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1826171875,
+      "final_predicted_reward_avg": 0.1826171875,
+      "final_predicted_reward_sum": 0.1826171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c5ebbe85-5a85-4bfe-a797-1db752fc023f.npz",
+      "id": "c5ebbe85-5a85-4bfe-a797-1db752fc023f",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.16796875,
+      "final_predicted_reward_avg": 0.16796875,
+      "final_predicted_reward_sum": 0.16796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ff0bf8d3-625b-42ad-bc0b-d87d139abbab.npz",
+      "id": "ff0bf8d3-625b-42ad-bc0b-d87d139abbab",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.150390625,
+      "final_predicted_reward_avg": 0.150390625,
+      "final_predicted_reward_sum": 0.150390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ba3d1379-9b4e-4c71-964a-384c4d339a79.npz",
+      "id": "ba3d1379-9b4e-4c71-964a-384c4d339a79",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.123046875,
+      "final_predicted_reward_avg": 0.123046875,
+      "final_predicted_reward_sum": 0.123046875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_08a4dd1a-4cec-4245-82f0-75732d0b8e99.npz",
+      "id": "08a4dd1a-4cec-4245-82f0-75732d0b8e99",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.234375,
+      "final_predicted_reward_avg": 0.234375,
+      "final_predicted_reward_sum": 0.234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_be976797-3990-45ae-8210-c0fd3e3c2419.npz",
+      "id": "be976797-3990-45ae-8210-c0fd3e3c2419",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.115234375,
+      "final_predicted_reward_avg": 0.115234375,
+      "final_predicted_reward_sum": 0.115234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_96a02599-08f7-48da-95e2-c52dc4d35850.npz",
+      "id": "96a02599-08f7-48da-95e2-c52dc4d35850",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.10400390625,
+      "final_predicted_reward_avg": 0.10400390625,
+      "final_predicted_reward_sum": 0.10400390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_cfd6870c-08b5-4ae5-a7cf-4f562e2c7b59.npz",
+      "id": "cfd6870c-08b5-4ae5-a7cf-4f562e2c7b59",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.146484375,
+      "final_predicted_reward_avg": 0.146484375,
+      "final_predicted_reward_sum": 0.146484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1e3a30ae-5b30-4dec-82d5-f34320b55724.npz",
+      "id": "1e3a30ae-5b30-4dec-82d5-f34320b55724",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.224609375,
+      "final_predicted_reward_avg": 0.224609375,
+      "final_predicted_reward_sum": 0.224609375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_56e9ade0-05e2-4801-876b-59337d99194e.npz",
+      "id": "56e9ade0-05e2-4801-876b-59337d99194e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.2041015625,
+      "final_predicted_reward_avg": 0.2041015625,
+      "final_predicted_reward_sum": 0.2041015625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ee904c14-42da-487c-b0f6-bca81cc26ee8.npz",
+      "id": "ee904c14-42da-487c-b0f6-bca81cc26ee8",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1572265625,
+      "final_predicted_reward_avg": 0.1572265625,
+      "final_predicted_reward_sum": 0.1572265625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_10120352-92ad-419b-85d3-22275c2db799.npz",
+      "id": "10120352-92ad-419b-85d3-22275c2db799",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.2275390625,
+      "final_predicted_reward_avg": 0.2275390625,
+      "final_predicted_reward_sum": 0.2275390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9102b254-e0b4-4f6d-a15c-7ef336860cec.npz",
+      "id": "9102b254-e0b4-4f6d-a15c-7ef336860cec",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1669921875,
+      "final_predicted_reward_avg": 0.1669921875,
+      "final_predicted_reward_sum": 0.1669921875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_50f8ddd5-f63b-41f0-a2f9-e6f8f3c19f26.npz",
+      "id": "50f8ddd5-f63b-41f0-a2f9-e6f8f3c19f26",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1416015625,
+      "final_predicted_reward_avg": 0.1416015625,
+      "final_predicted_reward_sum": 0.1416015625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1bd16b14-d877-4e0f-b294-b2df473e2873.npz",
+      "id": "1bd16b14-d877-4e0f-b294-b2df473e2873",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1630859375,
+      "final_predicted_reward_avg": 0.1630859375,
+      "final_predicted_reward_sum": 0.1630859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_79208bc1-0a56-4a45-a918-047aa2097603.npz",
+      "id": "79208bc1-0a56-4a45-a918-047aa2097603",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.171875,
+      "final_predicted_reward_avg": 0.171875,
+      "final_predicted_reward_sum": 0.171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_761d5334-e0d3-449d-b8e4-d224e95c0175.npz",
+      "id": "761d5334-e0d3-449d-b8e4-d224e95c0175",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.173828125,
+      "final_predicted_reward_avg": 0.173828125,
+      "final_predicted_reward_sum": 0.173828125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1286bf20-af80-40fb-bcde-e05130903914.npz",
+      "id": "1286bf20-af80-40fb-bcde-e05130903914",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.06787109375,
+      "final_predicted_reward_avg": 0.06787109375,
+      "final_predicted_reward_sum": 0.06787109375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f1ed4f4f-c5d2-49a5-a24b-7f11e4079a36.npz",
+      "id": "f1ed4f4f-c5d2-49a5-a24b-7f11e4079a36",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1591796875,
+      "final_predicted_reward_avg": 0.1591796875,
+      "final_predicted_reward_sum": 0.1591796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_137816e3-b982-4f63-aabd-9645168a7b2c.npz",
+      "id": "137816e3-b982-4f63-aabd-9645168a7b2c",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.169921875,
+      "final_predicted_reward_avg": 0.169921875,
+      "final_predicted_reward_sum": 0.169921875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_6fb72845-c880-4a78-968f-168786dbd5f7.npz",
+      "id": "6fb72845-c880-4a78-968f-168786dbd5f7",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.16015625,
+      "final_predicted_reward_avg": 0.16015625,
+      "final_predicted_reward_sum": 0.16015625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_43870bc7-259c-4ee7-b198-e1a0992844c8.npz",
+      "id": "43870bc7-259c-4ee7-b198-e1a0992844c8",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.0966796875,
+      "final_predicted_reward_avg": 0.0966796875,
+      "final_predicted_reward_sum": 0.0966796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d7713b0f-fa16-4533-a618-7f2baad33e6e.npz",
+      "id": "d7713b0f-fa16-4533-a618-7f2baad33e6e",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1513671875,
+      "final_predicted_reward_avg": 0.1513671875,
+      "final_predicted_reward_sum": 0.1513671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e3566070-d3bd-4f26-a363-a753d1b01f05.npz",
+      "id": "e3566070-d3bd-4f26-a363-a753d1b01f05",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.2177734375,
+      "final_predicted_reward_avg": 0.2177734375,
+      "final_predicted_reward_sum": 0.2177734375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_0e4dbc71-ca54-4ab6-85fc-37d65a4c2dba.npz",
+      "id": "0e4dbc71-ca54-4ab6-85fc-37d65a4c2dba",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.2021484375,
+      "final_predicted_reward_avg": 0.2021484375,
+      "final_predicted_reward_sum": 0.2021484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8cdf9fec-68a0-4bea-aed1-d60877fb3b6a.npz",
+      "id": "8cdf9fec-68a0-4bea-aed1-d60877fb3b6a",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.15625,
+      "final_predicted_reward_avg": 0.15625,
+      "final_predicted_reward_sum": 0.15625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7df7139d-3d6f-4720-9d1b-185e75dd9b41.npz",
+      "id": "7df7139d-3d6f-4720-9d1b-185e75dd9b41",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.15625,
+      "final_predicted_reward_avg": 0.15625,
+      "final_predicted_reward_sum": 0.15625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7fe27d4f-fbd3-4718-a42a-2c11576ff41f.npz",
+      "id": "7fe27d4f-fbd3-4718-a42a-2c11576ff41f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.10302734375,
+      "final_predicted_reward_avg": 0.10302734375,
+      "final_predicted_reward_sum": 0.10302734375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9776120d-ff0b-40a8-9d0f-ddba28914298.npz",
+      "id": "9776120d-ff0b-40a8-9d0f-ddba28914298",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.062255859375,
+      "final_predicted_reward_avg": 0.062255859375,
+      "final_predicted_reward_sum": 0.062255859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c9736d29-440d-40dc-afe6-d12962dfbb8b.npz",
+      "id": "c9736d29-440d-40dc-afe6-d12962dfbb8b",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.150390625,
+      "final_predicted_reward_avg": 0.150390625,
+      "final_predicted_reward_sum": 0.150390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d43b6193-eb56-4dd6-865e-3c60bcefaf6c.npz",
+      "id": "d43b6193-eb56-4dd6-865e-3c60bcefaf6c",
+      "quality_label": "suboptimal"
+    }
+  ],
+  "Fold the towel in half": [
+    {
+      "final_predicted_reward_last": 0.1337890625,
+      "final_predicted_reward_avg": 0.1337890625,
+      "final_predicted_reward_sum": 0.1337890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ab8ad119-b7ba-4983-b111-731530a21f7c.npz",
+      "id": "ab8ad119-b7ba-4983-b111-731530a21f7c",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.16796875,
+      "final_predicted_reward_avg": 0.16796875,
+      "final_predicted_reward_sum": 0.16796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_db3f2f0a-4046-4ba5-9d64-866b80c431bb.npz",
+      "id": "db3f2f0a-4046-4ba5-9d64-866b80c431bb",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1650390625,
+      "final_predicted_reward_avg": 0.1650390625,
+      "final_predicted_reward_sum": 0.1650390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e795d59a-3c17-461c-bfd2-93e04303b866.npz",
+      "id": "e795d59a-3c17-461c-bfd2-93e04303b866",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.10888671875,
+      "final_predicted_reward_avg": 0.10888671875,
+      "final_predicted_reward_sum": 0.10888671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e3dc8245-c4e1-4678-a1de-2ee880e15a4e.npz",
+      "id": "e3dc8245-c4e1-4678-a1de-2ee880e15a4e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1962890625,
+      "final_predicted_reward_avg": 0.1962890625,
+      "final_predicted_reward_sum": 0.1962890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d53de77a-d031-46f0-9078-df376aa17509.npz",
+      "id": "d53de77a-d031-46f0-9078-df376aa17509",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11279296875,
+      "final_predicted_reward_avg": 0.11279296875,
+      "final_predicted_reward_sum": 0.11279296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8e18746a-6c32-420d-af1b-2edfd09fbc71.npz",
+      "id": "8e18746a-6c32-420d-af1b-2edfd09fbc71",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.07568359375,
+      "final_predicted_reward_avg": 0.07568359375,
+      "final_predicted_reward_sum": 0.07568359375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_8a9f8a34-517b-4adc-8152-da76693778f5.npz",
+      "id": "8a9f8a34-517b-4adc-8152-da76693778f5",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.125,
+      "final_predicted_reward_avg": 0.125,
+      "final_predicted_reward_sum": 0.125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_70ab0bca-bc83-4118-957b-06ffa91deb69.npz",
+      "id": "70ab0bca-bc83-4118-957b-06ffa91deb69",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1455078125,
+      "final_predicted_reward_avg": 0.1455078125,
+      "final_predicted_reward_sum": 0.1455078125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d5f2bc6d-3dc0-486b-880f-03b44a7ffd09.npz",
+      "id": "d5f2bc6d-3dc0-486b-880f-03b44a7ffd09",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12890625,
+      "final_predicted_reward_avg": 0.12890625,
+      "final_predicted_reward_sum": 0.12890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b87ab6ec-35d4-44b9-a9ef-cd27ccf8ac5f.npz",
+      "id": "b87ab6ec-35d4-44b9-a9ef-cd27ccf8ac5f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1259765625,
+      "final_predicted_reward_avg": 0.1259765625,
+      "final_predicted_reward_sum": 0.1259765625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_fc07c10e-f2d5-4ac4-a49a-e7d4a864824f.npz",
+      "id": "fc07c10e-f2d5-4ac4-a49a-e7d4a864824f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11376953125,
+      "final_predicted_reward_avg": 0.11376953125,
+      "final_predicted_reward_sum": 0.11376953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b50b15a0-6d10-4fd2-bb06-f5b781b13ccb.npz",
+      "id": "b50b15a0-6d10-4fd2-bb06-f5b781b13ccb",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.16796875,
+      "final_predicted_reward_avg": 0.16796875,
+      "final_predicted_reward_sum": 0.16796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a699b739-e7ee-4c14-b027-436e16853bf7.npz",
+      "id": "a699b739-e7ee-4c14-b027-436e16853bf7",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.11669921875,
+      "final_predicted_reward_avg": 0.11669921875,
+      "final_predicted_reward_sum": 0.11669921875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_19ef29b6-899a-4b78-88c8-fed46998f023.npz",
+      "id": "19ef29b6-899a-4b78-88c8-fed46998f023",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1904296875,
+      "final_predicted_reward_avg": 0.1904296875,
+      "final_predicted_reward_sum": 0.1904296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f9393a5a-c2f1-46ce-a83e-50ac3ccbf22d.npz",
+      "id": "f9393a5a-c2f1-46ce-a83e-50ac3ccbf22d",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1103515625,
+      "final_predicted_reward_avg": 0.1103515625,
+      "final_predicted_reward_sum": 0.1103515625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_67745758-b3d9-4bd2-84a8-cc753b0ebe47.npz",
+      "id": "67745758-b3d9-4bd2-84a8-cc753b0ebe47",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1923828125,
+      "final_predicted_reward_avg": 0.1923828125,
+      "final_predicted_reward_sum": 0.1923828125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9d253d56-ff72-42e1-99e2-66df9e1c0b7b.npz",
+      "id": "9d253d56-ff72-42e1-99e2-66df9e1c0b7b",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1298828125,
+      "final_predicted_reward_avg": 0.1298828125,
+      "final_predicted_reward_sum": 0.1298828125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b97c8f8e-43d0-4e06-855b-e01065cf0325.npz",
+      "id": "b97c8f8e-43d0-4e06-855b-e01065cf0325",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12109375,
+      "final_predicted_reward_avg": 0.12109375,
+      "final_predicted_reward_sum": 0.12109375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7c1d1873-88f9-4530-a87b-2b43d816e25c.npz",
+      "id": "7c1d1873-88f9-4530-a87b-2b43d816e25c",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12890625,
+      "final_predicted_reward_avg": 0.12890625,
+      "final_predicted_reward_sum": 0.12890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_6e9b3a7e-7a26-4123-acea-fd87a05eff98.npz",
+      "id": "6e9b3a7e-7a26-4123-acea-fd87a05eff98",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.0947265625,
+      "final_predicted_reward_avg": 0.0947265625,
+      "final_predicted_reward_sum": 0.0947265625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_54b8de37-2f9f-4488-8931-4fb990b0268d.npz",
+      "id": "54b8de37-2f9f-4488-8931-4fb990b0268d",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11474609375,
+      "final_predicted_reward_avg": 0.11474609375,
+      "final_predicted_reward_sum": 0.11474609375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_2fef061b-09b9-442c-82c6-7825c5e89fa5.npz",
+      "id": "2fef061b-09b9-442c-82c6-7825c5e89fa5",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1845703125,
+      "final_predicted_reward_avg": 0.1845703125,
+      "final_predicted_reward_sum": 0.1845703125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_731d38a8-24b6-4d57-8863-af6a2798b91c.npz",
+      "id": "731d38a8-24b6-4d57-8863-af6a2798b91c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.10791015625,
+      "final_predicted_reward_avg": 0.10791015625,
+      "final_predicted_reward_sum": 0.10791015625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_3003d9f0-1521-493c-b1a2-85f80006ed1c.npz",
+      "id": "3003d9f0-1521-493c-b1a2-85f80006ed1c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1201171875,
+      "final_predicted_reward_avg": 0.1201171875,
+      "final_predicted_reward_sum": 0.1201171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b5c4d53a-3c9f-41da-99da-0a65895663d6.npz",
+      "id": "b5c4d53a-3c9f-41da-99da-0a65895663d6",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.08984375,
+      "final_predicted_reward_avg": 0.08984375,
+      "final_predicted_reward_sum": 0.08984375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_4119d278-838d-43fa-8cc7-8a21f37421ee.npz",
+      "id": "4119d278-838d-43fa-8cc7-8a21f37421ee",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.134765625,
+      "final_predicted_reward_avg": 0.134765625,
+      "final_predicted_reward_sum": 0.134765625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e9007a9b-c3b9-465f-adba-c7dcba3811a6.npz",
+      "id": "e9007a9b-c3b9-465f-adba-c7dcba3811a6",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1298828125,
+      "final_predicted_reward_avg": 0.1298828125,
+      "final_predicted_reward_sum": 0.1298828125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_075974b1-9eec-44ec-9c49-8dd415773628.npz",
+      "id": "075974b1-9eec-44ec-9c49-8dd415773628",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1826171875,
+      "final_predicted_reward_avg": 0.1826171875,
+      "final_predicted_reward_sum": 0.1826171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e0044959-f7df-453f-8cf2-eb0b7e668e79.npz",
+      "id": "e0044959-f7df-453f-8cf2-eb0b7e668e79",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.146484375,
+      "final_predicted_reward_avg": 0.146484375,
+      "final_predicted_reward_sum": 0.146484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b04a24f5-f50a-418c-b156-9ae1b05914b8.npz",
+      "id": "b04a24f5-f50a-418c-b156-9ae1b05914b8",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.11962890625,
+      "final_predicted_reward_avg": 0.11962890625,
+      "final_predicted_reward_sum": 0.11962890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_0b73b4ec-7896-4b0e-be0a-9f0155a8aadf.npz",
+      "id": "0b73b4ec-7896-4b0e-be0a-9f0155a8aadf",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1240234375,
+      "final_predicted_reward_avg": 0.1240234375,
+      "final_predicted_reward_sum": 0.1240234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ce5fc60b-6658-4584-bd27-c5abae549a0d.npz",
+      "id": "ce5fc60b-6658-4584-bd27-c5abae549a0d",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.11181640625,
+      "final_predicted_reward_avg": 0.11181640625,
+      "final_predicted_reward_sum": 0.11181640625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_aaabc040-81d0-4c2c-ab31-6343690a1405.npz",
+      "id": "aaabc040-81d0-4c2c-ab31-6343690a1405",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1015625,
+      "final_predicted_reward_avg": 0.1015625,
+      "final_predicted_reward_sum": 0.1015625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e9cfe775-4b5f-4868-b821-f85e92362b1c.npz",
+      "id": "e9cfe775-4b5f-4868-b821-f85e92362b1c",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.103515625,
+      "final_predicted_reward_avg": 0.103515625,
+      "final_predicted_reward_sum": 0.103515625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_cb89d664-7265-444b-b623-87c11dba2359.npz",
+      "id": "cb89d664-7265-444b-b623-87c11dba2359",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1083984375,
+      "final_predicted_reward_avg": 0.1083984375,
+      "final_predicted_reward_sum": 0.1083984375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_4ff0df87-136e-4036-bbb4-282dedcab229.npz",
+      "id": "4ff0df87-136e-4036-bbb4-282dedcab229",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.138671875,
+      "final_predicted_reward_avg": 0.138671875,
+      "final_predicted_reward_sum": 0.138671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d6e9b8b6-c6bf-4aa8-b766-eb22546b426a.npz",
+      "id": "d6e9b8b6-c6bf-4aa8-b766-eb22546b426a",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.099609375,
+      "final_predicted_reward_avg": 0.099609375,
+      "final_predicted_reward_sum": 0.099609375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_83ebf693-c82b-42d6-8cda-170ac28594ac.npz",
+      "id": "83ebf693-c82b-42d6-8cda-170ac28594ac",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.10888671875,
+      "final_predicted_reward_avg": 0.10888671875,
+      "final_predicted_reward_sum": 0.10888671875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_79041109-b96f-474b-82fe-b02a69c4b641.npz",
+      "id": "79041109-b96f-474b-82fe-b02a69c4b641",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12255859375,
+      "final_predicted_reward_avg": 0.12255859375,
+      "final_predicted_reward_sum": 0.12255859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9edecc05-daf2-40e6-b9da-9b5df3e478fb.npz",
+      "id": "9edecc05-daf2-40e6-b9da-9b5df3e478fb",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.11474609375,
+      "final_predicted_reward_avg": 0.11474609375,
+      "final_predicted_reward_sum": 0.11474609375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_5bae3348-abd3-4d3b-96b8-214378b502e4.npz",
+      "id": "5bae3348-abd3-4d3b-96b8-214378b502e4",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.126953125,
+      "final_predicted_reward_avg": 0.126953125,
+      "final_predicted_reward_sum": 0.126953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b3b5f98a-f56c-4717-9681-162f9a807b9c.npz",
+      "id": "b3b5f98a-f56c-4717-9681-162f9a807b9c",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.150390625,
+      "final_predicted_reward_avg": 0.150390625,
+      "final_predicted_reward_sum": 0.150390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_933468b5-eca8-47fe-affc-10dafadd72d8.npz",
+      "id": "933468b5-eca8-47fe-affc-10dafadd72d8",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.16796875,
+      "final_predicted_reward_avg": 0.16796875,
+      "final_predicted_reward_sum": 0.16796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_acc1d998-0d31-4ea7-8d15-403342000a5f.npz",
+      "id": "acc1d998-0d31-4ea7-8d15-403342000a5f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1103515625,
+      "final_predicted_reward_avg": 0.1103515625,
+      "final_predicted_reward_sum": 0.1103515625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_9ead58b4-54fa-4691-bdf3-1259154b9466.npz",
+      "id": "9ead58b4-54fa-4691-bdf3-1259154b9466",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.14453125,
+      "final_predicted_reward_avg": 0.14453125,
+      "final_predicted_reward_sum": 0.14453125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1de5643b-8ce2-43de-a078-ba7a2629c587.npz",
+      "id": "1de5643b-8ce2-43de-a078-ba7a2629c587",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1650390625,
+      "final_predicted_reward_avg": 0.1650390625,
+      "final_predicted_reward_sum": 0.1650390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_d7e2996b-27bd-4fb6-9610-eafa383a5cd4.npz",
+      "id": "d7e2996b-27bd-4fb6-9610-eafa383a5cd4",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.140625,
+      "final_predicted_reward_avg": 0.140625,
+      "final_predicted_reward_sum": 0.140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f48bb5f2-0539-4e82-8d68-dcea8ea2f119.npz",
+      "id": "f48bb5f2-0539-4e82-8d68-dcea8ea2f119",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.11865234375,
+      "final_predicted_reward_avg": 0.11865234375,
+      "final_predicted_reward_sum": 0.11865234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c1af326f-52e2-4236-8887-dc49db367811.npz",
+      "id": "c1af326f-52e2-4236-8887-dc49db367811",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1328125,
+      "final_predicted_reward_avg": 0.1328125,
+      "final_predicted_reward_sum": 0.1328125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_11763f48-01e9-4eb6-8bdd-53fbac68f89e.npz",
+      "id": "11763f48-01e9-4eb6-8bdd-53fbac68f89e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1396484375,
+      "final_predicted_reward_avg": 0.1396484375,
+      "final_predicted_reward_sum": 0.1396484375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_62fe9e39-d171-4fa5-9b8f-6edb23660c6e.npz",
+      "id": "62fe9e39-d171-4fa5-9b8f-6edb23660c6e",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1533203125,
+      "final_predicted_reward_avg": 0.1533203125,
+      "final_predicted_reward_sum": 0.1533203125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_cf54383e-9ec1-4763-9c58-c413f41a92a9.npz",
+      "id": "cf54383e-9ec1-4763-9c58-c413f41a92a9",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.12890625,
+      "final_predicted_reward_avg": 0.12890625,
+      "final_predicted_reward_sum": 0.12890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_b6ceb39d-adf0-4e42-8817-8daf724e5fb8.npz",
+      "id": "b6ceb39d-adf0-4e42-8817-8daf724e5fb8",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.08935546875,
+      "final_predicted_reward_avg": 0.08935546875,
+      "final_predicted_reward_sum": 0.08935546875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_01de5bc0-58b9-4160-9da5-bfbc10edd4ca.npz",
+      "id": "01de5bc0-58b9-4160-9da5-bfbc10edd4ca",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1826171875,
+      "final_predicted_reward_avg": 0.1826171875,
+      "final_predicted_reward_sum": 0.1826171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a4ca9abd-bf9d-4531-80a8-944c7a708a63.npz",
+      "id": "a4ca9abd-bf9d-4531-80a8-944c7a708a63",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1201171875,
+      "final_predicted_reward_avg": 0.1201171875,
+      "final_predicted_reward_sum": 0.1201171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_c36a3988-fcff-483c-8db2-599a73eb95ba.npz",
+      "id": "c36a3988-fcff-483c-8db2-599a73eb95ba",
+      "quality_label": "suboptimal"
+    }
+  ],
+  "Pull a tissue from the tissue box": [
+    {
+      "final_predicted_reward_last": 0.1337890625,
+      "final_predicted_reward_avg": 0.1337890625,
+      "final_predicted_reward_sum": 0.1337890625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ad519dd9-df76-434c-9784-06ada22ed961.npz",
+      "id": "ad519dd9-df76-434c-9784-06ada22ed961",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.154296875,
+      "final_predicted_reward_avg": 0.154296875,
+      "final_predicted_reward_sum": 0.154296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_becf6417-cf74-4a1d-a32e-eb2a42e8bf72.npz",
+      "id": "becf6417-cf74-4a1d-a32e-eb2a42e8bf72",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.2041015625,
+      "final_predicted_reward_avg": 0.2041015625,
+      "final_predicted_reward_sum": 0.2041015625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_5aa104ff-e956-4957-8b9b-47744884575a.npz",
+      "id": "5aa104ff-e956-4957-8b9b-47744884575a",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1904296875,
+      "final_predicted_reward_avg": 0.1904296875,
+      "final_predicted_reward_sum": 0.1904296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_46b93535-5df1-48aa-b05a-a76702c53521.npz",
+      "id": "46b93535-5df1-48aa-b05a-a76702c53521",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1328125,
+      "final_predicted_reward_avg": 0.1328125,
+      "final_predicted_reward_sum": 0.1328125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_755cc4be-7805-453a-9de9-a0f8e77792fb.npz",
+      "id": "755cc4be-7805-453a-9de9-a0f8e77792fb",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1552734375,
+      "final_predicted_reward_avg": 0.1552734375,
+      "final_predicted_reward_sum": 0.1552734375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_e5f0d186-6ac5-4e29-aec9-73624cb6a688.npz",
+      "id": "e5f0d186-6ac5-4e29-aec9-73624cb6a688",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.12255859375,
+      "final_predicted_reward_avg": 0.12255859375,
+      "final_predicted_reward_sum": 0.12255859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_5910dc69-3e8f-4977-8d45-ded9873ff878.npz",
+      "id": "5910dc69-3e8f-4977-8d45-ded9873ff878",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.1455078125,
+      "final_predicted_reward_avg": 0.1455078125,
+      "final_predicted_reward_sum": 0.1455078125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_f708bdce-6416-466a-a1bc-518e2656efb3.npz",
+      "id": "f708bdce-6416-466a-a1bc-518e2656efb3",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1298828125,
+      "final_predicted_reward_avg": 0.1298828125,
+      "final_predicted_reward_sum": 0.1298828125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_90073f42-bb4b-4f51-8af3-b96312066565.npz",
+      "id": "90073f42-bb4b-4f51-8af3-b96312066565",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.150390625,
+      "final_predicted_reward_avg": 0.150390625,
+      "final_predicted_reward_sum": 0.150390625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_351346d4-cafc-485a-ad94-ca90d8371437.npz",
+      "id": "351346d4-cafc-485a-ad94-ca90d8371437",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.16796875,
+      "final_predicted_reward_avg": 0.16796875,
+      "final_predicted_reward_sum": 0.16796875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7bacf088-4149-4e50-a839-79f11d32e7f1.npz",
+      "id": "7bacf088-4149-4e50-a839-79f11d32e7f1",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1279296875,
+      "final_predicted_reward_avg": 0.1279296875,
+      "final_predicted_reward_sum": 0.1279296875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a8a5e85b-3a58-4a43-b395-cd0a01e56d9a.npz",
+      "id": "a8a5e85b-3a58-4a43-b395-cd0a01e56d9a",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1376953125,
+      "final_predicted_reward_avg": 0.1376953125,
+      "final_predicted_reward_sum": 0.1376953125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_91416c33-d266-4cff-b281-b503cd14fd41.npz",
+      "id": "91416c33-d266-4cff-b281-b503cd14fd41",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.15234375,
+      "final_predicted_reward_avg": 0.15234375,
+      "final_predicted_reward_sum": 0.15234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_7943cae4-851c-4ce4-8ffc-ffa34a02d4cd.npz",
+      "id": "7943cae4-851c-4ce4-8ffc-ffa34a02d4cd",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.119140625,
+      "final_predicted_reward_avg": 0.119140625,
+      "final_predicted_reward_sum": 0.119140625,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_ab9a498b-e21f-4161-ae3a-7fd084a080cf.npz",
+      "id": "ab9a498b-e21f-4161-ae3a-7fd084a080cf",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.201171875,
+      "final_predicted_reward_avg": 0.201171875,
+      "final_predicted_reward_sum": 0.201171875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_bdcea369-52d0-49e3-9666-c7c7ebe7b3e8.npz",
+      "id": "bdcea369-52d0-49e3-9666-c7c7ebe7b3e8",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.232421875,
+      "final_predicted_reward_avg": 0.232421875,
+      "final_predicted_reward_sum": 0.232421875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_1ea1102f-adf7-42c5-a6ea-06d4ccde99b7.npz",
+      "id": "1ea1102f-adf7-42c5-a6ea-06d4ccde99b7",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.11767578125,
+      "final_predicted_reward_avg": 0.11767578125,
+      "final_predicted_reward_sum": 0.11767578125,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_93de5238-2329-484b-9616-f728c3643cab.npz",
+      "id": "93de5238-2329-484b-9616-f728c3643cab",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.12255859375,
+      "final_predicted_reward_avg": 0.12255859375,
+      "final_predicted_reward_sum": 0.12255859375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_13e7ab03-e18a-4de7-a329-ee65cfeb2d3f.npz",
+      "id": "13e7ab03-e18a-4de7-a329-ee65cfeb2d3f",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.2099609375,
+      "final_predicted_reward_avg": 0.2099609375,
+      "final_predicted_reward_sum": 0.2099609375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_331cd1bf-14bc-453f-bc28-28e07869b941.npz",
+      "id": "331cd1bf-14bc-453f-bc28-28e07869b941",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.185546875,
+      "final_predicted_reward_avg": 0.185546875,
+      "final_predicted_reward_sum": 0.185546875,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_a99a5040-3dea-47ef-8725-65eca634ced0.npz",
+      "id": "a99a5040-3dea-47ef-8725-65eca634ced0",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.11865234375,
+      "final_predicted_reward_avg": 0.11865234375,
+      "final_predicted_reward_sum": 0.11865234375,
+      "video_path": "./processed_datasets/jesbu1_rfm_new_mit_franka_rfm_rfm_new_mit_franka_rfm/frames/trajectory_0c9a061f-fd64-4d52-84f5-9c222f0a6110.npz",
+      "id": "0c9a061f-fd64-4d52-84f5-9c222f0a6110",
+      "quality_label": "suboptimal"
+    }
+  ]
+}

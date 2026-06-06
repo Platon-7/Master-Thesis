@@ -1,0 +1,39 @@
+#!/bin/bash
+#SBATCH --job-name=diag_score4
+#SBATCH --output=logs/diag_score4_%j.out
+#SBATCH --error=logs/diag_score4_%j.err
+#SBATCH --time=00:45:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+# Run all 3 models (4B baseline, Robometer-FT run1 s3000, Qwen3.5-FT run4 s6500)
+# on the 3 hand-picked score=4 examples (Assembly held-out, BinPicking in-train,
+# Failsafe-Pick in-train), with and without ICL.
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+
+echo "==================== diag_score4 summary ===================="
+echo "python : $(which python)"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "==============================================================="
+
+python tools/diag_score4_examples.py

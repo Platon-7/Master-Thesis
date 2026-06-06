@@ -1,0 +1,99 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_paper_repro
+#SBATCH --output=logs/reproduce_robometer_paper_%j.out
+#SBATCH --error=logs/reproduce_robometer_paper_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_mig
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=6
+#SBATCH --mem=32G
+
+# Reproduce Robometer paper's published rbm-1m-ood metrics:
+#   - Reward alignment (VOC Pearson r) target 0.95
+#   - Policy ranking (Kendall τ)        target 0.66
+#
+# Uses Robometer's own `run_baseline_eval.py` so the loader, target_progress
+# construction, aggregation, and metric math are all bit-identical to the
+# paper. We just point it at robometer/Robometer-4B and the rbm-1m-ood
+# dataset list — HF will download the 6 per-family sub-datasets fresh.
+#
+# Eval type chosen via env var so we can run reward_alignment + policy_ranking
+# as separate jobs (different use_frame_steps).
+#
+#   EVAL_TYPE=reward_alignment | policy_ranking   (required)
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+
+# vlm_ibrl/ FIRST on PYTHONPATH so the unsloth stub shadows the real
+# package (avoids torch 2.8 / cu128 requirement), then Robometer/.
+export PYTHONPATH="$HERE:$ROBOMETER_DIR:$PYTHONPATH"
+
+# Cache HF stuff under scratch (downloads can be GB+)
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache_rbm_eval}"
+export HF_HUB_CACHE="$HF_HOME/hub"
+mkdir -p "$HF_HOME"
+
+unset WANDB_PROJECT WANDB_ENTITY
+export WANDB_MODE=disabled
+
+# Robometer's data loader requires a directory containing the preprocessed
+# eval sub-datasets in HF datasets format. The 6 OOD families (~1.59 GB) were
+# downloaded from jesbu1/processed_datasets and extracted here.
+export ROBOMETER_PROCESSED_DATASETS_PATH="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/$USER/rbm_processed_eval}"
+
+EVAL_TYPE="${EVAL_TYPE:?Set EVAL_TYPE=reward_alignment or policy_ranking}"
+case "$EVAL_TYPE" in
+    reward_alignment)
+        USE_FRAME_STEPS=true
+        EXTRA_ARGS="custom_eval.reward_alignment=[rbm-1m-ood] custom_eval.subsample_n_frames=5 custom_eval.reward_alignment_max_trajectories=30"
+        ;;
+    policy_ranking)
+        USE_FRAME_STEPS=false
+        EXTRA_ARGS="custom_eval.policy_ranking=[rbm-1m-ood] custom_eval.num_examples_per_quality_pr=1000"
+        ;;
+    *) echo "ERROR: EVAL_TYPE must be reward_alignment or policy_ranking" >&2; exit 2 ;;
+esac
+
+echo "==================== robometer paper repro ===================="
+echo "EVAL_TYPE       : $EVAL_TYPE"
+echo "USE_FRAME_STEPS : $USE_FRAME_STEPS"
+echo "HF_HOME         : $HF_HOME"
+echo "python          : $(which python)"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "==============================================================="
+
+cd "$ROBOMETER_DIR"
+
+# Use our wrapper instead of run_baseline_eval.py directly: it monkey-patches
+# setup_model_and_processor to force use_unsloth=False (Robometer-4B's config
+# ships with use_unsloth=True, but Unsloth needs torch 2.8/cu128 which our
+# env doesn't have). Wrapper also hides flash_attn (RBM rejects FA2).
+python "$HERE/tools/run_robometer_eval.py" \
+    reward_model=rbm \
+    model_path="${MODEL_PATH:-robometer/Robometer-4B}" \
+    custom_eval.eval_types=[$EVAL_TYPE] \
+    custom_eval.use_frame_steps=$USE_FRAME_STEPS \
+    $EXTRA_ARGS \
+    max_frames=8 \
+    model_config.batch_size=8
+RC=$?
+
+echo
+echo "==================== paper repro exit ===================="
+echo "return code: $RC"
+exit $RC

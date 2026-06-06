@@ -1,0 +1,73 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_cm_icl
+#SBATCH --output=logs/rbm_cm_icl_%j.out
+#SBATCH --error=logs/rbm_cm_icl_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+# ICL-augmented offline CM: 16 uniform frames from demo 0 of CoffeePush
+# prepended as in-context demonstration; scored against demos 1 and 2.
+#
+# Required env vars:
+#   ROBOMETER_FT_PATH         path to consolidated FT checkpoint
+# Optional:
+#   IBRL_CONDA_ENV            (default vlm_ibrl_qwen35)
+#   TASK                      (default CoffeePush)
+#   PREFIX_STRIDE             (default 1 — score every prefix length)
+#   SKIP_ICL_SOURCE_DEMO      if set to 1, drop demo 0 from eval (cleaner)
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+QWEN35_FT_DIR="${QWEN35_FT_DIR:-$HERE/../Qwen35-FT}"
+ENV_NAME="${IBRL_CONDA_ENV:-vlm_ibrl_qwen35}"
+MUJOCO_PATH="${MUJOCO_PATH:-$HOME/.mujoco/mujoco210}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+export IBRL_CONDA_ENV="$ENV_NAME"
+export MUJOCO_PATH="$MUJOCO_PATH"
+
+source "$(conda info --base)/etc/profile.d/conda.sh"
+source set_env.sh
+export PYTHONPATH="$QWEN35_FT_DIR:$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+unset WANDB_PROJECT WANDB_ENTITY
+export WANDB_MODE=disabled
+
+TASK="${TASK:-CoffeePush}"
+PREFIX_STRIDE="${PREFIX_STRIDE:-1}"
+SKIP_FLAG=""
+if [[ "${SKIP_ICL_SOURCE_DEMO:-0}" == "1" ]]; then
+    SKIP_FLAG="--skip-icl-source-demo"
+fi
+OUT_DIR="${OUT_DIR:-/scratch-shared/$USER/vlm_ibrl_cm/${SLURM_JOB_ID:-local}}"
+mkdir -p "$OUT_DIR"
+
+echo "==================== ICL CM eval ===================="
+echo "ENV       : $ENV_NAME"
+echo "FT path   : ${ROBOMETER_FT_PATH:?must be set}"
+echo "TASK      : $TASK"
+echo "STRIDE    : $PREFIX_STRIDE"
+echo "SKIP_SRC  : ${SKIP_ICL_SOURCE_DEMO:-0}"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "======================================================"
+
+python tools/robometer_offline_cm_icl.py \
+    --model-path "$ROBOMETER_FT_PATH" \
+    --task "$TASK" \
+    --full-clip \
+    --prefix-stride "$PREFIX_STRIDE" \
+    $SKIP_FLAG \
+    --output "$OUT_DIR/cm_robometer_ft_${TASK}_icl.json"
+RC=$?
+echo
+echo "return code: $RC"
+exit $RC

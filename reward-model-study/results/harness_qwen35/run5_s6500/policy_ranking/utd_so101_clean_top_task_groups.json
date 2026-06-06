@@ -1,0 +1,262 @@
+{
+  "Put the marker into the pen cup.": [
+    {
+      "final_predicted_reward_last": 0.0135498046875,
+      "final_predicted_reward_avg": 0.0135498046875,
+      "final_predicted_reward_sum": 0.0135498046875,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_960cb5d3-f615-4d5c-9ed8-de54e22de636.npz",
+      "id": "960cb5d3-f615-4d5c-9ed8-de54e22de636",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.2138671875,
+      "final_predicted_reward_avg": 0.2138671875,
+      "final_predicted_reward_sum": 0.2138671875,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_08de23b4-0c0e-4948-a284-6a96f5bb4baa.npz",
+      "id": "08de23b4-0c0e-4948-a284-6a96f5bb4baa",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.01519775390625,
+      "final_predicted_reward_avg": 0.01519775390625,
+      "final_predicted_reward_sum": 0.01519775390625,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_16190f8e-e961-4cd2-aeda-979ab3e96c6d.npz",
+      "id": "16190f8e-e961-4cd2-aeda-979ab3e96c6d",
+      "quality_label": "suboptimal"
+    }
+  ],
+  "Collect the fork to the yellow box.": [
+    {
+      "final_predicted_reward_last": 0.076171875,
+      "final_predicted_reward_avg": 0.076171875,
+      "final_predicted_reward_sum": 0.076171875,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_14bf5714-494e-48c5-9de3-e388ba0a2778.npz",
+      "id": "14bf5714-494e-48c5-9de3-e388ba0a2778",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.0712890625,
+      "final_predicted_reward_avg": 0.0712890625,
+      "final_predicted_reward_sum": 0.0712890625,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_df788898-db89-43e7-b50a-03507ecaeb9d.npz",
+      "id": "df788898-db89-43e7-b50a-03507ecaeb9d",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.051513671875,
+      "final_predicted_reward_avg": 0.051513671875,
+      "final_predicted_reward_sum": 0.051513671875,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_c0a82bc4-48a4-40a9-8016-d3c81547fad9.npz",
+      "id": "c0a82bc4-48a4-40a9-8016-d3c81547fad9",
+      "quality_label": "suboptimal"
+    }
+  ],
+  "Put the red cup on the purple coaster.": [
+    {
+      "final_predicted_reward_last": 0.064453125,
+      "final_predicted_reward_avg": 0.064453125,
+      "final_predicted_reward_sum": 0.064453125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_74a401ab-83eb-4ccb-9f1d-571893ceed17.npz",
+      "id": "74a401ab-83eb-4ccb-9f1d-571893ceed17",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.0859375,
+      "final_predicted_reward_avg": 0.0859375,
+      "final_predicted_reward_sum": 0.0859375,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_a1bcf286-119d-4f74-aba5-2a2ed2366057.npz",
+      "id": "a1bcf286-119d-4f74-aba5-2a2ed2366057",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.03759765625,
+      "final_predicted_reward_avg": 0.03759765625,
+      "final_predicted_reward_sum": 0.03759765625,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_019f3eb8-5510-47a4-b165-46279763422b.npz",
+      "id": "019f3eb8-5510-47a4-b165-46279763422b",
+      "quality_label": "successful"
+    }
+  ],
+  "Put the red bowl on the blue plate.": [
+    {
+      "final_predicted_reward_last": 0.013427734375,
+      "final_predicted_reward_avg": 0.013427734375,
+      "final_predicted_reward_sum": 0.013427734375,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_ae228abd-e2a9-4617-a45a-cdd846b0a562.npz",
+      "id": "ae228abd-e2a9-4617-a45a-cdd846b0a562",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.042236328125,
+      "final_predicted_reward_avg": 0.042236328125,
+      "final_predicted_reward_sum": 0.042236328125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_8f8e88ff-3391-45ae-acdd-9a07a6a139ce.npz",
+      "id": "8f8e88ff-3391-45ae-acdd-9a07a6a139ce",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1845703125,
+      "final_predicted_reward_avg": 0.1845703125,
+      "final_predicted_reward_sum": 0.1845703125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_6a22163b-9ae0-4617-b00a-718427029176.npz",
+      "id": "6a22163b-9ae0-4617-b00a-718427029176",
+      "quality_label": "successful"
+    }
+  ],
+  "Stack the green block on the red block.": [
+    {
+      "final_predicted_reward_last": 0.0302734375,
+      "final_predicted_reward_avg": 0.0302734375,
+      "final_predicted_reward_sum": 0.0302734375,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_92d4ea96-4841-4ac4-b1a0-d0c025eb7af2.npz",
+      "id": "92d4ea96-4841-4ac4-b1a0-d0c025eb7af2",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.056640625,
+      "final_predicted_reward_avg": 0.056640625,
+      "final_predicted_reward_sum": 0.056640625,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_8dbe12af-bc89-4d81-8e65-ef6489d48a99.npz",
+      "id": "8dbe12af-bc89-4d81-8e65-ef6489d48a99",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.0291748046875,
+      "final_predicted_reward_avg": 0.0291748046875,
+      "final_predicted_reward_sum": 0.0291748046875,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_9331c968-4d56-4e13-8eeb-ca4fbd983d36.npz",
+      "id": "9331c968-4d56-4e13-8eeb-ca4fbd983d36",
+      "quality_label": "successful"
+    }
+  ],
+  "Put the pear in the yellow plate.": [
+    {
+      "final_predicted_reward_last": 0.0240478515625,
+      "final_predicted_reward_avg": 0.0240478515625,
+      "final_predicted_reward_sum": 0.0240478515625,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_80c25ccd-303f-4e9b-adfb-9f8830ca5218.npz",
+      "id": "80c25ccd-303f-4e9b-adfb-9f8830ca5218",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.146484375,
+      "final_predicted_reward_avg": 0.146484375,
+      "final_predicted_reward_sum": 0.146484375,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_5e67bf7d-da1b-4e2c-9703-5490a2a3ba96.npz",
+      "id": "5e67bf7d-da1b-4e2c-9703-5490a2a3ba96",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.1376953125,
+      "final_predicted_reward_avg": 0.1376953125,
+      "final_predicted_reward_sum": 0.1376953125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_aa739f0c-ce06-4edf-a414-e182dc2ef6d9.npz",
+      "id": "aa739f0c-ce06-4edf-a414-e182dc2ef6d9",
+      "quality_label": "successful"
+    }
+  ],
+  "Put the bread in the oven.": [
+    {
+      "final_predicted_reward_last": 0.1572265625,
+      "final_predicted_reward_avg": 0.1572265625,
+      "final_predicted_reward_sum": 0.1572265625,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_6900fcf3-138f-4449-ad56-da096207d70f.npz",
+      "id": "6900fcf3-138f-4449-ad56-da096207d70f",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.052001953125,
+      "final_predicted_reward_avg": 0.052001953125,
+      "final_predicted_reward_sum": 0.052001953125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_1ffc582c-0537-40d7-900d-46d86fe66908.npz",
+      "id": "1ffc582c-0537-40d7-900d-46d86fe66908",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.1376953125,
+      "final_predicted_reward_avg": 0.1376953125,
+      "final_predicted_reward_sum": 0.1376953125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_3fb34a53-dec6-4fae-8721-05e1d0bec510.npz",
+      "id": "3fb34a53-dec6-4fae-8721-05e1d0bec510",
+      "quality_label": "successful"
+    }
+  ],
+  "Add pepper to the green bowl.": [
+    {
+      "final_predicted_reward_last": 0.09033203125,
+      "final_predicted_reward_avg": 0.09033203125,
+      "final_predicted_reward_sum": 0.09033203125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_1e113665-58a4-4360-8e45-fd3589a690bb.npz",
+      "id": "1e113665-58a4-4360-8e45-fd3589a690bb",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.057861328125,
+      "final_predicted_reward_avg": 0.057861328125,
+      "final_predicted_reward_sum": 0.057861328125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_26b6cd90-74d8-452d-8572-a60a78be2c18.npz",
+      "id": "26b6cd90-74d8-452d-8572-a60a78be2c18",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.01348876953125,
+      "final_predicted_reward_avg": 0.01348876953125,
+      "final_predicted_reward_sum": 0.01348876953125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_0a807f34-528d-4809-afd6-1470eb6ec1b1.npz",
+      "id": "0a807f34-528d-4809-afd6-1470eb6ec1b1",
+      "quality_label": "failure"
+    }
+  ],
+  "Put the eraser to the blue pencil box.": [
+    {
+      "final_predicted_reward_last": 0.158203125,
+      "final_predicted_reward_avg": 0.158203125,
+      "final_predicted_reward_sum": 0.158203125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_d0be5478-c4a0-407a-af31-7380d4d9b7d1.npz",
+      "id": "d0be5478-c4a0-407a-af31-7380d4d9b7d1",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.05908203125,
+      "final_predicted_reward_avg": 0.05908203125,
+      "final_predicted_reward_sum": 0.05908203125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_e4e0e4de-d5b4-4085-83e0-7fed68dda230.npz",
+      "id": "e4e0e4de-d5b4-4085-83e0-7fed68dda230",
+      "quality_label": "successful"
+    },
+    {
+      "final_predicted_reward_last": 0.046875,
+      "final_predicted_reward_avg": 0.046875,
+      "final_predicted_reward_sum": 0.046875,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_28a52e72-b791-411e-bff4-c6f7a960a3da.npz",
+      "id": "28a52e72-b791-411e-bff4-c6f7a960a3da",
+      "quality_label": "failure"
+    }
+  ],
+  "Press the button.": [
+    {
+      "final_predicted_reward_last": 0.1611328125,
+      "final_predicted_reward_avg": 0.1611328125,
+      "final_predicted_reward_sum": 0.1611328125,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_e46b4860-568f-4d5c-8e41-832010b82c73.npz",
+      "id": "e46b4860-568f-4d5c-8e41-832010b82c73",
+      "quality_label": "suboptimal"
+    },
+    {
+      "final_predicted_reward_last": 0.06591796875,
+      "final_predicted_reward_avg": 0.06591796875,
+      "final_predicted_reward_sum": 0.06591796875,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_0548f1f3-7a80-4110-9123-db28180a7b7e.npz",
+      "id": "0548f1f3-7a80-4110-9123-db28180a7b7e",
+      "quality_label": "failure"
+    },
+    {
+      "final_predicted_reward_last": 0.07763671875,
+      "final_predicted_reward_avg": 0.07763671875,
+      "final_predicted_reward_sum": 0.07763671875,
+      "video_path": "./processed_datasets/jesbu1_utd_so101_clean_policy_ranking_top_utd_so101_clean_policy_ranking_top/frames/trajectory_c1fec2fd-7a48-43e1-ac2e-0e10e4813fc4.npz",
+      "id": "c1fec2fd-7a48-43e1-ac2e-0e10e4813fc4",
+      "quality_label": "successful"
+    }
+  ]
+}

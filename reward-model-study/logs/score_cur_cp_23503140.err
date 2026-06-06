@@ -1,0 +1,720 @@
+2026-06-05 20:08:38.538 | INFO     | robometer.utils.save:resolve_checkpoint_path:133 - Using local checkpoint: /scratch-shared/pkarageorgis1/Robometer_FT_consolidated/run1_icl_ours_step3000
+2026-06-05 20:08:38.558 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:818 - Using torch dtype: torch.bfloat16
+2026-06-05 20:08:38.558 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:841 - Flash Attention 2 CUDA is not available
+2026-06-05 20:08:38.558 | INFO     | robometer.utils.save:resolve_checkpoint_path:133 - Using local checkpoint: /scratch-shared/pkarageorgis1/Robometer_FT_consolidated/run1_icl_ours_step3000
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 178.70it/s]
+Some weights of Qwen3VLModel were not initialized from the model checkpoint at Qwen/Qwen3-VL-4B-Instruct and are newly initialized: ['language_model.embed_tokens.weight', 'language_model.layers.0.input_layernorm.weight', 'language_model.layers.0.mlp.down_proj.weight', 'language_model.layers.0.mlp.gate_proj.weight', 'language_model.layers.0.mlp.up_proj.weight', 'language_model.layers.0.post_attention_layernorm.weight', 'language_model.layers.0.self_attn.k_norm.weight', 'language_model.layers.0.self_attn.k_proj.weight', 'language_model.layers.0.self_attn.o_proj.weight', 'language_model.layers.0.self_attn.q_norm.weight', 'language_model.layers.0.self_attn.q_proj.weight', 'language_model.layers.0.self_attn.v_proj.weight', 'language_model.layers.1.input_layernorm.weight', 'language_model.layers.1.mlp.down_proj.weight', 'language_model.layers.1.mlp.gate_proj.weight', 'language_model.layers.1.mlp.up_proj.weight', 'language_model.layers.1.post_attention_layernorm.weight', 'language_model.layers.1.self_attn.k_norm.weight', 'language_model.layers.1.self_attn.k_proj.weight', 'language_model.layers.1.self_attn.o_proj.weight', 'language_model.layers.1.self_attn.q_norm.weight', 'language_model.layers.1.self_attn.q_proj.weight', 'language_model.layers.1.self_attn.v_proj.weight', 'language_model.layers.10.input_layernorm.weight', 'language_model.layers.10.mlp.down_proj.weight', 'language_model.layers.10.mlp.gate_proj.weight', 'language_model.layers.10.mlp.up_proj.weight', 'language_model.layers.10.post_attention_layernorm.weight', 'language_model.layers.10.self_attn.k_norm.weight', 'language_model.layers.10.self_attn.k_proj.weight', 'language_model.layers.10.self_attn.o_proj.weight', 'language_model.layers.10.self_attn.q_norm.weight', 'language_model.layers.10.self_attn.q_proj.weight', 'language_model.layers.10.self_attn.v_proj.weight', 'language_model.layers.11.input_layernorm.weight', 'language_model.layers.11.mlp.down_proj.weight', 'language_model.layers.11.mlp.gate_proj.weight', 'language_model.layers.11.mlp.up_proj.weight', 'language_model.layers.11.post_attention_layernorm.weight', 'language_model.layers.11.self_attn.k_norm.weight', 'language_model.layers.11.self_attn.k_proj.weight', 'language_model.layers.11.self_attn.o_proj.weight', 'language_model.layers.11.self_attn.q_norm.weight', 'language_model.layers.11.self_attn.q_proj.weight', 'language_model.layers.11.self_attn.v_proj.weight', 'language_model.layers.12.input_layernorm.weight', 'language_model.layers.12.mlp.down_proj.weight', 'language_model.layers.12.mlp.gate_proj.weight', 'language_model.layers.12.mlp.up_proj.weight', 'language_model.layers.12.post_attention_layernorm.weight', 'language_model.layers.12.self_attn.k_norm.weight', 'language_model.layers.12.self_attn.k_proj.weight', 'language_model.layers.12.self_attn.o_proj.weight', 'language_model.layers.12.self_attn.q_norm.weight', 'language_model.layers.12.self_attn.q_proj.weight', 'language_model.layers.12.self_attn.v_proj.weight', 'language_model.layers.13.input_layernorm.weight', 'language_model.layers.13.mlp.down_proj.weight', 'language_model.layers.13.mlp.gate_proj.weight', 'language_model.layers.13.mlp.up_proj.weight', 'language_model.layers.13.post_attention_layernorm.weight', 'language_model.layers.13.self_attn.k_norm.weight', 'language_model.layers.13.self_attn.k_proj.weight', 'language_model.layers.13.self_attn.o_proj.weight', 'language_model.layers.13.self_attn.q_norm.weight', 'language_model.layers.13.self_attn.q_proj.weight', 'language_model.layers.13.self_attn.v_proj.weight', 'language_model.layers.14.input_layernorm.weight', 'language_model.layers.14.mlp.down_proj.weight', 'language_model.layers.14.mlp.gate_proj.weight', 'language_model.layers.14.mlp.up_proj.weight', 'language_model.layers.14.post_attention_layernorm.weight', 'language_model.layers.14.self_attn.k_norm.weight', 'language_model.layers.14.self_attn.k_proj.weight', 'language_model.layers.14.self_attn.o_proj.weight', 'language_model.layers.14.self_attn.q_norm.weight', 'language_model.layers.14.self_attn.q_proj.weight', 'language_model.layers.14.self_attn.v_proj.weight', 'language_model.layers.15.input_layernorm.weight', 'language_model.layers.15.mlp.down_proj.weight', 'language_model.layers.15.mlp.gate_proj.weight', 'language_model.layers.15.mlp.up_proj.weight', 'language_model.layers.15.post_attention_layernorm.weight', 'language_model.layers.15.self_attn.k_norm.weight', 'language_model.layers.15.self_attn.k_proj.weight', 'language_model.layers.15.self_attn.o_proj.weight', 'language_model.layers.15.self_attn.q_norm.weight', 'language_model.layers.15.self_attn.q_proj.weight', 'language_model.layers.15.self_attn.v_proj.weight', 'language_model.layers.16.input_layernorm.weight', 'language_model.layers.16.mlp.down_proj.weight', 'language_model.layers.16.mlp.gate_proj.weight', 'language_model.layers.16.mlp.up_proj.weight', 'language_model.layers.16.post_attention_layernorm.weight', 'language_model.layers.16.self_attn.k_norm.weight', 'language_model.layers.16.self_attn.k_proj.weight', 'language_model.layers.16.self_attn.o_proj.weight', 'language_model.layers.16.self_attn.q_norm.weight', 'language_model.layers.16.self_attn.q_proj.weight', 'language_model.layers.16.self_attn.v_proj.weight', 'language_model.layers.17.input_layernorm.weight', 'language_model.layers.17.mlp.down_proj.weight', 'language_model.layers.17.mlp.gate_proj.weight', 'language_model.layers.17.mlp.up_proj.weight', 'language_model.layers.17.post_attention_layernorm.weight', 'language_model.layers.17.self_attn.k_norm.weight', 'language_model.layers.17.self_attn.k_proj.weight', 'language_model.layers.17.self_attn.o_proj.weight', 'language_model.layers.17.self_attn.q_norm.weight', 'language_model.layers.17.self_attn.q_proj.weight', 'language_model.layers.17.self_attn.v_proj.weight', 'language_model.layers.18.input_layernorm.weight', 'language_model.layers.18.mlp.down_proj.weight', 'language_model.layers.18.mlp.gate_proj.weight', 'language_model.layers.18.mlp.up_proj.weight', 'language_model.layers.18.post_attention_layernorm.weight', 'language_model.layers.18.self_attn.k_norm.weight', 'language_model.layers.18.self_attn.k_proj.weight', 'language_model.layers.18.self_attn.o_proj.weight', 'language_model.layers.18.self_attn.q_norm.weight', 'language_model.layers.18.self_attn.q_proj.weight', 'language_model.layers.18.self_attn.v_proj.weight', 'language_model.layers.19.input_layernorm.weight', 'language_model.layers.19.mlp.down_proj.weight', 'language_model.layers.19.mlp.gate_proj.weight', 'language_model.layers.19.mlp.up_proj.weight', 'language_model.layers.19.post_attention_layernorm.weight', 'language_model.layers.19.self_attn.k_norm.weight', 'language_model.layers.19.self_attn.k_proj.weight', 'language_model.layers.19.self_attn.o_proj.weight', 'language_model.layers.19.self_attn.q_norm.weight', 'language_model.layers.19.self_attn.q_proj.weight', 'language_model.layers.19.self_attn.v_proj.weight', 'language_model.layers.2.input_layernorm.weight', 'language_model.layers.2.mlp.down_proj.weight', 'language_model.layers.2.mlp.gate_proj.weight', 'language_model.layers.2.mlp.up_proj.weight', 'language_model.layers.2.post_attention_layernorm.weight', 'language_model.layers.2.self_attn.k_norm.weight', 'language_model.layers.2.self_attn.k_proj.weight', 'language_model.layers.2.self_attn.o_proj.weight', 'language_model.layers.2.self_attn.q_norm.weight', 'language_model.layers.2.self_attn.q_proj.weight', 'language_model.layers.2.self_attn.v_proj.weight', 'language_model.layers.20.input_layernorm.weight', 'language_model.layers.20.mlp.down_proj.weight', 'language_model.layers.20.mlp.gate_proj.weight', 'language_model.layers.20.mlp.up_proj.weight', 'language_model.layers.20.post_attention_layernorm.weight', 'language_model.layers.20.self_attn.k_norm.weight', 'language_model.layers.20.self_attn.k_proj.weight', 'language_model.layers.20.self_attn.o_proj.weight', 'language_model.layers.20.self_attn.q_norm.weight', 'language_model.layers.20.self_attn.q_proj.weight', 'language_model.layers.20.self_attn.v_proj.weight', 'language_model.layers.21.input_layernorm.weight', 'language_model.layers.21.mlp.down_proj.weight', 'language_model.layers.21.mlp.gate_proj.weight', 'language_model.layers.21.mlp.up_proj.weight', 'language_model.layers.21.post_attention_layernorm.weight', 'language_model.layers.21.self_attn.k_norm.weight', 'language_model.layers.21.self_attn.k_proj.weight', 'language_model.layers.21.self_attn.o_proj.weight', 'language_model.layers.21.self_attn.q_norm.weight', 'language_model.layers.21.self_attn.q_proj.weight', 'language_model.layers.21.self_attn.v_proj.weight', 'language_model.layers.22.input_layernorm.weight', 'language_model.layers.22.mlp.down_proj.weight', 'language_model.layers.22.mlp.gate_proj.weight', 'language_model.layers.22.mlp.up_proj.weight', 'language_model.layers.22.post_attention_layernorm.weight', 'language_model.layers.22.self_attn.k_norm.weight', 'language_model.layers.22.self_attn.k_proj.weight', 'language_model.layers.22.self_attn.o_proj.weight', 'language_model.layers.22.self_attn.q_norm.weight', 'language_model.layers.22.self_attn.q_proj.weight', 'language_model.layers.22.self_attn.v_proj.weight', 'language_model.layers.23.input_layernorm.weight', 'language_model.layers.23.mlp.down_proj.weight', 'language_model.layers.23.mlp.gate_proj.weight', 'language_model.layers.23.mlp.up_proj.weight', 'language_model.layers.23.post_attention_layernorm.weight', 'language_model.layers.23.self_attn.k_norm.weight', 'language_model.layers.23.self_attn.k_proj.weight', 'language_model.layers.23.self_attn.o_proj.weight', 'language_model.layers.23.self_attn.q_norm.weight', 'language_model.layers.23.self_attn.q_proj.weight', 'language_model.layers.23.self_attn.v_proj.weight', 'language_model.layers.24.input_layernorm.weight', 'language_model.layers.24.mlp.down_proj.weight', 'language_model.layers.24.mlp.gate_proj.weight', 'language_model.layers.24.mlp.up_proj.weight', 'language_model.layers.24.post_attention_layernorm.weight', 'language_model.layers.24.self_attn.k_norm.weight', 'language_model.layers.24.self_attn.k_proj.weight', 'language_model.layers.24.self_attn.o_proj.weight', 'language_model.layers.24.self_attn.q_norm.weight', 'language_model.layers.24.self_attn.q_proj.weight', 'language_model.layers.24.self_attn.v_proj.weight', 'language_model.layers.25.input_layernorm.weight', 'language_model.layers.25.mlp.down_proj.weight', 'language_model.layers.25.mlp.gate_proj.weight', 'language_model.layers.25.mlp.up_proj.weight', 'language_model.layers.25.post_attention_layernorm.weight', 'language_model.layers.25.self_attn.k_norm.weight', 'language_model.layers.25.self_attn.k_proj.weight', 'language_model.layers.25.self_attn.o_proj.weight', 'language_model.layers.25.self_attn.q_norm.weight', 'language_model.layers.25.self_attn.q_proj.weight', 'language_model.layers.25.self_attn.v_proj.weight', 'language_model.layers.26.input_layernorm.weight', 'language_model.layers.26.mlp.down_proj.weight', 'language_model.layers.26.mlp.gate_proj.weight', 'language_model.layers.26.mlp.up_proj.weight', 'language_model.layers.26.post_attention_layernorm.weight', 'language_model.layers.26.self_attn.k_norm.weight', 'language_model.layers.26.self_attn.k_proj.weight', 'language_model.layers.26.self_attn.o_proj.weight', 'language_model.layers.26.self_attn.q_norm.weight', 'language_model.layers.26.self_attn.q_proj.weight', 'language_model.layers.26.self_attn.v_proj.weight', 'language_model.layers.27.input_layernorm.weight', 'language_model.layers.27.mlp.down_proj.weight', 'language_model.layers.27.mlp.gate_proj.weight', 'language_model.layers.27.mlp.up_proj.weight', 'language_model.layers.27.post_attention_layernorm.weight', 'language_model.layers.27.self_attn.k_norm.weight', 'language_model.layers.27.self_attn.k_proj.weight', 'language_model.layers.27.self_attn.o_proj.weight', 'language_model.layers.27.self_attn.q_norm.weight', 'language_model.layers.27.self_attn.q_proj.weight', 'language_model.layers.27.self_attn.v_proj.weight', 'language_model.layers.28.input_layernorm.weight', 'language_model.layers.28.mlp.down_proj.weight', 'language_model.layers.28.mlp.gate_proj.weight', 'language_model.layers.28.mlp.up_proj.weight', 'language_model.layers.28.post_attention_layernorm.weight', 'language_model.layers.28.self_attn.k_norm.weight', 'language_model.layers.28.self_attn.k_proj.weight', 'language_model.layers.28.self_attn.o_proj.weight', 'language_model.layers.28.self_attn.q_norm.weight', 'language_model.layers.28.self_attn.q_proj.weight', 'language_model.layers.28.self_attn.v_proj.weight', 'language_model.layers.29.input_layernorm.weight', 'language_model.layers.29.mlp.down_proj.weight', 'language_model.layers.29.mlp.gate_proj.weight', 'language_model.layers.29.mlp.up_proj.weight', 'language_model.layers.29.post_attention_layernorm.weight', 'language_model.layers.29.self_attn.k_norm.weight', 'language_model.layers.29.self_attn.k_proj.weight', 'language_model.layers.29.self_attn.o_proj.weight', 'language_model.layers.29.self_attn.q_norm.weight', 'language_model.layers.29.self_attn.q_proj.weight', 'language_model.layers.29.self_attn.v_proj.weight', 'language_model.layers.3.input_layernorm.weight', 'language_model.layers.3.mlp.down_proj.weight', 'language_model.layers.3.mlp.gate_proj.weight', 'language_model.layers.3.mlp.up_proj.weight', 'language_model.layers.3.post_attention_layernorm.weight', 'language_model.layers.3.self_attn.k_norm.weight', 'language_model.layers.3.self_attn.k_proj.weight', 'language_model.layers.3.self_attn.o_proj.weight', 'language_model.layers.3.self_attn.q_norm.weight', 'language_model.layers.3.self_attn.q_proj.weight', 'language_model.layers.3.self_attn.v_proj.weight', 'language_model.layers.30.input_layernorm.weight', 'language_model.layers.30.mlp.down_proj.weight', 'language_model.layers.30.mlp.gate_proj.weight', 'language_model.layers.30.mlp.up_proj.weight', 'language_model.layers.30.post_attention_layernorm.weight', 'language_model.layers.30.self_attn.k_norm.weight', 'language_model.layers.30.self_attn.k_proj.weight', 'language_model.layers.30.self_attn.o_proj.weight', 'language_model.layers.30.self_attn.q_norm.weight', 'language_model.layers.30.self_attn.q_proj.weight', 'language_model.layers.30.self_attn.v_proj.weight', 'language_model.layers.31.input_layernorm.weight', 'language_model.layers.31.mlp.down_proj.weight', 'language_model.layers.31.mlp.gate_proj.weight', 'language_model.layers.31.mlp.up_proj.weight', 'language_model.layers.31.post_attention_layernorm.weight', 'language_model.layers.31.self_attn.k_norm.weight', 'language_model.layers.31.self_attn.k_proj.weight', 'language_model.layers.31.self_attn.o_proj.weight', 'language_model.layers.31.self_attn.q_norm.weight', 'language_model.layers.31.self_attn.q_proj.weight', 'language_model.layers.31.self_attn.v_proj.weight', 'language_model.layers.32.input_layernorm.weight', 'language_model.layers.32.mlp.down_proj.weight', 'language_model.layers.32.mlp.gate_proj.weight', 'language_model.layers.32.mlp.up_proj.weight', 'language_model.layers.32.post_attention_layernorm.weight', 'language_model.layers.32.self_attn.k_norm.weight', 'language_model.layers.32.self_attn.k_proj.weight', 'language_model.layers.32.self_attn.o_proj.weight', 'language_model.layers.32.self_attn.q_norm.weight', 'language_model.layers.32.self_attn.q_proj.weight', 'language_model.layers.32.self_attn.v_proj.weight', 'language_model.layers.33.input_layernorm.weight', 'language_model.layers.33.mlp.down_proj.weight', 'language_model.layers.33.mlp.gate_proj.weight', 'language_model.layers.33.mlp.up_proj.weight', 'language_model.layers.33.post_attention_layernorm.weight', 'language_model.layers.33.self_attn.k_norm.weight', 'language_model.layers.33.self_attn.k_proj.weight', 'language_model.layers.33.self_attn.o_proj.weight', 'language_model.layers.33.self_attn.q_norm.weight', 'language_model.layers.33.self_attn.q_proj.weight', 'language_model.layers.33.self_attn.v_proj.weight', 'language_model.layers.34.input_layernorm.weight', 'language_model.layers.34.mlp.down_proj.weight', 'language_model.layers.34.mlp.gate_proj.weight', 'language_model.layers.34.mlp.up_proj.weight', 'language_model.layers.34.post_attention_layernorm.weight', 'language_model.layers.34.self_attn.k_norm.weight', 'language_model.layers.34.self_attn.k_proj.weight', 'language_model.layers.34.self_attn.o_proj.weight', 'language_model.layers.34.self_attn.q_norm.weight', 'language_model.layers.34.self_attn.q_proj.weight', 'language_model.layers.34.self_attn.v_proj.weight', 'language_model.layers.35.input_layernorm.weight', 'language_model.layers.35.mlp.down_proj.weight', 'language_model.layers.35.mlp.gate_proj.weight', 'language_model.layers.35.mlp.up_proj.weight', 'language_model.layers.35.post_attention_layernorm.weight', 'language_model.layers.35.self_attn.k_norm.weight', 'language_model.layers.35.self_attn.k_proj.weight', 'language_model.layers.35.self_attn.o_proj.weight', 'language_model.layers.35.self_attn.q_norm.weight', 'language_model.layers.35.self_attn.q_proj.weight', 'language_model.layers.35.self_attn.v_proj.weight', 'language_model.layers.4.input_layernorm.weight', 'language_model.layers.4.mlp.down_proj.weight', 'language_model.layers.4.mlp.gate_proj.weight', 'language_model.layers.4.mlp.up_proj.weight', 'language_model.layers.4.post_attention_layernorm.weight', 'language_model.layers.4.self_attn.k_norm.weight', 'language_model.layers.4.self_attn.k_proj.weight', 'language_model.layers.4.self_attn.o_proj.weight', 'language_model.layers.4.self_attn.q_norm.weight', 'language_model.layers.4.self_attn.q_proj.weight', 'language_model.layers.4.self_attn.v_proj.weight', 'language_model.layers.5.input_layernorm.weight', 'language_model.layers.5.mlp.down_proj.weight', 'language_model.layers.5.mlp.gate_proj.weight', 'language_model.layers.5.mlp.up_proj.weight', 'language_model.layers.5.post_attention_layernorm.weight', 'language_model.layers.5.self_attn.k_norm.weight', 'language_model.layers.5.self_attn.k_proj.weight', 'language_model.layers.5.self_attn.o_proj.weight', 'language_model.layers.5.self_attn.q_norm.weight', 'language_model.layers.5.self_attn.q_proj.weight', 'language_model.layers.5.self_attn.v_proj.weight', 'language_model.layers.6.input_layernorm.weight', 'language_model.layers.6.mlp.down_proj.weight', 'language_model.layers.6.mlp.gate_proj.weight', 'language_model.layers.6.mlp.up_proj.weight', 'language_model.layers.6.post_attention_layernorm.weight', 'language_model.layers.6.self_attn.k_norm.weight', 'language_model.layers.6.self_attn.k_proj.weight', 'language_model.layers.6.self_attn.o_proj.weight', 'language_model.layers.6.self_attn.q_norm.weight', 'language_model.layers.6.self_attn.q_proj.weight', 'language_model.layers.6.self_attn.v_proj.weight', 'language_model.layers.7.input_layernorm.weight', 'language_model.layers.7.mlp.down_proj.weight', 'language_model.layers.7.mlp.gate_proj.weight', 'language_model.layers.7.mlp.up_proj.weight', 'language_model.layers.7.post_attention_layernorm.weight', 'language_model.layers.7.self_attn.k_norm.weight', 'language_model.layers.7.self_attn.k_proj.weight', 'language_model.layers.7.self_attn.o_proj.weight', 'language_model.layers.7.self_attn.q_norm.weight', 'language_model.layers.7.self_attn.q_proj.weight', 'language_model.layers.7.self_attn.v_proj.weight', 'language_model.layers.8.input_layernorm.weight', 'language_model.layers.8.mlp.down_proj.weight', 'language_model.layers.8.mlp.gate_proj.weight', 'language_model.layers.8.mlp.up_proj.weight', 'language_model.layers.8.post_attention_layernorm.weight', 'language_model.layers.8.self_attn.k_norm.weight', 'language_model.layers.8.self_attn.k_proj.weight', 'language_model.layers.8.self_attn.o_proj.weight', 'language_model.layers.8.self_attn.q_norm.weight', 'language_model.layers.8.self_attn.q_proj.weight', 'language_model.layers.8.self_attn.v_proj.weight', 'language_model.layers.9.input_layernorm.weight', 'language_model.layers.9.mlp.down_proj.weight', 'language_model.layers.9.mlp.gate_proj.weight', 'language_model.layers.9.mlp.up_proj.weight', 'language_model.layers.9.post_attention_layernorm.weight', 'language_model.layers.9.self_attn.k_norm.weight', 'language_model.layers.9.self_attn.k_proj.weight', 'language_model.layers.9.self_attn.o_proj.weight', 'language_model.layers.9.self_attn.q_norm.weight', 'language_model.layers.9.self_attn.q_proj.weight', 'language_model.layers.9.self_attn.v_proj.weight', 'language_model.norm.weight', 'visual.blocks.0.attn.proj.bias', 'visual.blocks.0.attn.proj.weight', 'visual.blocks.0.attn.qkv.bias', 'visual.blocks.0.attn.qkv.weight', 'visual.blocks.0.mlp.linear_fc1.bias', 'visual.blocks.0.mlp.linear_fc1.weight', 'visual.blocks.0.mlp.linear_fc2.bias', 'visual.blocks.0.mlp.linear_fc2.weight', 'visual.blocks.0.norm1.bias', 'visual.blocks.0.norm1.weight', 'visual.blocks.0.norm2.bias', 'visual.blocks.0.norm2.weight', 'visual.blocks.1.attn.proj.bias', 'visual.blocks.1.attn.proj.weight', 'visual.blocks.1.attn.qkv.bias', 'visual.blocks.1.attn.qkv.weight', 'visual.blocks.1.mlp.linear_fc1.bias', 'visual.blocks.1.mlp.linear_fc1.weight', 'visual.blocks.1.mlp.linear_fc2.bias', 'visual.blocks.1.mlp.linear_fc2.weight', 'visual.blocks.1.norm1.bias', 'visual.blocks.1.norm1.weight', 'visual.blocks.1.norm2.bias', 'visual.blocks.1.norm2.weight', 'visual.blocks.10.attn.proj.bias', 'visual.blocks.10.attn.proj.weight', 'visual.blocks.10.attn.qkv.bias', 'visual.blocks.10.attn.qkv.weight', 'visual.blocks.10.mlp.linear_fc1.bias', 'visual.blocks.10.mlp.linear_fc1.weight', 'visual.blocks.10.mlp.linear_fc2.bias', 'visual.blocks.10.mlp.linear_fc2.weight', 'visual.blocks.10.norm1.bias', 'visual.blocks.10.norm1.weight', 'visual.blocks.10.norm2.bias', 'visual.blocks.10.norm2.weight', 'visual.blocks.11.attn.proj.bias', 'visual.blocks.11.attn.proj.weight', 'visual.blocks.11.attn.qkv.bias', 'visual.blocks.11.attn.qkv.weight', 'visual.blocks.11.mlp.linear_fc1.bias', 'visual.blocks.11.mlp.linear_fc1.weight', 'visual.blocks.11.mlp.linear_fc2.bias', 'visual.blocks.11.mlp.linear_fc2.weight', 'visual.blocks.11.norm1.bias', 'visual.blocks.11.norm1.weight', 'visual.blocks.11.norm2.bias', 'visual.blocks.11.norm2.weight', 'visual.blocks.12.attn.proj.bias', 'visual.blocks.12.attn.proj.weight', 'visual.blocks.12.attn.qkv.bias', 'visual.blocks.12.attn.qkv.weight', 'visual.blocks.12.mlp.linear_fc1.bias', 'visual.blocks.12.mlp.linear_fc1.weight', 'visual.blocks.12.mlp.linear_fc2.bias', 'visual.blocks.12.mlp.linear_fc2.weight', 'visual.blocks.12.norm1.bias', 'visual.blocks.12.norm1.weight', 'visual.blocks.12.norm2.bias', 'visual.blocks.12.norm2.weight', 'visual.blocks.13.attn.proj.bias', 'visual.blocks.13.attn.proj.weight', 'visual.blocks.13.attn.qkv.bias', 'visual.blocks.13.attn.qkv.weight', 'visual.blocks.13.mlp.linear_fc1.bias', 'visual.blocks.13.mlp.linear_fc1.weight', 'visual.blocks.13.mlp.linear_fc2.bias', 'visual.blocks.13.mlp.linear_fc2.weight', 'visual.blocks.13.norm1.bias', 'visual.blocks.13.norm1.weight', 'visual.blocks.13.norm2.bias', 'visual.blocks.13.norm2.weight', 'visual.blocks.14.attn.proj.bias', 'visual.blocks.14.attn.proj.weight', 'visual.blocks.14.attn.qkv.bias', 'visual.blocks.14.attn.qkv.weight', 'visual.blocks.14.mlp.linear_fc1.bias', 'visual.blocks.14.mlp.linear_fc1.weight', 'visual.blocks.14.mlp.linear_fc2.bias', 'visual.blocks.14.mlp.linear_fc2.weight', 'visual.blocks.14.norm1.bias', 'visual.blocks.14.norm1.weight', 'visual.blocks.14.norm2.bias', 'visual.blocks.14.norm2.weight', 'visual.blocks.15.attn.proj.bias', 'visual.blocks.15.attn.proj.weight', 'visual.blocks.15.attn.qkv.bias', 'visual.blocks.15.attn.qkv.weight', 'visual.blocks.15.mlp.linear_fc1.bias', 'visual.blocks.15.mlp.linear_fc1.weight', 'visual.blocks.15.mlp.linear_fc2.bias', 'visual.blocks.15.mlp.linear_fc2.weight', 'visual.blocks.15.norm1.bias', 'visual.blocks.15.norm1.weight', 'visual.blocks.15.norm2.bias', 'visual.blocks.15.norm2.weight', 'visual.blocks.16.attn.proj.bias', 'visual.blocks.16.attn.proj.weight', 'visual.blocks.16.attn.qkv.bias', 'visual.blocks.16.attn.qkv.weight', 'visual.blocks.16.mlp.linear_fc1.bias', 'visual.blocks.16.mlp.linear_fc1.weight', 'visual.blocks.16.mlp.linear_fc2.bias', 'visual.blocks.16.mlp.linear_fc2.weight', 'visual.blocks.16.norm1.bias', 'visual.blocks.16.norm1.weight', 'visual.blocks.16.norm2.bias', 'visual.blocks.16.norm2.weight', 'visual.blocks.17.attn.proj.bias', 'visual.blocks.17.attn.proj.weight', 'visual.blocks.17.attn.qkv.bias', 'visual.blocks.17.attn.qkv.weight', 'visual.blocks.17.mlp.linear_fc1.bias', 'visual.blocks.17.mlp.linear_fc1.weight', 'visual.blocks.17.mlp.linear_fc2.bias', 'visual.blocks.17.mlp.linear_fc2.weight', 'visual.blocks.17.norm1.bias', 'visual.blocks.17.norm1.weight', 'visual.blocks.17.norm2.bias', 'visual.blocks.17.norm2.weight', 'visual.blocks.18.attn.proj.bias', 'visual.blocks.18.attn.proj.weight', 'visual.blocks.18.attn.qkv.bias', 'visual.blocks.18.attn.qkv.weight', 'visual.blocks.18.mlp.linear_fc1.bias', 'visual.blocks.18.mlp.linear_fc1.weight', 'visual.blocks.18.mlp.linear_fc2.bias', 'visual.blocks.18.mlp.linear_fc2.weight', 'visual.blocks.18.norm1.bias', 'visual.blocks.18.norm1.weight', 'visual.blocks.18.norm2.bias', 'visual.blocks.18.norm2.weight', 'visual.blocks.19.attn.proj.bias', 'visual.blocks.19.attn.proj.weight', 'visual.blocks.19.attn.qkv.bias', 'visual.blocks.19.attn.qkv.weight', 'visual.blocks.19.mlp.linear_fc1.bias', 'visual.blocks.19.mlp.linear_fc1.weight', 'visual.blocks.19.mlp.linear_fc2.bias', 'visual.blocks.19.mlp.linear_fc2.weight', 'visual.blocks.19.norm1.bias', 'visual.blocks.19.norm1.weight', 'visual.blocks.19.norm2.bias', 'visual.blocks.19.norm2.weight', 'visual.blocks.2.attn.proj.bias', 'visual.blocks.2.attn.proj.weight', 'visual.blocks.2.attn.qkv.bias', 'visual.blocks.2.attn.qkv.weight', 'visual.blocks.2.mlp.linear_fc1.bias', 'visual.blocks.2.mlp.linear_fc1.weight', 'visual.blocks.2.mlp.linear_fc2.bias', 'visual.blocks.2.mlp.linear_fc2.weight', 'visual.blocks.2.norm1.bias', 'visual.blocks.2.norm1.weight', 'visual.blocks.2.norm2.bias', 'visual.blocks.2.norm2.weight', 'visual.blocks.20.attn.proj.bias', 'visual.blocks.20.attn.proj.weight', 'visual.blocks.20.attn.qkv.bias', 'visual.blocks.20.attn.qkv.weight', 'visual.blocks.20.mlp.linear_fc1.bias', 'visual.blocks.20.mlp.linear_fc1.weight', 'visual.blocks.20.mlp.linear_fc2.bias', 'visual.blocks.20.mlp.linear_fc2.weight', 'visual.blocks.20.norm1.bias', 'visual.blocks.20.norm1.weight', 'visual.blocks.20.norm2.bias', 'visual.blocks.20.norm2.weight', 'visual.blocks.21.attn.proj.bias', 'visual.blocks.21.attn.proj.weight', 'visual.blocks.21.attn.qkv.bias', 'visual.blocks.21.attn.qkv.weight', 'visual.blocks.21.mlp.linear_fc1.bias', 'visual.blocks.21.mlp.linear_fc1.weight', 'visual.blocks.21.mlp.linear_fc2.bias', 'visual.blocks.21.mlp.linear_fc2.weight', 'visual.blocks.21.norm1.bias', 'visual.blocks.21.norm1.weight', 'visual.blocks.21.norm2.bias', 'visual.blocks.21.norm2.weight', 'visual.blocks.22.attn.proj.bias', 'visual.blocks.22.attn.proj.weight', 'visual.blocks.22.attn.qkv.bias', 'visual.blocks.22.attn.qkv.weight', 'visual.blocks.22.mlp.linear_fc1.bias', 'visual.blocks.22.mlp.linear_fc1.weight', 'visual.blocks.22.mlp.linear_fc2.bias', 'visual.blocks.22.mlp.linear_fc2.weight', 'visual.blocks.22.norm1.bias', 'visual.blocks.22.norm1.weight', 'visual.blocks.22.norm2.bias', 'visual.blocks.22.norm2.weight', 'visual.blocks.23.attn.proj.bias', 'visual.blocks.23.attn.proj.weight', 'visual.blocks.23.attn.qkv.bias', 'visual.blocks.23.attn.qkv.weight', 'visual.blocks.23.mlp.linear_fc1.bias', 'visual.blocks.23.mlp.linear_fc1.weight', 'visual.blocks.23.mlp.linear_fc2.bias', 'visual.blocks.23.mlp.linear_fc2.weight', 'visual.blocks.23.norm1.bias', 'visual.blocks.23.norm1.weight', 'visual.blocks.23.norm2.bias', 'visual.blocks.23.norm2.weight', 'visual.blocks.3.attn.proj.bias', 'visual.blocks.3.attn.proj.weight', 'visual.blocks.3.attn.qkv.bias', 'visual.blocks.3.attn.qkv.weight', 'visual.blocks.3.mlp.linear_fc1.bias', 'visual.blocks.3.mlp.linear_fc1.weight', 'visual.blocks.3.mlp.linear_fc2.bias', 'visual.blocks.3.mlp.linear_fc2.weight', 'visual.blocks.3.norm1.bias', 'visual.blocks.3.norm1.weight', 'visual.blocks.3.norm2.bias', 'visual.blocks.3.norm2.weight', 'visual.blocks.4.attn.proj.bias', 'visual.blocks.4.attn.proj.weight', 'visual.blocks.4.attn.qkv.bias', 'visual.blocks.4.attn.qkv.weight', 'visual.blocks.4.mlp.linear_fc1.bias', 'visual.blocks.4.mlp.linear_fc1.weight', 'visual.blocks.4.mlp.linear_fc2.bias', 'visual.blocks.4.mlp.linear_fc2.weight', 'visual.blocks.4.norm1.bias', 'visual.blocks.4.norm1.weight', 'visual.blocks.4.norm2.bias', 'visual.blocks.4.norm2.weight', 'visual.blocks.5.attn.proj.bias', 'visual.blocks.5.attn.proj.weight', 'visual.blocks.5.attn.qkv.bias', 'visual.blocks.5.attn.qkv.weight', 'visual.blocks.5.mlp.linear_fc1.bias', 'visual.blocks.5.mlp.linear_fc1.weight', 'visual.blocks.5.mlp.linear_fc2.bias', 'visual.blocks.5.mlp.linear_fc2.weight', 'visual.blocks.5.norm1.bias', 'visual.blocks.5.norm1.weight', 'visual.blocks.5.norm2.bias', 'visual.blocks.5.norm2.weight', 'visual.blocks.6.attn.proj.bias', 'visual.blocks.6.attn.proj.weight', 'visual.blocks.6.attn.qkv.bias', 'visual.blocks.6.attn.qkv.weight', 'visual.blocks.6.mlp.linear_fc1.bias', 'visual.blocks.6.mlp.linear_fc1.weight', 'visual.blocks.6.mlp.linear_fc2.bias', 'visual.blocks.6.mlp.linear_fc2.weight', 'visual.blocks.6.norm1.bias', 'visual.blocks.6.norm1.weight', 'visual.blocks.6.norm2.bias', 'visual.blocks.6.norm2.weight', 'visual.blocks.7.attn.proj.bias', 'visual.blocks.7.attn.proj.weight', 'visual.blocks.7.attn.qkv.bias', 'visual.blocks.7.attn.qkv.weight', 'visual.blocks.7.mlp.linear_fc1.bias', 'visual.blocks.7.mlp.linear_fc1.weight', 'visual.blocks.7.mlp.linear_fc2.bias', 'visual.blocks.7.mlp.linear_fc2.weight', 'visual.blocks.7.norm1.bias', 'visual.blocks.7.norm1.weight', 'visual.blocks.7.norm2.bias', 'visual.blocks.7.norm2.weight', 'visual.blocks.8.attn.proj.bias', 'visual.blocks.8.attn.proj.weight', 'visual.blocks.8.attn.qkv.bias', 'visual.blocks.8.attn.qkv.weight', 'visual.blocks.8.mlp.linear_fc1.bias', 'visual.blocks.8.mlp.linear_fc1.weight', 'visual.blocks.8.mlp.linear_fc2.bias', 'visual.blocks.8.mlp.linear_fc2.weight', 'visual.blocks.8.norm1.bias', 'visual.blocks.8.norm1.weight', 'visual.blocks.8.norm2.bias', 'visual.blocks.8.norm2.weight', 'visual.blocks.9.attn.proj.bias', 'visual.blocks.9.attn.proj.weight', 'visual.blocks.9.attn.qkv.bias', 'visual.blocks.9.attn.qkv.weight', 'visual.blocks.9.mlp.linear_fc1.bias', 'visual.blocks.9.mlp.linear_fc1.weight', 'visual.blocks.9.mlp.linear_fc2.bias', 'visual.blocks.9.mlp.linear_fc2.weight', 'visual.blocks.9.norm1.bias', 'visual.blocks.9.norm1.weight', 'visual.blocks.9.norm2.bias', 'visual.blocks.9.norm2.weight', 'visual.deepstack_merger_list.0.linear_fc1.bias', 'visual.deepstack_merger_list.0.linear_fc1.weight', 'visual.deepstack_merger_list.0.linear_fc2.bias', 'visual.deepstack_merger_list.0.linear_fc2.weight', 'visual.deepstack_merger_list.0.norm.bias', 'visual.deepstack_merger_list.0.norm.weight', 'visual.deepstack_merger_list.1.linear_fc1.bias', 'visual.deepstack_merger_list.1.linear_fc1.weight', 'visual.deepstack_merger_list.1.linear_fc2.bias', 'visual.deepstack_merger_list.1.linear_fc2.weight', 'visual.deepstack_merger_list.1.norm.bias', 'visual.deepstack_merger_list.1.norm.weight', 'visual.deepstack_merger_list.2.linear_fc1.bias', 'visual.deepstack_merger_list.2.linear_fc1.weight', 'visual.deepstack_merger_list.2.linear_fc2.bias', 'visual.deepstack_merger_list.2.linear_fc2.weight', 'visual.deepstack_merger_list.2.norm.bias', 'visual.deepstack_merger_list.2.norm.weight', 'visual.merger.linear_fc1.bias', 'visual.merger.linear_fc1.weight', 'visual.merger.linear_fc2.bias', 'visual.merger.linear_fc2.weight', 'visual.merger.norm.bias', 'visual.merger.norm.weight', 'visual.patch_embed.proj.bias', 'visual.patch_embed.proj.weight', 'visual.pos_embed.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+2026-06-05 20:11:18.152 | INFO     | robometer.utils.setup_utils:_load_base_model_standard:516 - Using Qwen3 models
+2026-06-05 20:11:21.552 | INFO     | robometer.utils.setup_utils:_setup_processor_and_tokenizer:558 - Qwen Processor: Qwen3VLProcessor:
+- image_processor: Qwen2VLImageProcessorFast {
+  "crop_size": null,
+  "data_format": "channels_first",
+  "default_to_square": true,
+  "device": null,
+  "disable_grouping": null,
+  "do_center_crop": null,
+  "do_convert_rgb": true,
+  "do_normalize": true,
+  "do_pad": null,
+  "do_rescale": true,
+  "do_resize": true,
+  "image_mean": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "image_processor_type": "Qwen2VLImageProcessorFast",
+  "image_std": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "input_data_format": null,
+  "max_pixels": null,
+  "merge_size": 2,
+  "min_pixels": null,
+  "pad_size": null,
+  "patch_size": 16,
+  "processor_class": "Qwen3VLProcessor",
+  "resample": 3,
+  "rescale_factor": 0.00392156862745098,
+  "return_tensors": null,
+  "size": {
+    "longest_edge": 16777216,
+    "shortest_edge": 65536
+  },
+  "temporal_patch_size": 2
+}
+
+- tokenizer: Qwen2TokenizerFast(name_or_path='Qwen/Qwen3-VL-4B-Instruct', vocab_size=151643, model_max_length=262144, is_fast=True, padding_side='right', truncation_side='right', special_tokens={'eos_token': '<|im_end|>', 'pad_token': '<|endoftext|>', 'additional_special_tokens': ['<|im_start|>', '<|im_end|>', '<|object_ref_start|>', '<|object_ref_end|>', '<|box_start|>', '<|box_end|>', '<|quad_start|>', '<|quad_end|>', '<|vision_start|>', '<|vision_end|>', '<|vision_pad|>', '<|image_pad|>', '<|video_pad|>']}, clean_up_tokenization_spaces=False, added_tokens_decoder={
+	151643: AddedToken("<|endoftext|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151644: AddedToken("<|im_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151645: AddedToken("<|im_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151646: AddedToken("<|object_ref_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151647: AddedToken("<|object_ref_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151648: AddedToken("<|box_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151649: AddedToken("<|box_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151650: AddedToken("<|quad_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151651: AddedToken("<|quad_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151652: AddedToken("<|vision_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151653: AddedToken("<|vision_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151654: AddedToken("<|vision_pad|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151655: AddedToken("<|image_pad|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151656: AddedToken("<|video_pad|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+	151657: AddedToken("<tool_call>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151658: AddedToken("</tool_call>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151659: AddedToken("<|fim_prefix|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151660: AddedToken("<|fim_middle|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151661: AddedToken("<|fim_suffix|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151662: AddedToken("<|fim_pad|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151663: AddedToken("<|repo_name|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151664: AddedToken("<|file_sep|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151665: AddedToken("<tool_response>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151666: AddedToken("</tool_response>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151667: AddedToken("<think>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+	151668: AddedToken("</think>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+}
+)
+- video_processor: Qwen3VLVideoProcessor {
+  "crop_size": null,
+  "data_format": "channels_first",
+  "default_to_square": true,
+  "device": null,
+  "do_center_crop": null,
+  "do_convert_rgb": true,
+  "do_normalize": true,
+  "do_rescale": true,
+  "do_resize": true,
+  "do_sample_frames": false,
+  "fps": 2,
+  "image_mean": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "image_std": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "input_data_format": null,
+  "max_frames": 768,
+  "merge_size": 2,
+  "min_frames": 4,
+  "num_frames": null,
+  "pad_size": null,
+  "patch_size": 16,
+  "processor_class": "Qwen3VLProcessor",
+  "resample": 3,
+  "rescale_factor": 0.00392156862745098,
+  "return_metadata": false,
+  "size": {
+    "longest_edge": 25165824,
+    "shortest_edge": 4096
+  },
+  "temporal_patch_size": 2,
+  "video_metadata": null,
+  "video_processor_type": "Qwen3VLVideoProcessor"
+}
+
+
+{
+  "processor_class": "Qwen3VLProcessor"
+}
+
+2026-06-05 20:11:21.566 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:955 - Checkpoint at /scratch-shared/pkarageorgis1/Robometer_FT_consolidated/run1_icl_ours_step3000 declares vocab_size=151936; pre-resize will stop at that size.
+2026-06-05 20:11:21.653 | INFO     | robometer.utils.setup_utils:_add_special_tokens_and_resize:628 - Before adding special tokens: 151669
+2026-06-05 20:11:22.325 | INFO     | robometer.utils.setup_utils:_add_special_tokens_and_resize:641 - Added 6 special tokens
+2026-06-05 20:11:36.292 | INFO     | robometer.utils.setup_utils:_add_special_tokens_and_resize:644 - Resized token embeddings to 151675
+2026-06-05 20:11:36.292 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:960 - Initializing RBM model...
+RBM has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+2026-06-05 20:11:36.293 | INFO     | robometer.models.heads:__init__:85 - PredictionHeadsMixin. __init__: use_discrete_progress: True
+2026-06-05 20:11:36.356 | INFO     | robometer.utils.save:parse_hf_model_id_and_revision:192 - Loading local/explicit model from /scratch-shared/pkarageorgis1/Robometer_FT_consolidated/run1_icl_ours_step3000
+You are using a model of type qwen3_vl to instantiate a model of type qwen2_5_vl. This is not supported for all configurations of models and can yield errors.
+Unrecognized keys in `rope_scaling` for 'rope_type'='default': {'mrope_interleaved'}
+RBM has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+2026-06-05 20:11:37.438 | INFO     | robometer.models.heads:__init__:85 - PredictionHeadsMixin. __init__: use_discrete_progress: True
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:08<00:26,  8.87s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:20<00:20, 10.31s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:32<00:11, 11.16s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:36<00:00,  8.40s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:36<00:00,  9.13s/it]
+RBM has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+RBM has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+2026-06-05 20:12:14.119 | INFO     | robometer.utils.setup_utils:_add_special_tokens_and_resize:628 - Before adding special tokens: 151675
+2026-06-05 20:12:14.609 | INFO     | robometer.utils.setup_utils:_add_special_tokens_and_resize:641 - Added 0 special tokens
+2026-06-05 20:12:14.673 | INFO     | robometer.utils.setup_utils:_add_special_tokens_and_resize:644 - Resized token embeddings to 151675
+2026-06-05 20:12:15.204 | INFO     | robometer.utils.setup_utils:_verify_checkpoint_loading:762 - Before visual: torch.Size([4096, 1024]), 8.5625 | After visual: torch.Size([4096, 1024]), -65.5
+2026-06-05 20:12:15.205 | INFO     | robometer.utils.setup_utils:_verify_checkpoint_loading:765 - Before progress head: torch.Size([1280, 2560]), -9.0 | After progress head: torch.Size([1280, 2560]), 34.0
+2026-06-05 20:12:15.225 | INFO     | robometer.utils.setup_utils:_verify_checkpoint_loading:768 - Before LM embed tokens: torch.Size([151675, 2560]), 270.0 | After LM embed tokens: torch.Size([151675, 2560]), -8096.0
+2026-06-05 20:12:15.227 | INFO     | robometer.utils.setup_utils:_verify_checkpoint_loading:771 - Before LM layer: torch.Size([9728, 2560]), -36.75 | After LM layer: torch.Size([9728, 2560]), -72.5
+2026-06-05 20:12:15.949 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1096 - Model architecture initialized
+2026-06-05 20:12:15.952 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1097 - Model architecture: RBM(
+  (progress_head): Sequential(
+    (0): Linear(in_features=2560, out_features=1280, bias=True)
+    (1): LayerNorm((1280,), eps=1e-05, elementwise_affine=True)
+    (2): GELU(approximate='none')
+    (3): Dropout(p=0.1, inplace=False)
+    (4): Linear(in_features=1280, out_features=10, bias=True)
+  )
+  (preference_head): Sequential(
+    (0): Linear(in_features=2560, out_features=1280, bias=True)
+    (1): LayerNorm((1280,), eps=1e-05, elementwise_affine=True)
+    (2): GELU(approximate='none')
+    (3): Dropout(p=0.1, inplace=False)
+    (4): Linear(in_features=1280, out_features=1, bias=True)
+  )
+  (success_head): Sequential(
+    (0): Linear(in_features=2560, out_features=1280, bias=True)
+    (1): LayerNorm((1280,), eps=1e-05, elementwise_affine=True)
+    (2): GELU(approximate='none')
+    (3): Dropout(p=0.1, inplace=False)
+    (4): Linear(in_features=1280, out_features=1, bias=True)
+  )
+  (model): Qwen3VLModel(
+    (visual): Qwen3VLVisionModel(
+      (patch_embed): Qwen3VLVisionPatchEmbed(
+        (proj): Conv3d(3, 1024, kernel_size=(2, 16, 16), stride=(2, 16, 16))
+      )
+      (pos_embed): Embedding(2304, 1024)
+      (rotary_pos_emb): Qwen3VLVisionRotaryEmbedding()
+      (blocks): ModuleList(
+        (0-23): 24 x Qwen3VLVisionBlock(
+          (norm1): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
+          (norm2): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
+          (attn): Qwen3VLVisionAttention(
+            (qkv): Linear(in_features=1024, out_features=3072, bias=True)
+            (proj): Linear(in_features=1024, out_features=1024, bias=True)
+          )
+          (mlp): Qwen3VLVisionMLP(
+            (linear_fc1): Linear(in_features=1024, out_features=4096, bias=True)
+            (linear_fc2): Linear(in_features=4096, out_features=1024, bias=True)
+            (act_fn): GELUTanh()
+          )
+        )
+      )
+      (merger): Qwen3VLVisionPatchMerger(
+        (norm): LayerNorm((1024,), eps=1e-06, elementwise_affine=True)
+        (linear_fc1): Linear(in_features=4096, out_features=4096, bias=True)
+        (act_fn): GELU(approximate='none')
+        (linear_fc2): Linear(in_features=4096, out_features=2560, bias=True)
+      )
+      (deepstack_merger_list): ModuleList(
+        (0-2): 3 x Qwen3VLVisionPatchMerger(
+          (norm): LayerNorm((4096,), eps=1e-06, elementwise_affine=True)
+          (linear_fc1): Linear(in_features=4096, out_features=4096, bias=True)
+          (act_fn): GELU(approximate='none')
+          (linear_fc2): Linear(in_features=4096, out_features=2560, bias=True)
+        )
+      )
+    )
+    (language_model): Qwen3VLTextModel(
+      (embed_tokens): Embedding(151675, 2560)
+      (layers): ModuleList(
+        (0-35): 36 x Qwen3VLTextDecoderLayer(
+          (self_attn): Qwen3VLTextAttention(
+            (q_proj): Linear(in_features=2560, out_features=4096, bias=False)
+            (k_proj): Linear(in_features=2560, out_features=1024, bias=False)
+            (v_proj): Linear(in_features=2560, out_features=1024, bias=False)
+            (o_proj): Linear(in_features=4096, out_features=2560, bias=False)
+            (q_norm): Qwen3VLTextRMSNorm((128,), eps=1e-06)
+            (k_norm): Qwen3VLTextRMSNorm((128,), eps=1e-06)
+          )
+          (mlp): Qwen3VLTextMLP(
+            (gate_proj): Linear(in_features=2560, out_features=9728, bias=False)
+            (up_proj): Linear(in_features=2560, out_features=9728, bias=False)
+            (down_proj): Linear(in_features=9728, out_features=2560, bias=False)
+            (act_fn): SiLUActivation()
+          )
+          (input_layernorm): Qwen3VLTextRMSNorm((2560,), eps=1e-06)
+          (post_attention_layernorm): Qwen3VLTextRMSNorm((2560,), eps=1e-06)
+        )
+      )
+      (norm): Qwen3VLTextRMSNorm((2560,), eps=1e-06)
+      (rotary_emb): Qwen3VLTextRotaryEmbedding()
+    )
+  )
+  (frame_pool_attn): Linear(in_features=2560, out_features=1, bias=False)
+)
+2026-06-05 20:12:15.956 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1152 - Training configuration:
+2026-06-05 20:12:15.956 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1153 -   - Vision encoder: False
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1154 -   - Language model: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1155 -   - Progress head: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1156 -   - Success head: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1157 -   - Preference head: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - progress_head.0.weight                                       | torch.Size([1280, 2560]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - progress_head.0.bias                                         | torch.Size([1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - progress_head.1.weight                                       | torch.Size([1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - progress_head.1.bias                                         | torch.Size([1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - progress_head.4.weight                                       | torch.Size([10, 1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - progress_head.4.bias                                         | torch.Size([10]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - preference_head.0.weight                                     | torch.Size([1280, 2560]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - preference_head.0.bias                                       | torch.Size([1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - preference_head.1.weight                                     | torch.Size([1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - preference_head.1.bias                                       | torch.Size([1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - preference_head.4.weight                                     | torch.Size([1, 1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - preference_head.4.bias                                       | torch.Size([1]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - success_head.0.weight                                        | torch.Size([1280, 2560]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - success_head.0.bias                                          | torch.Size([1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - success_head.1.weight                                        | torch.Size([1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - success_head.1.bias                                          | torch.Size([1280]) | RG: True
+2026-06-05 20:12:15.957 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - success_head.4.weight                                        | torch.Size([1, 1280]) | RG: True
+2026-06-05 20:12:15.958 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - success_head.4.bias                                          | torch.Size([1]) | RG: True
+2026-06-05 20:12:15.958 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.embed_tokens.weight                     | torch.Size([151675, 2560]) | RG: True
+2026-06-05 20:12:15.958 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.0.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.959 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.1.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.2.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.960 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.3.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.4.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.961 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.5.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.6.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.962 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.7.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.8.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.self_attn.q_proj.weight        | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.963 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.self_attn.k_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.self_attn.v_proj.weight        | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.self_attn.o_proj.weight        | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.self_attn.q_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.self_attn.k_norm.weight        | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.mlp.gate_proj.weight           | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.mlp.up_proj.weight             | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.mlp.down_proj.weight           | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.input_layernorm.weight         | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.9.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.964 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.10.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.11.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.965 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.12.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.13.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.966 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.14.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.967 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.15.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.16.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.968 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.17.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.18.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.969 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.19.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.20.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.970 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.21.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.971 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.22.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.23.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.972 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.24.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.25.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.973 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.26.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.27.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.974 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.28.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.29.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.975 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.30.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.31.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.976 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.32.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.977 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.33.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.34.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.self_attn.q_proj.weight       | torch.Size([4096, 2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.self_attn.k_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.self_attn.v_proj.weight       | torch.Size([1024, 2560]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.self_attn.o_proj.weight       | torch.Size([2560, 4096]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.self_attn.q_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.self_attn.k_norm.weight       | torch.Size([128]) | RG: True
+2026-06-05 20:12:15.978 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.mlp.gate_proj.weight          | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.979 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.mlp.up_proj.weight            | torch.Size([9728, 2560]) | RG: True
+2026-06-05 20:12:15.979 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.mlp.down_proj.weight          | torch.Size([2560, 9728]) | RG: True
+2026-06-05 20:12:15.979 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.input_layernorm.weight        | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.979 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.layers.35.post_attention_layernorm.weight | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.979 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - model.language_model.norm.weight                             | torch.Size([2560]) | RG: True
+2026-06-05 20:12:15.979 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1163 - frame_pool_attn.weight                                       | torch.Size([1, 2560]) | RG: True
+2026-06-05 20:12:15.983 | INFO     | robometer.utils.setup_utils:setup_model_and_processor:1167 - trainable params: 4,031,659,788 || all params: 4,447,007,500 || trainable%: 90.6601
+[32m2026-06-05 20:12:21[0m | [1mINFO    [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36m<module>[0m:[36m62[0m | [1mrobometer.eval_server logger initialized at level DEBUG[0m
+[32m2026-06-05 20:12:21[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+/gpfs/scratch1/shared/pkarageorgis1/envs/demo2reward_v3/lib/python3.10/site-packages/transformers/tokenization_utils_base.py:2863: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+[32m2026-06-05 20:12:21[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:21[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:26[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:26[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:26[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:26[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:26[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:26[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:26[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:27[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:28[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:29[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:29[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:29[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m
+[32m2026-06-05 20:12:29[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m198[0m | [34m[1m[job 0] Processing 1 samples on device cuda:0[0m
+[32m2026-06-05 20:12:29[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mprocess_batch_helper[0m:[36m296[0m | [34m[1m[job 0] Batch counts — preference: 0 progress: 1[0m
+[32m2026-06-05 20:12:29[0m | [34m[1mDEBUG   [0m | [Rank 0] [36mrobometer.evals.eval_server[0m:[36mcompute_batch_outputs[0m:[36m545[0m | [34m[1mcompute_batch_outputs sample_type=progress[0m

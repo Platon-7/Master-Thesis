@@ -1,0 +1,50 @@
+#!/bin/bash
+#SBATCH --job-name=hpr
+#SBATCH --output=logs/hpr_%j.out
+#SBATCH --error=logs/hpr_%j.err
+#SBATCH --time=01:20:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=96G
+set -uo pipefail
+# REPO_DIR selects which robometer copy to import: Robometer/ (Qwen3-VL, the 4B
+# baseline/FT) or Qwen35-FT/ (the Qwen3.5-aware setup_utils with the
+# Qwen3_5ForConditionalGeneration dispatch). MUST be Qwen35-FT for Qwen3.5 ckpts,
+# else the qwen3_5 weights load through the wrong class (q_proj size mismatch).
+cd "$SLURM_SUBMIT_DIR/${REPO_DIR:-Robometer}"
+ENV_NAME="${EVAL_ENV:-robometer_gpu_fa2}"
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+export PYTHONPATH="$PWD:${PYTHONPATH:-}"
+export MUJOCO_GL=egl
+export ROBOMETER_PROCESSED_DATASETS_PATH="${PROC_PATH:-/projects/prjs1958/robometer_frame_eval_dataset}"
+[ -n "${FORCE_FP32:-}" ] && export ROBOMETER_FORCE_FP32=1
+# Qwen3.5's lm_head materializes full-vocab logits per position; batch_size=32 OOMs
+# a 40GB A100 (~28GB just for logits). BATCHSZ is overridable; small for Qwen3.5.
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+echo "model=$MODEL_PATH max_frames=$MAXF env=$ENV_NAME batch=${BATCHSZ:-32} out=$OUTDIR"
+nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1
+python robometer/evals/run_baseline_eval.py \
+    reward_model=rbm \
+    model_path="$MODEL_PATH" \
+    custom_eval.eval_types=[${EVAL_TYPES:-policy_ranking}] \
+    custom_eval.policy_ranking=[${DATASET:-rbm-1m-ood}] \
+    custom_eval.confusion_matrix=[${DATASET:-rbm-1m-ood}] \
+    custom_eval.use_frame_steps=${USE_FRAME_STEPS:-false} \
+    custom_eval.num_examples_per_quality_pr=${NUM_EX_PR:-85} \
+    custom_eval.policy_ranking_max_tasks=${MAX_TASKS:-100} \
+    custom_eval.policy_ranking_dual_icl=${DUAL_ICL:-false} \
+    custom_eval.custom_eval_random_seed=${SEED:-42} \
+    use_icl=${USE_ICL:-false} \
+    icl_prob=${ICL_PROB:-1.0} \
+    pairs_index_path=${PAIRS_INDEX:-null} \
+    max_frames=$MAXF \
+    model_config.batch_size=${BATCHSZ:-32} \
+    output_dir="$OUTDIR"

@@ -1,0 +1,48 @@
+#!/bin/bash
+#SBATCH --job-name=smoke_ibrl_icl
+#SBATCH --output=logs/smoke_ibrl_icl_%j.out
+#SBATCH --error=logs/smoke_ibrl_icl_%j.err
+#SBATCH --time=00:15:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+QWEN35_FT_DIR="${QWEN35_FT_DIR:-$HERE/../Qwen35-FT}"
+ENV_NAME="${IBRL_CONDA_ENV:-vlm_ibrl_qwen35}"
+MUJOCO_PATH="${MUJOCO_PATH:-$HOME/.mujoco/mujoco210}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+export IBRL_CONDA_ENV="$ENV_NAME"
+export MUJOCO_PATH="$MUJOCO_PATH"
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+
+source "$(conda info --base)/etc/profile.d/conda.sh"
+source set_env.sh
+export PYTHONPATH="$QWEN35_FT_DIR:$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+unset WANDB_PROJECT WANDB_ENTITY
+export WANDB_MODE=disabled
+
+# ICL config
+export ROBOMETER_ICL_DEMO_PATH=$HERE/release/data/metaworld/CoffeePush_frame_stack_1_224x224_end_on_success/demonstrations/mw-coffee-push/frames
+export ROBOMETER_ICL_DEMO_IDX=0
+export ROBOMETER_ICL_FRAMES=16
+
+echo "==================== smoke_ibrl_icl ===================="
+echo "ICL path : $ROBOMETER_ICL_DEMO_PATH"
+nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1
+echo "========================================================"
+
+python tools/smoke_ibrl_icl.py
+RC=$?
+echo "return code: $RC"
+exit $RC

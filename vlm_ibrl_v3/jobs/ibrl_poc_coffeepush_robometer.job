@@ -1,0 +1,135 @@
+#!/bin/bash
+#SBATCH --job-name=ibrl_poc_rbm4b
+#SBATCH --output=logs/ibrl_poc_%j.out
+#SBATCH --error=logs/ibrl_poc_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --account=gusei17535
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=80G
+
+# IBRL PoC: train an IBRL policy on MetaWorld CoffeePush using Robometer-4B
+# as the (sparse, end-of-episode) reward signal. One seed, 20k env steps —
+# matches paper Fig 5c grid. Validates the full pipeline end-to-end:
+#   IBRL policy <-> MuJoCo env <-> Robometer-4B scorer
+#
+# Prereqs:
+#   - demo2reward env built and verified (jobs/build_demo2reward_env.job,
+#     jobs/verify_demo2reward_env.job)
+#   - release/data + release/model unpacked under vlm_ibrl/
+#   - Robometer-4B HF-cached on the allocated node (smoke job did this)
+
+set -uo pipefail
+
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+MUJOCO_PATH="${MUJOCO_PATH:-$HOME/.mujoco/mujoco210}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+export PYTHONNOUSERSITE=1
+export IBRL_CONDA_ENV="$ENV_NAME"
+export MUJOCO_PATH="$MUJOCO_PATH"
+
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+
+# Robometer/ must be on PYTHONPATH so `from robometer.evals.eval_server
+# import process_batch_helper` resolves. set_env.sh already put vlm_ibrl/
+# (HERE) first; appending Robometer/.
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+
+# Headless MuJoCo via EGL (set_env.sh leaves MUJOCO_GL unset; metaworld
+# wrappers default to glfw, but the cluster nodes only have EGL/OSMesa).
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+
+# Don't sync model checkpoints to W&B at end of run — they're already on
+# scratch in $SAVE_DIR, and the upload (~160MB) was hanging wandb.finish()
+# for 2h+ on job 22757287, eating all the walltime after the actual
+# training completed in ~13 min. Telemetry (scalars/curves) still goes up.
+export WANDB_DISABLE_ARTIFACTS=true
+
+# Pick a roomy save dir on scratch — checkpoints + replay can grow.
+SAVE_DIR="/scratch-shared/$USER/vlm_ibrl_poc/${BC_POLICY:-coffeepush}_${VLM_NAME:-robometer_4b}_${SLURM_JOB_ID:-local}"
+mkdir -p "$SAVE_DIR"
+
+echo "==================== ibrl poc summary ===================="
+echo "ENV_NAME       : $ENV_NAME"
+echo "HERE           : $HERE"
+echo "ROBOMETER_DIR  : $ROBOMETER_DIR"
+echo "SAVE_DIR       : $SAVE_DIR"
+echo "MUJOCO_GL      : $MUJOCO_GL"
+echo "python         : $(which python)"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "==========================================================="
+
+# Wrap the python call in `timeout` to side-step the Python-shutdown hang
+# observed on jobs 22757287 and 22764141: training completes in ~14 min,
+# wandb.finish() returns within seconds, but the interpreter then sits idle
+# for hours (CUDA/MuJoCo/pybind destructor not terminating). 20 min covers
+# 14 min training + 1 min sync + 5 min buffer; everything past that is
+# guaranteed-dead time. SIGKILL after grace period.
+TRAIN_TIMEOUT="${TRAIN_TIMEOUT:-20m}"
+VLM_NAME="${VLM_NAME:-robometer_4b}"   # robometer_4b | robometer_ft | qwen35_ft
+ROBOMETER_BETA="${ROBOMETER_BETA:-0.0}"
+ROBOMETER_THRESHOLD="${ROBOMETER_THRESHOLD:-0.0}"
+ROBOMETER_REWARD_SCALE="${ROBOMETER_REWARD_SCALE:-1.0}"
+SEED="${SEED:-1}"
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-20000}"
+BC_POLICY="${BC_POLICY:-coffeepush}"
+
+echo "VLM_NAME               : $VLM_NAME"
+echo "BC_POLICY              : $BC_POLICY"
+echo "ROBOMETER_BETA         : $ROBOMETER_BETA"
+echo "ROBOMETER_THRESHOLD    : $ROBOMETER_THRESHOLD"
+echo "ROBOMETER_REWARD_SCALE : $ROBOMETER_REWARD_SCALE"
+echo "SEED                   : $SEED"
+echo "NUM_TRAIN_STEP         : $NUM_TRAIN_STEP"
+echo "ROBOMETER_FT_PATH      : ${ROBOMETER_FT_PATH:-<unset>}"
+echo "QWEN35_FT_PATH         : ${QWEN35_FT_PATH:-<unset>}"
+
+timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
+    python mw_main/train_rl_vlm_mw.py \
+        --config_path release/cfgs/metaworld/ibrl_long.yaml \
+        --bc_policy "$BC_POLICY" \
+        --vlm "$VLM_NAME" \
+        --train_end_on_success 0 \
+        --reward_at_truncation 1 \
+        --num_train_step "$NUM_TRAIN_STEP" \
+        --seed "$SEED" \
+        --use_wb 1 \
+        --robometer_beta "$ROBOMETER_BETA" \
+        --robometer_threshold "$ROBOMETER_THRESHOLD" \
+        --robometer_reward_scale "$ROBOMETER_REWARD_SCALE" \
+        --save_dir "$SAVE_DIR"
+RC=$?
+
+# timeout returns 124 (graceful) or 137 (SIGKILL after kill-after) when the
+# wall budget is hit. If training reached its target step before the kill,
+# the per-step log line ``20000:`` is present and the run is functionally
+# successful — treat as PASS.
+if [[ $RC -eq 124 || $RC -eq 137 ]]; then
+    if grep -q "^20000: " "$SAVE_DIR/train.log" 2>/dev/null; then
+        echo "[wrapper] timeout fired but training reached step 20000 — treating as PASS"
+        RC=0
+    else
+        echo "[wrapper] timeout fired BEFORE training reached step 20000 — real timeout"
+    fi
+fi
+
+echo
+echo "==================== ibrl poc exit ===================="
+echo "return code: $RC"
+if [[ $RC -eq 0 ]]; then
+    echo "IBRL PoC PASSED"
+else
+    echo "IBRL PoC FAILED (rc=$RC)"
+fi
+exit $RC

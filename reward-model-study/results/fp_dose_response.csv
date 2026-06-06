@@ -1,0 +1,6 @@
+injected_FP_pct,peak_true_success,note
+0,0.66,"random non-exploitable FP, GT reward, seed1, ~50-55k steps"
+2,0.54,"random non-exploitable FP, GT reward, seed1, ~50-55k steps"
+5,0.48,"random non-exploitable FP, GT reward, seed1, ~50-55k steps"
+10,0.28,"random non-exploitable FP, GT reward, seed1, ~50-55k steps"
+20,0.34,"random non-exploitable FP, GT reward, seed1, ~50-55k steps"

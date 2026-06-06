@@ -243,6 +243,26 @@ class BaselineEvalConfig:
         metadata={"help": "Maximum frames for models (used by GVL and potentially others)"},
     )
 
+    # ICL (in-context demo) settings — threaded into the eval DataConfig in main().
+    # Mirror DataConfig.use_icl/icl_prob/pairs_index_path so the standalone eval can
+    # run ICL-on like the training loop does. Defaults off = no behavior change.
+    use_icl: bool = field(
+        default=False,
+        metadata={"help": "If True, prepend a 16-frame demo to each query (needs pairs_index_path)."},
+    )
+    icl_prob: float = field(
+        default=1.0,
+        metadata={"help": "Probability of populating the demo when use_icl=True (eval: 1.0 = always-on)."},
+    )
+    pairs_index_path: Optional[str] = field(
+        default=None,
+        metadata={"help": "JSONL mapping episode_id -> partner demo. Required when use_icl=True."},
+    )
+    icl_min_coverage: float = field(
+        default=0.0,
+        metadata={"help": "Partner-coverage drift threshold; 0.0 disables (eval pools may be small)."},
+    )
+
     # Custom evaluation configuration
     custom_eval: CustomEvaluationConfig = field(
         default_factory=CustomEvaluationConfig,
