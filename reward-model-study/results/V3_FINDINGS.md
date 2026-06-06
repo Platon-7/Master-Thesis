@@ -120,3 +120,62 @@ With reward_at_truncation=1 the 4B reward is queried ~once per episode. A DEAD
 policy = ~167s / 5k-block, flat -> 60k in ~33 min. An ALIVE policy slows to
 ~580s/block as success rises -> 60k in ~90 min. So a VLM run finishing in ~30 min
 likely stayed dead; ~90 min means it learned. GT (no VLM) is ~35 min regardless.
+
+---
+
+## CRITICAL CAVEAT on the on-policy result — success signal is GROUND TRUTH, not the model (2026-06-06)
+
+The seed-1 on-policy runs (FT 0.83, baseline 0.77, GT-floor 0.43) used the **simulator's
+ground-truth success** for detection / termination / reward-gating — NOT the reward model.
+The model only supplied the reward *magnitude*. So these runs do NOT yet validate the
+paper's autonomous-RL protocol (Robometer App. E-2: terminate when the model's
+success_prob > 0.6). Mechanism, in `vlm_ibrl_v3/env/vlm_envs.py`:
+
+- L167 `reward_at_truncation = kwargs.pop(...)` — popped by VLMCritic, NOT forwarded to the
+  base env -> base `PixelMetaWorld` reward = `SparseRewardWrapper` = `float(info["success"])`
+  = GT success flag.
+- L372 `truncated = info["truncated"] or (reward == 1)` — `reward==1` is GT success; this is
+  what gates when the model reward is computed (reward_at_truncation).
+- L409-414 `vlm_terminal` is True only if `vlm_reward == 1`. With `robometer_threshold=0.0`
+  the reward is the *continuous* success_prob (never exactly 1) -> that branch never fires ->
+  the base's GT-success terminal is overridden -> **episodes ran to the time limit** (matches
+  the flat `other/episode`=50/block). I.e. `end_on_success=1` did NOT actually truncate at
+  success; GT success only gated the reward value.
+- L418 returns the base `success` (GT) -> `score/train_score` and eval are GT success.
+
+Net: the model differentiated success (~0.76) from failure (~0.13) as a *value* signal, but
+*when* reward was given and *whether* an episode counted as success came from GT. There is GT
+signal in the loop. The honest claim is "FT/baseline are useful reward VALUES under GT-gated
+episodes," NOT "the model autonomously detects success and drives RL."
+
+### Also: don't read "VLM > GT oracle" as super-oracle
+The GT control reward is SPARSE BINARY (`float(info["success"])` at truncation); the VLM
+reward is GRADED CONTINUOUS (success_prob, beta=0, threshold=0). Graded != better-than-truth —
+it's a denser optimization target. FT (0.83) ~= baseline (0.77) at one seed (within ~0.1 eval
+noise); both above the sparse-GT late mean (0.43) partly due to reward density + GT's late
+single-seed instability (GT peaked 0.70). For a fair oracle ceiling, run a GT control with a
+DENSE reward (reward_at_truncation=0 + shaped/per-step reward).
+
+## NEXT EXPERIMENTS (new cluster)
+1. **Paper-faithful autonomous RL** — set `robometer_threshold>0` so the MODEL's success_prob
+   crossing the threshold detects success AND terminates (vlm_reward becomes binary -> L411
+   `vlm_reward==1` fires -> model-terminated). Also change L372's GT gate (`reward==1`) to key
+   off `vlm_reward` so GT no longer leaks, and add the ~240-step timeout. This is the run that
+   actually tests "model enables autonomous RL."
+2. **Calibrate the threshold PER MODEL — do NOT reuse 0.6.** 0.6 is the paper's value for their
+   model; FT (success~0.76/fail~0.13) and the baseline live on different scales. Calibrate for
+   a TARGET LOW FALSE-POSITIVE RATE (~2-5%), not the balanced midpoint: a false positive ->
+   the policy reward-hacks a model blind spot (collapse risk); a false negative -> episode just
+   times out (benign/slower). Measure PER-STEP / causally (does success_prob cross the
+   threshold at a non-success frame), not just per-episode — the scorer's `detailed=True`
+   returns per-frame success_probs.
+   Cheap pipeline (~tens of min, << one RL run): roll out the GT-reward policy (balanced
+   success/fail mix) in the v3 dual-render env, score each model per-step, dump
+   `(GT_label, success_prob)`, sweep thresholds -> pick per-model threshold at target FPR, read
+   off TPR. FT is already half-calibrated (0.76 vs 0.13 from the curated control); the baseline
+   needs a fresh rollout. Run this BEFORE the model-terminated RL.
+   Likely outcome of switching to model-terminated: probably somewhat lower (FN sparsity) with
+   a tail risk of reward-hacking collapse (FP) — NOT the old ~0.10 wipeout (that cause is fixed
+   by dual-render + v3). Calibration predicts which.
+3. **Multi-seed** FT vs baseline (seeds 2,3) for error bars; FT loses offline, so on-policy
+   parity/advantage is the result to nail down.
