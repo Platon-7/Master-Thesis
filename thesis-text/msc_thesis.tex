@@ -1,0 +1,79 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% For the use of University of Amsterdam
+% Master of AI thesis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[license]{mscaithesis}  % Can print or not a license
+% The license is very optional and its definition easy to edit in mscaithesis.cls
+
+\usepackage{mwe}  % Only for the example
+
+\usepackage{amssymb} % Math packages are (on purpose) not included in the class document
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\usepackage{natbib}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DOCUMENT METADATA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Thesis related entries
+\title{Master AI thesis template:\\ A tale of computers}
+% \subtitle{A tale of computers}
+
+% Date on which your thesis is submitted
+\date{2026/06/19}
+
+\author{Student \textsc{van Naam}}
+\studentnumber{314159265}
+\period{2026/01/05 -- 2026/06/19}
+\credits{36 ECTS}
+\examiner{Pr. E. Xaminer}
+\dailysupervisor{M. Entor}
+\uvasupervisor{Dr U. Vasupervisor}  % Only if different from daily supervisor, leave empty otherwise
+\addsupervisor{Ir. E. N. Gineer}  % Optional
+
+\begin{document}
+\maketitle
+
+\frontmatter
+        \chapter*{Abstract}
+                % TODO: convert the plain-text parentheticals "(Liang et al.)" and
+                % "(Gumbsch et al., 2026)" to \citep{} once the bibliography is assembled.
+                \begin{adjustwidth}{4cm}{4cm}
+                        Defining a reward is a long-standing problem in robot reinforcement learning (RL). Prior work has engineered complicated reward functions and heuristics, yet no single solution delivers both strong performance and generalization. The recent surge of vision-language models (VLMs), with impressive performance across domains, raises a key question: can state-of-the-art VLMs provide meaningful rewards and resolve the reward-definition bottleneck in robot RL? A handful of recent papers investigate this question, with Robometer (Liang et al.) demonstrating the most competitive performance, yet the field remains largely unexplored. We introduce RoboRef, which builds on Robometer and introduces several innovations. First, we identify that their dataset lacks failure trajectories conveying physical understanding, and re-curate it to fill this gap. Second, we incorporate in-context demonstrations to sharpen the model's notion of task success. Finally, following prior work (Gumbsch et al., 2026), we argue that VLM reward models are overconfident in predicting success and propose an alternative loss that penalizes false positives to enforce conservatism. We evaluate RoboRef on offline metrics and downstream RL across two simulators. We find that state-of-the-art reward models excel offline yet struggle as reward signals in downstream RL. RoboRef outperforms baselines in both regimes, making it, to our knowledge, the state-of-the-art VLM reward model for robot RL.
+                \end{adjustwidth}
+
+\tableofcontents
+
+\listoffigures
+
+\listoftables
+
+\setlength{\parskip}{5pt}
+
+\include{sections/0-list-symbols}
+
+
+\twocolumn
+\mainmatter
+        \include{sections/1-introduction}
+        \include{sections/2-related-work}
+        \include{sections/3-methodology}
+        \include{sections/4-results}
+        \include{sections/5-discussion}
+        \include{sections/6-conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{bibliographies/references}
+
+% \newpage
+\appendix
+        \include{sections/7-appendix}
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
