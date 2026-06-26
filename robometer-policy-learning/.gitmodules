@@ -1,0 +1,9 @@
+[submodule "LIBERO"]
+	path = LIBERO
+	url = https://github.com/nakamotoo/LIBERO.git
+[submodule "dsrl_openpi"]
+	path = dsrl_openpi
+	url = https://github.com/jesbu1/dsrl_openpi.git
+[submodule "robometer"]
+	path = robometer
+	url = https://github.com/robometer/robometer.git
