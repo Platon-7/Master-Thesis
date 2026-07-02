@@ -1,0 +1,101 @@
+#!/bin/bash
+#SBATCH --job-name=run1icl_stab
+#SBATCH --output=logs/run1icl_stab_%A_%a.out
+#SBATCH --error=logs/run1icl_stab_%A_%a.err
+#SBATCH --time=05:30:00
+#SBATCH --account=rob-tme-gaia
+# 1-GPU partitions ONLY — multi-GPU nodes NODE_FAIL on AWS provisioning.
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6-1gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+# run1 (icl_ours) gate-alone stabilization WITH its ICL demonstration (train/inference
+# MATCHED). Fair re-test vs the no-ICL run (job 647) where run1 dropped 2 CoffeePush seeds.
+# CoffeePush + BoxClose, 6 seeds, gate g0.8, no ensemble. Submit: --array=0-11%10.
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+CFG_FILE="${CFG_FILE:-/shared/home/PKA4388/vlm_ibrl_runs/run1_icl_stab_configs.tsv}"
+LINE=$(( SLURM_ARRAY_TASK_ID + 1 ))
+read VLM_NAME BC_POLICY ROBOMETER_SUCCESS_THRESHOLD SEED CKPT_NAME < <(sed -n "${LINE}p" "$CFG_FILE")
+if [[ -z "${VLM_NAME:-}" ]]; then echo "no config at line $LINE"; exit 1; fi
+
+# ---- environment ----
+unset PYTHONPATH CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL 2>/dev/null || true
+ENV_NAME="/shared/home/PKA4388/miniconda3/envs/demo2reward_v3"
+export IBRL_CONDA_ENV="$ENV_NAME"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+conda activate "$ENV_NAME"
+export PYTHONNOUSERSITE=1
+source set_env.sh
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+echo "[env] python=$(which python)"
+python -c "import gymnasium, metaworld; print('[env] gymnasium+metaworld import OK')" || { echo "[env] import FAILED"; exit 1; }
+
+export ROBOMETER_FT_PATH="/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/${CKPT_NAME}"
+[[ -d "$ROBOMETER_FT_PATH" ]] || { echo "missing checkpoint: $ROBOMETER_FT_PATH"; exit 1; }
+
+# ---- winning recipe + GATE ONLY (ensemble OFF) ----
+export AUTONOMOUS_SUCCESS=1
+export V3_CORNER2_ZOOM=1
+export ROBOMETER_REWARD_CAMERA=corner2_default
+export ROBOMETER_DETECT_HEAD=success
+export ROBOMETER_BETA=0.0
+export ROBOMETER_SUCCESS_CONSECUTIVE=1
+export ROBOMETER_THRESHOLD=0.0
+export ROBOMETER_REWARD_SCALE=1.0
+export ROBOMETER_SUCCESS_THRESHOLD
+export ROBOMETER_MIN_EP_FRAC=0.8     # gate ON
+export ROBOMETER_CONFIRM_K=0         # ensemble OFF
+export ROBOMETER_REWARD_SAMPLE=0
+REWARD_AT_TRUNC=1
+EPISODE_LENGTH=200
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-40000}"
+TRAIN_TIMEOUT="${TRAIN_TIMEOUT:-18000}"
+
+# ---- ICL demonstration (train/inference MATCH for the icl_ours checkpoint) ----
+ICL_BASE=/shared/home/PKA4388/Master-Thesis/vlm_ibrl/release/data/metaworld
+case "$BC_POLICY" in
+    coffeepush) D="CoffeePush_frame_stack_1_224x224_end_on_success/demonstrations/mw-coffee-push/frames" ;;
+    boxclose)   D="BoxClose_frame_stack_1_224x224_end_on_success/demonstrations/mw-box-close/frames" ;;
+    *) echo "no ICL dir for $BC_POLICY"; exit 1 ;;
+esac
+export ROBOMETER_ICL_DEMO_PATH="$ICL_BASE/$D"
+export ROBOMETER_ICL_DEMO_IDX=0
+export ROBOMETER_ICL_FRAMES=16
+[[ -d "$ROBOMETER_ICL_DEMO_PATH" ]] || { echo "ICL dir missing: $ROBOMETER_ICL_DEMO_PATH"; exit 1; }
+
+SAVE_BASE="${SAVE_BASE:-/shared/home/$USER/vlm_ibrl_runs}"
+SAVE_DIR="${SAVE_BASE}/gatestab_${CKPT_NAME}_icl_${BC_POLICY}_dsucc${ROBOMETER_SUCCESS_THRESHOLD}_g0.8_s${SEED}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
+mkdir -p "$SAVE_DIR"
+echo "CKPT=$CKPT_NAME +ICL TASK=$BC_POLICY THR=$ROBOMETER_SUCCESS_THRESHOLD SEED=$SEED gate=0.8"
+echo "ICL=$ROBOMETER_ICL_DEMO_PATH"
+echo "SAVE=$SAVE_DIR"
+echo "================================================"
+
+timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
+    python mw_main/train_rl_vlm_mw.py \
+        --config_path release/cfgs/metaworld/ibrl_long.yaml \
+        --episode_length "$EPISODE_LENGTH" \
+        --bc_policy "$BC_POLICY" \
+        --vlm "$VLM_NAME" \
+        --train_end_on_success 0 \
+        --reward_at_truncation "$REWARD_AT_TRUNC" \
+        --num_train_step "$NUM_TRAIN_STEP" \
+        --seed "$SEED" \
+        --use_wb 0 \
+        --robometer_beta "$ROBOMETER_BETA" \
+        --robometer_threshold "$ROBOMETER_THRESHOLD" \
+        --robometer_reward_scale "$ROBOMETER_REWARD_SCALE" \
+        --save_dir "$SAVE_DIR"
+RC=$?
+if [[ $RC -eq 124 || $RC -eq 137 ]]; then
+    grep -q "^${NUM_TRAIN_STEP}: " "$SAVE_DIR/train.log" 2>/dev/null && { echo "[wrapper] timeout but reached ${NUM_TRAIN_STEP} — PASS"; RC=0; } \
+        || echo "[wrapper] timeout before ${NUM_TRAIN_STEP}; last: $(grep -E '^[0-9]+: ' "$SAVE_DIR/train.log" 2>/dev/null | awk -F: '{print $1}' | sort -un | tail -1)"
+fi
+echo "return code: $RC"

@@ -526,6 +526,20 @@ class RBM(PredictionHeadsMixin, PreTrainedModel):
             "second_per_grid_ts": second_per_grid_ts,
             **kwargs,
         }
+        # ICL guard: the demo+query pixel_values assembled by the ICL-aware collator can
+        # reach here as fp32 (the processor emits fp32 and the demo branch bypasses the
+        # eval-server input cast), tripping the bf16 vision tower's LayerNorm with
+        # "expected scalar type BFloat16 but found Float". Cast image tensors to the
+        # vision tower's param dtype unconditionally; no-op when already matching.
+        try:
+            _vdtype = next(self.model.visual.parameters()).dtype
+        except Exception:
+            _vdtype = getattr(self, "model_dtype", None)
+        if _vdtype is not None:
+            for _k in ("pixel_values", "pixel_values_videos"):
+                _v = model_kwargs.get(_k)
+                if _v is not None and hasattr(_v, "is_floating_point") and _v.is_floating_point():
+                    model_kwargs[_k] = _v.to(_vdtype)
         with _timer("time/rbm_forward", timing_raw=timing_raw):
             # Qwen3 models may need output_hidden_states=True and use hidden_states instead of last_hidden_state
             is_qwen3 = "Qwen3" in self.base_model_id or (

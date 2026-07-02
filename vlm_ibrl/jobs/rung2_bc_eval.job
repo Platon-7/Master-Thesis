@@ -1,0 +1,42 @@
+#!/bin/bash
+#SBATCH --job-name=rm_bc_eval
+#SBATCH --output=logs/rm_bc_eval_%j.out
+#SBATCH --error=logs/rm_bc_eval_%j.err
+#SBATCH --time=00:40:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6-1gpu-l4,ondemand-g6e-1gpu-l40s,ondemand-g6-4gpu-l4,ondemand-g6e-4gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=40G
+# Rung-2 of the robomimic de-risking ladder: GT BC eval on demo2reward_robomimic
+# (robosuite@de64fa5, old controller API). Confirms env+EGL render+policy load before
+# any VLM/RL. TASK={can,square}. See [[robomimic-eval-setup]] memory.
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+mkdir -p logs
+
+TASK="${TASK:-can}"
+export NUM_GAME="${NUM_GAME:-25}"
+export EVAL_SEED="${EVAL_SEED:-1}"
+
+# ---- environment ----
+unset PYTHONPATH 2>/dev/null || true
+export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_robomimic"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+source set_env.sh                 # activates env; sets PYTHONPATH + nvidia LD_LIBRARY_PATH (rela) + OMP=1
+export PYTHONNOUSERSITE=1
+export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export MUJOCO_GL=egl
+
+echo "[env] python=$(which python)"
+python -c "import robosuite, env.robosuite_wrapper; from env.robometer_utils import get_robometer_4b; print('[env] imports OK')" \
+    || { echo "[env] IMPORT FAIL"; exit 1; }
+
+BC_PATH="release/model/robomimic/${TASK}/model0.pt"
+echo "[rung2] task=$TASK bc=$BC_PATH num_game=$NUM_GAME seed=$EVAL_SEED host=$(hostname)"
+python jobs/rung2_bc_eval.py "$BC_PATH"
+echo "[rung2] done"

@@ -1,0 +1,63 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_reencode
+#SBATCH --output=logs/reencode_%j.out
+#SBATCH --error=logs/reencode_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --exclusive
+#SBATCH --mem=0
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-4gpu-l4,spot-g6-8gpu-l4,spot-g6e-4gpu-l40s,spot-g6e-8gpu-l40s
+#SBATCH --requeue
+
+# Second-pass fix: delete the truncated (<512B, "moov atom not found") mp4 stubs
+# left by the failed 24_1 first-run of shard 1, then re-run generate_hf_dataset
+# for shard 1 to re-encode them. mp4 paths are unchanged, so the merged train_raw
+# stays valid; the downstream preprocess top-up just fills the missing .npz.
+#
+#   sbatch --dependency=afterany:<full_jobid>:<nox_jobid> jobs/reencode_part01_aws.job
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+STEP1_DIR="${STEP1_DIR:-/fsx/$USER/robometer_frames_hf_full}"
+SPLITS_DIR="${SPLITS_DIR:-/shared/home/PKA4388/robometer_splits/robometer_frames_splits_full}"
+NWORKERS="$(nproc)"
+
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2}"
+PYTHON="$ENV_PREFIX/bin/python"
+
+echo "[reencode] HOST=$(hostname)  scanning for corrupt (<512B) mp4 stubs across all shards…"
+mapfile -t BAD < <(find "$STEP1_DIR" -name "*.mp4" -size -512c 2>/dev/null)
+printf '  stub: %s\n' "${BAD[@]:-<none>}"
+echo "[reencode] corrupt count = ${#BAD[@]}"
+
+# Derive the set of affected shard indices (e.g. "01" "10") from the stub paths,
+# so we re-encode EVERY shard that has corruption, not a hardcoded one.
+mapfile -t SHARDS < <(printf '%s\n' "${BAD[@]}" | grep -oE 'train_part[0-9]+_raw' | grep -oE '[0-9]+' | sort -u)
+echo "[reencode] affected shards: ${SHARDS[*]:-<none>}"
+
+# Delete the stubs so generate_hf_dataset re-encodes them.
+for f in "${BAD[@]:-}"; do [ -n "$f" ] && rm -f "$f"; done
+
+export ROBOMETER_DATASET_PATH="/shared/home/PKA4388/robometer_frame_dataset"
+export ROBOMETER_PROCESSED_DATASETS_PATH="$STEP1_DIR"
+export HF_DIR="$STEP1_DIR"
+export SPLIT=train
+
+cd "$ROBOMETER_DIR"
+for s in "${SHARDS[@]:-}"; do
+  [ -z "$s" ] && continue
+  PAIRS_INDEX="$SPLITS_DIR/shards/pairs_index_train_part${s}.jsonl"
+  echo "[reencode] regenerating shard $s (missing mp4s get re-encoded)…"
+  "$PYTHON" -m dataset_upload.generate_hf_dataset \
+    --config_path "$HERE/configs/dataset_frames.yaml" \
+    --dataset.dataset_name "robometer_frames_train_part${s}" \
+    --dataset.pairs_index_path "$PAIRS_INDEX" \
+    --output.output_dir "$STEP1_DIR/train_part${s}_raw" \
+    --output.num_workers "$NWORKERS"
+done
+
+echo "[reencode] verify no stubs remain (expect 0):"
+find "$STEP1_DIR" -name "*.mp4" -size -512c 2>/dev/null | wc -l
+echo "[reencode] DONE"

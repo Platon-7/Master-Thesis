@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH --job-name=icl_montage
+#SBATCH --output=logs/icl_montage_%j.out
+#SBATCH --error=logs/icl_montage_%j.err
+#SBATCH --time=00:25:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-1gpu-l4,spot-g6e-1gpu-l40s,spot-g6-4gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=24G
+set -uo pipefail; cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+unset PYTHONPATH CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL 2>/dev/null||true
+export IBRL_CONDA_ENV=/shared/home/PKA4388/miniconda3/envs/demo2reward_v3
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh; conda activate "$IBRL_CONDA_ENV"
+export PYTHONNOUSERSITE=1; source set_env.sh; export PYTHONPATH="$PYTHONPATH:$HERE/../Robometer"; export MUJOCO_GL=egl
+python -c "import gymnasium,metaworld;print('[env] OK')" || { echo FAIL; exit 1; }
+TASK=coffeepush python ../reward-model-study/scripts/icl_vs_query_montage.py
+echo "done $?"

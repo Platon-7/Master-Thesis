@@ -1,0 +1,48 @@
+#!/bin/bash
+#SBATCH --job-name=calib_mt
+#SBATCH --output=logs/calib_mt_%j.out
+#SBATCH --error=logs/calib_mt_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+
+ENV_NAME="${IBRL_CONDA_ENV:-/shared/home/PKA4388/miniconda3/envs/demo2reward_v3}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+export IBRL_CONDA_ENV="$ENV_NAME"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda activate "$ENV_NAME"
+export PYTHONNOUSERSITE=1
+source set_env.sh
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+
+# Faithful to the 288 sweep reward view: leave V3_CORNER2_ZOOM UNSET so the
+# real `corner2` camera == the un-zoomed reward view (corner2_default), and no
+# ICL (ROBOMETER_ICL_DEMO_PATH unset => icl_frames=None).
+unset V3_CORNER2_ZOOM
+unset ROBOMETER_ICL_DEMO_PATH
+
+export ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000}"
+export CALIB_TASKS="${CALIB_TASKS:-CoffeePush,Assembly,BoxClose,StickPull}"
+export CALIB_MODELS="${CALIB_MODELS:-ft}"
+export CALIB_N_SUCC="${CALIB_N_SUCC:-15}"
+export CALIB_N_FAIL="${CALIB_N_FAIL:-15}"
+export CALIB_STRIDE="${CALIB_STRIDE:-10}"
+export CALIB_OUT="${CALIB_OUT:-/shared/home/PKA4388/vlm_ibrl_runs/calib_multitask.json}"
+
+echo "==================== calibrate multitask ===================="
+echo "tasks=$CALIB_TASKS models=$CALIB_MODELS N=${CALIB_N_SUCC}s/${CALIB_N_FAIL}f stride=$CALIB_STRIDE"
+echo "FT=$ROBOMETER_FT_PATH  out=$CALIB_OUT  MUJOCO_GL=$MUJOCO_GL"
+echo "============================================================="
+
+python ../reward-model-study/scripts/calibrate_threshold_multitask.py
+echo "==================== calibrate done (exit $?) ===================="

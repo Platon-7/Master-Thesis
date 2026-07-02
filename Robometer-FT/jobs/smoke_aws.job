@@ -1,0 +1,147 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_ft_smoke_aws
+#SBATCH --output=logs/smoke_aws_%j.out
+#SBATCH --error=logs/smoke_aws_%j.err
+#SBATCH --time=00:45:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-p4d-8gpu-a100,spot-p5-8gpu-h100-h200
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=8
+#SBATCH --cpus-per-task=96
+#SBATCH --exclusive
+#SBATCH --requeue
+
+# ============================================================================
+# ICL-ON smoke for the 8+8-frame Run-1 port. Mirrors jobs/run1_icl_ours_aws.job's
+# launch path 1:1 (same env, same train_base + run1_icl_ours configs, same FSDP /
+# 8-GPU topology) so a pass proves the prod job will launch AND validates the parts
+# the experiment actually changed:
+#   * keyframe/ICL dataset path  (ROBOMETER_FRAME_DATASET_ROOT -> AWS)
+#   * pairs_index_path           (train_base.yaml -> AWS)
+#   * demo subsample to 8 frames (base.py::_load_partner_trajectory)
+#   * query subsample to 8       (data.max_frames=8 in run1_icl_ours.yaml)
+#   * HF offline model/processor load + 8-way FSDP launch/fit on 8x A100 40GB
+#
+# Unlike the Snellius smoke.job, this one keeps ICL ON (icl_prob=1.0 forces a demo on
+# every sample) — that is the whole point, so it must NOT be disabled.
+#
+# Smoke deltas vs prod: 2 steps, bsz=2, no eval, no save, no wandb.
+#
+# SUBMIT FROM Robometer-FT/:
+#     cd Robometer-FT && sbatch -M research-partner-cluster jobs/smoke_aws.job
+# ============================================================================
+
+set -uo pipefail   # NOT -e: we want to capture the trainer exit code, not abort early
+
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/shared/home/$USER/robometer_frames_hf_full_step2}"
+
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2}"
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+[[ -x "$PYTHON" && -x "$ACCELERATE" ]] || { echo "ERROR: env binaries missing at $ENV_PREFIX/bin" >&2; exit 1; }
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export ROBOMETER_FRAME_DATASET_ROOT="${ROBOMETER_FRAME_DATASET_ROOT:-/shared/home/PKA4388/robometer_frame_dataset}"
+# HF ONLINE (cache present → metadata-only). This transformers version's tokenizer/processor
+# loader is broken OFFLINE for Qwen3-VL (os.listdir(repo-id) / _config.model_type on a dict);
+# online avoids both. Needs compute-node egress — same as the prod job; the smoke validates it.
+export HF_HUB_OFFLINE="${HF_HUB_OFFLINE:-0}"
+export TRANSFORMERS_OFFLINE="${TRANSFORMERS_OFFLINE:-0}"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+
+# WandB explicitly disabled — smoke writes no run.
+unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+export WANDB_MODE=disabled
+
+for f in "$HERE/configs/train_base.yaml" "$HERE/configs/run1_icl_ours.yaml" "$HERE/configs/distributed/fsdp.yaml"; do
+    [[ -f "$f" ]] || { echo "ERROR: missing config $f" >&2; exit 2; }
+done
+
+NUM_NODES="${SLURM_NNODES:-1}"
+GPUS_PER_NODE="${GPUS_PER_NODE:-8}"
+TOTAL_PROCESSES=$(( NUM_NODES * GPUS_PER_NODE ))
+RDZV_PORT=$(( 10000 + ${SLURM_JOB_ID:-0} % 50000 ))
+NODE_LIST=( $(scontrol show hostnames "$SLURM_JOB_NODELIST") )
+HEAD_NODE="${NODE_LIST[0]}"
+HEAD_NODE_IP=$(srun --nodes=1 --ntasks=1 -w "$HEAD_NODE" hostname --ip-address | head -1)
+
+export NCCL_ASYNC_ERROR_HANDLING=1
+export FI_PROVIDER=efa
+export OMP_NUM_THREADS=1
+
+# Same flatten pipeline as prod (train_base + run1_icl_ours -> ++key=value).
+readarray -t OVERRIDES < <(
+    cat "$HERE/configs/train_base.yaml" "$HERE/configs/run1_icl_ours.yaml" \
+      | grep -v '^[[:space:]]*#' \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+# Smoke overrides — last on the CLI so they win on duplicate keys. ICL stays ON;
+# icl_prob=1.0 forces a demo on every sample so the demo-load path is exercised.
+SMOKE=$(cat <<'EOF'
+++training.max_steps=2
+++training.per_device_train_batch_size=2
+++training.do_eval=false
+++training.evaluation_strategy=no
+++training.save_strategy=no
+++training.logging_steps=1
+++custom_eval.eval_types=[]
+++custom_eval.policy_ranking_dual_icl=false
+++logging.log_to=[]
+++data.use_icl=true
+++data.icl_prob=1.0
+++data.max_frames=8
+EOF
+)
+SMOKE_ARGS=$(echo "$SMOKE" | tr '\n' ' ')
+
+WEIGHTS_DIR="/shared/home/$USER/Robometer_FT_smoke/run1_8f_${SLURM_JOB_ID:-local}"
+mkdir -p "$WEIGHTS_DIR"
+
+# Base checkpoint: COMPLETE local consolidated dir, NOT the hub repo-id. Under HF offline,
+# a repo-id triggers snapshot_download() which fails (the HF cache for it is a stub); an
+# absolute local path short-circuits that (save.py:132). Appended last so it wins.
+LOAD_FROM_CKPT="${LOAD_FROM_CKPT:-/shared/home/PKA4388/checkpoints/Robometer-4B}"
+[[ -f "$LOAD_FROM_CKPT/config.json" ]] || { echo "ERROR: base ckpt incomplete at $LOAD_FROM_CKPT" >&2; exit 3; }
+SMOKE_ARGS="$SMOKE_ARGS ++training.load_from_checkpoint=$LOAD_FROM_CKPT"
+
+cd "$ROBOMETER_DIR"
+export PYTHONPATH="$ROBOMETER_DIR:${PYTHONPATH:-}"
+export ROBOMETER_DIR
+
+echo "==================== smoke launch summary ===================="
+echo "Partition          : ${SLURM_JOB_PARTITION:-?}   Nodes: $NUM_NODES (${NODE_LIST[*]})"
+echo "GPUs per node      : $GPUS_PER_NODE   TOTAL_PROCESSES: $TOTAL_PROCESSES"
+echo "step2 cache        : $HF_DIR"
+echo "keyframe root      : $ROBOMETER_FRAME_DATASET_ROOT"
+echo "ICL                : ON (icl_prob=1.0)   frames: 8 query + 8 demo"
+echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
+echo "OVERRIDES count    : ${#OVERRIDES[@]}"
+echo "SMOKE overrides    :"; echo "$SMOKE" | sed 's/^/  /'
+echo "==============================================================="
+
+"$ACCELERATE" launch \
+  --config_file "$HERE/configs/distributed/fsdp.yaml" \
+  --num_machines=1 \
+  --num_processes="$TOTAL_PROCESSES" \
+  --machine_rank=0 \
+  --main_process_ip="$HEAD_NODE_IP" \
+  --main_process_port="$RDZV_PORT" \
+  train.py "${OVERRIDES[@]}" $SMOKE_ARGS \
+  training.output_dir="$WEIGHTS_DIR"
+RC=$?
+
+echo
+echo "==================== smoke exit summary ===================="
+echo "trainer return code: $RC"
+if [[ $RC -eq 0 ]]; then echo "SMOKE PASSED — run1 8+8 ICL path"; else echo "SMOKE FAILED (rc=$RC)"; fi
+echo "============================================================"
+exit $RC

@@ -1,0 +1,64 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_step2_full
+#SBATCH --output=logs/step2_full_%j.out
+#SBATCH --error=logs/step2_full_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --exclusive
+#SBATCH --mem=0
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-4gpu-l4,spot-g6-8gpu-l4,spot-g6e-4gpu-l40s,spot-g6e-8gpu-l40s
+#SBATCH --requeue
+
+# Step 2, full-train preprocess (NPZ cache for robometer_frames_train, all
+# families). Reads the merged train_raw produced by concat_train_aws.job, so it
+# runs in PARALLEL with step2_no_extras_aws.job once the concat is done.
+#
+#   sbatch --dependency=afterok:<concat_jobid> jobs/step2_full_preprocess_aws.job
+#
+# Path split: read MP4s from /fsx (STEP1_DIR), write NPZs to /shared (cache_dir).
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+SPLIT="${SPLIT:-train}"
+STEP1_DIR="${STEP1_DIR:-/fsx/$USER/robometer_frames_hf_full}"
+HF_OUT_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/shared/home/$USER/robometer_frames_hf_full_step2}"
+
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2}"
+PYTHON="$ENV_PREFIX/bin/python"
+if [[ ! -x "$PYTHON" ]]; then echo "ERROR: $PYTHON not executable" >&2; exit 1; fi
+
+export ROBOMETER_DATASET_PATH="/shared/home/PKA4388/robometer_frame_dataset"
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_OUT_DIR"
+export HF_DIR="$STEP1_DIR"
+export SPLIT
+
+mkdir -p "$HF_OUT_DIR"
+
+echo "[step2_full] HOST=$(hostname)  PARTITION=${SLURM_JOB_PARTITION:-?}"
+echo "[step2_full] read MP4s from $STEP1_DIR ; write NPZs to $HF_OUT_DIR"
+
+TMP_PP_YAML="$(mktemp --suffix=.yaml)"
+trap 'rm -f "$TMP_PP_YAML"' EXIT
+sed -e "s|\${oc.env:HF_DIR}|$STEP1_DIR|g" \
+    -e "s|\${oc.env:SPLIT}|$SPLIT|g" \
+    -e "s|\${oc.env:ROBOMETER_PROCESSED_DATASETS_PATH}|$HF_OUT_DIR|g" \
+    "$HERE/configs/preprocess_split.yaml" > "$TMP_PP_YAML"
+cat "$TMP_PP_YAML"
+
+cd "$ROBOMETER_DIR"
+"$PYTHON" -m robometer.data.scripts.preprocess_datasets \
+    --config "$TMP_PP_YAML" \
+    --cache_dir "$HF_OUT_DIR"
+
+HASHED="${STEP1_DIR//\//_}_${SPLIT}_raw_robometer_frames_${SPLIT}"
+SHORT="robometer_frames_${SPLIT}"
+if [[ -d "$HF_OUT_DIR/$HASHED" ]]; then
+    ln -sfn "$HASHED" "$HF_OUT_DIR/$SHORT"
+    echo "[step2_full] linked $HF_OUT_DIR/$SHORT -> $HASHED"
+else
+    echo "[step2_full] WARN: hashed cache dir not found at $HF_OUT_DIR/$HASHED — skipping symlink"
+fi
+echo "[step2_full] DONE"

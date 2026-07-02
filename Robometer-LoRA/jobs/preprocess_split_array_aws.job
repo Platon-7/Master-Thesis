@@ -1,0 +1,88 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_pp_array
+#SBATCH --output=logs/preprocess_array_%A_%a.out
+#SBATCH --error=logs/preprocess_array_%A_%a.err
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=56G
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-1gpu-l4
+#SBATCH --requeue
+
+# Step 1 (mp4s): parallel HF-cache builder for the full-pool training data.
+# AWS / research-partner-cluster port of preprocess_split_array.job.
+#
+# CPU-only work (16 workers + system ffmpeg). There is no CPU-only partition on
+# this cluster, so we land on the smallest GPU instance that has 16 vCPUs: the
+# g6-4xlarge node inside spot-g6-1gpu-l4 (cpus=16 forces that node; the L4 sits
+# idle). --requeue so a spot reclaim auto-resubmits.
+#
+# Usage (shards already pre-built in $SPLITS_DIR/shards/):
+#   smoke one shard first:
+#     sbatch --array=0-0  jobs/preprocess_split_array_aws.job
+#   then the rest:
+#     sbatch --array=1-15 jobs/preprocess_split_array_aws.job
+#   eval splits (small, single shard):
+#     SPLIT=eval_droid N_SHARDS=1 sbatch --array=0-0 jobs/preprocess_split_array_aws.job
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+SPLIT="${SPLIT:-train}"
+N_SHARDS="${N_SHARDS:-16}"
+SHARD_ID="${SLURM_ARRAY_TASK_ID:-0}"
+SPLITS_DIR="${SPLITS_DIR:-/shared/home/PKA4388/robometer_splits/robometer_frames_splits_full}"
+HF_OUT_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/fsx/$USER/robometer_frames_hf_full}"
+
+# Pick the right pairs_index for this task
+if [[ "$N_SHARDS" -gt 1 ]]; then
+    PAIRS_INDEX="$SPLITS_DIR/shards/pairs_index_${SPLIT}_part$(printf '%02d' $SHARD_ID).jsonl"
+    OUTPUT_NAME="${SPLIT}_part$(printf '%02d' $SHARD_ID)"
+else
+    PAIRS_INDEX="$SPLITS_DIR/pairs_index_${SPLIT}.jsonl"
+    OUTPUT_NAME="${SPLIT}"
+fi
+if [[ ! -f "$PAIRS_INDEX" ]]; then
+    echo "ERROR: pairs_index not found at $PAIRS_INDEX" >&2
+    exit 2
+fi
+
+# Cluster env: no Lmod modules needed. System ffmpeg is on PATH (/usr/bin/ffmpeg).
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2}"
+PYTHON="$ENV_PREFIX/bin/python"
+if [[ ! -x "$PYTHON" ]]; then
+    echo "ERROR: $PYTHON not executable" >&2
+    exit 1
+fi
+
+export ROBOMETER_DATASET_PATH="/shared/home/PKA4388/robometer_frame_dataset"
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_OUT_DIR"
+export HF_DIR="$HF_OUT_DIR"
+export SPLIT  # for the preprocess YAML's ${oc.env:SPLIT}
+
+mkdir -p "$HF_OUT_DIR"
+cd "$ROBOMETER_DIR"
+
+echo "==================== shard ${SHARD_ID}/${N_SHARDS} ===================="
+echo "  HOST           : $(hostname)"
+echo "  SPLIT          : $SPLIT"
+echo "  PAIRS_INDEX    : $PAIRS_INDEX"
+echo "  HF_OUT_DIR     : $HF_OUT_DIR"
+echo "  OUTPUT_NAME    : $OUTPUT_NAME"
+echo "  PYTHON         : $PYTHON"
+echo "  FFMPEG         : $(command -v ffmpeg)"
+echo "  ROW_COUNT      : $(wc -l < "$PAIRS_INDEX")"
+echo "==================================================================="
+
+# Step 1: convert raw shards into a HuggingFace dataset (per-shard).
+"$PYTHON" -m dataset_upload.generate_hf_dataset \
+  --config_path "$HERE/configs/dataset_frames.yaml" \
+  --dataset.dataset_name "robometer_frames_${OUTPUT_NAME}" \
+  --dataset.pairs_index_path "$PAIRS_INDEX" \
+  --output.output_dir "$HF_OUT_DIR/${OUTPUT_NAME}_raw" \
+  --output.num_workers 16
+
+# Step 2 runs separately on the merged cache (see step2_after_array.job).
+echo "[shard $SHARD_ID] DONE"

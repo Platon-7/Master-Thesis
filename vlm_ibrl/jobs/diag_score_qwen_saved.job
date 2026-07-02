@@ -1,0 +1,34 @@
+#!/bin/bash
+#SBATCH --job-name=diag_qscore
+#SBATCH --output=logs/diag_qscore_%j.out
+#SBATCH --error=logs/diag_qscore_%j.err
+#SBATCH --time=01:30:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-1gpu-l4,spot-p4d-8gpu-a100,ondemand-g6e-4gpu-l40s,ondemand-g6-4gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+
+# Use the Qwen3.5 env's python DIRECTLY — no activation, no install, no env mutation.
+QPY=/shared/home/PKA4388/miniconda3/envs/vlm_ibrl_qwen35/bin/python
+unset PYTHONPATH 2>/dev/null || true
+export PYTHONNOUSERSITE=1
+# NB: do NOT put Robometer/ on the path — get_robometer_4b prepends Qwen35-FT/ via dispatch.
+export VLM_IBRL_DIR="$HERE"
+
+# leave HF online (offline tokenizer is broken); Qwen3.5-4B base is in the HF cache
+export ROBOMETER_ICL_DEMO_PATH=/shared/home/PKA4388/vlm_ibrl_runs/icl_demo_can_median
+export ROBOMETER_ICL_DEMO_IDX=0
+export ROBOMETER_ICL_FRAMES=16
+
+Q=/shared/home/PKA4388/checkpoints/Qwen35_FT_phase1_consolidated
+export MODELS="run4:$Q/run4_step6500,run5:$Q/run5_step6500"
+export SAVE_ROOT=/shared/home/PKA4388/vlm_ibrl_runs/diag_fairsep_qwen   # frames + gt_labels.json already here
+
+echo "[qscore] host=$(hostname) py=$QPY MODELS=$MODELS"
+"$QPY" jobs/diag_score_qwen_saved.py
+echo "[qscore] done"

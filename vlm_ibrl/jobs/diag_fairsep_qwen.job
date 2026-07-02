@@ -1,0 +1,42 @@
+#!/bin/bash
+#SBATCH --job-name=diag_fsqwen
+#SBATCH --output=logs/diag_fsqwen_%j.out
+#SBATCH --error=logs/diag_fsqwen_%j.err
+#SBATCH --time=02:30:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-1gpu-l4,spot-p4d-8gpu-a100,ondemand-g6e-4gpu-l40s,ondemand-g6-4gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+unset PYTHONPATH 2>/dev/null || true
+export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_robomimic"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"   # get_robometer_4b prepends Qwen35-FT/ via dispatch
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+source set_env.sh
+export PYTHONNOUSERSITE=1
+export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export MUJOCO_GL=egl
+# NB: leave HF ONLINE — offline tokenizer load is known-broken (uses cache if base present)
+
+# same ICL demo (median) as the Robometer run, so +ICL is comparable:
+export ROBOMETER_ICL_DEMO_PATH=/shared/home/PKA4388/vlm_ibrl_runs/icl_demo_can_median
+export ROBOMETER_ICL_DEMO_IDX=0
+export ROBOMETER_ICL_FRAMES=16
+
+# Qwen3.5 pair (run4 = ICL-trained, run5 = no-ICL). Scored ±ICL each.
+Q=/shared/home/PKA4388/checkpoints/Qwen35_FT_phase1_consolidated
+export MODELS="run4:$Q/run4_step6500,run5:$Q/run5_step6500"
+
+# IDENTICAL neutral rollout to the Robometer job (same seeds 700/900 + NOISE):
+export N_EP="${N_EP:-10}"
+export NOISE="${NOISE:-0.4}"
+export SAVE_ROOT=/shared/home/PKA4388/vlm_ibrl_runs/diag_fairsep_qwen
+
+echo "[fsqwen] host=$(hostname) MODELS=$MODELS N_EP=$N_EP NOISE=$NOISE"
+python jobs/diag_fairsep_neutral.py
+echo "[fsqwen] done"

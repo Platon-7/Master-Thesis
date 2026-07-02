@@ -1,0 +1,48 @@
+#!/bin/bash
+#SBATCH --job-name=regen_v3
+#SBATCH --output=/shared/home/PKA4388/Master-Thesis/reward-model-study/logs/regen_v3_%j.out
+#SBATCH --error=/shared/home/PKA4388/Master-Thesis/reward-model-study/logs/regen_v3_%j.err
+#SBATCH --time=01:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6e-1gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=40G
+
+# AWS research-partner-cluster port of regen_v3.job (Snellius original).
+# Parity test: regenerate fresh CoffeePush v3 successes three ways (A curated /
+# B curated random-goal / C fixed-175 run-on) and score with the Robometer-FT
+# scorer. Confirms env render + camera + scorer + checkpoint reproduce the
+# documented A/B~0.76, C~0.30 truncation-at-success result on this cluster.
+#
+# FT checkpoint here is run1_icl_ours_step4000 (the only one on this cluster);
+# documented numbers were on step3000, so treat this as re-establishing the
+# reference on s4000, not a byte-for-byte reproduction.
+
+set -uo pipefail
+
+# Conda (no Lmod modules on this cluster; system ffmpeg already on PATH).
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda activate /shared/home/PKA4388/miniconda3/envs/demo2reward_v3
+export PYTHONNOUSERSITE=1
+
+# new-mujoco EGL offscreen render (needs the GPU).
+export MUJOCO_GL=egl
+
+# FT scorer checkpoint (consumed by regen_v3_pipeline.py via ROBOMETER_FT_PATH).
+export ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000}"
+
+echo "==================== regen_v3 parity ===================="
+echo "HOST            : $(hostname)"
+echo "PARTITION       : ${SLURM_JOB_PARTITION:-?}"
+echo "python          : $(which python)"
+echo "ROBOMETER_FT_PATH: $ROBOMETER_FT_PATH"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader | head -1
+echo "========================================================="
+
+python -u /shared/home/PKA4388/Master-Thesis/reward-model-study/scripts/regen_v3_pipeline.py
+RC=$?
+echo "return code: $RC"
+exit $RC

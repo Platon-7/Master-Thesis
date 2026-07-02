@@ -1,0 +1,33 @@
+#!/bin/bash
+#SBATCH --job-name=icl224_chk
+#SBATCH --output=logs/icl224_chk_%j.out
+#SBATCH --time=00:30:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6-1gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+set -uo pipefail; cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+unset PYTHONPATH CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL 2>/dev/null||true
+export IBRL_CONDA_ENV=/shared/home/PKA4388/miniconda3/envs/demo2reward_v3
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh; conda activate "$IBRL_CONDA_ENV"
+export PYTHONNOUSERSITE=1; source set_env.sh; export PYTHONPATH="$PYTHONPATH:$HERE/../Robometer"; export MUJOCO_GL=egl
+export ROBOMETER_FT_PATH=/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000
+python - << 'PY'
+import os,glob,numpy as np
+from PIL import Image
+import sys; sys.path.insert(0,"."); sys.path.insert(0,"../Robometer")
+from env.robometer_utils import get_robometer_4b
+sc=get_robometer_4b(model_path=os.environ["ROBOMETER_FT_PATH"])
+for task,td in [("coffeepush","Push a mug under a coffee machine."),("boxclose","Close the box.")]:
+    for di in ("0","1","2"):
+        frs=sorted(glob.glob(f"/shared/home/PKA4388/icl_correct_view/{task}/{di}_*.png"))
+        if not frs: continue
+        picks=np.linspace(0,len(frs)-1,16).round().astype(int)
+        win=[Image.open(frs[i]).convert("RGB") for i in picks]  # already 224
+        sp=float(sc(win,task=td,icl_frames=None)["success_prob"])
+        print(f"[224-check] {task} demo{di}: success_prob={sp:.4f}")
+PY
+echo "done $?"

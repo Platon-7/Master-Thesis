@@ -1,0 +1,39 @@
+#!/bin/bash
+#SBATCH --job-name=diag_fairsep
+#SBATCH --output=logs/diag_fairsep_%j.out
+#SBATCH --error=logs/diag_fairsep_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-1gpu-l4,spot-p4d-8gpu-a100,ondemand-g6e-4gpu-l40s,ondemand-g6-4gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+unset PYTHONPATH 2>/dev/null || true
+export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_robomimic"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+source set_env.sh
+export PYTHONNOUSERSITE=1
+export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export MUJOCO_GL=egl
+
+# ICL demo (median, same as Curve B):
+export ROBOMETER_ICL_DEMO_PATH=/shared/home/PKA4388/vlm_ibrl_runs/icl_demo_can_median
+export ROBOMETER_ICL_DEMO_IDX=0
+export ROBOMETER_ICL_FRAMES=16
+# the two checkpoints to compare:
+export ROBOMETER_FT_PATH=/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000
+export RUN2_PATH=/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run2_noicl_ours_step4000
+
+export N_EP="${N_EP:-10}"
+export NOISE="${NOISE:-0.4}"
+export SAVE_ROOT=/shared/home/PKA4388/vlm_ibrl_runs/diag_fairsep
+
+echo "[fairsep] host=$(hostname) N_EP=$N_EP NOISE=$NOISE"
+python jobs/diag_fairsep_neutral.py
+echo "[fairsep] done"

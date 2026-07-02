@@ -12,6 +12,13 @@
 # Data pool — 650k (excludes humanoid + human_hand families, matching the LoRA bake-off).
 data.train_datasets: [robometer_frames_train_no_extras]
 
+# Frame budget — 8 frames per query AND per ICL demo (was 16 via the upstream
+# config.yaml default). Matches the Robometer-4B baseline's 8-frame budget so the
+# ICL/asymmetric-loss comparison is apples-to-apples. The query subsamples to this
+# via linspace; the demo subsample to the same budget was added in
+# samplers/base.py::_load_partner_trajectory. Net ICL context: 8 (demo) + 8 (query).
+data.max_frames: 8
+
 # Loss 2 — asymmetric C51 + asymmetric BCE, our lambda + KL pilot.
 loss.progress_loss_type: c51_asymmetric
 loss.success_loss_type: bce_asymmetric

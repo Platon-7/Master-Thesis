@@ -1,0 +1,60 @@
+#!/bin/bash
+#SBATCH --job-name=q35r4_auto
+#SBATCH --output=logs/q35r4_auto_%j.out
+#SBATCH --error=logs/q35r4_auto_%j.err
+#SBATCH --time=1-12:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6-1gpu-l4,ondemand-g6e-4gpu-l40s,ondemand-g6-4gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+
+# --- vlm_ibrl_qwen35 env, driven directly (Qwen3.5 needs transformers 5.7 / torch 2.6) ---
+QENV=/shared/home/PKA4388/miniconda3/envs/vlm_ibrl_qwen35
+QPY="$QENV/bin/python"
+GLDIR=/shared/home/PKA4388/qwen35_gl_libs   # Mesa libGL family for cv2 (staged, non-invasive)
+unset PYTHONPATH 2>/dev/null || true
+export PYTHONNOUSERSITE=1
+# torch's bundled NVIDIA libs (libnvrtc etc.) are needed by the rela C++ extension (cf. set_env.sh)
+NV=$(find "$QENV"/lib/python*/site-packages/nvidia -maxdepth 2 -name lib -type d 2>/dev/null | tr '\n' ':' | sed 's/:$//')
+export LD_LIBRARY_PATH="${NV:+$NV:}$QENV/lib:$GLDIR:/usr/lib/nvidia:${LD_LIBRARY_PATH:-}"
+export MUJOCO_GL=egl
+export OMP_NUM_THREADS=1
+export PYTHONPATH="$HERE:$HERE/../Robometer:${PYTHONPATH:-}"
+
+# --- reward model: Qwen3.5 run4 (ICL-trained), loaded via the robometer_ft dispatch ---
+export ROBOMETER_FT_PATH=/shared/home/PKA4388/checkpoints/Qwen35_FT_phase1_consolidated/run4_step6500
+export ROBOMETER_ICL_DEMO_PATH=/shared/home/PKA4388/vlm_ibrl_runs/icl_demo_can_median
+export ROBOMETER_ICL_DEMO_IDX=0
+export ROBOMETER_ICL_FRAMES=16
+# autonomous gate (mirrors Curve A/B): success head, thr 0.5 (run4+ICL real 0.71 / OOD-fail max 0.03), gate 120
+export AUTONOMOUS_SUCCESS=1
+export ROBOMETER_DETECT_HEAD=success
+export ROBOMETER_SUCCESS_THRESHOLD="${THR:-0.5}"
+export ROBOMETER_SUCCESS_CONSECUTIVE=1
+export ROBOMETER_MIN_EP_STEPS=120
+
+SAVE_DIR="${SAVE_DIR:-/shared/home/PKA4388/vlm_ibrl_runs/can_qwen35run4ICL_auto_thr0.5_gate120_200k_fa2}"
+RESUME_ARGS=""
+if [ -f "$SAVE_DIR/latest.pt" ]; then RESUME_ARGS="--load_pretrained_agent $SAVE_DIR/latest.pt --load_policy_only 0"; fi
+
+echo "[q35r4] host=$(hostname)"; nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1
+"$QPY" train_vlm_rl.py \
+  $RESUME_ARGS \
+  --config_path release/cfgs/robomimic_rl/can_ibrl.yaml \
+  --vlm robometer_ft \
+  --robometer_beta 0.0 \
+  --robometer_threshold 0.0 \
+  --reward_at_truncation 1 \
+  --num_train_step 200000 \
+  --num_warm_up_episode 30 \
+  --num_eval_episode 20 \
+  --mp_eval 0 \
+  --use_wb 0 \
+  --log_per_step 5000 \
+  --save_dir "$SAVE_DIR"
+echo "[q35r4] done save_dir=$SAVE_DIR"

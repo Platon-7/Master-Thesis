@@ -129,12 +129,16 @@ def main():
     user = os.environ.get("USER", "UNKNOWN")
     print(f"Running as user: {user}")
 
+    # Roots are env-overridable so the same script runs on Snellius (defaults below) and on
+    # the AWS cluster (ROBOMETER_STEP1_DIR=/fsx/$USER/robometer_frames_hf_full,
+    # ROBOMETER_PROCESSED_DATASETS_PATH=/shared/home/$USER/robometer_frames_hf_full_step2).
+    step1_root = os.environ.get("ROBOMETER_STEP1_DIR", "/projects/prjs1958/robometer_frames_hf_full")
     step1_paths = [
-        "/projects/prjs1958/robometer_frames_hf_full/train_raw/robometer_frames_train",
-        "/projects/prjs1958/robometer_frames_hf_full/train_no_extras_raw/robometer_frames_train_no_extras",
-        "/projects/prjs1958/robometer_frames_hf_full/eval_metaworld_raw/robometer_frames_eval_metaworld",
+        f"{step1_root}/train_raw/robometer_frames_train",
+        f"{step1_root}/train_no_extras_raw/robometer_frames_train_no_extras",
+        f"{step1_root}/eval_metaworld_raw/robometer_frames_eval_metaworld",
     ]
-    step2_root = f"/scratch-shared/{user}/robometer_frames_hf_full_step2"
+    step2_root = os.environ.get("ROBOMETER_PROCESSED_DATASETS_PATH", f"/scratch-shared/{user}/robometer_frames_hf_full_step2")
     step2_paths = [
         f"{step2_root}/robometer_frames_train/processed_dataset",
         f"{step2_root}/robometer_frames_train_no_extras/processed_dataset",

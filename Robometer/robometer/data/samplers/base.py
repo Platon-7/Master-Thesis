@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import io
 import json
+import os
 import tarfile
 from pathlib import Path
 from typing import Optional, Dict, Any, List, Set, Tuple, Union
@@ -39,9 +40,16 @@ from robometer.data.dataset_category import is_preference_only_ds
 
 logger = get_logger()
 
-# Root under which relative pair-index frames_path entries resolve. Keyframe dataset on the HPC:
-# /projects/prjs1958/robometer_frame_dataset/{metaworld,failsafe,droid,robometer,roboreward}/keyframes/.../shard-*.tar
-_ROBOMETER_FRAME_DATASET_ROOT = Path("/projects/prjs1958/robometer_frame_dataset")
+# Root under which relative pair-index frames_path entries resolve. Keyframe dataset layout:
+# <root>/{metaworld,failsafe,droid,robometer,roboreward}/keyframes/.../shard-*.tar
+# Overridable via $ROBOMETER_FRAME_DATASET_ROOT so the same code runs on the old Snellius HPC
+# (/projects/prjs1958/...) and the AWS cluster (/shared/home/$USER/...) without an edit.
+_ROBOMETER_FRAME_DATASET_ROOT = Path(
+    os.environ.get(
+        "ROBOMETER_FRAME_DATASET_ROOT",
+        "/projects/prjs1958/robometer_frame_dataset",
+    )
+)
 
 # Source-of-truth for episode → on-disk frames_path lookup. Per-split pair indices declare
 # *which* partner pairs with which query but do not store the partner's tar-shard path; we
@@ -848,6 +856,14 @@ class RBMBaseSampler:
         shard_str, episode_dir = frames_path.split("::", 1)
         shard_path = self._resolve_shard_path(shard_str)
         frames = self._load_partner_frames(shard_path, episode_dir)
+
+        # Uniformly subsample the demo to data.max_frames (first + last always kept), matching
+        # the query's frame budget. The keyframe tars store a fixed 16 keyframes per episode and
+        # this loader otherwise passes ALL of them through unsubsampled, so without this the demo
+        # length is pinned at 16 regardless of max_frames — e.g. 16-frame demo + 8-frame query.
+        # With max_frames=8 this yields the intended symmetric 8 (demo) + 8 (query) ICL context.
+        # linspace_subsample_frames is a no-op when the demo already has <= max_frames frames.
+        frames, _demo_indices = linspace_subsample_frames(frames, self.config.max_frames)
 
         # ABLATION: zero out the demo's visual content while keeping its shape +
         # position. Lets us test whether the VLM is using the demo's visual signal

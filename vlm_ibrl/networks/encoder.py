@@ -160,6 +160,69 @@ class DrQEncoder(nn.Module):
         return h
 
 
+class DinoEncoder(nn.Module):
+    """Frozen DINOv2 feature extractor — SWITCH (enc_type='dino'), fully additive.
+
+    The DINO weights are frozen and forward() runs under no_grad, so no gradient ever
+    flows into this module: QAgent's existing ``encoder_opt`` over these (grad-less)
+    params is a silent no-op, and nothing in the existing trainable-encoder paths is
+    touched. Mirrors the authors' LIBERO policy representation (frozen pretrained visual
+    features instead of a learned CNN).
+
+    Frame-stacked obs (channels = 3*K) -> per-frame DINO CLS feature -> (B, K, dim),
+    so the actor/critic see ``num_patch=K`` tokens of ``patch_repr_dim=dim``.
+    DINO model / input size are read from env vars (DINO_MODEL, DINO_IMG) to avoid
+    touching any config dataclass.
+    """
+
+    def __init__(self, obs_shape):
+        super().__init__()
+        import os
+        from transformers import AutoModel
+
+        assert len(obs_shape) == 3, obs_shape
+        c = obs_shape[0]
+        assert c % 3 == 0, f"DinoEncoder expects 3*stack channels, got {c}"
+        self.k = c // 3
+        model_name = os.environ.get("DINO_MODEL", "facebook/dinov2-small")
+        self.img_size = int(os.environ.get("DINO_IMG", "224"))
+
+        self.dino = AutoModel.from_pretrained(model_name)
+        self.dino.eval()
+        for p in self.dino.parameters():
+            p.requires_grad_(False)
+
+        dim = int(self.dino.config.hidden_size)  # 384 (small) / 768 (base)
+        self.patch_repr_dim = dim
+        self.num_patch = self.k
+        self.repr_dim = dim * self.k
+
+        self.register_buffer("_mean", torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1))
+        self.register_buffer("_std", torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1))
+
+    def train(self, mode=True):
+        # keep DINO in eval regardless of QAgent.train() so it stays frozen
+        super().train(mode)
+        self.dino.eval()
+        return self
+
+    @torch.no_grad()
+    def forward(self, obs, flatten=True):
+        # obs: (B, 3*K, H, W) in [0, 255]
+        b = obs.size(0)
+        x = obs.reshape(b * self.k, 3, obs.size(-2), obs.size(-1)).float() / 255.0
+        if x.size(-1) != self.img_size or x.size(-2) != self.img_size:
+            x = nn.functional.interpolate(
+                x, size=(self.img_size, self.img_size), mode="bicubic", align_corners=False
+            )
+        x = (x - self._mean) / self._std
+        feat = self.dino(pixel_values=x).pooler_output  # (B*K, dim)
+        feat = feat.reshape(b, self.k, self.patch_repr_dim)  # (B, K, dim)
+        if flatten:
+            feat = feat.flatten(1, 2)  # (B, K*dim)
+        return feat
+
+
 if __name__ == "__main__":
     import rich.traceback
     import pyrallis

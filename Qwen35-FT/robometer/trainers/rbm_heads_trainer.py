@@ -28,6 +28,7 @@ from robometer.evals.compile_results import (
     run_reward_alignment_eval_per_trajectory,
     run_confusion_matrix_eval,
     run_policy_ranking_eval,
+    compute_head_quality_metrics,
 )
 from robometer.models.utils import ModelOutput, convert_bins_to_continuous, convert_discrete_target_to_continuous
 from robometer.utils.distributed import banner, get_rank, is_rank_0, log_fsdp_diagnostics
@@ -1380,6 +1381,22 @@ class RBMHeadsTrainer(Trainer):
                 data_source,
                 correlation_method="kendall",
             )
+            # Success-head + progress-separation + IBRL false-positive metrics, computed from the SAME
+            # eval_results (per-frame success_probs were already captured upstream). Merged into
+            # eval_metrics so they get the per-dataset / icl-on/off suffixing + wandb logging for free.
+            try:
+                _hq = compute_head_quality_metrics(
+                    eval_results,
+                    num_bins=num_bins,
+                    is_discrete_mode=is_discrete_mode,
+                    convert_fn=lambda a: convert_bins_to_continuous(
+                        torch.tensor(a, dtype=torch.float32)
+                    ).numpy(),
+                )
+                if _hq:
+                    eval_metrics.update(_hq)
+            except Exception as e:
+                logger.warning(f"compute_head_quality_metrics failed (non-fatal): {e}")
             # log_memory_usage(f"After compute_eval_metrics (policy_ranking)")
 
             banner(

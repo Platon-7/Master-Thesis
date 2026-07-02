@@ -1,0 +1,98 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_step2
+#SBATCH --output=logs/step2_%j_%x.out
+#SBATCH --error=logs/step2_%j_%x.err
+#SBATCH --time=24:00:00
+#SBATCH --exclusive
+#SBATCH --mem=0
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-4gpu-l4,spot-g6-8gpu-l4,spot-g6e-4gpu-l40s,spot-g6e-8gpu-l40s
+#SBATCH --requeue
+
+# Step 2 (hf cache), AWS / research-partner-cluster port of step2_after_array.job.
+#
+# (a) concat the 16 per-shard _raw arrow datasets into <STEP1_DIR>/train_raw/
+# (b) run preprocess_datasets.py: read MP4s from STEP1_DIR, extract one .npz per
+#     trajectory into cache_dir, store npz paths in the processed dataset
+# (c) symlink the short dataset name the trainer's loader expects
+#
+# IMPORTANT path split (capacity):
+#   STEP1_DIR (read MP4s)   -> /fsx (Lustre, fast)         ~40 GB, already there
+#   cache_dir (write NPZs)  -> /shared (8 EB, unlimited)   ~hundreds of GB for the
+#                              full ~860k-trajectory pool. /fsx (1.1 TB free) is
+#                              too small to risk here.
+#
+# Usage (after step 1's 16 shards are all complete):
+#   sbatch jobs/step2_after_array_aws.job
+# To pin to the existing step-1 array as a dependency instead:
+#   sbatch --dependency=afterok:<step1_jobid> jobs/step2_after_array_aws.job
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+SPLIT="${SPLIT:-train}"
+N_SHARDS="${N_SHARDS:-16}"
+SPLITS_DIR="${SPLITS_DIR:-/shared/home/PKA4388/robometer_splits/robometer_frames_splits_full}"
+STEP1_DIR="${STEP1_DIR:-/fsx/$USER/robometer_frames_hf_full}"
+HF_OUT_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/shared/home/$USER/robometer_frames_hf_full_step2}"
+
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2}"
+PYTHON="$ENV_PREFIX/bin/python"
+if [[ ! -x "$PYTHON" ]]; then
+    echo "ERROR: $PYTHON not executable" >&2
+    exit 1
+fi
+
+export ROBOMETER_DATASET_PATH="/shared/home/PKA4388/robometer_frame_dataset"
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_OUT_DIR"
+# HF_DIR points where the _raw lives (input). cache_dir is separate (output).
+export HF_DIR="$STEP1_DIR"
+export SPLIT
+
+mkdir -p "$HF_OUT_DIR"
+
+echo "============================================================"
+echo "step 2 for SPLIT=$SPLIT"
+echo "  HOST                       : $(hostname)"
+echo "  PARTITION                  : ${SLURM_JOB_PARTITION:-?}"
+echo "  STEP1_DIR (read MP4s)      : $STEP1_DIR"
+echo "  cache_dir (write NPZs)     : $HF_OUT_DIR"
+echo "============================================================"
+
+# ----- (a) For train only: merge per-shard outputs INTO STEP1_DIR -------------
+if [[ "$SPLIT" == "train" ]]; then
+    echo "[step 2a] concatenating $N_SHARDS shards into $STEP1_DIR/train_raw/"
+    "$PYTHON" "$HERE/scripts/concat_split_shards.py" \
+        --hf-out-dir "$STEP1_DIR" \
+        --split train \
+        --n-shards "$N_SHARDS"
+fi
+
+# ----- (b) Run preprocess_datasets — reads from STEP1_DIR, writes to HF_OUT_DIR
+TMP_PP_YAML="$(mktemp --suffix=.yaml)"
+trap 'rm -f "$TMP_PP_YAML"' EXIT
+sed -e "s|\${oc.env:HF_DIR}|$STEP1_DIR|g" \
+    -e "s|\${oc.env:SPLIT}|$SPLIT|g" \
+    -e "s|\${oc.env:ROBOMETER_PROCESSED_DATASETS_PATH}|$HF_OUT_DIR|g" \
+    "$HERE/configs/preprocess_split.yaml" > "$TMP_PP_YAML"
+echo "[step 2b] preprocess_datasets config:"
+cat "$TMP_PP_YAML"
+
+cd "$ROBOMETER_DIR"
+"$PYTHON" -m robometer.data.scripts.preprocess_datasets \
+    --config "$TMP_PP_YAML" \
+    --cache_dir "$HF_OUT_DIR"
+
+# ----- (c) Create short-name symlink the dataset loader expects --------------
+HASHED="${STEP1_DIR//\//_}_${SPLIT}_raw_robometer_frames_${SPLIT}"
+SHORT="robometer_frames_${SPLIT}"
+if [[ -d "$HF_OUT_DIR/$HASHED" ]]; then
+    ln -sfn "$HASHED" "$HF_OUT_DIR/$SHORT"
+    echo "[step 2c] linked $HF_OUT_DIR/$SHORT -> $HASHED"
+else
+    echo "[step 2c] WARN: expected hashed cache dir not found at $HF_OUT_DIR/$HASHED — skipping symlink"
+fi
+
+echo "[step 2] DONE for $SPLIT"

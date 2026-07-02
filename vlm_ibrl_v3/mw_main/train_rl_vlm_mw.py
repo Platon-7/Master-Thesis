@@ -275,6 +275,30 @@ class Workspace:
         self.agent.set_stats(stat)
         saver = common_utils.TopkSaver(save_dir=self.work_dir, topk=1)
 
+        # WATCHDOG: the interpreter reliably hangs on shutdown after training
+        # (CUDA / MuJoCo / pybind / eval-server-thread destructors never join),
+        # holding the GPU until the SLURM timeout SIGKILLs it hours later. The
+        # os._exit() in __main__ doesn't always fire because the wedge happens
+        # before main() returns. This daemon thread is independent of where the
+        # main thread is stuck: once training has reached num_train_step (the
+        # final eval at step 40000 logs "40000: score/score" and the checkpoint
+        # is saved within the grace window), it force-exits the whole process.
+        import threading as _threading
+        import time as _time
+
+        def _watchdog():
+            while self.global_step < self.cfg.num_train_step:
+                _time.sleep(5)
+            _time.sleep(600)  # grace: let the final eval + checkpoint flush finish
+            print(
+                f"[watchdog] reached step {self.global_step}; forcing clean exit "
+                f"to avoid the shutdown hang",
+                flush=True,
+            )
+            os._exit(0)
+
+        _threading.Thread(target=_watchdog, daemon=True).start()
+
         self.warm_up()
         self.num_success = self.replay.num_success
         stopwatch = common_utils.Stopwatch()
@@ -446,3 +470,13 @@ if __name__ == "__main__":
 
     cfg = pyrallis.parse(config_class=MainConfig)  # type: ignore
     main(cfg)
+
+    # Force an immediate, clean exit. Otherwise the interpreter HANGS on
+    # shutdown (CUDA / MuJoCo / pybind / eval-server-thread destructors never
+    # terminate), holding the GPU for hours until the SLURM timeout SIGKILLs it
+    # — a huge waste across a large batch. Training + checkpoint saving already
+    # completed inside main(), so skipping interpreter cleanup is safe.
+    import sys as _sys
+    _sys.stdout.flush()
+    _sys.stderr.flush()
+    os._exit(0)

@@ -1062,6 +1062,135 @@ def run_confusion_matrix_eval(
     return fig, confusion_matrix, metrics
 
 
+def _hq_roc_auc(scores, labels):
+    P = labels.sum(); N = len(labels) - P
+    if P == 0 or N == 0:
+        return float("nan")
+    order = np.argsort(-scores, kind="mergesort"); l = labels[order]
+    tp = np.cumsum(l); fp = np.cumsum(1 - l)
+    tpr = np.concatenate([[0.0], tp / P]); fpr = np.concatenate([[0.0], fp / N])
+    return float(np.trapz(tpr, fpr))
+
+
+def _hq_auprc(scores, labels):
+    P = labels.sum()
+    if P == 0:
+        return float("nan")
+    order = np.argsort(-scores, kind="mergesort"); l = labels[order]
+    tp = np.cumsum(l)
+    precision = tp / np.arange(1, len(l) + 1); recall = tp / P
+    return float(np.trapz(np.concatenate([[1.0], precision]), np.concatenate([[0.0], recall])))
+
+
+def _hq_tpr_at_fpr(scores, labels, target_fpr=0.05):
+    P = labels.sum(); N = len(labels) - P
+    if P == 0 or N == 0:
+        return float("nan")
+    order = np.argsort(-scores, kind="mergesort"); l = labels[order]
+    tp = np.cumsum(l); fp = np.cumsum(1 - l)
+    tpr = tp / P; fpr = fp / N
+    ok = fpr <= target_fpr
+    return float(tpr[ok].max()) if ok.any() else 0.0
+
+
+def _hq_sep(succ_vals, fail_vals):
+    s = succ_vals[~np.isnan(succ_vals)]; f = fail_vals[~np.isnan(fail_vals)]
+    if len(s) == 0 or len(f) == 0:
+        return float("nan"), float("nan"), float("nan")
+    gap = float(s.mean() - f.mean())
+    pooled = float(np.sqrt((s.var() + f.var()) / 2.0))
+    return gap, pooled, (gap / pooled if pooled > 1e-9 else float("nan"))
+
+
+def compute_head_quality_metrics(results, num_bins=None, is_discrete_mode=False,
+                                 thresholds=(0.5, 0.8, 0.9), convert_fn=None):
+    """Success-head + progress-head quality metrics for the deck tables (slides 3/5/7/8) and the
+    IBRL false-positive analysis. Consumes the SAME `results` list as run_policy_ranking_eval
+    (per-(trajectory,frame-step) dicts: id, quality_label, partial_success, progress_pred [per-frame],
+    success_probs [per-frame]). `convert_fn` converts c51 progress logits -> continuous
+    (pass convert_bins_to_continuous-on-numpy). Returns a flat dict of scalars; {} if the success
+    head is off (no success_probs). Trajectory-level scores use the LAST frame; per-frame FP analysis
+    pools failure frames and adds near-miss (top-quintile partial_success) + late-frame (last 20%) strata
+    — the offline reward-hacking proxy (pooled FPR hides what stratified FPR reveals)."""
+    by_id = {}
+    for r in results:
+        tid = r.get("id")
+        if tid is None:
+            continue
+        by_id.setdefault(tid, []).append(r)
+    trajs = []; any_sp = False
+    for tid, rs in by_id.items():
+        rs = sorted(rs, key=lambda r: (r.get("metadata") or {}).get("frame_step", 0))
+        label = 1 if rs[0].get("quality_label") == "successful" else 0
+        partial = rs[0].get("partial_success")
+        succ_frames = []; prog_last = np.nan
+        for r in rs:
+            sp = r.get("success_probs")
+            if sp is not None:
+                any_sp = True
+                succ_frames.extend(np.asarray(sp, float).ravel().tolist())
+            pp = r.get("progress_pred")
+            if pp is not None:
+                pa = np.asarray(pp, float)
+                if is_discrete_mode and convert_fn is not None and pa.ndim >= 1 and num_bins and pa.shape[-1] == num_bins:
+                    cont = np.asarray(convert_fn(pa), float).ravel()
+                else:
+                    cont = pa.ravel()
+                if cont.size:
+                    prog_last = float(cont[-1])
+        if not succ_frames:
+            continue
+        sf = np.asarray(succ_frames, float)
+        trajs.append(dict(label=label, partial=partial, succ_last=float(sf[-1]),
+                          prog_last=prog_last, succ_frames=sf))
+    if not any_sp or not trajs:
+        return {}
+    labels = np.array([t["label"] for t in trajs])
+    succ_last = np.array([t["succ_last"] for t in trajs])
+    prog_last = np.array([t["prog_last"] for t in trajs])
+    m = {}
+    m["succ_roc_auc"] = _hq_roc_auc(succ_last, labels)
+    m["succ_auprc"] = _hq_auprc(succ_last, labels)
+    m["succ_tpr_at_5fpr"] = _hq_tpr_at_fpr(succ_last, labels, 0.05)
+    g, sg, dp = _hq_sep(succ_last[labels == 1], succ_last[labels == 0])
+    m["succ_gap"], m["succ_sigma"], m["succ_dprime"] = g, sg, dp
+    g, sg, dp = _hq_sep(prog_last[labels == 1], prog_last[labels == 0])
+    m["prog_gap"], m["prog_sigma"], m["prog_dprime"] = g, sg, dp
+    m["prog_tpr_at_5fpr"] = _hq_tpr_at_fpr(prog_last, labels, 0.05)
+    Pm = (labels == 1); Nm = (labels == 0)
+    for thr in thresholds:
+        ts = f"{thr:.2f}".replace(".", "")
+        pred = succ_last > thr
+        tp = int((pred & Pm).sum()); fp = int((pred & Nm).sum())
+        tn = int((~pred & Nm).sum()); fn = int((~pred & Pm).sum())
+        m[f"succ_tp_t{ts}"] = tp; m[f"succ_fp_t{ts}"] = fp
+        m[f"succ_tn_t{ts}"] = tn; m[f"succ_fn_t{ts}"] = fn
+        m[f"succ_precision_t{ts}"] = tp / (tp + fp) if (tp + fp) else float("nan")
+        m[f"succ_recall_t{ts}"] = tp / (tp + fn) if (tp + fn) else float("nan")
+        m[f"succ_fpr_t{ts}"] = fp / (fp + tn) if (fp + tn) else float("nan")
+    fails = [t for t in trajs if t["label"] == 0]
+    if fails:
+        all_fail = np.concatenate([t["succ_frames"] for t in fails])
+        late_fail = np.concatenate([
+            (t["succ_frames"][int(np.ceil(0.8 * len(t["succ_frames"]))):] if len(t["succ_frames"]) >= 2
+             else t["succ_frames"]) for t in fails])
+        parts = [t["partial"] for t in fails if t["partial"] is not None]
+        nearmiss = None
+        if len(parts) >= 5:
+            cut = float(np.quantile(parts, 0.8))
+            nm = [t for t in fails if t["partial"] is not None and t["partial"] >= cut]
+            if nm:
+                nearmiss = np.concatenate([t["succ_frames"] for t in nm])
+        for thr in thresholds:
+            ts = f"{thr:.2f}".replace(".", "")
+            m[f"succ_frame_fpr_t{ts}"] = float((all_fail > thr).mean())
+            m[f"succ_latefr_fpr_t{ts}"] = float((late_fail > thr).mean()) if late_fail.size else float("nan")
+            if nearmiss is not None:
+                m[f"succ_nearmiss_fpr_t{ts}"] = float((nearmiss > thr).mean())
+    m["n_traj"] = len(trajs); m["n_success"] = int(Pm.sum()); m["n_failure"] = int(Nm.sum())
+    return m
+
+
 def run_policy_ranking_eval(
     results: List[Dict[str, Any]],
     progress_pred_type: str,

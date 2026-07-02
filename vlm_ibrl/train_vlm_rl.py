@@ -367,6 +367,13 @@ class Workspace:
             with stopwatch.time("env step"):
                 obs, reward, terminal, success, image_obs = self.train_env.step(action)
 
+            # ONLINE success/fail gap logging (additive, no behavior change): track the
+            # per-episode MAX success_prob the reward model gives over the growing video,
+            # so we can split it by GT outcome at episode end -> the online analog of the
+            # offline fair-sep gap.
+            self._ep_max_sp = max(getattr(self, "_ep_max_sp", 0.0),
+                                  float(getattr(self.train_env, "_last_success_prob", 0.0)))
+
             with stopwatch.time("add"):
                 assert isinstance(terminal, bool)
                 reply = {"action": action}
@@ -378,6 +385,11 @@ class Workspace:
                     self.global_episode += 1
                     stat["score/train_score"].append(float(success))
                     stat["data/episode_len"].append(self.train_env.time_step)
+                    # online gap: per-episode max success_prob split by GT outcome.
+                    # gap = mean(online/maxsp_gtsucc) - mean(online/maxsp_gtfail)
+                    stat["online/maxsp_gtsucc" if success else "online/maxsp_gtfail"].append(
+                        float(getattr(self, "_ep_max_sp", 0.0)))
+                    self._ep_max_sp = 0.0
 
                     # reset env
                     obs, _ = self.train_env.reset()
@@ -528,6 +540,12 @@ def main():
 
     if cfg.use_wb:
         wandb.finish()
+
+    # Hard-exit before this frame unwinds: gc of the eval env (MuJoCo/EGL/pybind C++
+    # replay buffer) on return hangs and holds the GPU until SLURM SIGKILL. Training +
+    # ckpt already saved. Same fix as train_rl.py.
+    sys.stdout.flush()
+    os._exit(0)
 
 
 if __name__ == "__main__":

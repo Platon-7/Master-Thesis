@@ -3,8 +3,10 @@ from collections import defaultdict, deque
 
 import torch
 import robosuite
-#from robosuite import load_controller_config # TODO RoboMimicQwen
-from robosuite.controllers import load_composite_controller_config
+# Reverted to old controller API to match pinned robosuite@de64fa5 + shipped 1.4.1 data.
+# (Chris's active line below used the new composite API from an unfinished RoboMimicQwen migration.)
+#from robosuite.controllers import load_composite_controller_config
+from robosuite.controllers import load_controller_config
 
 import numpy as np
 from common_utils import ibrl_utils as utils
@@ -89,8 +91,8 @@ class PixelRobosuite:
     ):
         assert isinstance(camera_names, list)
         self.camera_names = camera_names
-        #self.ctrl_config = load_controller_config(default_controller="OSC_POSE") #TODO Robomimic qwen
-        self.ctrl_config = load_composite_controller_config(controller="BASIC")
+        #self.ctrl_config = load_composite_controller_config(controller="BASIC")
+        self.ctrl_config = load_controller_config(default_controller="OSC_POSE")
         self.ctrl_config["control_delta"] = ctrl_delta
         self.record_sim_state = record_sim_state
         self.env = robosuite.make(

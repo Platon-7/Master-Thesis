@@ -1,0 +1,37 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_concat
+#SBATCH --output=logs/concat_%j.out
+#SBATCH --error=logs/concat_%j.err
+#SBATCH --time=04:00:00
+#SBATCH --exclusive
+#SBATCH --mem=0
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-4gpu-l4,spot-g6-8gpu-l4,spot-g6e-4gpu-l40s,spot-g6e-8gpu-l40s
+#SBATCH --requeue
+
+# Step 2, shared prerequisite: merge the 16 per-shard _raw arrow datasets into
+# one  $STEP1_DIR/train_raw/robometer_frames_train  (+ absolutize the frames
+# column to point at the MP4s under each train_part<NN>_raw/). Runs ONCE.
+#
+# Both preprocess jobs read this output, so after this completes the full-train
+# and no_extras preprocess jobs can run SIMULTANEOUSLY (afterok on THIS job).
+#
+#   sbatch jobs/concat_train_aws.job
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+
+N_SHARDS="${N_SHARDS:-16}"
+STEP1_DIR="${STEP1_DIR:-/fsx/$USER/robometer_frames_hf_full}"
+
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2}"
+PYTHON="$ENV_PREFIX/bin/python"
+if [[ ! -x "$PYTHON" ]]; then echo "ERROR: $PYTHON not executable" >&2; exit 1; fi
+
+echo "[concat] HOST=$(hostname)  merging $N_SHARDS shards into $STEP1_DIR/train_raw/"
+"$PYTHON" "$HERE/scripts/concat_split_shards.py" \
+    --hf-out-dir "$STEP1_DIR" \
+    --split train \
+    --n-shards "$N_SHARDS"
+echo "[concat] DONE -> $STEP1_DIR/train_raw/robometer_frames_train"

@@ -510,6 +510,13 @@ def main():
     if cfg.use_wb:
         wandb.finish()
 
+    # Training + ckpt already saved. Hard-exit BEFORE this frame unwinds: gc of the
+    # eval env (MuJoCo/EGL/pybind C++ replay buffer) on return hangs and holds the GPU
+    # until SLURM SIGKILL. os._exit here skips those destructors. (The os._exit in
+    # __main__ never ran because the hang happens during main()'s return, not after.)
+    sys.stdout.flush()
+    os._exit(0)
+
 
 if __name__ == "__main__":
     from rich.traceback import install
@@ -518,4 +525,4 @@ if __name__ == "__main__":
     os.environ["MUJOCO_GL"] = "egl"
     torch.backends.cudnn.allow_tf32 = True  # type: ignore
     torch.backends.cudnn.benchmark = True  # type: ignore
-    main()
+    main()  # main() hard-exits via os._exit(0) before returning (see note there)

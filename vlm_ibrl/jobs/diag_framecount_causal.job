@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --job-name=diag_fc
+#SBATCH --output=logs/diag_fc_%j.out
+#SBATCH --error=logs/diag_fc_%j.err
+#SBATCH --time=01:10:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6-1gpu-l4,ondemand-g6e-1gpu-l40s,ondemand-g6-4gpu-l4,ondemand-g6e-4gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+unset PYTHONPATH 2>/dev/null || true
+export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_robomimic"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+source set_env.sh
+export PYTHONNOUSERSITE=1
+export PYTHONPATH="$HERE:$HERE/../Robometer:${PYTHONPATH:-}"
+export MUJOCO_GL=egl
+export ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run2_noicl_ours_step4000}"
+export N_EP="${N_EP:-8}"
+export THR="${THR:-0.61}"
+echo "[diag] host=$(hostname) ckpt=$ROBOMETER_FT_PATH N_EP=$N_EP"
+python jobs/diag_framecount_causal.py
+echo "[diag] done"

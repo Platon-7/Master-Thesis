@@ -1,0 +1,92 @@
+#!/bin/bash
+#SBATCH --job-name=followup
+#SBATCH --output=logs/followup_%A_%a.out
+#SBATCH --error=logs/followup_%A_%a.err
+#SBATCH --time=05:30:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6e-4gpu-l40s,ondemand-g6e-8gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+# NOTE: submit with  --array=0-53%10  (<=10 concurrent GPUs, ondemand only, no spot)
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+
+# ---- pick this task's config from the manifest line = SLURM_ARRAY_TASK_ID ----
+CFG_FILE="${CFG_FILE:-/shared/home/PKA4388/vlm_ibrl_runs/followup_configs.tsv}"
+LINE=$(( SLURM_ARRAY_TASK_ID + 1 ))
+read VLM_NAME BC_POLICY ROBOMETER_SUCCESS_THRESHOLD SEED < <(sed -n "${LINE}p" "$CFG_FILE")
+if [[ -z "${VLM_NAME:-}" ]]; then echo "no config at line $LINE of $CFG_FILE"; exit 1; fi
+
+# ---- environment (mirrors ibrl_sweep_robometer_aws.job) ----
+ENV_NAME="${IBRL_CONDA_ENV:-/shared/home/PKA4388/miniconda3/envs/demo2reward_v3}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+export IBRL_CONDA_ENV="$ENV_NAME"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda activate "$ENV_NAME"
+export PYTHONNOUSERSITE=1
+source set_env.sh
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+export WANDB_DISABLE_ARTIFACTS=true
+export WANDB_ENTITY=nlp-squad   # correct team for IBRL runs (was going to wrong team)
+export ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000}"
+export ROBOMETER_4B_PATH="${ROBOMETER_4B_PATH:-/shared/home/PKA4388/checkpoints/Robometer-4B}"
+
+# ---- the winning autonomous recipe (success head, beta=0, sparse, debounce=1) ----
+export AUTONOMOUS_SUCCESS=1
+export V3_CORNER2_ZOOM=1
+export ROBOMETER_REWARD_CAMERA=corner2_default
+export ROBOMETER_DETECT_HEAD=success
+export ROBOMETER_BETA=0.0
+export ROBOMETER_SUCCESS_CONSECUTIVE=1
+export ROBOMETER_THRESHOLD=0.0
+export ROBOMETER_REWARD_SCALE=1.0
+export ROBOMETER_SUCCESS_THRESHOLD
+export REWARD_AT_TRUNC=1
+export EPISODE_LENGTH=200          # codebase default (MainConfig.episode_length)
+export NUM_TRAIN_STEP=40000
+export USE_WB=0
+TRAIN_TIMEOUT="${TRAIN_TIMEOUT:-18000}"   # 5h backstop; watchdog kills post-40k hangs in ~10min
+
+SAVE_BASE="${SAVE_BASE:-/shared/home/$USER/vlm_ibrl_runs}"
+SAVE_DIR="${SAVE_BASE}/${BC_POLICY}_${VLM_NAME}_dsucc${ROBOMETER_SUCCESS_THRESHOLD}_s${SEED}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
+mkdir -p "$SAVE_DIR"
+
+echo "==================== followup (AWS) ===================="
+echo "HOST=$(hostname) PART=${SLURM_JOB_PARTITION:-?} ARRAYTASK=${SLURM_ARRAY_TASK_ID}"
+echo "VLM=$VLM_NAME  TASK=$BC_POLICY  SUCC_THR=$ROBOMETER_SUCCESS_THRESHOLD  SEED=$SEED"
+echo "EP_LEN=$EPISODE_LENGTH  STEPS=$NUM_TRAIN_STEP  TIMEOUT=$TRAIN_TIMEOUT"
+echo "SAVE_DIR=$SAVE_DIR"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+echo "========================================================"
+
+timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
+    python mw_main/train_rl_vlm_mw.py \
+        --config_path release/cfgs/metaworld/ibrl_long.yaml \
+        --episode_length "$EPISODE_LENGTH" \
+        --bc_policy "$BC_POLICY" \
+        --vlm "$VLM_NAME" \
+        --train_end_on_success 0 \
+        --reward_at_truncation "$REWARD_AT_TRUNC" \
+        --num_train_step "$NUM_TRAIN_STEP" \
+        --seed "$SEED" \
+        --use_wb 0 \
+        --robometer_beta "$ROBOMETER_BETA" \
+        --robometer_threshold "$ROBOMETER_THRESHOLD" \
+        --robometer_reward_scale "$ROBOMETER_REWARD_SCALE" \
+        --save_dir "$SAVE_DIR"
+RC=$?
+if [[ $RC -eq 124 || $RC -eq 137 ]]; then
+    if grep -q "^${NUM_TRAIN_STEP}: " "$SAVE_DIR/train.log" 2>/dev/null; then
+        echo "[wrapper] timeout fired but training reached step ${NUM_TRAIN_STEP} — PASS"; RC=0
+    else
+        LAST=$(grep -E "^[0-9]+: " "$SAVE_DIR/train.log" 2>/dev/null | awk -F: '{print $1}' | sort -un | tail -1)
+        echo "[wrapper] timeout fired BEFORE ${NUM_TRAIN_STEP} — last step: ${LAST}"
+    fi
+fi
+echo "return code: $RC"

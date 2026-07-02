@@ -4,6 +4,36 @@ import torch
 from qwen_vl_utils import process_vision_info
 
 
+def _load_roboreward(model_id):
+    """Load a RoboReward baseline by HF id. Prefers flash_attention_2; falls back if unavailable."""
+    from transformers import Qwen3VLForConditionalGeneration, AutoProcessor
+
+    try:
+        model = Qwen3VLForConditionalGeneration.from_pretrained(
+            model_id,
+            dtype=torch.bfloat16,
+            attn_implementation="flash_attention_2",
+            device_map="auto",
+        )
+    except (ImportError, ValueError) as e:
+        warnings.warn(
+            f"flash_attention_2 unavailable for {model_id} ({e}); "
+            "falling back to default attention. Install flash-attn for full throughput."
+        )
+        model = Qwen3VLForConditionalGeneration.from_pretrained(
+            model_id,
+            dtype=torch.bfloat16,
+            device_map="auto",
+        )
+    processor = AutoProcessor.from_pretrained(model_id, use_fast=True)
+    return model, processor
+
+
+def get_roboreward_4b():
+    """Load the RoboReward-4B baseline (teetone/RoboReward-4B)."""
+    return _load_roboreward("teetone/RoboReward-4B")
+
+
 def get_roboreward_8b():
     """Load the RoboReward-8B baseline. Prefers flash_attention_2; falls back if unavailable."""
     from transformers import Qwen3VLForConditionalGeneration, AutoProcessor

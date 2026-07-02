@@ -1,0 +1,78 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_pp_big
+#SBATCH --output=logs/preprocess_array_%A_%a.out
+#SBATCH --error=logs/preprocess_array_%A_%a.err
+#SBATCH --time=12:00:00
+#SBATCH --exclusive
+#SBATCH --mem=0
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-4gpu-l4,spot-g6-8gpu-l4,spot-g6e-4gpu-l40s,spot-g6e-8gpu-l40s
+#SBATCH --requeue
+
+# Step 1 (mp4s), big-node variant. Because every partition is OverSubscribe=NO
+# (one job per node, exclusively), we grab a whole node per shard and scale the
+# worker pool to ALL of the node's cores ($(nproc): 48-192) instead of a fixed
+# 16. Spans the g6 + g6e 4gpu/8gpu partitions so SLURM places each shard on
+# whichever big node is free first. --mem=0 = use all memory on the node.
+#
+# Usage (shards already pre-built in $SPLITS_DIR/shards/):
+#   sbatch --array=0,3-15 jobs/preprocess_split_array_bignode.job
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+SPLIT="${SPLIT:-train}"
+N_SHARDS="${N_SHARDS:-16}"
+SHARD_ID="${SLURM_ARRAY_TASK_ID:-0}"
+SPLITS_DIR="${SPLITS_DIR:-/shared/home/PKA4388/robometer_splits/robometer_frames_splits_full}"
+HF_OUT_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/fsx/$USER/robometer_frames_hf_full}"
+NWORKERS="$(nproc)"
+
+if [[ "$N_SHARDS" -gt 1 ]]; then
+    PAIRS_INDEX="$SPLITS_DIR/shards/pairs_index_${SPLIT}_part$(printf '%02d' $SHARD_ID).jsonl"
+    OUTPUT_NAME="${SPLIT}_part$(printf '%02d' $SHARD_ID)"
+else
+    PAIRS_INDEX="$SPLITS_DIR/pairs_index_${SPLIT}.jsonl"
+    OUTPUT_NAME="${SPLIT}"
+fi
+if [[ ! -f "$PAIRS_INDEX" ]]; then
+    echo "ERROR: pairs_index not found at $PAIRS_INDEX" >&2
+    exit 2
+fi
+
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2}"
+PYTHON="$ENV_PREFIX/bin/python"
+if [[ ! -x "$PYTHON" ]]; then
+    echo "ERROR: $PYTHON not executable" >&2
+    exit 1
+fi
+
+export ROBOMETER_DATASET_PATH="/shared/home/PKA4388/robometer_frame_dataset"
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_OUT_DIR"
+export HF_DIR="$HF_OUT_DIR"
+export SPLIT
+
+mkdir -p "$HF_OUT_DIR"
+cd "$ROBOMETER_DIR"
+
+echo "==================== shard ${SHARD_ID}/${N_SHARDS} ===================="
+echo "  HOST           : $(hostname)"
+echo "  PARTITION      : ${SLURM_JOB_PARTITION:-?}"
+echo "  N_WORKERS      : $NWORKERS"
+echo "  SPLIT          : $SPLIT"
+echo "  PAIRS_INDEX    : $PAIRS_INDEX"
+echo "  HF_OUT_DIR     : $HF_OUT_DIR"
+echo "  OUTPUT_NAME    : $OUTPUT_NAME"
+echo "  ROW_COUNT      : $(wc -l < "$PAIRS_INDEX")"
+echo "==================================================================="
+
+"$PYTHON" -m dataset_upload.generate_hf_dataset \
+  --config_path "$HERE/configs/dataset_frames.yaml" \
+  --dataset.dataset_name "robometer_frames_${OUTPUT_NAME}" \
+  --dataset.pairs_index_path "$PAIRS_INDEX" \
+  --output.output_dir "$HF_OUT_DIR/${OUTPUT_NAME}_raw" \
+  --output.num_workers "$NWORKERS"
+
+echo "[shard $SHARD_ID] DONE"

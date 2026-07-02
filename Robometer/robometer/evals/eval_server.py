@@ -160,11 +160,41 @@ def forward_model(
                 timing_raw=None,
             )
         else:
+            # ICL dtype guard: the processor emits pixel_values as fp32; with a bf16 vision
+            # tower this trips LayerNorm ("expected scalar type BFloat16 but found Float").
+            # forward_model reads TOP-LEVEL batch_inputs["pixel_values"] (the input cast in
+            # process_batch_helper only touched the *_inputs sub-dicts), so cast here, at the
+            # actual model entry point, to the vision tower's param dtype.
+            _vdt = None
+            for _g in (
+                lambda: next(model.model.visual.parameters()).dtype,
+                lambda: getattr(model, "model_dtype", None),
+                lambda: next(model.parameters()).dtype,
+            ):
+                try:
+                    _vdt = _g()
+                    if _vdt is not None:
+                        break
+                except Exception:
+                    continue
+            _pv = batch_inputs.get("pixel_values", None)
+            _pvv = batch_inputs.get("pixel_values_videos", None)
+            if not getattr(forward_model, "_dt_logged", False):
+                logger.info(
+                    f"[forward_model] vision_dtype={_vdt} pixel_values_dtype="
+                    f"{getattr(_pv, 'dtype', None)} pixel_values_videos_dtype={getattr(_pvv, 'dtype', None)}"
+                )
+                forward_model._dt_logged = True
+            if _vdt is not None:
+                if _pv is not None and hasattr(_pv, "is_floating_point") and _pv.is_floating_point():
+                    _pv = _pv.to(_vdt)
+                if _pvv is not None and hasattr(_pvv, "is_floating_point") and _pvv.is_floating_point():
+                    _pvv = _pvv.to(_vdt)
             model_output, extra = model(
                 input_ids=batch_inputs["input_ids"],
                 attention_mask=batch_inputs["attention_mask"],
-                pixel_values=batch_inputs.get("pixel_values", None),
-                pixel_values_videos=batch_inputs.get("pixel_values_videos", None),
+                pixel_values=_pv,
+                pixel_values_videos=_pvv,
                 image_grid_thw=batch_inputs.get("image_grid_thw", None),
                 video_grid_thw=batch_inputs.get("video_grid_thw", None),
                 second_per_grid_ts=batch_inputs.get("second_per_grid_ts", None),
@@ -280,13 +310,44 @@ def process_batch_helper(
 
     batch_inputs = batch_collator(input_samples)
 
-    # Move inputs to the correct GPU
+    # Move inputs to the correct GPU. Also cast floating-point tensors (e.g.
+    # pixel_values) to the model's dtype: the processor emits them as fp32, and
+    # the Qwen3-VL vision tower does not cast internally, so a bf16 model trips
+    # LayerNorm with "expected scalar type BFloat16 but found Float". Integer
+    # tensors (input_ids, attention_mask, *_grid_thw) are left untouched.
+    # The cast target is the VISION TOWER's param dtype: the RBM wrapper mixes
+    # dtypes (bf16 backbone + heads), so a generic next(model.parameters()) can
+    # return an fp32 head. The failing LayerNorm lives in model.model.visual, so
+    # match that exactly. Fall back to the backbone/whole-model dtype.
+    _model_dtype = None
+    for _getter in (
+        lambda: next(model.model.visual.parameters()).dtype,
+        lambda: model.model_dtype,
+        lambda: model.model.dtype,
+        lambda: next(model.parameters()).dtype,
+    ):
+        try:
+            _model_dtype = _getter()
+            if _model_dtype is not None:
+                break
+        except Exception:
+            continue
+    if not getattr(process_batch_helper, "_dtype_logged", False):
+        logger.info(f"[reward-relabel] casting float inputs to vision dtype: {_model_dtype}")
+        process_batch_helper._dtype_logged = True
+
+    def _to_model(value):
+        value = value.to(device)
+        if _model_dtype is not None and value.is_floating_point():
+            value = value.to(_model_dtype)
+        return value
+
     for key, value in batch_inputs["preference_inputs"].items():
         if isinstance(value, torch.Tensor):
-            batch_inputs["preference_inputs"][key] = value.to(device)
+            batch_inputs["preference_inputs"][key] = _to_model(value)
     for key, value in batch_inputs["progress_inputs"].items():
         if isinstance(value, torch.Tensor):
-            batch_inputs["progress_inputs"][key] = value.to(device)
+            batch_inputs["progress_inputs"][key] = _to_model(value)
     outputs_preference = None
     outputs_progress = None
     outputs_success = None

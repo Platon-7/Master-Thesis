@@ -574,6 +574,9 @@ class TrainingConfig:
     ddp_timeout: int = field(default=1800)
     max_steps: Optional[int] = field(default=-1)  # -1 means no limit, use num_train_epochs instead
     save_steps: int = field(default=100)
+    # None = keep every checkpoint (HF default). Consumed via getattr in setup_utils
+    # build of TrainingArguments; declared here so jobs can pass it explicitly.
+    save_total_limit: Optional[int] = field(default=None)
     dataloader_pin_memory: bool = field(default=True)
     dataloader_num_workers: int = field(default=0)
     dataloader_persistent_workers: bool = field(default=False)

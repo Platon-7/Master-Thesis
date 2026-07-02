@@ -10,7 +10,7 @@ from PIL import Image
 from env.gvl import reward_from_GVL
 from env.metaworld_wrapper import PixelMetaWorld
 from env.qwen_utils import get_qwen3, get_qwen3_8b, prompt_qwen
-from env.roboreward_utils import get_roboreward_8b, prompt_roboreward
+from env.roboreward_utils import get_roboreward_4b, get_roboreward_8b, prompt_roboreward
 from env.robometer_utils import get_robometer_4b
 from env.vlm_prompts import (
     METAWORLD_DEMO2REWARD_REPLIES as demo2reward_replies,
@@ -48,6 +48,7 @@ VALID_VLMS = (
     "demo2reward_qwen3_8b",
     "demo2reward_qwen3_32b",
     "roboreward_8b",
+    "roboreward_4b",
     "robometer_4b",
     "robometer_ft",   # user's fine-tuned variant; checkpoint via ROBOMETER_FT_PATH env var
     "qwen35_ft",      # alternative FT (Qwen3.5 base); checkpoint via QWEN35_FT_PATH env var
@@ -143,6 +144,51 @@ def _vlm_demo_dataset_path(metaworld_data_dir: str, env_name: str) -> Path:
     return Path(metaworld_data_dir) / f"{env_name}_frame_stack_1_224x224_modem" / "dataset.hdf5"
 
 
+def _otsu_threshold(x, bins=64):
+    """Otsu's 1-D threshold over scores in [0,1] + a VARIANCE-NORMALIZED separation.
+
+    Returns (threshold, d) where d = (mean_high - mean_low) / sigma_within is the
+    standardized separation (Cohen's-d style) at the optimal Otsu split — the
+    cluster gap measured in units of the within-cluster spread. This is
+    scale-invariant (works whether successes sit at 0.3 or 0.9) and variance-aware
+    (tight, well-resolved clusters score high; overlapping ones score low even if
+    their means are far apart) — unlike a raw absolute gap. A unimodal blob, which
+    Otsu still splits, lands around d~2.6 regardless of where/how wide it is, while
+    a genuinely bimodal stream gives d well above ~5; the caller fires only when
+    d >= a cutoff, else stays silent (graceful failure). Demo-free, GT-free."""
+    x = np.asarray(x, dtype=float)
+    hist, edges = np.histogram(x, bins=bins, range=(0.0, 1.0))
+    p = hist.astype(float)
+    s = p.sum()
+    if s <= 0:
+        return 1.1, 0.0, 1.1, 0.0
+    p /= s
+    centers = 0.5 * (edges[:-1] + edges[1:])
+    omega = np.cumsum(p)
+    mu = np.cumsum(p * centers)
+    s2 = np.cumsum(p * centers ** 2)        # second-moment cumsum (for within-var)
+    mu_t = mu[-1]; s2_t = s2[-1]
+    denom = omega * (1.0 - omega)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        sigma_b = np.where(denom > 0, (mu_t * omega - mu) ** 2 / np.where(denom > 0, denom, 1.0), 0.0)
+    k = int(np.argmax(sigma_b))
+    w0 = omega[k]
+    if w0 <= 0 or w0 >= 1:
+        return float(centers[k]), 0.0, float(centers[k]), 0.0
+    mu_low = mu[k] / w0
+    mu_high = (mu_t - mu[k]) / (1.0 - w0)
+    # within-class variances of each side at the split
+    var_low = max(s2[k] / w0 - mu_low ** 2, 0.0)
+    var_high = max((s2_t - s2[k]) / (1.0 - w0) - mu_high ** 2, 0.0)
+    sigma_w = float(np.sqrt(max(w0 * var_low + (1.0 - w0) * var_high, 1e-12)))  # pooled
+    sigma_high = float(np.sqrt(max(var_high, 1e-12)))
+    d = float((mu_high - mu_low) / sigma_w)
+    # Returns: (valley threshold, separation d, high-cluster mean, high-cluster std).
+    # The caller can fire at the valley OR at the high cluster (mu_high - k*sigma_high),
+    # the latter being the demo-free analogue of "look as good as the success mode".
+    return float(centers[k]), d, float(mu_high), sigma_high
+
+
 class VLMCritic_PixelMetaWorld(PixelMetaWorld):
     """MetaWorld env wrapped with a frozen VLM reward model.
 
@@ -186,6 +232,104 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         self.robometer_reward_scale = float(kwargs.pop("robometer_reward_scale", 1.0))
         self._last_progress = 0.0
         self._last_success_prob = 0.0
+
+        # FAIR autonomous-RL mode (Robometer App. E-2): success detection AND
+        # episode termination come from the MODEL's success_prob crossing
+        # SUCCESS_THRESHOLD — never from the simulator's GT success. Enabled via
+        # env var so SLURM jobs stay generic. When on, the scorer is queried
+        # EVERY step (needed for detection), and GT success is returned only as a
+        # logged diagnostic — the separate eval_env still measures true GT
+        # success, which is the honest performance metric. Assumes a success
+        # head (Robometer family / qwen35_ft). The detection threshold is
+        # SEPARATE from robometer_threshold (which only shapes the reward value),
+        # so reward shaping (beta / threshold / reward_at_truncation) stays
+        # orthogonal to the success detector.
+        self.autonomous = os.environ.get("AUTONOMOUS_SUCCESS", "0") == "1"
+        self.success_threshold = float(os.environ.get("ROBOMETER_SUCCESS_THRESHOLD", "0.6"))
+        # Debounce: require N CONSECUTIVE steps with success_prob > threshold
+        # before declaring success + terminating (Christian's suggestion). Filters
+        # transient single-frame false-positive spikes that otherwise end episodes
+        # at ~step 20 and let the policy reward-hack. 1 = no debounce (default).
+        self.success_consecutive = int(os.environ.get("ROBOMETER_SUCCESS_CONSECUTIVE", "1"))
+        self._consec_success = 0
+        # Which head drives success DETECTION (independent of the reward, which
+        # is the beta mix). "success" = success_prob (paper default); "progress"
+        # = progress_reward (rises monotonically, so it may avoid the early
+        # single-frame spikes that make the success head terminate episodes
+        # prematurely). Env var so jobs stay generic.
+        self.detect_head = os.environ.get("ROBOMETER_DETECT_HEAD", "success")
+        # SINGLE-FRAME-TILE (default OFF): replicate the reward model's Robometer-
+        # authors LIBERO usage — instead of feeding the growing trajectory buffer,
+        # each scorer call gets ONLY the current frame, tiled to fill max_frames
+        # ([frame]*N). The progress head then reads a per-STATE progress estimate
+        # (temporal context removed), used as a dense per-step reward. 0 = off;
+        # any value >0 turns it on and (unless it is >1, in which case it is the
+        # literal tile count) uses the scorer's own max_frames as N.
+        self.single_frame_tile = int(os.environ.get("ROBOMETER_SINGLE_FRAME_TILE", "0"))
+        # Stability levers (both default OFF; see the autonomous branch in step()):
+        # CONFIRM_K: a candidate fire must be confirmed by a majority of K extra
+        #   scores on jittered frame subsamples (self-ensemble majority vote).
+        # REWARD_SAMPLE: terminal reward emitted as Bernoulli(success_prob) instead
+        #   of the raw value (output sampling — systematic FPs stop paying out
+        #   deterministically).
+        self.confirm_k = int(os.environ.get("ROBOMETER_CONFIRM_K", "0"))
+        self.confirm_frac = float(os.environ.get("ROBOMETER_CONFIRM_FRAC", "0.85"))
+        # unanimous confirm vote (all ballots agree) vs majority
+        self.confirm_unanimous = os.environ.get("ROBOMETER_CONFIRM_UNANIMOUS", "0") == "1"
+        # pixel-augmentation strength for confirm-vote ballots (0 = off, demo-free)
+        self.confirm_augment = float(os.environ.get("ROBOMETER_CONFIRM_AUGMENT", "0.0"))
+        # dual-head: also require progress head > this to fire (0 = off, demo-free)
+        self.progress_confirm_thr = float(os.environ.get("ROBOMETER_PROGRESS_CONFIRM_THR", "0.0"))
+        self.reward_sample = os.environ.get("ROBOMETER_REWARD_SAMPLE", "0") == "1"
+        # Online levers (both default OFF; see the autonomous branch in step()):
+        # DYNAMIC_THR: adaptive quantile threshold over recent on-policy scores
+        #   (no per-task calibration); SUCCESS_THRESHOLD acts as the floor.
+        # MIN_EP_FRAC: ignore fires before frac×(median demo length) steps.
+        self.dynamic_thr = os.environ.get("ROBOMETER_DYNAMIC_THR", "0") == "1"
+        self.dyn_q = float(os.environ.get("ROBOMETER_DYN_Q", "0.995"))
+        self.dyn_margin = float(os.environ.get("ROBOMETER_DYN_MARGIN", "0.03"))
+        self.dyn_window = int(os.environ.get("ROBOMETER_DYN_WINDOW", "1500"))
+        self._dyn_scores = []
+        # Online-calibration levers (default OFF), compared against offline-fixed thr:
+        # OTSU (demo-free): bar = Otsu valley of the recent on-policy score stream,
+        #   used only when the stream is clearly BIMODAL (sep >= otsu_sep); else stay
+        #   silent (bar=1.1) -> graceful failure. No demos, no GT, no per-task tuning.
+        # DEMO_ANCHOR (demo-based): bar = percentile of the frozen model's success_prob
+        #   on demo success windows loaded from ROBOMETER_DEMO_ANCHOR_PATH. Per-task, automatic.
+        self.otsu = os.environ.get("ROBOMETER_OTSU", "0") == "1"
+        self.otsu_min = int(os.environ.get("ROBOMETER_OTSU_MIN", "100"))
+        self.otsu_bins = int(os.environ.get("ROBOMETER_OTSU_BINS", "64"))
+        # min VARIANCE-NORMALIZED separation d = (mu_hi-mu_lo)/sigma_within at the
+        # Otsu split to count the stream as bimodal (fire). Scale-invariant +
+        # variance-aware: a unimodal blob lands ~2.6, real bimodal >>5. Below the
+        # cutoff -> unimodal -> stay silent (graceful failure).
+        self.otsu_d = float(os.environ.get("ROBOMETER_OTSU_D", "3.5"))
+        # Otsu operates on PER-EPISODE PEAK success_probs, NOT the per-step stream.
+        # The per-step stream is ~99% ordinary (failure-looking) frames, so its
+        # "high cluster" is just the failure tail — genuine success frames are too
+        # rare to form a cluster. Per-episode PEAKS separate failure-episodes (low
+        # peak) from success-episodes (high peak), giving a real valley to fire at.
+        self._ep_peak_scores = []          # rolling buffer of per-episode peak scores
+        self._cur_ep_peak = 0.0            # running peak within the current episode
+        self.otsu_min_eps = int(os.environ.get("ROBOMETER_OTSU_MIN_EPS", "20"))
+        self.otsu_win_eps = int(os.environ.get("ROBOMETER_OTSU_WIN_EPS", "60"))
+        self._otsu_next_log = self.otsu_min_eps   # diagnostic-print throttle (buffer-length based)
+        self.demo_anchor = os.environ.get("ROBOMETER_DEMO_ANCHOR", "0") == "1"
+        self.demo_anchor_path = os.environ.get("ROBOMETER_DEMO_ANCHOR_PATH", "")
+        self.demo_anchor_pct = float(os.environ.get("ROBOMETER_DEMO_ANCHOR_PCT", "25"))
+        self.demo_anchor_k = int(os.environ.get("ROBOMETER_DEMO_ANCHOR_K", "3"))
+        self._demo_anchor_thr = None
+        _min_frac = float(os.environ.get("ROBOMETER_MIN_EP_FRAC", "0"))
+        _env_name_early = args[0] if args else kwargs.get("env_name")
+        if _min_frac > 0 and _env_name_early in video_demo3_t_end:
+            _demo_med = sorted(video_demo3_t_end[_env_name_early])[1]
+            self.min_ep_steps = int(_min_frac * _demo_med)
+        else:
+            self.min_ep_steps = int(os.environ.get("ROBOMETER_MIN_EP_STEPS", "0"))
+        if self.dynamic_thr or self.min_ep_steps > 0:
+            print(f"[online-levers] dynamic_thr={self.dynamic_thr} "
+                  f"(q={self.dyn_q}, margin={self.dyn_margin}, window={self.dyn_window}, "
+                  f"floor={self.success_threshold}) min_ep_steps={self.min_ep_steps}", flush=True)
 
         # ICL context for Robometer-family scorers. When ROBOMETER_ICL_DEMO_PATH
         # is set (a directory of `{demo_idx}_NNN.png` frames), pick N uniform
@@ -280,13 +424,18 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             self.prompt_vlm = prompt_roboreward
             self.system_prompt = roboreward_prompt
             self.prompt = f"{roboreward_prompt}\n\nTask: {task}"
+        elif vlm == "roboreward_4b":
+            self.vlm, self.processor = get_roboreward_4b()
+            self.prompt_vlm = prompt_roboreward
+            self.system_prompt = roboreward_prompt
+            self.prompt = f"{roboreward_prompt}\n\nTask: {task}"
         elif vlm in ("robometer_4b", "robometer_ft", "qwen35_ft"):
             # Robometer-family critics (progress + success heads, not
             # generative). All variants share one loader; only the
             # checkpoint path differs. FT variants read their path from an
             # env var so the SLURM job stays generic.
             _ckpt_map = {
-                "robometer_4b": "robometer/Robometer-4B",
+                "robometer_4b": os.environ.get("ROBOMETER_4B_PATH", "robometer/Robometer-4B"),
                 "robometer_ft": os.environ.get("ROBOMETER_FT_PATH", ""),
                 "qwen35_ft":    os.environ.get("QWEN35_FT_PATH", ""),
             }
@@ -315,6 +464,39 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         self.current_video = []
         self.vid_t = 0
 
+        # DEMO-ANCHORED online calibration (demo-based): set the detection bar from
+        # the frozen model's success_prob on a few demo success windows. Computed once
+        # (model is frozen); no offline grid-search, no GT. Reuses the demo frame dir
+        # ({demo_idx}_NNN.png) — same source/view as ICL.
+        if self.demo_anchor and self.demo_anchor_path and (
+            "robometer" in vlm or vlm == "qwen35_ft"
+        ):
+            from pathlib import Path as _P
+            from PIL import Image as _PIL
+            d = _P(self.demo_anchor_path)
+            present = sorted({p.name.split("_")[0] for p in d.iterdir()
+                              if p.suffix == ".png" and p.name.split("_")[0].isdigit()},
+                             key=lambda s: int(s))
+            scores = []
+            for di in present[: self.demo_anchor_k]:
+                frs = sorted(p for p in d.iterdir()
+                             if p.name.startswith(f"{di}_") and p.suffix == ".png")
+                if not frs:
+                    continue
+                picks = np.linspace(0, len(frs) - 1, 16).round().astype(int)
+                # Feed PIL Images (same type the on-policy path and desc_rerank use);
+                # passing numpy arrays here makes the scorer return garbage ~0.
+                win = [_PIL.open(frs[i]).convert("RGB") for i in picks]
+                out = self.scorer(win, task=self.task_description, icl_frames=self.icl_frames)
+                scores.append(float(out["success_prob"]))
+            if scores:
+                self._demo_anchor_thr = float(np.percentile(scores, self.demo_anchor_pct))
+                print(f"[demo-anchor] {len(scores)} demos success_probs="
+                      f"{[round(s, 3) for s in scores]} -> bar(p{self.demo_anchor_pct:g})="
+                      f"{self._demo_anchor_thr:.3f}", flush=True)
+            else:
+                print(f"[demo-anchor] WARNING: no demo frames found at {self.demo_anchor_path}", flush=True)
+
     def _load_demo_video(self, env_name, camera_name, i=0):
         data_path = _vlm_demo_dataset_path(self.metaworld_data_dir, env_name)
         if not data_path.exists():
@@ -337,6 +519,20 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         assert img_np.shape[0] == 224 and img_np.shape[1] == 224 and img_np.shape[2] == 3
         return Image.fromarray(img_np)
 
+    def _augment_frame(self, img):
+        """Small random photometric perturbation of a PIL frame for the
+        augmentation-ensemble confirm vote. Scale = self.confirm_augment.
+        Brightness/contrast jitter + light gaussian noise — enough to flip a
+        pixel-brittle false positive, not enough to break a genuine success."""
+        from PIL import ImageEnhance
+        a = self.confirm_augment
+        out = img
+        out = ImageEnhance.Brightness(out).enhance(1.0 + random.uniform(-a, a))
+        out = ImageEnhance.Contrast(out).enhance(1.0 + random.uniform(-a, a))
+        arr = np.asarray(out, dtype=np.float32)
+        arr = arr + np.random.normal(0.0, 255.0 * a * 0.5, arr.shape)
+        return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
+
     def reset(self):
         rl_obs, image_obs = super().reset()
         self.current_video = [self.fetch_img(image_obs)]
@@ -356,6 +552,8 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         }
         self._last_progress = 0.0
         self._last_success_prob = 0.0
+        self._consec_success = 0
+        self._cur_ep_peak = 0.0
         self.vid_t = 1
         return rl_obs, image_obs
 
@@ -365,6 +563,168 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         self.current_video.append(current_img)
         self.vid_t += 1
         idx = past_frames_single_video(self.vid_t, self.past_len)
+
+        if self.autonomous:
+            # ---- FAIR autonomous protocol: the MODEL detects success, not GT.
+            # Score the growing buffer every step (sets _last_success_prob).
+            if self.single_frame_tile and (
+                "robometer" in self.vlm_name or self.vlm_name == "qwen35_ft"
+            ):
+                # Robometer-authors LIBERO mode: score ONLY the current frame,
+                # tiled to max_frames. No temporal window -> per-state progress.
+                tile_n = self.single_frame_tile if self.single_frame_tile > 1 \
+                    else int(getattr(self.scorer, "max_frames", 16))
+                vlm_reward = self.vlm_reward([current_img] * tile_n)
+            elif "roboreward" in self.vlm_name or "robometer" in self.vlm_name or self.vlm_name == "qwen35_ft":
+                vlm_reward = self.vlm_reward(self.current_video)
+            else:
+                subsampled_video = [self.current_video[i] for i in idx]
+                subsampled_video.append(current_img)
+                vlm_reward = self.vlm_reward(subsampled_video)
+            # The chosen detection head crossing the threshold for N consecutive
+            # steps == success + terminate. Head selectable (success_prob vs
+            # progress_reward); GT is NOT used either way.
+            detect_value = (self._last_progress if self.detect_head == "progress"
+                            else self._last_success_prob)
+            self._cur_ep_peak = max(self._cur_ep_peak, float(detect_value))
+            # DYNAMIC THRESHOLD (online lever; OFF unless ROBOMETER_DYNAMIC_THR=1).
+            # No hand-calibrated threshold: the bar is the rolling ~q-th quantile
+            # of recent ON-POLICY detection scores + margin (floored at
+            # ROBOMETER_SUCCESS_THRESHOLD). When the policy adversarially inflates
+            # scores, the quantile rises with it — the bar self-raises under
+            # exactly the pressure that breaks a static threshold.
+            # Maintain the rolling on-policy score buffer for any stream-based
+            # online lever (DYNAMIC_THR quantile or OTSU bimodal valley).
+            if self.dynamic_thr:
+                self._dyn_scores.append(float(detect_value))
+                if len(self._dyn_scores) > self.dyn_window:
+                    self._dyn_scores = self._dyn_scores[-self.dyn_window:]
+            if self.demo_anchor and self._demo_anchor_thr is not None:
+                # DEMO-ANCHORED (demo-based): bar set once from demo success scores.
+                eff_threshold = self._demo_anchor_thr
+            elif self.otsu:
+                # OTSU (demo-free): bar = Otsu valley over PER-EPISODE PEAK scores
+                # (updated once per episode at ep_end, below). Failure-episodes peak
+                # low, success-episodes peak high -> a real valley to fire at. Only
+                # when the peaks are clearly BIMODAL (d >= otsu_d, i.e. a success
+                # cluster has emerged); otherwise stay silent (bar=1.1) so we don't
+                # fire before the policy ever succeeds. Demo-free, GT-free.
+                if len(self._ep_peak_scores) >= self.otsu_min_eps:
+                    _thr, _d, _mu_hi, _sd_hi = _otsu_threshold(self._ep_peak_scores, self.otsu_bins)
+                    eff_threshold = max(self.success_threshold, _thr) if _d >= self.otsu_d else 1.1
+                    # diagnostic: print once whenever the ep-peak buffer grows by 10
+                    # (vid_t resets every episode & caps at 200, so a vid_t%500 gate
+                    # never fires — use the buffer length as the throttle instead).
+                    if len(self._ep_peak_scores) >= self._otsu_next_log:
+                        self._otsu_next_log = len(self._ep_peak_scores) + 10
+                        _a = np.asarray(self._ep_peak_scores)
+                        print(f"[otsu] ep-peaks n={len(_a)} [min/med/max]="
+                              f"{_a.min():.3f}/{np.median(_a):.3f}/{_a.max():.3f} "
+                              f"valley={_thr:.3f} d={_d:.2f} mu_hi={_mu_hi:.3f} -> bar={eff_threshold:.3f}",
+                              flush=True)
+                else:
+                    eff_threshold = 1.1  # warmup: still collecting per-episode peaks
+            elif self.dynamic_thr:
+                if len(self._dyn_scores) >= 50:
+                    q = float(np.quantile(np.asarray(self._dyn_scores), self.dyn_q))
+                    eff_threshold = max(self.success_threshold, q + self.dyn_margin)
+                else:
+                    eff_threshold = 1.1  # warmup: never fire on <50 observed scores
+            else:
+                eff_threshold = self.success_threshold
+            # MIN-EPISODE-LENGTH GATE (online lever; OFF unless min_ep_steps>0):
+            # real success cannot happen faster than the expert demo — ignore any
+            # fire earlier than ~frac×(median demo length). Kills the 11–21-step
+            # exploit fires categorically; zero-shot (demo lengths already known).
+            gate_open = self.vid_t >= self.min_ep_steps
+            if detect_value > eff_threshold and gate_open:
+                self._consec_success += 1
+            else:
+                self._consec_success = 0
+            model_success = self._consec_success >= self.success_consecutive
+            # DUAL-HEAD AGREEMENT (demo-free FP filter; OFF unless thr>0): a real
+            # success has BOTH heads high; a success-head false positive often has
+            # mid progress (the leaky 0.3-0.7 range) -> veto it. Orthogonal signal,
+            # free at runtime (progress head already computed each step).
+            if model_success and self.progress_confirm_thr > 0.0 and \
+                    self._last_progress < self.progress_confirm_thr:
+                model_success = False
+                self._consec_success = 0
+            if model_success and self.dynamic_thr:
+                print(f"[dyn-thr] fire at t={self.vid_t} score={detect_value:.3f} "
+                      f"bar={eff_threshold:.3f} (q{self.dyn_q}+{self.dyn_margin})", flush=True)
+            # CONFIRMATION VOTE (stability lever; OFF unless ROBOMETER_CONFIRM_K>0).
+            # A candidate fire must be confirmed by a majority of K extra scores,
+            # each on a jittered subsample of the buffer (~confirm_frac of frames
+            # kept, last frame always included → the internal linspace-16 picks a
+            # different frame set per vote). Real success is persistent across
+            # subsamples; subsample-dependent false positives get vetoed. Cost:
+            # K extra scorer calls ONLY at candidate fires.
+            if model_success and self.confirm_k > 0 and (
+                "robometer" in self.vlm_name or self.vlm_name == "qwen35_ft"
+            ):
+                votes_yes = 1  # the original crossing counts as one ballot
+                buf = self.current_video
+                for _ in range(self.confirm_k):
+                    n_keep = max(6, int(len(buf) * self.confirm_frac))
+                    if n_keep >= len(buf):
+                        keep = list(range(len(buf)))
+                    else:
+                        keep = sorted(random.sample(range(len(buf) - 1), n_keep - 1)) + [len(buf) - 1]
+                    ballot_frames = [buf[i] for i in keep]
+                    # PIXEL-AUGMENTATION ensemble (demo-free): perturb the kept frames
+                    # (brightness/contrast jitter + small gaussian noise). An adversarial
+                    # false positive that hacks specific pixels is BRITTLE to this and
+                    # flips; a genuine success is robust. Adds *information* the
+                    # frame-subsample vote can't (it re-queries the same pixels).
+                    if self.confirm_augment > 0.0:
+                        ballot_frames = [self._augment_frame(f) for f in ballot_frames]
+                    out = self.scorer(ballot_frames, task=self.task_description,
+                                      icl_frames=self.icl_frames)
+                    v = (float(out["progress_reward"]) if self.detect_head == "progress"
+                         else float(out["success_prob"]))
+                    votes_yes += int(v > self.success_threshold)
+                # unanimous (all ballots agree) vs strict majority
+                need = (self.confirm_k + 1) if self.confirm_unanimous else (self.confirm_k + 1) // 2 + 1
+                if votes_yes < need:
+                    print(f"[confirm] VETO {votes_yes}/{self.confirm_k + 1} (need {need}) "
+                          f"at t={self.vid_t}", flush=True)
+                    model_success = False
+                    self._consec_success = 0
+                else:
+                    print(f"[confirm] pass {votes_yes}/{self.confirm_k + 1} at t={self.vid_t}",
+                          flush=True)
+            time_truncated = bool(self.most_recent_info["truncated"])  # episode_length timeout
+            ep_end = bool(model_success) or time_truncated
+            # OTSU: record this episode's PEAK detection score (one value/episode) into
+            # the rolling buffer the threshold is derived from. Done at ep_end so the
+            # peak is complete; rolling window keeps it adaptive to on-policy drift.
+            if self.otsu and ep_end:
+                self._ep_peak_scores.append(float(self._cur_ep_peak))
+                if len(self._ep_peak_scores) > self.otsu_win_eps:
+                    self._ep_peak_scores = self._ep_peak_scores[-self.otsu_win_eps:]
+            # reward_at_truncation: dense (rt=0) vs only at the terminating step (rt=1)
+            out_reward = vlm_reward if (not self.reward_at_truncation or ep_end) else 0.0
+            # OUTPUT SAMPLING (stability lever; OFF unless ROBOMETER_REWARD_SAMPLE=1):
+            # emit Bernoulli(p) instead of the raw value, so a systematic false
+            # positive stops paying out deterministically (Goodhart-resistance).
+            if self.reward_sample and out_reward > 0.0:
+                p = min(max(float(out_reward), 0.0), 1.0)
+                out_reward = float(np.random.rand() < p)
+            # diagnostics only (do NOT drive learning)
+            self.episode_stats["vlm_reward_counts"] += 1
+            if model_success and not terminal:
+                self.episode_stats["early_termination"] += 1
+            if "robometer" in self.vlm_name or self.vlm_name == "qwen35_ft":
+                self.episode_stats["vlm_robometer_progress_sum"] += self._last_progress
+                self.episode_stats["vlm_robometer_success_prob_sum"] += self._last_success_prob
+            # NOTE: returned `success` is GT, for logging only; the policy learns
+            # from out_reward + the terminal flag, both model/timeout-driven (no GT).
+            # Terminal on model-detection OR episode_length timeout — NOT on GT.
+            # (Dropping the timeout here overflows the C++ replay buffer's
+            # maxSeqLen_ when the model never fires; the train loop ends an
+            # episode only on `terminal`.)
+            return rl_obs, out_reward, bool(ep_end), success, image_obs
 
         if not self.end_on_success:
             truncated = self.most_recent_info["truncated"]
@@ -454,6 +814,18 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             return reward
 
         is_roboreward = "roboreward" in self.vlm_name
+        if is_roboreward:
+            # RoboReward is a Qwen3-VL video scorer with a fixed token budget:
+            # feeding the full rollout collapses spatial resolution to ~4x4 patches
+            # (unreadable) AND floods the output with timestamp tokens. Subsample to
+            # ROBOREWARD_NFRAMES (default 16, final frame always included) to keep a
+            # readable resolution and a clean "ANSWER: <n>". Validated to reproduce
+            # the paper's MetaWorld discrimination (BoxClose AUC~1.0, CoffeePush~0.68)
+            # on their own eval clips; the full-frame feed gave a flat constant score.
+            nf = int(os.environ.get("ROBOREWARD_NFRAMES", "16"))
+            if len(frames) > nf:
+                sel = np.linspace(0, len(frames) - 1, nf).round().astype(int)
+                frames = [frames[i] for i in sel]
         critic_output = single_prompt_eval(
             prompt_vlm=self.prompt_vlm,
             model=self.vlm,
@@ -463,7 +835,7 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             frames=frames,
             debug=debug,
             use_video=is_roboreward,
-            max_new_tokens=5,
+            max_new_tokens=24 if is_roboreward else 5,
         )
         if is_roboreward:
             reward = roboreward_to_reward(critic_output)

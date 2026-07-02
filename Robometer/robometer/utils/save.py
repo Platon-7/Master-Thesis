@@ -972,6 +972,36 @@ def load_model_from_hf(
     reward_model = reward_model.to(device)
     reward_model.eval()
 
+    # Consolidated / fine-tuned checkpoints (e.g. the ICL run1 model) can leave the
+    # base VLM with MIXED param dtypes (most bf16, a scattering of fp32) across the
+    # vision tower, the vision->text merger AND the language backbone. Any fp32
+    # submodule meeting a bf16 activation trips either a bf16 LayerNorm ("expected
+    # scalar type BFloat16 but found Float") or a Linear matmul ("mat1 and mat2 ...
+    # float != BFloat16"). Casting inputs cannot fix this (mismatches are produced
+    # internally), so unify the whole base VLM to its dominant floating dtype. The RBM
+    # heads are already cast to model_dtype at construction; uniformly-typed checkpoints
+    # (e.g. base Robometer-4B, run2) are a no-op.
+    try:
+        from collections import Counter as _Counter
+
+        _base = getattr(reward_model, "model", None)
+        if _base is not None:
+            _dts = _Counter(p.dtype for p in _base.parameters() if p.is_floating_point())
+            if len(_dts) > 1:
+                _dom = _dts.most_common(1)[0][0]
+                _base.to(_dom)
+                logger.info(f"[load] unified mixed base-VLM dtypes {dict(_dts)} -> {_dom}")
+            # also align the RBM heads to the dominant base dtype to avoid head-level mismatch
+            _hdom = _dts.most_common(1)[0][0] if _dts else None
+            if _hdom is not None:
+                for _hname in ("progress_head", "success_head", "preference_head", "frame_pool_attn"):
+                    _h = getattr(reward_model, _hname, None)
+                    if _h is not None and any(p.dtype != _hdom for p in _h.parameters() if p.is_floating_point()):
+                        _h.to(_hdom)
+                        logger.info(f"[load] aligned {_hname} -> {_hdom}")
+    except Exception as _e:  # pragma: no cover - safety only
+        logger.warning(f"[load] base-VLM dtype unification skipped: {_e}")
+
     return exp_config, tokenizer, processor, reward_model
 
 

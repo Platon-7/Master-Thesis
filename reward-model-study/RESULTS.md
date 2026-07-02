@@ -31,23 +31,15 @@ as the differentiator; see below).
   cells hit walltime at ~3,142; we report the common set every model has.]
 - **ICL-on**: 129 (capped 50/source small test).
 
-## HEADLINE FINDING — the asymmetric loss destroys the progress head
-Progress-head correlation with GT progress (VOC-pearson / kendall), FULL sets:
-
-| model | OOD | in-dist |
-|---|---|---|
-| baseline | 0.90 / 0.90 | 0.68 / 0.71 |
-| run3 (paper-std) | 0.88 / 0.81 | 0.73 / 0.74 |
-| run6 (Qwen3.5 paper-std) | 0.44 / 0.38 | 0.56 / 0.57 |
-| **run1 (asym+ICL)** | **−0.04** | **−0.05** |
-| **run2 (asym)** | **−0.03** | **−0.05** |
-| **run4 (Qwen3.5 asym)** | **−0.03** | **−0.03** |
-| **run5 (Qwen3.5 asym)** | **−0.02** | **−0.03** |
-
-Every asymmetric model collapses to ≈0 progress correlation — both bases, both
-distributions. Every paper-standard model + baseline keeps it intact (0.38–0.90).
-The asymmetric C51 loss kills the progress head. This directly explains the
-downstream-RL progress-reward inversion we observed on rollouts.
+## HEADLINE FINDING — RETRACTED (2026-06-06)
+The earlier claim here — *"the asymmetric loss destroys the progress head"*,
+based on a near-zero progress↔GT **correlation** — is **obsolete and wrong**.
+Measuring class **separability** (not correlation) shows the opposite: the
+asymmetric-loss 4B FT models are the **best** success/failure separators on the
+progress head (d′ ≈ 1.3–1.5 vs baseline 0.42). The asymmetric loss compresses the
+score **scale** (small raw gap) but keeps — even improves — **separability**.
+Authoritative, up-to-date reward-quality results now live in
+`deck/VLM_reward_models.pptx` (slides 7–8).
 
 ## OOD ranking — success head (kendall from harness, AUC from grid; FULL 782)
 `kendall_last` = paper-exact Robometer harness (`policy_ranking` on rbm-1m-ood, 6
@@ -69,9 +61,7 @@ batch_size=4 (lm_head OOM guard); fidelity-gated against the grid.
 Baseline ≫ all FT on OOD ranking (harness 0.638 vs ≤0.30; success AUC 0.87 vs
 0.54–0.69). The harness kendall does NOT cleanly separate the loss types (4B: asym
 > paper-std; Qwen3.5: paper-std > asym) — it is a cross-trajectory ranking, noisier
-(small per-task N) and orthogonal to within-trajectory progress shape. The clean
-asymmetric-vs-paper separation is the grid progress-pearson below (the signal dense
-IBRL reward uses): asym uniformly dead, paper-std/baseline intact.
+(small per-task N) and orthogonal to within-trajectory progress shape.
 
 ## In-distribution — success head AUC (grid, ICL off, common 3,142)
 | model | succ_AUC | succ_denseECE |

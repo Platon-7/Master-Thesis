@@ -1,0 +1,66 @@
+#!/bin/bash
+#SBATCH --job-name=dense_prog
+#SBATCH --output=logs/dense_prog_%j.out
+#SBATCH --error=logs/dense_prog_%j.err
+#SBATCH --time=5-00:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6-1gpu-l4,ondemand-g6e-4gpu-l40s,ondemand-g6-4gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+# The LIBERO-winning regime ported to Can: FULL EPISODE (no termination) + DENSE
+# (reward_at_truncation=0) + PROGRESS head (beta=1.0). Reward model + task overridable.
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+
+TASK="${TASK:-can}"
+VLM="${VLM:-robometer_ft}"
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-1000000}"
+WARMUP="${WARMUP:-30}"
+EVAL_EP="${EVAL_EP:-20}"
+SAVE_DIR="${SAVE_DIR:-/shared/home/$USER/vlm_ibrl_runs/dense_prog_${TASK}_${SLURM_JOB_ID}}"
+
+unset PYTHONPATH 2>/dev/null || true
+export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_robomimic"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+source set_env.sh
+export PYTHONNOUSERSITE=1
+export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export MUJOCO_GL=egl
+
+# ---- FULL-EPISODE regime: autonomous on (so GT success does NOT terminate), but the
+#      detection threshold is unreachable (2.0) so the VLM never terminates either ->
+#      episodes always run the full horizon. ----
+export AUTONOMOUS_SUCCESS=1
+export ROBOMETER_DETECT_HEAD=progress
+export ROBOMETER_SUCCESS_THRESHOLD=2.0      # progress<=1.0 can never cross -> no termination
+export ROBOMETER_SUCCESS_CONSECUTIVE=1
+export ROBOMETER_MIN_EP_STEPS=0
+export ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-/shared/home/PKA4388/checkpoints/Robometer-4B}"
+
+echo "[dense_prog] task=$TASK vlm=$VLM model=$ROBOMETER_FT_PATH steps=$NUM_TRAIN_STEP host=$(hostname)"
+
+RESUME_ARGS=""
+if [ -f "$SAVE_DIR/latest.pt" ]; then
+    RESUME_ARGS="--load_pretrained_agent $SAVE_DIR/latest.pt --load_policy_only 0"
+fi
+
+python train_vlm_rl.py \
+    $RESUME_ARGS \
+    --config_path "release/cfgs/robomimic_rl/${TASK}_ibrl.yaml" \
+    --vlm "$VLM" \
+    --robometer_beta 1.0 \
+    --robometer_threshold 0.0 \
+    --reward_at_truncation 0 \
+    --num_train_step "$NUM_TRAIN_STEP" \
+    --num_warm_up_episode "$WARMUP" \
+    --num_eval_episode "$EVAL_EP" \
+    --mp_eval 0 \
+    --use_wb "${USE_WB:-0}" \
+    --log_per_step "${LOG_PER_STEP:-5000}" \
+    --save_dir "$SAVE_DIR"
+echo "[dense_prog] done save_dir=$SAVE_DIR"

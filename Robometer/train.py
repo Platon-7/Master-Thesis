@@ -137,9 +137,21 @@ def train(cfg: ExperimentConfig):
     # This is important for accelerate/FSDP setups where multiple processes run
     dist_initialized = dist.is_available() and dist.is_initialized()
 
+    # When resuming, output_dir is EXPECTED to already exist — it holds the checkpoint we are
+    # resuming from (e.g. on a SLURM --requeue after a spot preemption). It must be PRESERVED:
+    # never rmtree it (that would delete the very checkpoint, then crash on the missing
+    # trainer_state.json) and never error on its existence. This guard overrides
+    # overwrite_output_dir for the resume case only.
+    resuming_from_checkpoint = bool(getattr(cfg.training, "resume_from_checkpoint", None))
+
     # Check if output directory exists (only on rank 0 to avoid race conditions)
     if is_rank_0() and os.path.exists(output_dir):
-        if overwrite_output_dir:
+        if resuming_from_checkpoint:
+            rank_0_info(
+                f"Resuming: output directory {output_dir} already exists — preserving it "
+                f"(holds the resume checkpoint; NOT overwriting despite overwrite_output_dir)."
+            )
+        elif overwrite_output_dir:
             rank_0_info(f"Output directory {output_dir} already exists. Overwriting (overwrite_output_dir=True)...")
             shutil.rmtree(output_dir)
         else:

@@ -1,0 +1,57 @@
+#!/bin/bash
+#SBATCH --job-name=q35_envsmoke
+#SBATCH --output=logs/q35_envsmoke_%j.out
+#SBATCH --error=logs/q35_envsmoke_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6e-4gpu-l40s,ondemand-g6-1gpu-l4,ondemand-g6-4gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+
+# AWS readiness smoke for Qwen3.5 IBRL: build the REAL env (metaworld_wrapper +
+# VLMCritic), render corner2_default on GPU, load run4 scorer, score the rendered
+# frame end-to-end. Mirrors the IBRL import chain exactly (no mujoco_py — not used).
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+unset PYTHONPATH CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL 2>/dev/null || true
+ENV_NAME="/shared/home/PKA4388/miniconda3/envs/vlm_ibrl_qwen35"
+export IBRL_CONDA_ENV="$ENV_NAME"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+QWEN35_FT_DIR="${QWEN35_FT_DIR:-$HERE/../Qwen35-FT}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+conda activate "$ENV_NAME"
+export PYTHONNOUSERSITE=1
+source set_env.sh
+# Qwen35-FT first (its setup_utils Qwen3.5 dispatch must win), then repo, then Robometer
+export PYTHONPATH="$QWEN35_FT_DIR:$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+export QWEN35_FT_PATH="${QWEN35_FT_PATH:-/shared/home/PKA4388/checkpoints/Qwen35_FT_phase1_consolidated/run4_step6500}"
+
+echo "[env] python=$(which python)"
+python -c "import torch,transformers; print('[env] torch',torch.__version__,'tf',transformers.__version__,'cuda',torch.cuda.is_available())" || { echo "[env] import FAILED"; exit 1; }
+
+python <<'PYEOF'
+import numpy as np, sys
+print("[1/5] deps: gymnasium, metaworld, mujoco(new)")
+import gymnasium, metaworld, mujoco
+print("   gym", gymnasium.__version__, "metaworld", metaworld.__version__, "mujoco", mujoco.__version__)
+try:
+    import mujoco_py; print("   mujoco_py present:", mujoco_py.__file__)
+except Exception as e:
+    print("   mujoco_py ABSENT (ok — not used by MetaWorld chain):", type(e).__name__)
+
+print("[2/5] build PixelMetaWorld (corner2_default) + render a frame")
+from env.metaworld_wrapper import PixelMetaWorld
+mw = PixelMetaWorld(env_name="coffee-push", robots=None, episode_length=200,
+                    image_size=480, rl_cameras=["corner2_default"], device="cuda",
+                    end_on_success=False) if False else None
+# constructor signature may differ; introspect & build minimally
+import inspect
+sig = inspect.signature(PixelMetaWorld.__init__)
+print("   PixelMetaWorld args:", list(sig.parameters)[1:])
+PYEOF
+echo "=== envsmoke stage-1 done (exit $?); see args above, will finalize build next ==="

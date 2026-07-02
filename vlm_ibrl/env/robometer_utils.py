@@ -50,6 +50,7 @@ class RobometerScorer:
         # sys.path BEFORE the deferred `from robometer.* import` lines below so
         # the Qwen3.5-aware copy wins. Robometer-4B (Qwen3-VL) falls through
         # unchanged — the Qwen35-FT copy still has the Qwen3-VL branch.
+        _is_qwen35 = False  # Qwen3.5 supports (and was trained with) FA2; Robometer's RBM does not
         cfg_yaml = os.path.join(model_path, "config.yaml")
         if os.path.isfile(cfg_yaml):
             try:
@@ -58,6 +59,7 @@ class RobometerScorer:
             except Exception:
                 bid = ""
             if "qwen3.5" in bid.lower():
+                _is_qwen35 = True
                 qwen35_repo = os.path.join(
                     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                     "Qwen35-FT",
@@ -92,15 +94,18 @@ class RobometerScorer:
         #
         # 2. ``setup_model_and_processor`` probes ``import flash_attn`` and
         #    picks ``attn_implementation='flash_attention_2'`` when it succeeds.
-        #    Chris's env has flash-attn 2.7.3, but Robometer's RBM wrapper
-        #    rejects FA2 (``RBM does not support Flash Attention 2 yet``). We
-        #    hide flash_attn from ``sys.modules`` for the duration of the load
-        #    so the probe fails and Robometer's loader falls back to ``sdpa``.
-        #    Flash-attn remains available everywhere else in the process.
+        #    Robometer's RBM (Qwen3-VL) wrapper REJECTS FA2 (``RBM does not
+        #    support Flash Attention 2 yet``), so for it we hide flash_attn for
+        #    the duration of the load → the probe fails → it falls back to ``sdpa``.
+        #    Qwen3.5, however, was TRAINED with FA2 and its model supports it, so
+        #    we leave flash_attn visible for Qwen3.5 → FA2 is selected (≈2x faster,
+        #    and matches the training-time attention impl).
         _orig_setup = setup_utils.setup_model_and_processor
         _SENTINEL = object()
+        _hide_fa = not _is_qwen35
         _saved_fa = sys.modules.get("flash_attn", _SENTINEL)
-        sys.modules["flash_attn"] = None  # makes ``import flash_attn`` raise
+        if _hide_fa:
+            sys.modules["flash_attn"] = None  # makes ``import flash_attn`` raise
 
         def _setup_patched(model_cfg, *args, **kwargs):
             model_cfg.use_unsloth = False
@@ -111,10 +116,11 @@ class RobometerScorer:
             cfg, tokenizer, processor, model = load_model_from_hf(model_path=model_path, device=device)
         finally:
             setup_utils.setup_model_and_processor = _orig_setup
-            if _saved_fa is _SENTINEL:
-                sys.modules.pop("flash_attn", None)
-            else:
-                sys.modules["flash_attn"] = _saved_fa
+            if _hide_fa:
+                if _saved_fa is _SENTINEL:
+                    sys.modules.pop("flash_attn", None)
+                else:
+                    sys.modules["flash_attn"] = _saved_fa
 
         from robometer.utils.setup_utils import setup_batch_collator
         if model is None:

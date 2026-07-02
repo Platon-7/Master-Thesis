@@ -4,7 +4,7 @@
 # (see MODIFICATIONS.md §A.2) is added upstream.
 
 dataset:
-  dataset_path: /projects/prjs1958/robometer_frame_dataset
+  dataset_path: /shared/home/PKA4388/robometer_frame_dataset
   dataset_name: robometer_frames_metaworld   # change per-family: metaworld|failsafe|droid|robometer|roboreward
   # Adapter-specific knobs (consumed by robometer_frames_loader.py):
   family: metaworld

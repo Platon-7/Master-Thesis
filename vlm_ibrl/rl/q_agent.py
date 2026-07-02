@@ -9,6 +9,7 @@ import common_utils
 from common_utils import ibrl_utils as utils
 from networks.encoder import VitEncoder, VitEncoderConfig
 from networks.encoder import ResNetEncoder, ResNetEncoderConfig, DrQEncoder
+from networks.encoder import DinoEncoder  # frozen-DINO switch (enc_type='dino')
 from networks.encoder import ResNet96Encoder, ResNet96EncoderConfig
 from rl.critic import Critic, CriticConfig
 from rl.actor import Actor, ActorConfig
@@ -123,6 +124,9 @@ class QAgent(nn.Module):
             return ResNet96Encoder(obs_shape, self.cfg.resnet96).to(self.cfg.device)
         elif self.cfg.enc_type == "drq":
             return DrQEncoder(obs_shape).to(self.cfg.device)
+        elif self.cfg.enc_type == "dino":
+            # frozen DINOv2 features; encoder_opt becomes a no-op (no grads flow in)
+            return DinoEncoder(obs_shape).to(self.cfg.device)
         else:
             assert False, f"Unknown encoder type {self.cfg.enc_type}."
 

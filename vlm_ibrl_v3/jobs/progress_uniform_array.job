@@ -1,0 +1,61 @@
+#!/bin/bash
+#SBATCH --job-name=prog_unif
+#SBATCH --output=logs/prog_unif_%A_%a.out
+#SBATCH --error=logs/prog_unif_%A_%a.err
+#SBATCH --time=11:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6e-1gpu-l40s,spot-g6-1gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+# ROBOMETER-AUTHORS LIBERO MODE (test): PROGRESS head, current-frame-tiled to
+# max_frames each call, DENSE reward every step, NO termination (full episode).
+# CoffeePush. config cols: MODEL_TAG VLM_NAME CKPT SEED  ("-" CKPT = off-the-shelf)
+set -uo pipefail; cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+CFG_FILE="${CFG_FILE:-/shared/home/PKA4388/vlm_ibrl_runs/progress_tile_configs.tsv}"
+LINE=$(( SLURM_ARRAY_TASK_ID + 1 ))
+read MODEL_TAG VLM_NAME CKPT SEED < <(sed -n "${LINE}p" "$CFG_FILE")
+[[ -z "${MODEL_TAG:-}" ]] && { echo "no config line $LINE"; exit 1; }
+BC_POLICY=coffeepush
+unset PYTHONPATH CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL 2>/dev/null || true
+export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_v3"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true; conda activate "$IBRL_CONDA_ENV"
+export PYTHONNOUSERSITE=1; source set_env.sh
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"; export MUJOCO_GL=egl
+export WANDB_API_KEY="$(cat /shared/home/PKA4388/.config/wandb_key 2>/dev/null)"; export WANDB_ENTITY=nlp-squad
+[[ -n "$WANDB_API_KEY" ]] && USE_WB=1 || USE_WB=0
+python -c "import gymnasium, metaworld; print('[env] OK')" || { echo FAIL; exit 1; }
+# checkpoint only for FT models
+if [[ "$CKPT" != "-" ]]; then
+  export ROBOMETER_FT_PATH="/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/${CKPT}"
+fi
+export AUTONOMOUS_SUCCESS=1 V3_CORNER2_ZOOM=1
+export ROBOMETER_REWARD_CAMERA=corner2_default
+# --- the mode ---
+# UNIFORM MODE: tile OFF -> scorer gets the growing episode buffer, uniformly
+# subsampled to max_frames (8 for 4B, 16 for FT) with the CURRENT frame always
+# last -- the input format the paper describes. Everything else identical to progtile.
+export ROBOMETER_BETA=1.0                    # reward = PROGRESS head
+export ROBOMETER_DETECT_HEAD=progress        # (detection disabled anyway)
+export ROBOMETER_SUCCESS_THRESHOLD=2.0       # impossible -> NEVER terminate (full episode)
+export ROBOMETER_THRESHOLD=0.0 ROBOMETER_REWARD_SCALE=1.0 ROBOMETER_SUCCESS_CONSECUTIVE=1
+export ROBOMETER_MIN_EP_FRAC=0.0             # no gate
+export ROBOMETER_CONFIRM_K=0 ROBOMETER_REWARD_SAMPLE=0 ROBOMETER_OTSU=0 ROBOMETER_DEMO_ANCHOR=0
+REWARD_AT_TRUNC=0                            # DENSE reward every step
+EPISODE_LENGTH=200; NUM_TRAIN_STEP=40000; TRAIN_TIMEOUT=36000
+SAVE_DIR="/shared/home/$USER/vlm_ibrl_runs/proguniform_${MODEL_TAG}_${BC_POLICY}_s${SEED}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
+mkdir -p "$SAVE_DIR"; export WANDB_NAME="proguniform_${MODEL_TAG}_${BC_POLICY}_s${SEED}"
+echo "PROGRESS-UNIFORM MODEL=$MODEL_TAG VLM=$VLM_NAME CKPT=$CKPT TASK=$BC_POLICY SEED=$SEED (dense progress, no-term, uniform-episode-frames)"
+timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
+  python mw_main/train_rl_vlm_mw.py --config_path release/cfgs/metaworld/ibrl_long.yaml \
+    --episode_length "$EPISODE_LENGTH" --bc_policy "$BC_POLICY" --vlm "$VLM_NAME" \
+    --train_end_on_success 0 --reward_at_truncation "$REWARD_AT_TRUNC" \
+    --num_train_step "$NUM_TRAIN_STEP" --seed "$SEED" --use_wb "$USE_WB" \
+    --robometer_beta "$ROBOMETER_BETA" --robometer_threshold "$ROBOMETER_THRESHOLD" \
+    --robometer_reward_scale "$ROBOMETER_REWARD_SCALE" --save_dir "$SAVE_DIR"
+RC=$?; [[ $RC -eq 124 || $RC -eq 137 ]] && grep -q "^${NUM_TRAIN_STEP}: " "$SAVE_DIR/train.log" 2>/dev/null && RC=0
+echo "return code: $RC"

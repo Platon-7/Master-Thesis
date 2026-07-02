@@ -1,0 +1,94 @@
+#!/bin/bash
+#SBATCH --job-name=online_calib
+#SBATCH --output=logs/online_calib_%A_%a.out
+#SBATCH --error=logs/online_calib_%A_%a.err
+#SBATCH --time=05:30:00
+#SBATCH --account=rob-tme-gaia
+# 1-GPU partitions ONLY (multi-GPU NODE_FAIL on AWS).
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6-1gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+# Online-calibration comparison: same recipe as offline-fixed (gate g0.8, success
+# head, beta0, sparse) but the detection THRESHOLD comes from an online method.
+# config cols: METHOD TASK THR SEED CKPT   (METHOD in {otsu, demoanchor, fixed})
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+CFG_FILE="${CFG_FILE:-/shared/home/PKA4388/vlm_ibrl_runs/online_calib_configs.tsv}"
+LINE=$(( SLURM_ARRAY_TASK_ID + 1 ))
+read METHOD BC_POLICY ROBOMETER_SUCCESS_THRESHOLD SEED CKPT_NAME < <(sed -n "${LINE}p" "$CFG_FILE")
+if [[ -z "${METHOD:-}" ]]; then echo "no config at line $LINE"; exit 1; fi
+VLM_NAME=robometer_ft
+
+# ---- environment ----
+unset PYTHONPATH CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL 2>/dev/null || true
+ENV_NAME="/shared/home/PKA4388/miniconda3/envs/demo2reward_v3"
+export IBRL_CONDA_ENV="$ENV_NAME"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+conda activate "$ENV_NAME"
+export PYTHONNOUSERSITE=1
+source set_env.sh
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+# wandb -> nlp-squad; key from home-dir file (never in the repo)
+export WANDB_API_KEY="$(cat /shared/home/PKA4388/.config/wandb_key 2>/dev/null)"
+export WANDB_ENTITY=nlp-squad
+[[ -n "$WANDB_API_KEY" ]] && USE_WB=1 || USE_WB=0
+python -c "import gymnasium, metaworld; print('[env] OK')" || { echo "[env] FAIL"; exit 1; }
+export ROBOMETER_FT_PATH="/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/${CKPT_NAME}"
+[[ -d "$ROBOMETER_FT_PATH" ]] || { echo "missing ckpt $ROBOMETER_FT_PATH"; exit 1; }
+
+# ---- shared recipe (success head, beta0, sparse, gate g0.8) ----
+export AUTONOMOUS_SUCCESS=1 V3_CORNER2_ZOOM=1
+export ROBOMETER_REWARD_CAMERA=corner2_default
+export ROBOMETER_DETECT_HEAD=success
+export ROBOMETER_BETA=0.0 ROBOMETER_SUCCESS_CONSECUTIVE=1 ROBOMETER_THRESHOLD=0.0 ROBOMETER_REWARD_SCALE=1.0
+export ROBOMETER_MIN_EP_FRAC=0.8     # gate ON (same as offline-fixed baseline 647)
+export ROBOMETER_CONFIRM_K=0 ROBOMETER_REWARD_SAMPLE=0
+export ROBOMETER_SUCCESS_THRESHOLD   # = floor (0.0 for online methods)
+
+# ---- method-specific threshold source ----
+# CORRECT-VIEW demos (un-zoomed eval-keyframe success clips) — the fix for the
+# wrong-view demo-anchor bug. coffee/box extracted; stick/assembly TBD if needed.
+case "$BC_POLICY" in
+    coffeepush) DEMO="/shared/home/PKA4388/icl_correct_view/coffeepush" ;;
+    boxclose)   DEMO="/shared/home/PKA4388/icl_correct_view/boxclose" ;;
+    stickpull)  DEMO="/shared/home/PKA4388/icl_correct_view/stickpull" ;;
+    assembly)   DEMO="/shared/home/PKA4388/icl_correct_view/assembly" ;;
+esac
+export ROBOMETER_DYNAMIC_THR=0 ROBOMETER_OTSU=0 ROBOMETER_DEMO_ANCHOR=0
+case "$METHOD" in
+    otsu)       export ROBOMETER_OTSU=1 ;;
+    demoanchor) export ROBOMETER_DEMO_ANCHOR=1; export ROBOMETER_DEMO_ANCHOR_PATH="$DEMO"; export ROBOMETER_DEMO_ANCHOR_PCT="${DEMO_ANCHOR_PCT:-25}" ;;
+    quantile)   export ROBOMETER_DYNAMIC_THR=1 ;;
+    fixed)      : ;;  # uses ROBOMETER_SUCCESS_THRESHOLD as the fixed bar
+    *) echo "unknown METHOD=$METHOD"; exit 1 ;;
+esac
+
+REWARD_AT_TRUNC=1; EPISODE_LENGTH=200
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-40000}"; TRAIN_TIMEOUT="${TRAIN_TIMEOUT:-18000}"
+SAVE_BASE="${SAVE_BASE:-/shared/home/$USER/vlm_ibrl_runs}"
+SAVE_DIR="${SAVE_BASE}/onlinecal_${METHOD}_${CKPT_NAME}_${BC_POLICY}_s${SEED}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
+mkdir -p "$SAVE_DIR"
+export WANDB_NAME="onlinecal_${METHOD}_${BC_POLICY}_s${SEED}"
+echo "METHOD=$METHOD TASK=$BC_POLICY CKPT=$CKPT_NAME SEED=$SEED floor=$ROBOMETER_SUCCESS_THRESHOLD steps=$NUM_TRAIN_STEP"
+echo "OTSU=$ROBOMETER_OTSU DEMO_ANCHOR=$ROBOMETER_DEMO_ANCHOR DYNAMIC=$ROBOMETER_DYNAMIC_THR DEMO=${ROBOMETER_DEMO_ANCHOR_PATH:-<none>}"
+echo "SAVE=$SAVE_DIR"; echo "==============================="
+
+timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
+    python mw_main/train_rl_vlm_mw.py \
+        --config_path release/cfgs/metaworld/ibrl_long.yaml \
+        --episode_length "$EPISODE_LENGTH" --bc_policy "$BC_POLICY" --vlm "$VLM_NAME" \
+        --train_end_on_success 0 --reward_at_truncation "$REWARD_AT_TRUNC" \
+        --num_train_step "$NUM_TRAIN_STEP" --seed "$SEED" --use_wb "$USE_WB" \
+        --robometer_beta "$ROBOMETER_BETA" --robometer_threshold "$ROBOMETER_THRESHOLD" \
+        --robometer_reward_scale "$ROBOMETER_REWARD_SCALE" --save_dir "$SAVE_DIR"
+RC=$?
+if [[ $RC -eq 124 || $RC -eq 137 ]]; then
+    grep -q "^${NUM_TRAIN_STEP}: " "$SAVE_DIR/train.log" 2>/dev/null && { echo "[wrapper] timeout-but-reached PASS"; RC=0; } || echo "[wrapper] timeout early"
+fi
+echo "return code: $RC"

@@ -1,0 +1,25 @@
+task_name: "PickPlaceCan"
+rl_camera: "agentview"          # external view: matches the authors + the reward-model view
+prop_stack: 3
+episode_length: 200
+stddev_max: 0.1
+bc_policy: ""                    # NO BC bootstrap (pure RL) -> avoids the DINO/pixel-BC mismatch
+preload_num_data: 0             # online-only, matching the authors' LIBERO recipe
+num_warm_up_episode: 40
+num_train_step: 1000000
+replay_buffer_size: 1000
+use_wb: 1
+mp_eval: 1
+num_eval_episode: 50
+use_state: 0
+q_agent:
+  act_method: "rl"              # pure RL (SAC-style), not IBRL
+  enc_type: "dino"             # FROZEN DINOv2 features (the switch)
+  use_prop: 1
+  actor:
+    dropout: 0.5
+    hidden_dim: 1024
+    feature_dim: 128
+  critic:
+    spatial_emb: 1024
+    hidden_dim: 1024

@@ -1,0 +1,35 @@
+#!/bin/bash
+#SBATCH --job-name=rr_view
+#SBATCH --output=logs/rr_view_%j.out
+#SBATCH --error=logs/rr_view_%j.err
+#SBATCH --time=02:30:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6e-4gpu-l40s,ondemand-g6e-8gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+unset PYTHONPATH CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL CONDA_PREFIX_1 CONDA_PREFIX_2 2>/dev/null || true
+ENV_NAME="/shared/home/PKA4388/miniconda3/envs/demo2reward_v3"
+export IBRL_CONDA_ENV="$ENV_NAME"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+conda activate "$ENV_NAME"
+export PYTHONNOUSERSITE=1
+source set_env.sh
+echo "[env] python=$(which python)"
+python -c "import gymnasium, metaworld; print('[env] gymnasium+metaworld import OK')" || echo "[env] WARNING import FAILED"
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
+export MUJOCO_GL="${MUJOCO_GL:-egl}"
+unset V3_CORNER2_ZOOM ROBOMETER_ICL_DEMO_PATH 2>/dev/null || true
+export CALIB_TASKS="${CALIB_TASKS:-CoffeePush}"     # ONE task per job (SLURM --export comma split)
+export CALIB_N_SUCC="${CALIB_N_SUCC:-15}"
+export CALIB_N_FAIL="${CALIB_N_FAIL:-15}"
+export CALIB_OUT="${CALIB_OUT:-/shared/home/PKA4388/vlm_ibrl_runs/calib_roboreward_4b_${CALIB_TASKS}.json}"
+echo "=== RoboReward-4B calib: task=$CALIB_TASKS out=$CALIB_OUT ==="
+python ../reward-model-study/scripts/diag_roboreward_view.py
+echo "=== rr calib done (exit $?) ==="

@@ -1,3 +1,4 @@
+import os
 import time
 from collections import defaultdict, deque
 
@@ -5,7 +6,9 @@ import numpy as np
 import robosuite
 import torch
 from PIL import Image
-from robosuite.controllers import load_composite_controller_config
+# Reverted to old controller API to match pinned robosuite@de64fa5 + shipped 1.4.1 data.
+#from robosuite.controllers import load_composite_controller_config
+from robosuite.controllers import load_controller_config
 
 from common_utils import ibrl_utils as utils
 from env.qwen_utils import get_qwen3, get_qwen3_8b, prompt_qwen
@@ -222,7 +225,7 @@ class VLMRobosuite:
         assert past_len > 0, "past_len must be > 0"
         assert isinstance(camera_names, list)
         self.camera_names = camera_names
-        self.ctrl_config = load_composite_controller_config(controller="BASIC")
+        self.ctrl_config = load_controller_config(default_controller="OSC_POSE")
         self.ctrl_config["control_delta"] = ctrl_delta
         self.record_sim_state = record_sim_state
         self.env = robosuite.make(
@@ -334,7 +337,57 @@ class VLMRobosuite:
         self.robometer_reward_scale = float(robometer_reward_scale)
         self._last_progress = 0.0
         self._last_success_prob = 0.0
+
+        # ---- FAIR autonomous-RL mode (ported from env/vlm_envs.py, metaworld) ----
+        # The MODEL detects success and terminates the episode; GT is NEVER used for
+        # termination or reward (returned only as a logged diagnostic — the separate
+        # GT eval_env measures honest performance). PROVEN CORE ONLY: detection head +
+        # threshold + consecutive-step debounce. The online-calibration levers
+        # (OTSU / demo-anchor / dynamic-quantile) are intentionally NOT ported yet —
+        # they're still being verified; they will plug in at _effective_threshold().
+        self.autonomous = os.environ.get("AUTONOMOUS_SUCCESS", "0") == "1"
+        self.success_threshold = float(os.environ.get("ROBOMETER_SUCCESS_THRESHOLD", "0.6"))
+        self.success_consecutive = int(os.environ.get("ROBOMETER_SUCCESS_CONSECUTIVE", "1"))
+        # which head drives DETECTION (independent of the reward beta-mix):
+        # "success" = success_prob (default), "progress" = progress_reward.
+        self.detect_head = os.environ.get("ROBOMETER_DETECT_HEAD", "success")
+        self._consec_success = 0
+        # MIN-EPISODE-LENGTH GATE (ported from vlm_envs.py): a detection earlier than
+        # min_ep_steps is ignored — real success cannot happen faster than ~a demo, so
+        # this categorically kills the early-fire reward-hack (e.g. the ~31-step exploit
+        # on PickPlaceCan). 0 = disabled (default). Zero-shot: needs no GT/demos at runtime.
+        self.min_ep_steps = int(os.environ.get("ROBOMETER_MIN_EP_STEPS", "0"))
+        if self.autonomous:
+            print(f"[autonomous] head={self.detect_head} thr={self.success_threshold} "
+                  f"consec={self.success_consecutive} min_ep_steps={self.min_ep_steps} "
+                  f"(offline-fixed threshold seam)", flush=True)
+
+        # ICL context (ported from vlm_envs.py): when ROBOMETER_ICL_DEMO_PATH is set
+        # (a dir of `{demo_idx}_NNN.png` frames), load N uniform frames of the chosen
+        # demo and pass them as the in-context demonstration to every scorer call.
+        self.icl_frames = None
+        icl_path = os.environ.get("ROBOMETER_ICL_DEMO_PATH", "")
+        if icl_path and "robometer" in self.vlm_name:
+            from pathlib import Path as _P
+            from PIL import Image as _PIL
+            icl_idx = int(os.environ.get("ROBOMETER_ICL_DEMO_IDX", "0"))
+            icl_n = int(os.environ.get("ROBOMETER_ICL_FRAMES", "16"))
+            avail = sorted(p for p in _P(icl_path).iterdir()
+                           if p.name.startswith(f"{icl_idx}_") and p.suffix == ".png")
+            if not avail:
+                raise FileNotFoundError(f"ROBOMETER_ICL_DEMO_PATH={icl_path} has no frames for demo {icl_idx}")
+            picks = np.linspace(0, len(avail) - 1, icl_n).round().astype(int)
+            self.icl_frames = [np.asarray(_PIL.open(avail[i]).convert("RGB"), dtype=np.uint8) for i in picks]
+            print(f"[ICL] loaded {icl_n} frames from demo {icl_idx} of {icl_path} (of {len(avail)})", flush=True)
+
         assert len(self.rl_cameras) == 1
+
+    def _effective_threshold(self, detect_value):
+        """Detection-threshold seam. SAFE DEFAULT = offline-fixed ROBOMETER_SUCCESS_THRESHOLD.
+        The online-calibration rules (OTSU / demo-anchor / dynamic-quantile) plug in HERE
+        once verified on metaworld, so robomimic gets them as a one-method change with no
+        other edits to step(). See [[online-calibration-direction]]."""
+        return self.success_threshold
 
     @property
     def observation_shape(self):
@@ -461,7 +514,10 @@ class VLMRobosuite:
 
             if step_reward == 1:
                 success = True
-                if self.end_on_success:
+                # In autonomous mode, GT success must NOT terminate the episode
+                # (the model decides). `terminal` then reflects only the env horizon
+                # timeout. `success` is still tracked for logging.
+                if self.end_on_success and not self.autonomous:
                     terminal = True
 
             if not self.end_on_success and terminal:
@@ -472,6 +528,28 @@ class VLMRobosuite:
 
         reward = reward * self.env_reward_scale
         self.terminal = terminal
+
+        if self.autonomous:
+            # Score the growing video EVERY step → sets _last_success_prob/_last_progress.
+            vlm_reward = self.vlm_reward(self.current_video)
+            detect_value = (self._last_progress if self.detect_head == "progress"
+                            else self._last_success_prob)
+            eff_threshold = self._effective_threshold(detect_value)
+            # min-episode-length gate: a fire before min_ep_steps can't be a real success.
+            gate_open = self.time_step >= self.min_ep_steps
+            if detect_value > eff_threshold and gate_open:
+                self._consec_success += 1
+            else:
+                self._consec_success = 0
+            model_success = self._consec_success >= self.success_consecutive
+            time_truncated = bool(terminal)  # env horizon timeout (GT success no longer sets terminal)
+            ep_end = bool(model_success) or time_truncated
+            # reward_at_truncation: dense (rt=0) vs only at the terminating step (rt=1)
+            out_reward = vlm_reward if (not self.reward_at_truncation or ep_end) else 0.0
+            self.terminal = ep_end
+            # `success` (GT) returned for LOGGING ONLY; the policy learns from
+            # out_reward + ep_end, both model/timeout-driven (never GT).
+            return rl_obs, out_reward, bool(ep_end), success, high_res_images
 
         # VLM reward
         if self.reward_at_truncation and not truncation:
@@ -491,7 +569,7 @@ class VLMRobosuite:
 
     def vlm_reward(self, frames, debug=False):
         if "robometer" in self.vlm_name:
-            out = self.scorer(frames, task=self.task_description)
+            out = self.scorer(frames, task=self.task_description, icl_frames=self.icl_frames)
             self._last_progress = float(out["progress_reward"])
             self._last_success_prob = float(out["success_prob"])
             mixed = self.robometer_beta * self._last_progress + (1.0 - self.robometer_beta) * self._last_success_prob

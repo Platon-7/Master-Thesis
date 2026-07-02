@@ -20,9 +20,20 @@ import os
 import sys
 import numpy as np
 
-sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/MetaWorld")
-sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl_v3")
-sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/Robometer")
+# Repo root resolved relative to this file (Master-Thesis/), so the script is
+# portable across clusters. Override with MT_REPO if the layout differs.
+_REPO = os.environ.get(
+    "MT_REPO",
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
+sys.path.insert(0, os.path.join(_REPO, "MetaWorld"))
+sys.path.insert(0, os.path.join(_REPO, "vlm_ibrl_v3"))
+sys.path.insert(0, os.path.join(_REPO, "Robometer"))
+# Farama MetaWorld v3 package source. The env's editable install points at the
+# old Snellius /gpfs path (dead on this cluster); putting metaworld_repo on
+# sys.path makes PathFinder resolve `import metaworld` from here first, ahead of
+# the broken editable meta_path finder.
+sys.path.insert(0, os.path.join(_REPO, "MetaWorld", "metaworld_repo"))
 
 import metaworld
 from generate_failures import (
@@ -34,7 +45,10 @@ from PIL import Image
 
 TASK_ID = "coffee-push-v3"
 TASK = "Push a mug under a coffee machine."
-MODEL = "/scratch-shared/pkarageorgis1/Robometer_FT_consolidated/run1_icl_ours_step3000"
+MODEL = os.environ.get(
+    "ROBOMETER_FT_PATH",
+    "/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000",
+)
 CAM = "corner2"
 N = 25
 

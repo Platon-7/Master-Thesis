@@ -1,0 +1,66 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_eval_base_diag
+#SBATCH --output=logs/eval_base_diag_%j.out
+#SBATCH --error=logs/eval_base_diag_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-p4d-8gpu-a100,spot-p5-8gpu-h100-h200
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=8
+#SBATCH --cpus-per-task=96
+#SBATCH --exclusive
+#SBATCH --requeue
+
+# DIAGNOSTIC: eval-only the BASE Robometer-4B (no training) at max_frames=8, loading via the
+# ORIGINAL (Unsloth) path now that the use_unsloth carve-out is reverted. If metaworld
+# kendall comes back decent (vs the broken run 933's -0.41 under non-unsloth load), it
+# confirms the carve-out was the bug AND that 8-frame eval is fine for the 8-frame base.
+#   cd Robometer-FT && sbatch -M research-partner-cluster jobs/eval_base_diag_aws.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/shared/home/$USER/robometer_frames_hf_full_step2}"
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2}"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+[[ -x "$ENV_PREFIX/bin/python" && -x "$ACCELERATE" ]] || { echo "ERROR env"; exit 1; }
+export PATH="$ENV_PREFIX/bin:$PATH"
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export ROBOMETER_FRAME_DATASET_ROOT="${ROBOMETER_FRAME_DATASET_ROOT:-/shared/home/PKA4388/robometer_frame_dataset}"
+export HF_HUB_OFFLINE=0 TRANSFORMERS_OFFLINE=0
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY; export WANDB_MODE=disabled
+
+NUM_NODES="${SLURM_NNODES:-1}"; GPUS_PER_NODE="${GPUS_PER_NODE:-8}"
+TOTAL_PROCESSES=$(( NUM_NODES * GPUS_PER_NODE ))
+RDZV_PORT=$(( 10000 + ${SLURM_JOB_ID:-0} % 50000 ))
+NODE_LIST=( $(scontrol show hostnames "$SLURM_JOB_NODELIST") ); HEAD_NODE="${NODE_LIST[0]}"
+HEAD_NODE_IP=$(srun --nodes=1 --ntasks=1 -w "$HEAD_NODE" hostname --ip-address | head -1)
+export NCCL_ASYNC_ERROR_HANDLING=1 FI_PROVIDER=efa OMP_NUM_THREADS=1
+
+readarray -t OVERRIDES < <(
+    cat "$HERE/configs/train_base.yaml" "$HERE/configs/run1_icl_ours.yaml" \
+      | grep -v '^[[:space:]]*#' | sed -e 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+LOAD_FROM_CKPT="${LOAD_FROM_CKPT:-/shared/home/PKA4388/checkpoints/Robometer-4B}"
+TEST="/shared/home/$USER/Robometer_FT_eval_base_diag/${SLURM_JOB_ID:-local}"; mkdir -p "$TEST"
+
+# Eval-only: mode=evaluate, load base, 8 frames, keep custom_eval policy_ranking dual-icl ON.
+EVAL_ARGS="mode=evaluate ++training.load_from_checkpoint=$LOAD_FROM_CKPT ++data.max_frames=8 \
+  ++training.do_eval=true ++custom_eval.eval_types=[policy_ranking] ++custom_eval.policy_ranking_dual_icl=true \
+  ++logging.log_to=[] ++training.exp_name=eval_base_diag_8f"
+
+cd "$ROBOMETER_DIR"; export PYTHONPATH="$ROBOMETER_DIR:${PYTHONPATH:-}" ROBOMETER_DIR
+echo "==== EVAL-ONLY base Robometer-4B @ 8 frames (unsloth load, online) ===="
+echo "LOAD_FROM_CKPT=$LOAD_FROM_CKPT  TEST=$TEST"
+"$ACCELERATE" launch --config_file "$HERE/configs/distributed/fsdp.yaml" \
+  --num_machines=1 --num_processes="$TOTAL_PROCESSES" --machine_rank=0 \
+  --main_process_ip="$HEAD_NODE_IP" --main_process_port="$RDZV_PORT" \
+  train.py "${OVERRIDES[@]}" $EVAL_ARGS training.output_dir="$TEST"
+RC=$?
+echo "==== EVAL DIAG exit rc=$RC ===="
+echo "--- metaworld + droid kendall (base @ 8f, correct load) ---"
+sed 's/\x1b\[[0-9;]*m//g' "$HERE/logs/eval_base_diag_${SLURM_JOB_ID}.err" 2>/dev/null | grep -E 'kendall_last/robometer_frames_eval_(metaworld|droid|robometer)' | tail -12
+exit $RC

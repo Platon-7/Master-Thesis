@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --job-name=calib_thr
+#SBATCH --output=/shared/home/PKA4388/Master-Thesis/reward-model-study/logs/calib_thr_%j.out
+#SBATCH --error=/shared/home/PKA4388/Master-Thesis/reward-model-study/logs/calib_thr_%j.err
+#SBATCH --time=03:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6e-1gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+
+# Per-model success-detection threshold calibration (both FT s4000 + baseline
+# Robometer-4B fit on one L40S 48GB). Submit with -M research-partner-cluster.
+set -uo pipefail
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda activate /shared/home/PKA4388/miniconda3/envs/demo2reward_v3
+export PYTHONNOUSERSITE=1
+export MUJOCO_GL=egl
+export ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000}"
+export ROBOMETER_4B_PATH="${ROBOMETER_4B_PATH:-/shared/home/PKA4388/checkpoints/Robometer-4B}"
+echo "HOST=$(hostname)  PARTITION=${SLURM_JOB_PARTITION:-?}"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader | head -1
+python -u /shared/home/PKA4388/Master-Thesis/reward-model-study/scripts/calibrate_threshold.py
+echo "return code: $?"

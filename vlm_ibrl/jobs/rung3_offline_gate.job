@@ -1,0 +1,47 @@
+#!/bin/bash
+#SBATCH --job-name=rm_gate
+#SBATCH --output=logs/rm_gate_%j.out
+#SBATCH --error=logs/rm_gate_%j.err
+#SBATCH --time=01:30:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6-1gpu-l4,ondemand-g6e-4gpu-l40s,ondemand-g6-4gpu-l4
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+# Rung-3 offline scoring GATE: dump BC-rollout agentview videos for TASK, then score
+# success-vs-failure separability with Robometer-FT(s4000) and Robometer-4B(baseline).
+# AUC>=~0.8 => task x model worth a GPU-day of IBRL; ~0.5 => drop. See [[robomimic-eval-setup]].
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+mkdir -p logs "$HERE/../reward-model-study/results/robomimic"
+
+TASK="${TASK:-can}"
+export NUM_GAME="${NUM_GAME:-50}"
+export DUMP_FRAMES="${DUMP_FRAMES:-32}"
+export EVAL_SEED="${EVAL_SEED:-1}"
+FT_CKPT="${FT_CKPT:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000}"
+B4_CKPT="${B4_CKPT:-/shared/home/PKA4388/checkpoints/Robometer-4B}"
+DUMP="$HERE/../reward-model-study/results/robomimic/rollouts_${TASK}.npz"
+
+# ---- environment ----
+unset PYTHONPATH 2>/dev/null || true
+export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_robomimic"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+source set_env.sh
+export PYTHONNOUSERSITE=1
+export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export MUJOCO_GL=egl
+echo "[env] python=$(which python) task=$TASK host=$(hostname)"
+
+# ---- stage A: dump rollout videos + labels ----
+python jobs/rung3_dump_rollouts.py "release/model/robomimic/${TASK}/model0.pt" "$DUMP" \
+    || { echo "[gate] DUMP FAILED"; exit 1; }
+
+# ---- stage B: score both Robometer checkpoints ----
+python jobs/rung3_score.py "$DUMP" "$FT_CKPT" "robometer_ft_s4000" || echo "[gate] FT score FAILED"
+python jobs/rung3_score.py "$DUMP" "$B4_CKPT" "robometer_4b_base"  || echo "[gate] 4B score FAILED"
+echo "[gate] done task=$TASK"

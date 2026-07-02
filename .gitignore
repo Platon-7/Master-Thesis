@@ -118,3 +118,16 @@ loss-debug/sp_dist/
 loss-debug/score4_diag/
 vlm_ibrl/results/
 Qwen35-FT/scripts/_out/
+
+# --- appended: exclude large data / junk / third-party nested repo ---
+# Third-party nested repo (has its own .git; not part of this codebase)
+Robo-Dopamine/
+# Large binary rollout/result data
+*.npz
+reward-model-study/results/robomimic/
+# MuJoCo runtime logs
+MUJOCO_LOG.TXT
+**/MUJOCO_LOG.TXT
+# C/C++ build artifacts
+**/common_utils/build/
+*.err

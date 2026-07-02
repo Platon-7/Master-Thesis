@@ -1,0 +1,183 @@
+#!/bin/bash
+#SBATCH --job-name=q35_run4_p2
+#SBATCH --output=logs/run4_icl_ours_phase2_aws_%j.out
+#SBATCH --error=logs/run4_icl_ours_phase2_aws_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-p5-8gpu-h100-h200
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=8
+#SBATCH --cpus-per-task=96
+#SBATCH --exclusive
+#SBATCH --requeue
+
+# ============================================================================
+# Qwen3.5-FT run4 PHASE 2 — AWS port of jobs/run4_icl_ours_phase2.job.
+# Continues from Phase-1's consolidated best checkpoint (run4_step6500) at lr=1e-5
+# for 5000 steps. WEIGHTS-only load (load_from_checkpoint) — fresh optimizer + LR
+# schedule, NOT a HF Trainer resume. Trains on the no_extras (650k) pool.
+#
+# H100 (p5, 80GB): Qwen3.5-4B + 16+16 ICL frames (production) OOMs on 40GB A100, so this
+# pins to p5. spot is capacity-flaky → submit via a parking loop (resubmit-until-boot).
+#
+# AWS port vs Snellius original (see ../../aws_cluster_port/PORTING_GUIDE.md +
+# Robometer-FT/jobs/run1_icl_ours_aws.job which this mirrors):
+#   * --account rob-tme-gaia ; --partition spot-p5 ; 1 node x 8 GPU ; --requeue
+#   * module loads deleted ; ENV_PREFIX -> /shared/home/PKA4388/miniconda3/envs/robometer_qwen35_gpu
+#   * step2 cache -> /shared/...; keyframe root via $ROBOMETER_FRAME_DATASET_ROOT (ICL)
+#   * WEIGHTS_DIR -> /shared/home/PKA4388/Qwen35_FT_weights
+#   * HF ONLINE (this transformers ver's tokenizer/processor loader is broken offline) +
+#     base model Qwen/Qwen3.5-4B is cached; LOAD_FROM_CKPT is a local dir (no hub)
+#   * scontrol-robust single-node topology ; auto-resume from native checkpoint-* on requeue
+#
+# CRITICAL: the consolidated checkpoint's heads load via _load_custom_heads_from_safetensors,
+# which needs custom_heads.safetensors in the ckpt dir. The non-unsloth/non-PEFT from_pretrained
+# path loads ONLY backbone+lm (heads would stay random — this silently broke Robometer run1).
+# We extracted custom_heads.safetensors into run4_step6500 so the heads load. Keep it there.
+#
+#   cd Qwen35-FT && sbatch -M research-partner-cluster jobs/run4_icl_ours_phase2_aws.job
+#   (override: --export=ALL,LOAD_FROM_CKPT=...,MAX_STEPS=N,WANDB_API_KEY=...)
+# ============================================================================
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+QWEN35_DIR="${QWEN35_DIR:-$HERE}"
+
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/shared/home/$USER/robometer_frames_hf_full_step2}"
+
+# Phase-1 consolidated best checkpoint (HF format + custom_heads.safetensors). Local dir → no hub.
+LOAD_FROM_CKPT="${LOAD_FROM_CKPT:-/shared/home/PKA4388/checkpoints/Qwen35_FT_phase1_consolidated/run4_step6500}"
+if [[ ! -f "$LOAD_FROM_CKPT/config.json" ]]; then
+    echo "ERROR: consolidated checkpoint not found at $LOAD_FROM_CKPT (no config.json)" >&2; exit 1
+fi
+if [[ ! -f "$LOAD_FROM_CKPT/custom_heads.safetensors" ]]; then
+    echo "ERROR: $LOAD_FROM_CKPT has no custom_heads.safetensors — heads would load at RANDOM init." >&2
+    echo "  Extract them from the main safetensors first (progress/success/preference heads + frame_pool_attn)." >&2
+    exit 1
+fi
+
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_qwen35_gpu}"
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+[[ -x "$PYTHON" && -x "$ACCELERATE" ]] || { echo "ERROR: env interpreter missing at $ENV_PREFIX/bin" >&2; exit 1; }
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+export ROBOMETER_FRAME_DATASET_ROOT="${ROBOMETER_FRAME_DATASET_ROOT:-/shared/home/PKA4388/robometer_frame_dataset}"
+# HF ONLINE (cache present → metadata-only; LOAD_FROM_CKPT is local). Offline breaks this
+# transformers version's Qwen tokenizer/processor loader.
+export HF_HUB_OFFLINE="${HF_HUB_OFFLINE:-0}"
+export TRANSFORMERS_OFFLINE="${TRANSFORMERS_OFFLINE:-0}"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+
+export WANDB_PROJECT="${WANDB_PROJECT:-Qwen35_FT}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+export WANDB_API_KEY="${WANDB_API_KEY:-}"
+if [[ -z "${WANDB_MODE:-}" ]]; then
+    if [[ -n "$WANDB_API_KEY" ]] || grep -q 'api.wandb.ai' "$HOME/.netrc" 2>/dev/null; then
+        export WANDB_MODE=online
+    else
+        export WANDB_MODE=offline
+    fi
+fi
+export WANDB_DIR="${WANDB_DIR:-$HERE}"
+
+for f in "$HERE/configs/train_base.yaml" "$HERE/configs/run4_icl_ours_phase2.yaml" "$HERE/configs/distributed/fsdp_qwen35.yaml"; do
+    [[ -f "$f" ]] || { echo "ERROR: missing config $f" >&2; exit 2; }
+done
+
+NUM_NODES="${SLURM_NNODES:-1}"
+GPUS_PER_NODE="${GPUS_PER_NODE:-8}"
+TOTAL_PROCESSES=$(( NUM_NODES * GPUS_PER_NODE ))
+RDZV_PORT=$(( 10000 + ${SLURM_JOB_ID:-0} % 50000 ))
+# scontrol-robust topology (intermittently not on PATH on spot nodes → set -e would kill us).
+SCONTROL="$(command -v scontrol 2>/dev/null || echo /usr/bin/scontrol)"
+NODE_LIST=()
+if [[ "$NUM_NODES" -gt 1 && -x "$SCONTROL" ]]; then
+    NODE_LIST=( $("$SCONTROL" show hostnames "$SLURM_JOB_NODELIST" 2>/dev/null) )
+fi
+[[ ${#NODE_LIST[@]} -eq 0 ]] && NODE_LIST=( "$(hostname -s)" )
+HEAD_NODE="${NODE_LIST[0]}"
+HEAD_NODE_IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
+[[ -z "$HEAD_NODE_IP" ]] && HEAD_NODE_IP=127.0.0.1
+
+export NCCL_ASYNC_ERROR_HANDLING=1
+export FI_PROVIDER=efa
+export OMP_NUM_THREADS=1
+
+# Flatten train_base + phase2 yaml → ++key=value. phase2 is LAST so its no_extras pool +
+# lr=1e-5 + max_steps=5000 win over train_base (Hydra last-wins).
+readarray -t OVERRIDES < <(
+    grep -hv '^[[:space:]]*#' "$HERE/configs/train_base.yaml" "$HERE/configs/run4_icl_ours_phase2.yaml" \
+      | sed -e 's/[[:space:]]*#.*//' | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+EXTRA="${EXTRA:-}"
+# Belt-and-suspenders: finetune pool = no_extras (no 200k humanoid + human_hand). The phase2
+# yaml already sets this; re-assert here so it can never be silently overridden.
+EXTRA="$EXTRA ++data.train_datasets=[robometer_frames_train_no_extras]"
+EXTRA="$EXTRA ++training.load_from_checkpoint=$LOAD_FROM_CKPT"
+# Checkpoint every 500 (= eval cadence, so EVERY eval step has a saved checkpoint — fixes the old
+# loss where intermediate eval-step states (e.g. 3500) were never checkpointed) and KEEP ALL of them
+# (save_total_limit=null → HF Trainer never prunes native checkpoint-<step> dirs).
+EXTRA="$EXTRA ++training.save_steps=${SAVE_STEPS:-500} ++training.save_total_limit=null"
+# A100 (40GB) test config: 16+16 frames OOM at per_device_batch=8, so use micro-batch 2 with
+# H100 config: effective batch = 8 x 1 x 8 GPUs = 64, IDENTICAL to phase-1. Restored from the
+# A100 batch-2/accum-4 test (which OOM'd mid-run on 40GB). Pinned to H100/H200 only; do NOT run
+# this batch on a 40GB A100 — it will OOM. Override via PDB/ACCUM if needed.
+EXTRA="$EXTRA ++training.per_device_train_batch_size=${PDB:-8} ++training.gradient_accumulation_steps=${ACCUM:-1}"
+if [[ -n "${MAX_STEPS:-}" ]]; then EXTRA="$EXTRA ++training.max_steps=$MAX_STEPS"; fi
+if [[ -n "${WANDB_ENTITY:-}" ]]; then EXTRA="$EXTRA logging.wandb_entity=$WANDB_ENTITY"; fi
+
+WEIGHTS_DIR="${WEIGHTS_DIR:-/shared/home/$USER/Qwen35_FT_weights}"
+mkdir -p "$WEIGHTS_DIR"
+EXP_NAME="qwen35_ft_run4_icl_ours_phase2"   # matches the yaml; output_dir = RUN_OUT/<exp_name>
+# FIXED (not jobid-based) so a resubmit after a spot NODE_FAIL/preemption RESUMES from the
+# latest native checkpoint below instead of starting over. Safe because only ONE run4 job runs
+# at a time (single-jobid guard + SLURM --requeue keep same dir → no concurrent writers).
+# Override with RUN_OUT=... if ever needed.
+RUN_OUT="${RUN_OUT:-$WEIGHTS_DIR/run4_icl_ours_phase2}"
+
+# --- Auto-resume on requeue (spot): resume from the latest NATIVE checkpoint-<step> dir, which
+# HF writes under RUN_OUT/<exp_name>/. These carry optimizer+scheduler+RNG. If none yet, the
+# job does its normal load_from_checkpoint (consolidated) fresh start. ---
+CKPT_RESUME="$(printf %s "${CKPT_RESUME:-}" | tr -d '[:space:]')"
+if [[ -z "$CKPT_RESUME" && -d "$RUN_OUT" ]]; then
+    LATEST_STEP=-1
+    while IFS= read -r d; do
+        s="${d##*/checkpoint-}"
+        if [[ "$s" =~ ^[0-9]+$ ]] && (( s > LATEST_STEP )); then LATEST_STEP=$s; CKPT_RESUME="$d"; fi
+    done < <(find "$RUN_OUT" -maxdepth 3 -type d -name 'checkpoint-*' 2>/dev/null)
+    [[ -n "$CKPT_RESUME" ]] && echo "[auto-resume] found native checkpoint at step $LATEST_STEP — $CKPT_RESUME"
+fi
+[[ -n "$CKPT_RESUME" ]] && EXTRA="$EXTRA ++training.resume_from_checkpoint=$CKPT_RESUME"
+
+cd "$QWEN35_DIR"
+export PYTHONPATH="$QWEN35_DIR:${PYTHONPATH:-}"
+
+echo "================== PHASE 2 (run4) AWS launch =================="
+echo "Partition          : ${SLURM_JOB_PARTITION:-?}   Node: ${NODE_LIST[*]} ($HEAD_NODE_IP)"
+echo "GPUs               : $TOTAL_PROCESSES"
+echo "ENV_PREFIX         : $ENV_PREFIX"
+echo "step2 cache        : $HF_DIR   keyframe root: $ROBOMETER_FRAME_DATASET_ROOT"
+echo "LOAD_FROM_CKPT     : $LOAD_FROM_CKPT (custom_heads present)"
+echo "pool               : robometer_frames_train_no_extras (650k, no humanoid/human_hand)"
+echo "WEIGHTS_DIR        : $WEIGHTS_DIR    RUN_OUT: $RUN_OUT"
+echo "WANDB              : $WANDB_MODE ($WANDB_PROJECT / $WANDB_ENTITY)"
+echo "MAX_STEPS          : ${MAX_STEPS:-<from-yaml:5000>}   save_steps=${SAVE_STEPS:-500}"
+echo "CKPT_RESUME        : ${CKPT_RESUME:-<none — fresh load_from_checkpoint>}"
+echo "EXTRA              : $EXTRA"
+echo "=============================================================="
+
+"$ACCELERATE" launch \
+  --config_file configs/distributed/fsdp_qwen35.yaml \
+  --num_machines=1 \
+  --num_processes="$TOTAL_PROCESSES" \
+  --machine_rank=0 \
+  --main_process_ip="$HEAD_NODE_IP" \
+  --main_process_port="$RDZV_PORT" \
+  train.py "${OVERRIDES[@]}" $EXTRA \
+  training.output_dir="$RUN_OUT"

@@ -1,0 +1,32 @@
+#!/bin/bash
+#SBATCH --job-name=smoke_q35rm
+#SBATCH --output=logs/smoke_q35rm_%j.out
+#SBATCH --error=logs/smoke_q35rm_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-g6-1gpu-l4,spot-p4d-8gpu-a100,ondemand-g6-4gpu-l4,ondemand-g6e-4gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+
+# --- vlm_ibrl_qwen35 env, driven directly (no activation needed) ---
+QENV=/shared/home/PKA4388/miniconda3/envs/vlm_ibrl_qwen35
+QPY="$QENV/bin/python"
+GLDIR=/shared/home/PKA4388/qwen35_gl_libs   # Mesa libGL family staged from demo2reward (cv2 needs it)
+unset PYTHONPATH 2>/dev/null || true
+export PYTHONNOUSERSITE=1
+# qwen35's own libs FIRST, then the GL side-dir (fills the libGL gap), then whatever the GPU node provides
+export LD_LIBRARY_PATH="$QENV/lib:$GLDIR:${LD_LIBRARY_PATH:-}"
+export MUJOCO_GL=egl
+# vlm_ibrl + Robometer on path; get_robometer_4b auto-prepends Qwen35-FT for the Qwen3.5 dispatch
+export PYTHONPATH="$HERE:$HERE/../Robometer:${PYTHONPATH:-}"
+# HF online (offline tokenizer broken); Qwen3.5-4B base is in HF cache
+
+echo "[smoke] host=$(hostname) py=$QPY"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1
+"$QPY" jobs/smoke_qwen35_robomimic.py
+echo "[smoke] exit=$?"
