@@ -1,0 +1,276 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_ft_run2_hin
+#SBATCH --output=logs/run2_noicl_ours_aws_hin_%j.out
+#SBATCH --error=logs/run2_noicl_ours_aws_hin_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-p4d-8gpu-a100,spot-p5-8gpu-h100-h200
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=8
+#SBATCH --cpus-per-task=96
+#SBATCH --exclusive
+#SBATCH --requeue
+
+# ============================================================================
+# Robometer-4B FULL fine-tune — Run 1 (asymmetric C51 + asymmetric BCE) with ICL,
+# AWS research-partner-cluster port of jobs/run1_icl_ours.job.
+#
+# WHAT CHANGED vs the Snellius original (see ../../aws_cluster_port/PORTING_GUIDE.md):
+#   * --account            : gusei17535            -> rob-tme-gaia (accounting enforced)
+#   * --partition          : gpu_h100              -> spot-p4d-8gpu-a100 (8x A100 40GB / node)
+#                            (H100 spot was capacity-dry 2026-06-21; A100 chosen. GPU type does
+#                             not affect model validity — FSDP bf16 is equivalent across GPUs.)
+#   * topology             : 2 nodes x 4 GPU       -> 1 node x 8 GPU (p4d nodes are 8-GPU)
+#   * --requeue            : added                 (spot is preemptible; auto-resume below)
+#
+# OOM NOTE: A100 here is 40GB (vs the original 80GB H100). The 8+8-frame change roughly
+# halves activation memory vs the old 16+16, and FSDP FULL_SHARD across 8 GPUs keeps per-GPU
+# param/grad/optim small, so this should fit. If it OOMs, flip fsdp_offload_params=true in
+# configs/distributed/fsdp.yaml, or lower training.per_device_train_batch_size (currently 8).
+#   * module load 2025 ... : deleted              (no Lmod sci modules on AWS)
+#   * ENV_PREFIX           : /scratch-shared/...   -> /shared/home/PKA4388/miniconda3/envs/...
+#   * data (step2 cache)   : /scratch-shared/...   -> /shared/home/PKA4388/robometer_frames_hf_full_step2
+#   * keyframe/ICL root    : (hardcoded /projects) -> $ROBOMETER_FRAME_DATASET_ROOT (export below)
+#   * WEIGHTS_DIR          : /projects/prjs1958/.. -> /shared/home/PKA4388/Robometer_FT_weights
+#   * HF (online)          : cache present (metadata-only); base ckpt loaded from local path.
+#                            NOT forced offline — this transformers ver's Qwen3-VL tokenizer/
+#                            processor loader is broken offline (see the HF block below).
+#   * WANDB_MODE=offline   : default when no API key (online wandb would hang on login)
+#
+# THE EXPERIMENT DELTA (this run's whole point): 8 frames per QUERY *and* per ICL
+# DEMO (was 16+16). Query budget = data.max_frames=8 (set in configs/run1_icl_ours.yaml);
+# the demo subsample to the same budget was added in
+# Robometer/robometer/data/samplers/base.py::_load_partner_trajectory. Matches the
+# Robometer-4B baseline's 8-frame budget so the comparison is apples-to-apples.
+#
+# Recipe overrides (set at launch via `sbatch --export=ALL,VAR=val,...`):
+#   * MAX_STEPS=N                          -> training.max_steps
+#   * EXTRA="++data.use_icl=false ..."     -> arbitrary Hydra overrides
+#   * WANDB_API_KEY=...                    -> enables ONLINE wandb (else offline)
+#   * WEIGHTS_DIR=...                      -> checkpoint output root
+#   * CKPT_RESUME=<path>                   -> explicit full resume (overrides auto-resume)
+#
+# SUBMIT FROM Robometer-FT/ so $HERE/configs and logs/ resolve:
+#     cd Robometer-FT && sbatch -M research-partner-cluster jobs/run1_icl_ours_aws.job
+# ============================================================================
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+# --- Data: step2 HF/NPZ cache on /shared (training-ready, see PORTING_GUIDE §9) ---
+HF_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:-/shared/home/$USER/robometer_frames_hf_full_step2}"
+
+# --- Conda env (hardcoded; fail loudly if missing so we never silently fall back) ---
+ENV_PREFIX="${ENV_PREFIX:-/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2}"
+if [[ ! -x "$ENV_PREFIX/bin/python" ]]; then
+    echo "ERROR: ENV_PREFIX env not found at $ENV_PREFIX (expected $ENV_PREFIX/bin/python)" >&2
+    exit 1
+fi
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+if [[ ! -x "$PYTHON" ]] || [[ ! -x "$ACCELERATE" ]]; then
+    echo "ERROR: env interpreter / accelerate not executable at $ENV_PREFIX/bin/" >&2
+    exit 1
+fi
+# Put env bin/ first so `#!/usr/bin/env python3.10` shebangs resolve to the env interpreter.
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+# --- Dataset / cache locations -------------------------------------------------------
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_DIR"
+# Keyframe tar dataset that backs the ICL demos + pairs_unified.jsonl. base.py reads this
+# env var (default is the old /projects path), so ICL would crash at startup without it.
+export ROBOMETER_FRAME_DATASET_ROOT="${ROBOMETER_FRAME_DATASET_ROOT:-/shared/home/PKA4388/robometer_frame_dataset}"
+# HF: run ONLINE. The model+processor are cached (so this only does fast metadata checks,
+# not full downloads), and the base checkpoint is loaded from a local path (LOAD_FROM_CKPT
+# below) so it never touches the hub. We do NOT force offline because this transformers
+# version's tokenizer/processor loader is broken offline for Qwen3-VL: a repo-id hits
+# os.listdir(repo-id) (tokenization_utils_base.py:2057) and a local dir hits
+# `_config.model_type` on a dict (:2419) — both raise. Online avoids both paths (this is how
+# the Snellius runs worked). Requires compute-node egress to huggingface.co — the same egress
+# the online WandB logging below already needs, so the two are consistent. Override by
+# exporting HF_HUB_OFFLINE=1 at submit only if a node is confirmed network-isolated.
+export HF_HUB_OFFLINE="${HF_HUB_OFFLINE:-0}"
+export TRANSFORMERS_OFFLINE="${TRANSFORMERS_OFFLINE:-0}"
+
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+
+# --- WandB: online when creds exist (~/.netrc has the verified key, or WANDB_API_KEY is
+#     exported at submit); otherwise offline so a missing key never hangs the run on login. ---
+export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_FT}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+export WANDB_API_KEY="${WANDB_API_KEY:-}"
+if [[ -z "${WANDB_MODE:-}" ]]; then
+    if [[ -n "$WANDB_API_KEY" ]] || grep -q 'api.wandb.ai' "$HOME/.netrc" 2>/dev/null; then
+        export WANDB_MODE=online
+    else
+        export WANDB_MODE=offline
+    fi
+fi
+export WANDB_DIR="${WANDB_DIR:-$HERE}"
+
+# --- Sanity: required config files ----------------------------------------------------
+for f in "$HERE/configs/train_base.yaml" "$HERE/configs/run2_noicl_ours.yaml" "$HERE/configs/distributed/fsdp.yaml"; do
+    if [[ ! -f "$f" ]]; then
+        echo "ERROR: missing config $f" >&2
+        exit 2
+    fi
+done
+
+# --- Single-node topology (A100 nodes are 8-GPU; no multi-node srun path needed) ------
+NUM_NODES="${SLURM_NNODES:-1}"
+GPUS_PER_NODE="${GPUS_PER_NODE:-8}"
+TOTAL_PROCESSES=$(( NUM_NODES * GPUS_PER_NODE ))
+RDZV_PORT=$(( 10000 + ${SLURM_JOB_ID:-0} % 50000 ))
+# Resolve the node list robustly. scontrol is intermittently NOT on PATH on freshly
+# (re)created spot nodes — with set -e that "command not found" silently killed the job at
+# this line (cost several failed relaunches). Use an absolute path, and for the single-node
+# case fall back to this host so we never depend on scontrol/srun being resolvable.
+SCONTROL="$(command -v scontrol 2>/dev/null || echo /usr/bin/scontrol)"
+NODE_LIST=()
+if [[ "$NUM_NODES" -gt 1 && -x "$SCONTROL" ]]; then
+    NODE_LIST=( $("$SCONTROL" show hostnames "$SLURM_JOB_NODELIST" 2>/dev/null) )
+fi
+[[ ${#NODE_LIST[@]} -eq 0 ]] && NODE_LIST=( "$(hostname -s)" )
+HEAD_NODE="${NODE_LIST[0]}"
+# Single node → main process is local; use this host's IP (127.0.0.1 fallback). Avoids the
+# srun call entirely (it would also fail if SLURM bins aren't on PATH).
+HEAD_NODE_IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
+[[ -z "$HEAD_NODE_IP" ]] && HEAD_NODE_IP=127.0.0.1
+
+export NCCL_ASYNC_ERROR_HANDLING=1
+export FI_PROVIDER=efa
+export OMP_NUM_THREADS=1
+
+# --- Flatten train_base.yaml + run1_icl_ours.yaml into ++key=value Hydra overrides -----
+# (Strips comments + blank lines; turns "a.b: c" into "++a.b=c". data.max_frames=8 rides
+#  through here from configs/run1_icl_ours.yaml.)
+readarray -t OVERRIDES < <(
+    cat "$HERE/configs/train_base.yaml" "$HERE/configs/run2_noicl_ours.yaml" \
+      | grep -v '^[[:space:]]*#' \
+      | sed -e 's/[[:space:]]*#.*//' \
+      | grep -v '^[[:space:]]*$' \
+      | sed -e 's/: */=/' -e 's/^/++/'
+)
+
+EXTRA="${EXTRA:-}"
+if [[ -n "${MAX_STEPS:-}" ]]; then
+    EXTRA="$EXTRA ++training.max_steps=$MAX_STEPS"
+fi
+if [[ -n "${WANDB_ENTITY:-}" ]]; then
+    EXTRA="$EXTRA logging.wandb_entity=$WANDB_ENTITY"
+fi
+
+# Base checkpoint: use the COMPLETE local consolidated dir, NOT the hub repo-id from
+# train_base.yaml ("robometer/Robometer-4B"). Under HF_HUB_OFFLINE=1, resolve_checkpoint_path()
+# (save.py) calls snapshot_download() on a repo-id and fails — the models--robometer--Robometer-4B
+# HF cache is a stub with no blobs. An ABSOLUTE local path short-circuits that (save.py:132).
+# Overridable via LOAD_FROM_CKPT. EXTRA is appended after OVERRIDES so this wins (Hydra last-wins).
+LOAD_FROM_CKPT="${LOAD_FROM_CKPT:-/shared/home/PKA4388/checkpoints/Robometer-4B}"
+if [[ ! -f "$LOAD_FROM_CKPT/config.json" ]]; then
+    echo "ERROR: base checkpoint incomplete at $LOAD_FROM_CKPT (no config.json)" >&2
+    exit 3
+fi
+EXTRA="$EXTRA ++training.load_from_checkpoint=$LOAD_FROM_CKPT"
+
+# Distinct exp_name so this 8-frame fair-comparison rerun doesn't collide with the original
+# 16-frame run1 in the WandB dashboard. Overridable via EXP_NAME.
+EXP_NAME="${EXP_NAME:-robometer_ft_run2_noicl_hin}"
+EXTRA="$EXTRA ++training.exp_name=$EXP_NAME"
+
+# --- run2 experiment delta (THE point of this run) ------------------------------------
+# Hindsight outcome targets: every frame's progress target is replaced by the trajectory's
+# TERMINAL achieved level (successes -> 1.0 on every prefix; curated failures -> the
+# episode's final rubric level; partials -> partial_success; reverse/rewind clips -> their
+# own regressed end value). The progress head becomes a Monte Carlo value head
+# V(s) = E[outcome | prefix]; under these semantics the expectation readout is the
+# theoretically correct decode even when the C51 distribution is bimodal (genuine outcome
+# uncertainty), and failure data is load-bearing rather than a contaminant.
+# Implemented in Robometer/robometer/data/samplers/base.py (_get_traj_from_data); success
+# labels are computed BEFORE the transform, so the success head matches run2-ff exactly.
+# progress_pred_type stays at the config.yaml default absolute_first_frame, matching the
+# run2-ff/run3-ff reference pair (ff >= awt in all downstream comparisons so far).
+# max_frames pinned to 16 (production budget), use_icl=false -> 16 query + 0 demo frames.
+EXTRA="$EXTRA ++data.hindsight_outcome_targets=final ++data.max_frames=16"
+
+# Checkpoint every 500 steps (was 1000) so a spot preemption loses at most ~500 steps of
+# progress before auto-resume picks up the last native checkpoint. Overridable via SAVE_STEPS.
+EXTRA="$EXTRA ++training.save_steps=${SAVE_STEPS:-500}"
+
+WEIGHTS_DIR="${WEIGHTS_DIR:-/shared/home/$USER/Robometer_FT_weights}"
+mkdir -p "$WEIGHTS_DIR"
+
+# Stable output dir across requeue: SLURM keeps the same job id on requeue, so this path
+# persists and we can resume into it. "_8f" distinguishes this 8-frame run from the
+# earlier 16-frame run1 checkpoints.
+RUN_OUT="$WEIGHTS_DIR/run2_noicl_hin_${SLURM_JOB_ID:-local}"
+
+# --- Resume handling ------------------------------------------------------------------
+# Strip whitespace from any explicit CKPT_RESUME (defends against copy-paste newlines).
+CKPT_RESUME="$(printf %s "${CKPT_RESUME:-}" | tr -d '[:space:]')"
+# Auto-resume on requeue: if no explicit CKPT_RESUME, look for HF Trainer NATIVE
+# checkpoint-<step> dirs in RUN_OUT (these carry optimizer + scheduler + RNG state for a
+# correct full resume; the SaveBestCallback's ckpt-*/ dirs are weights-only and are NOT
+# used here). HF validates the dir contents and fails loudly if incomplete — never a
+# silent partial resume. If none exist yet, start fresh from step 0.
+if [[ -z "$CKPT_RESUME" && -d "$RUN_OUT" ]]; then
+    # IMPORTANT: train.py joins training.output_dir with run_name(=exp_name), so HF Trainer
+    # writes native checkpoints to $RUN_OUT/<exp_name>/checkpoint-<step> — NOT directly under
+    # $RUN_OUT. Search recursively and pick the highest step number (full path).
+    LATEST_STEP=-1
+    while IFS= read -r d; do
+        s="${d##*/checkpoint-}"
+        if [[ "$s" =~ ^[0-9]+$ ]] && (( s > LATEST_STEP )); then
+            LATEST_STEP=$s
+            CKPT_RESUME="$d"
+        fi
+    done < <(find "$RUN_OUT" -maxdepth 3 -type d -name 'checkpoint-*' 2>/dev/null)
+    if [[ -n "$CKPT_RESUME" ]]; then
+        echo "[auto-resume] found native checkpoint at step $LATEST_STEP — resuming from $CKPT_RESUME"
+    fi
+fi
+RESUME_OVERRIDE=""
+if [[ -n "$CKPT_RESUME" ]]; then
+    RESUME_OVERRIDE="++training.resume_from_checkpoint=${CKPT_RESUME}"
+    EXTRA="$EXTRA $RESUME_OVERRIDE"
+fi
+
+# Run from Robometer/ so upstream train.py finds config_path="robometer/configs" (relative).
+cd "$ROBOMETER_DIR"
+export PYTHONPATH="$ROBOMETER_DIR:${PYTHONPATH:-}"
+export ROBOMETER_DIR
+
+echo "==================== launch summary ===================="
+echo "Cluster            : ${SLURM_CLUSTER_NAME:-?}"
+echo "Partition          : ${SLURM_JOB_PARTITION:-?}"
+echo "Nodes              : $NUM_NODES  (${NODE_LIST[*]})"
+echo "Head node          : $HEAD_NODE  ($HEAD_NODE_IP)"
+echo "GPUs per node      : $GPUS_PER_NODE   TOTAL_PROCESSES: $TOTAL_PROCESSES"
+echo "ENV_PREFIX         : $ENV_PREFIX"
+echo "ROBOMETER_DIR      : $ROBOMETER_DIR"
+echo "step2 cache        : $HF_DIR"
+echo "keyframe root      : $ROBOMETER_FRAME_DATASET_ROOT"
+echo "WEIGHTS_DIR        : $WEIGHTS_DIR"
+echo "RUN_OUT            : $RUN_OUT"
+echo "LOAD_FROM_CKPT     : $LOAD_FROM_CKPT"
+echo "WANDB_MODE         : $WANDB_MODE  (project=$WANDB_PROJECT entity=$WANDB_ENTITY)"
+echo "HF_HUB_OFFLINE     : $HF_HUB_OFFLINE"
+echo "MAX_STEPS          : ${MAX_STEPS:-<from-yaml:7500>}"
+echo "CKPT_RESUME        : ${CKPT_RESUME:-<none — fresh start>}"
+echo "frames (query+demo): 16 + 0   (data.max_frames=16, use_icl=false)"
+echo "progress targets    : hindsight_outcome_targets=final (pred_type=absolute_first_frame)"
+echo "EXTRA              : $EXTRA"
+echo "OVERRIDES count    : ${#OVERRIDES[@]}"
+echo "========================================================"
+
+"$ACCELERATE" launch \
+  --config_file "$HERE/configs/distributed/fsdp.yaml" \
+  --num_machines=1 \
+  --num_processes="$TOTAL_PROCESSES" \
+  --machine_rank=0 \
+  --main_process_ip="$HEAD_NODE_IP" \
+  --main_process_port="$RDZV_PORT" \
+  train.py "${OVERRIDES[@]}" $EXTRA \
+  training.output_dir="$RUN_OUT"

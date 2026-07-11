@@ -412,6 +412,18 @@ class DataConfig:
         default="absolute_wrt_total_frames", metadata={"help": "Type of progress prediction: 'absolute' or 'relative'"}
     )
 
+    hindsight_outcome_targets: str = field(
+        default="none",
+        metadata={
+            "help": "Replace per-frame progress targets with the trajectory's eventual outcome, turning the "
+            "progress head into a Monte Carlo value head V(s) = E[outcome | prefix]. 'final': outcome = the "
+            "trajectory's terminal achieved level (the MC return; recommended). 'max': outcome = the peak "
+            "achieved level (informative for near-misses but rewards reach-then-drop). 'none': disabled "
+            "(default; per-frame state-progress targets). Success labels are computed BEFORE this transform "
+            "and are unaffected."
+        },
+    )
+
     # Success prediction thresholds
     min_success: float = field(
         default=0.0, metadata={"help": "Minimum progress threshold for success prediction (label=0, failure)"}

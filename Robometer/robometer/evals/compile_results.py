@@ -1124,6 +1124,7 @@ def compute_head_quality_metrics(results, num_bins=None, is_discrete_mode=False,
         label = 1 if rs[0].get("quality_label") == "successful" else 0
         partial = rs[0].get("partial_success")
         succ_frames = []; prog_last = np.nan
+        prog_frames = []; bins_last = None
         for r in rs:
             sp = r.get("success_probs")
             if sp is not None:
@@ -1134,15 +1135,24 @@ def compute_head_quality_metrics(results, num_bins=None, is_discrete_mode=False,
                 pa = np.asarray(pp, float)
                 if is_discrete_mode and convert_fn is not None and pa.ndim >= 1 and num_bins and pa.shape[-1] == num_bins:
                     cont = np.asarray(convert_fn(pa), float).ravel()
+                    # last-frame bin distribution (softmax only if not already normalized):
+                    # feeds the calibration-shape metrics (prog_p0/ptop_*) that the mean
+                    # readout hides (bimodality / floor collapse are invisible in cont).
+                    row = pa.reshape(-1, num_bins)[-1].astype(float)
+                    if not np.isclose(row.sum(), 1.0, atol=1e-3):
+                        row = np.exp(row - row.max()); row = row / max(row.sum(), 1e-12)
+                    bins_last = row
                 else:
                     cont = pa.ravel()
                 if cont.size:
                     prog_last = float(cont[-1])
+                    prog_frames.extend(cont.tolist())
         if not succ_frames:
             continue
         sf = np.asarray(succ_frames, float)
         trajs.append(dict(label=label, partial=partial, succ_last=float(sf[-1]),
-                          prog_last=prog_last, succ_frames=sf))
+                          prog_last=prog_last, succ_frames=sf,
+                          prog_frames=np.asarray(prog_frames, float), bins_last=bins_last))
     if not any_sp or not trajs:
         return {}
     labels = np.array([t["label"] for t in trajs])
@@ -1187,6 +1197,62 @@ def compute_head_quality_metrics(results, num_bins=None, is_discrete_mode=False,
             m[f"succ_latefr_fpr_t{ts}"] = float((late_fail > thr).mean()) if late_fail.size else float("nan")
             if nearmiss is not None:
                 m[f"succ_nearmiss_fpr_t{ts}"] = float((nearmiss > thr).mean())
+    # ---- Absolute-calibration + RL-margin metrics (ranking metrics are blind to these:
+    # a head can rank perfectly while reading its own solved clips at 0.25, collapsing
+    # its output range to a constant, or losing the solve-vs-nearmiss margin that
+    # downstream reinforcement learning lives on). ------------------------------------
+    m["prog_final_on_success_mean"] = float(np.nanmean(prog_last[Pm])) if Pm.any() else float("nan")
+    m["prog_final_on_failure_mean"] = float(np.nanmean(prog_last[Nm])) if Nm.any() else float("nan")
+    m["succ_on_success_final_mean"] = float(succ_last[Pm].mean()) if Pm.any() else float("nan")
+
+    # C51 shape on final frames: mass at bin 0 (the hedge) and at the top bin (the
+    # completion belief / top-bin readout). ptop gap between classes is the top-bin
+    # readout's operating margin.
+    sb = [t["bins_last"] for t in trajs if t["label"] == 1 and t["bins_last"] is not None]
+    fb = [t["bins_last"] for t in trajs if t["label"] == 0 and t["bins_last"] is not None]
+    if sb:
+        SB = np.vstack(sb)
+        m["prog_p0_success_final"] = float(SB[:, 0].mean())
+        m["prog_ptop_success_final"] = float(SB[:, -1].mean())
+    if fb:
+        FB = np.vstack(fb)
+        m["prog_p0_failure_final"] = float(FB[:, 0].mean())
+        m["prog_ptop_failure_final"] = float(FB[:, -1].mean())
+    if sb and fb:
+        m["prog_ptop_gap"] = m["prog_ptop_success_final"] - m["prog_ptop_failure_final"]
+
+    # Near-miss margin at trajectory level (top-quintile partial_success failures):
+    # the states an over-optimizing policy farms. This margin, not the pooled gap,
+    # decides whether reinforcement learning decays after the policy gets good.
+    parts_all = [t["partial"] for t in trajs if t["label"] == 0 and t["partial"] is not None]
+    if len(parts_all) >= 5:
+        cut = float(np.quantile(parts_all, 0.8))
+        nm_traj = [t for t in trajs if t["label"] == 0 and t["partial"] is not None and t["partial"] >= cut]
+        if nm_traj and Pm.any():
+            nm_prog = np.array([t["prog_last"] for t in nm_traj], float)
+            nm_succ = np.array([t["succ_last"] for t in nm_traj], float)
+            m["prog_nearmiss_gap"] = float(np.nanmean(prog_last[Pm]) - np.nanmean(nm_prog))
+            m["succ_on_nearmiss_mean"] = float(np.nanmean(nm_succ))
+
+    # Ramp quality: mean within-clip Spearman between predicted progress and frame
+    # order on SUCCESS clips. Dense reward needs the per-episode ramp; this separates
+    # "flat but ordered across clips" from "actually ramps within a clip".
+    def _spearman(y):
+        n = len(y)
+        if n < 3 or np.all(y == y[0]):
+            return float("nan")
+        rx = np.argsort(np.argsort(np.arange(n))).astype(float)
+        ry = np.argsort(np.argsort(y)).astype(float)
+        sx, sy = rx.std(), ry.std()
+        if sx < 1e-9 or sy < 1e-9:
+            return float("nan")
+        return float(((rx - rx.mean()) * (ry - ry.mean())).mean() / (sx * sy))
+    mono = [_spearman(t["prog_frames"]) for t in trajs
+            if t["label"] == 1 and t["prog_frames"].size >= 3]
+    mono = [v for v in mono if v == v]
+    if mono:
+        m["prog_monotonicity_success"] = float(np.mean(mono))
+
     m["n_traj"] = len(trajs); m["n_success"] = int(Pm.sum()); m["n_failure"] = int(Nm.sum())
     return m
 

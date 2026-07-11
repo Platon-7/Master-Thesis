@@ -4,11 +4,20 @@ import torch
 from qwen_vl_utils import process_vision_info
 
 
+def get_roboreward_4b():
+    """Load the RoboReward-4B baseline (matches our 4B FT for a fair comparison)."""
+    return _get_roboreward("teetone/RoboReward-4B")
+
+
 def get_roboreward_8b():
-    """Load the RoboReward-8B baseline. Prefers flash_attention_2; falls back if unavailable."""
+    """Load the RoboReward-8B baseline."""
+    return _get_roboreward("teetone/RoboReward-8B")
+
+
+def _get_roboreward(model_id):
+    """Load a RoboReward baseline. Prefers flash_attention_2; falls back if unavailable."""
     from transformers import Qwen3VLForConditionalGeneration, AutoProcessor
 
-    model_id = "teetone/RoboReward-8B"
     try:
         model = Qwen3VLForConditionalGeneration.from_pretrained(
             model_id,

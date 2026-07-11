@@ -132,9 +132,14 @@ class RobometerScorer:
         if data_cfg is not None and getattr(data_cfg, "use_multi_image", True) is False:
             data_cfg.use_multi_image = True
 
-        # Resolve discrete-progress mode from the loaded config.
+        # Resolve discrete-progress mode from the loaded config. Match any C51
+        # variant, not just the literal "discrete": fine-tuned checkpoints use
+        # loss types like "c51_asymmetric" (same 10-bin head, asymmetric loss);
+        # matching only "discrete" left their reads on the raw-logit path ->
+        # garbage progress. (Same fix as robometer-policy-learning's buffer.)
         loss_cfg = getattr(cfg, "loss", None)
-        self._is_discrete = getattr(loss_cfg, "progress_loss_type", None) == "discrete"
+        _plt = str(getattr(loss_cfg, "progress_loss_type", "") or "").lower()
+        self._is_discrete = _plt == "discrete" or "c51" in _plt
         self._num_bins = int(getattr(loss_cfg, "progress_discrete_bins", 10) or 10)
 
         model_cfg = getattr(cfg, "model", None)
@@ -215,6 +220,27 @@ class RobometerScorer:
             raw_dict_to_sample,
         )
 
+        # Capture the raw C51 bin distribution flowing through the progress
+        # readout (convert_bins_to_continuous) so callers can apply alternative
+        # decodes (condMean = EV/(1-P(bin0)); the plain EV is compressed by the
+        # FT heads' bin-0 hedge lump). Installed once, cleared per call.
+        if not hasattr(self, "_bin_trace"):
+            from robometer.evals import eval_server as _es
+            self._bin_trace = []
+            _orig_conv = _es.convert_bins_to_continuous
+            _tr = self._bin_trace
+            def _traced_conv(bl):
+                try:
+                    if isinstance(bl, torch.Tensor):
+                        _p = bl.float() if bool((bl.sum(dim=-1) == 1).all()) \
+                            else torch.softmax(bl.float(), dim=-1)
+                        _tr.append(_p.detach().cpu().numpy())
+                except Exception:
+                    pass
+                return _orig_conv(bl)
+            _es.convert_bins_to_continuous = _traced_conv
+        self._bin_trace.clear()
+
         frames_np = self._frames_to_uint8(frames)
         raw = dict(
             frames=frames_np,
@@ -257,8 +283,13 @@ class RobometerScorer:
 
         progress = float(extract_rewards_from_output(outputs)[0])
         success = float(extract_success_probs_from_output(outputs)[0])
+        bins_final = None
+        if self._bin_trace:
+            _arr = self._bin_trace[-1]
+            bins_final = [float(b) for b in _arr.reshape(-1, _arr.shape[-1])[-1]]
         if not detailed:
-            return {"progress_reward": progress, "success_prob": success}
+            return {"progress_reward": progress, "success_prob": success,
+                    "prog_bins_final": bins_final}
 
         # detailed mode: also surface the per-frame arrays the model produced
         # (the extract_* helpers only return the last frame). Used by the
@@ -274,6 +305,7 @@ class RobometerScorer:
         return {
             "progress_reward": progress,
             "success_prob": success,
+            "prog_bins_final": bins_final,
             "success_probs_per_frame": [float(x) for x in sp_per_frame],
             "progress_per_frame": [float(x) for x in pg_per_frame],
         }

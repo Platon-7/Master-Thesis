@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=calib_sq
-#SBATCH --output=logs/calib_sq_%j.out
-#SBATCH --error=logs/calib_sq_%j.err
+#SBATCH --job-name=rr_calib
+#SBATCH --output=logs/rr_calib_%j.out
+#SBATCH --error=logs/rr_calib_%j.err
 #SBATCH --time=01:30:00
 #SBATCH --account=rob-tme-gaia
 #SBATCH --partition=spot-g6-1gpu-l4,spot-p4d-8gpu-a100,ondemand-g6-4gpu-l4,ondemand-g6e-4gpu-l40s
@@ -22,13 +22,13 @@ export PYTHONNOUSERSITE=1
 export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
 export MUJOCO_GL=egl
 
-# Square calibration: run2 (no ICL), NutAssemblySquare, ep_len 300
-export ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run2_noicl_ours_step4000}"
-export DIAG_ENV="${DIAG_ENV:-NutAssemblySquare}"
-export DIAG_BC="${DIAG_BC:-release/model/robomimic/square/model0.pt}"
-export DIAG_EP_LEN="${DIAG_EP_LEN:-300}"
 export N_EP="${N_EP:-24}"
 
 echo "[calib_sq] host=$(hostname) run2 on Square"
-python jobs/diag_causal_calib.py
+export DIAG_ENV=PickPlaceCan
+export DIAG_BC=release/model/robomimic/can/model0.pt
+export DIAG_EP_LEN=200
+export N_EP="${N_EP:-20}"
+echo "[rr_calib] RoboReward-4B on Can"
+python jobs/diag_roboreward.py
 echo "[calib_sq] done"

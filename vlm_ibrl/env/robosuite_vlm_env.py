@@ -12,7 +12,7 @@ from robosuite.controllers import load_controller_config
 
 from common_utils import ibrl_utils as utils
 from env.qwen_utils import get_qwen3, get_qwen3_8b, prompt_qwen
-from env.roboreward_utils import get_roboreward_8b, prompt_roboreward
+from env.roboreward_utils import get_roboreward_4b, get_roboreward_8b, prompt_roboreward
 from env.robometer_utils import get_robometer_4b
 from env.vlm_prompts import (
     ROBOMIMIC_DEMO2REWARD_REPLIES as demo2reward_replies,
@@ -29,6 +29,9 @@ VALID_VLMS = (
     "demo2reward_qwen3_8b",
     "demo2reward_qwen3_32b",
     "roboreward_8b",
+    "roboreward_4b",
+    "robodopamine_4b",
+    "lrm_progress_8b",
     "robometer_4b",
     "robometer_ft",
     "qwen35_ft",
@@ -101,9 +104,11 @@ def response_to_reward(text: str) -> float:
 
 def roboreward_to_reward(text: str) -> float:
     score_str = extract_answer_after_substring(text, substring="ANSWER:")
-    assert score_str in ["1", "2", "3", "4", "5"], f"Got wrong answer {score_str}"
-    score = int(score_str)
-    return (score - 1) / 4.0  # normalize to [0, 1]
+    if score_str not in ["1", "2", "3", "4", "5"]:
+        # malformed / truncated generation → neutral reward rather than crash the RL run
+        print(f"[roboreward] unparseable answer {score_str!r}; reward=0")
+        return 0.0
+    return (int(score_str) - 1) / 4.0  # normalize to [0, 1]
 
 
 # ---------------------------------------------------------------------------
@@ -224,6 +229,15 @@ class VLMRobosuite:
         assert vlm in VALID_VLMS, f"VLM {vlm} not recognized. Valid: {VALID_VLMS}"
         assert past_len > 0, "past_len must be > 0"
         assert isinstance(camera_names, list)
+        # RoboDopamine renders multi-view frames on demand from the sim, so its cameras must
+        # exist in the model. Inject them into camera_names before the env is built.
+        if vlm == "robodopamine_4b":
+            # PickPlaceCan exposes agentview + robot0_eye_in_hand; there is no 2nd wrist,
+            # so reuse the wrist as the 3rd view (handoff-sanctioned fallback). camera_names
+            # dedupes; _rd_cams keeps 3 entries for the scorer's 3-view input.
+            self._rd_cams = os.environ.get(
+                "ROBODOPAMINE_CAMS", "agentview,robot0_eye_in_hand,robot0_eye_in_hand").split(",")
+            camera_names = list(dict.fromkeys(list(camera_names) + self._rd_cams))
         self.camera_names = camera_names
         self.ctrl_config = load_controller_config(default_controller="OSC_POSE")
         self.ctrl_config["control_delta"] = ctrl_delta
@@ -293,13 +307,39 @@ class VLMRobosuite:
                 f"Output EXACTLY a single character, either 0 or 1, to denote task completion. "
                 f"Use 1 if the task is completed; 0 otherwise. Use no other symbols or formatting."
             )
-        elif vlm == "roboreward_8b":
-            self.vlm, self.processor = get_roboreward_8b()
+        elif vlm in ("roboreward_8b", "roboreward_4b"):
+            self.vlm, self.processor = get_roboreward_4b() if vlm == "roboreward_4b" else get_roboreward_8b()
             self.prompt_vlm = prompt_roboreward
             self.system_prompt = roboreward_prompt
             self.prompt = f"{roboreward_prompt}\n\nTask: {task}"
+        elif vlm == "robodopamine_4b":
+            # Robo-Dopamine GRM: generative, MULTI-VIEW, hop-based progress. Per-episode
+            # scorer (bound to goal + reference-start frame) built in reset(); dense
+            # potential-based DELTA reward scored every ROBODOPAMINE_STRIDE steps.
+            from env.robodopamine_utils import get_robodopamine
+            _rd_path = os.environ.get("ROBODOPAMINE_PATH",
+                                      "tanhuajie2001/Robo-Dopamine-GRM-2.0-4B-Preview")
+            self.vlm, self.processor = get_robodopamine(_rd_path)
+            self._rd_stride = int(os.environ.get("ROBODOPAMINE_STRIDE", "16"))
+            self._rd_eval_mode = os.environ.get("ROBODOPAMINE_EVAL_MODE", "forward")
+            self._rd_goal_path = os.environ.get("ROBODOPAMINE_GOAL", "")
+            self._rd_res = int(os.environ.get("ROBODOPAMINE_RES", "224"))
+            self._rd_task = task
+            self.prompt_vlm = self.system_prompt = self.prompt = None
+        elif vlm == "lrm_progress_8b":
+            # LRM (Large Reward Models, TRI/USC-PSI) single-frame progress, Qwen3-VL-8B ->
+            # [0,1]. Needs the episode's frame-0 INITIAL anchor (zero-shot). Reward form is
+            # DELTA for our off-policy IBRL (absolute-held is a survival-bonus trap, handoff §3).
+            from env.lrm_utils import get_lrm_progress
+            self.vlm, self.processor = get_lrm_progress()
+            self._lrm_interval = int(os.environ.get("LRM_CALL_INTERVAL", "10"))
+            self._lrm_res = int(os.environ.get("LRM_RES", "256"))
+            self._lrm_reward_mode = os.environ.get("LRM_REWARD_MODE", "delta")
+            self._lrm_cam = os.environ.get("LRM_CAM", "agentview")
+            self._lrm_use_initial = os.environ.get("LRM_INCLUDE_INITIAL", "1") == "1"
+            self._lrm_task = task
+            self.prompt_vlm = self.system_prompt = self.prompt = None
         elif vlm in ("robometer_4b", "robometer_ft", "qwen35_ft"):
-            import os
             _ckpt_map = {
                 "robometer_4b": "robometer/Robometer-4B",
                 "robometer_ft": os.environ.get("ROBOMETER_FT_PATH", ""),
@@ -472,6 +512,11 @@ class VLMRobosuite:
             past_action = torch.from_numpy(np.stack(self.past_actions)).to(self.device)
             rl_obs["past_action"] = past_action
 
+        if self.vlm_name == "robodopamine_4b":
+            self._rd_reset_episode(high_res_images)
+        elif self.vlm_name == "lrm_progress_8b":
+            self._lrm_reset_episode(high_res_images)
+
         return rl_obs, high_res_images
 
     def step(self, actions: torch.Tensor) -> tuple[dict, float, bool, bool, dict]:
@@ -529,6 +574,13 @@ class VLMRobosuite:
         reward = reward * self.env_reward_scale
         self.terminal = terminal
 
+        # Dense multi-step scorers (non-autonomous): score every N steps, deliver a
+        # potential-based delta. Terminal only on the horizon timeout (no GT leak).
+        if self.vlm_name == "robodopamine_4b":
+            return self._rd_step_reward(rl_obs, success, high_res_images, truncation)
+        if self.vlm_name == "lrm_progress_8b":
+            return self._lrm_step_reward(rl_obs, success, high_res_images, truncation)
+
         if self.autonomous:
             # Score the growing video EVERY step → sets _last_success_prob/_last_progress.
             vlm_reward = self.vlm_reward(self.current_video)
@@ -554,10 +606,18 @@ class VLMRobosuite:
         # VLM reward
         if self.reward_at_truncation and not truncation:
             vlm_reward = 0.0
-        elif "roboreward" in self.vlm_name or "robometer" in self.vlm_name:
-            # RoboReward and Robometer consume the full video (their own internal
-            # frame subsampling handles long sequences).
+        elif "robometer" in self.vlm_name:
+            # Robometer consumes the full video (its own internal subsampling handles it).
             vlm_reward = self.vlm_reward(self.current_video)
+        elif "roboreward" in self.vlm_name:
+            # RoboReward: subsample to 16 frames (final frame always included) — feeding the
+            # full rollout collapses spatial res to 4x4 and floods timestamp tokens (handoff §2).
+            nfr = int(os.environ.get("ROBOREWARD_NFRAMES", "16"))
+            vid = self.current_video
+            if len(vid) > nfr:
+                idx = np.linspace(0, len(vid) - 1, nfr).round().astype(int)
+                vid = [vid[i] for i in idx]
+            vlm_reward = self.vlm_reward(vid)
         else:
             # Demo2Reward consumes a sparsely sampled set of frames.
             idx = past_frames_single_video(self.vid_t, self.past_len)
@@ -597,7 +657,7 @@ class VLMRobosuite:
             frames=frames,
             debug=debug,
             use_video=is_roboreward,
-            max_new_tokens=5,
+            max_new_tokens=(24 if is_roboreward else 5),
         )
         if is_roboreward:
             reward = roboreward_to_reward(critic_output)
@@ -606,3 +666,77 @@ class VLMRobosuite:
         if debug:
             print("Reward =", reward)
         return reward
+
+    # ---- RoboDopamine (multi-view, dense, potential-based delta) ----------------
+    def _rd_views_from(self, high_res_images):
+        """The RoboDopamine cameras are in camera_names, so they are already rendered into
+        high_res_images each step (CHW uint8 tensors) — pull them as PIL, no extra render."""
+        return [tensor_to_pil(high_res_images[c]) for c in self._rd_cams]
+
+    def _rd_reset_episode(self, high_res_images):
+        from env.robodopamine_utils import RoboDopamineScorer
+        start_views = self._rd_views_from(high_res_images)
+        if self._rd_goal_path and os.path.exists(self._rd_goal_path):
+            goal_img = Image.open(self._rd_goal_path).convert("RGB")
+        else:
+            if not getattr(self, "_rd_goal_warned", False):
+                print(f"[robodopamine] WARNING: no goal image at ROBODOPAMINE_GOAL="
+                      f"{self._rd_goal_path!r}; using start frame (weak).", flush=True)
+                self._rd_goal_warned = True
+            goal_img = start_views[0]
+        self._rd_scorer = RoboDopamineScorer(
+            self.vlm, self.processor, task=self._rd_task, goal_img=goal_img,
+            ref_start_img=start_views[0], eval_mode=self._rd_eval_mode)
+        self._rd_start_views = start_views
+        self._rd_prev_views = start_views
+        self._rd_prev_prog = 0.0
+        self._rd_step_i = 0
+
+    def _rd_step_reward(self, rl_obs, success, high_res_images, truncation):
+        from env.robodopamine_utils import accumulate_progress
+        self._rd_step_i += 1
+        reward = 0.0
+        if self._rd_step_i % self._rd_stride == 0 or truncation:
+            after_views = self._rd_views_from(high_res_images)
+            before = (self._rd_start_views if self._rd_eval_mode == "forward"
+                      else self._rd_prev_views)
+            raw = self._rd_scorer.score(before, after_views)
+            if raw is not None:
+                prog = accumulate_progress(self._rd_eval_mode, raw, self._rd_prev_prog)
+                reward = prog - self._rd_prev_prog          # potential-based hop
+                self._rd_prev_prog = prog
+                self._last_progress = prog
+            self._rd_prev_views = after_views
+        return rl_obs, float(reward), bool(truncation), success, high_res_images
+
+    # ---- LRM (single-frame progress, potential-based delta) --------------------
+    def _lrm_frame_from(self, high_res_images):
+        img = tensor_to_pil(high_res_images[self._lrm_cam])
+        if img.size != (self._lrm_res, self._lrm_res):
+            img = img.resize((self._lrm_res, self._lrm_res))  # >= LRM's 256^2 min_pixels
+        return img
+
+    def _lrm_reset_episode(self, high_res_images):
+        from env.lrm_utils import LRMProgressScorer
+        init_img = self._lrm_frame_from(high_res_images) if self._lrm_use_initial else None
+        self._lrm_scorer = LRMProgressScorer(self.vlm, self.processor,
+                                             task=self._lrm_task, initial_img=init_img)
+        self._lrm_held = 0.0
+        self._lrm_prev_prog = 0.0
+        self._lrm_step_i = 0
+
+    def _lrm_step_reward(self, rl_obs, success, high_res_images, truncation):
+        self._lrm_step_i += 1
+        reward = self._lrm_held  # "hold" carries the last value between calls
+        if self._lrm_step_i % self._lrm_interval == 0 or truncation:
+            prog = max(0.0, min(1.0, float(self._lrm_scorer.score(self._lrm_frame_from(high_res_images)))))
+            if self._lrm_reward_mode == "delta":
+                reward = prog - self._lrm_prev_prog
+                self._lrm_prev_prog = prog
+            else:
+                self._lrm_held = prog
+                reward = prog
+            self._last_progress = prog
+        elif self._lrm_reward_mode == "delta":
+            reward = 0.0  # delta pays out only at scored steps
+        return rl_obs, float(reward), bool(truncation), success, high_res_images

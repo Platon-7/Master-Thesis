@@ -1,0 +1,59 @@
+#!/bin/bash
+#SBATCH --job-name=d2r_rl
+#SBATCH --output=logs/d2r_rl_%A_%a.out
+#SBATCH --error=logs/d2r_rl_%A_%a.err
+#SBATCH --time=10:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s,ondemand-g6e-4gpu-l40s,ondemand-g6e-8gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+# RoboReward-4B BASELINE (off-the-shelf VLM reward model). NON-autonomous:
+# full 200-step episodes, reward = RoboReward normalized [0,1] score of the full
+# rollout video (16-frame subsample) delivered ONCE at the timeout. Reward feed =
+# corner2_default (the reward model's in-domain v3 view). config cols: TASK SEED
+set -uo pipefail; cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
+CFG_FILE="${CFG_FILE:-/shared/home/PKA4388/vlm_ibrl_runs/demo2reward_rl_configs.tsv}"
+LINE=$(( SLURM_ARRAY_TASK_ID + 1 ))
+read BC_POLICY SEED < <(sed -n "${LINE}p" "$CFG_FILE")
+[[ -z "${BC_POLICY:-}" ]] && { echo "no config line $LINE"; exit 1; }
+VLM_NAME=demo2reward_qwen3_8b
+unset PYTHONPATH CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL 2>/dev/null || true
+export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_v3"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true; conda activate "$IBRL_CONDA_ENV"
+export PYTHONNOUSERSITE=1; source set_env.sh
+export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"; export MUJOCO_GL=egl
+export WANDB_API_KEY="$(cat /shared/home/PKA4388/.config/wandb_key 2>/dev/null)"; export WANDB_ENTITY=nlp-squad
+[[ -n "$WANDB_API_KEY" ]] && USE_WB=1 || USE_WB=0
+python -c "import gymnasium, metaworld; print('[env] OK')" || { echo FAIL; exit 1; }
+# AUTONOMOUS success detector (Demo2Reward's intended protocol) — SAME autonomous
+# setup as our FT models so the ONLY difference is the reward model: the frozen
+# VLM evaluates the current frame each step with the optimized prompt -> binary
+# 0/1; on a detected success (>0.5) the episode terminates and pays reward. Same
+# 0.8x-demo min-length gate as the FT models (also curbs Demo2Reward's known
+# premature-detection failure). reward_at_truncation=1 -> reward at fire/timeout.
+export AUTONOMOUS_SUCCESS=1
+export V3_CORNER2_ZOOM=1                       # policy sees zoomed corner2 (BC in-domain)
+export ROBOMETER_REWARD_CAMERA=corner2_default # detector sees un-zoomed default view
+export ROBOMETER_DETECT_HEAD=success
+export ROBOMETER_SUCCESS_THRESHOLD=0.5         # binary 0/1 -> fire on 1
+export ROBOMETER_SUCCESS_CONSECUTIVE=1         # fire on detection (match FT)
+export ROBOMETER_MIN_EP_FRAC=0.8               # 0.8x median demo length gate (match FT)
+export ROBOMETER_BETA=0.0 ROBOMETER_THRESHOLD=0.0 ROBOMETER_REWARD_SCALE=1.0
+export ROBOMETER_CONFIRM_K=0 ROBOMETER_OTSU=0 ROBOMETER_DEMO_ANCHOR=0 ROBOMETER_REWARD_SAMPLE=0
+REWARD_AT_TRUNC=1; EPISODE_LENGTH=200; NUM_TRAIN_STEP=40000; TRAIN_TIMEOUT=32000
+SAVE_DIR="/shared/home/$USER/vlm_ibrl_runs/demo2reward8b_${BC_POLICY}_s${SEED}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
+mkdir -p "$SAVE_DIR"; export WANDB_NAME="demo2reward8b_${BC_POLICY}_s${SEED}"
+echo "DEMO2REWARD-8B TASK=$BC_POLICY SEED=$SEED (AUTONOMOUS: optimized-prompt binary detector, terminate on success, gate 0.8xdemo)"
+timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
+  python mw_main/train_rl_vlm_mw.py --config_path release/cfgs/metaworld/ibrl_long.yaml \
+    --episode_length "$EPISODE_LENGTH" --bc_policy "$BC_POLICY" --vlm "$VLM_NAME" \
+    --train_end_on_success 0 --reward_at_truncation "$REWARD_AT_TRUNC" \
+    --num_train_step "$NUM_TRAIN_STEP" --seed "$SEED" --use_wb "$USE_WB" \
+    --save_dir "$SAVE_DIR"
+RC=$?; [[ $RC -eq 124 || $RC -eq 137 ]] && grep -q "^${NUM_TRAIN_STEP}: " "$SAVE_DIR/train.log" 2>/dev/null && RC=0
+echo "return code: $RC"

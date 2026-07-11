@@ -49,6 +49,8 @@ VALID_VLMS = (
     "demo2reward_qwen3_32b",
     "roboreward_8b",
     "roboreward_4b",
+    "robodopamine_4b",
+    "lrm_progress_8b",
     "robometer_4b",
     "robometer_ft",   # user's fine-tuned variant; checkpoint via ROBOMETER_FT_PATH env var
     "qwen35_ft",      # alternative FT (Qwen3.5 base); checkpoint via QWEN35_FT_PATH env var
@@ -429,6 +431,47 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             self.prompt_vlm = prompt_roboreward
             self.system_prompt = roboreward_prompt
             self.prompt = f"{roboreward_prompt}\n\nTask: {task}"
+        elif vlm == "robodopamine_4b":
+            # Robo-Dopamine GRM: generative, MULTI-VIEW, hop-based progress. The model
+            # loads here; the per-episode scorer (bound to a goal + reference-start
+            # image) is built in reset(). Dense potential-based reward, scored every
+            # ROBODOPAMINE_STRIDE steps. See env/robodopamine_utils.py. The whole
+            # RoboDopamine path lives in the `is_robodopamine` branches of reset()/step()
+            # so no other VLM's logic is affected.
+            from env.robodopamine_utils import get_robodopamine
+            _rd_path = os.environ.get("ROBODOPAMINE_PATH",
+                                      "tanhuajie2001/Robo-Dopamine-GRM-2.0-4B-Preview")
+            self.vlm, self.processor = get_robodopamine(_rd_path)
+            self._rd_cams = os.environ.get(
+                "ROBODOPAMINE_CAMS", "corner2_default,gripperPOV,behindGripper").split(",")
+            self._rd_stride = int(os.environ.get("ROBODOPAMINE_STRIDE", "16"))
+            self._rd_eval_mode = os.environ.get("ROBODOPAMINE_EVAL_MODE", "forward")
+            self._rd_goal_path = os.environ.get("ROBODOPAMINE_GOAL", "")
+            # Render the reward views at a fixed, decent resolution (not the policy's
+            # small rl_image_size) so the GRM gets clear input.
+            self._rd_res = int(os.environ.get("ROBODOPAMINE_RES", "240"))
+            self._rd_task = task
+        elif vlm == "lrm_progress_8b":
+            # LRM (Large Reward Models, TRI/USC-PSI) Absolute Progress Reward, the
+            # Figure-2 model. Single-frame Qwen3-VL-8B -> completion progress [0,1].
+            # Faithful to their config/progress.yaml downstream-RL recipe: an INITIAL
+            # anchor (frame 0), queried every LRM_CALL_INTERVAL steps, and the reward
+            # HELD (absolute progress) between queries (vlm_non_call_reward_mode: hold,
+            # vlm_pure_reward). The per-episode scorer is built in reset(). Its whole
+            # path lives in the `lrm_progress_8b` branches of reset()/step().
+            from env.lrm_utils import get_lrm_progress
+            self.vlm, self.processor = get_lrm_progress()
+            self._lrm_interval = int(os.environ.get("LRM_CALL_INTERVAL", "10"))
+            self._lrm_res = int(os.environ.get("LRM_RES", "256"))   # >= LRM's 256^2 min_pixels
+            # Reward form. "hold" = absolute progress held between calls (their PPO
+            # config/progress.yaml). "delta" = potential-based progress increment
+            # (IBRL-appropriate; matches how RoboDopamine's dense reward is delivered
+            # here). Their absolute-held reward acts as a survival bonus under IBRL's
+            # off-policy Q-learning; delta gives a properly-shaped gradient.
+            self._lrm_reward_mode = os.environ.get("LRM_REWARD_MODE", "hold")
+            self._lrm_cam = os.environ.get("LRM_CAM", "corner2_default")
+            self._lrm_use_initial = os.environ.get("LRM_INCLUDE_INITIAL", "1") == "1"
+            self._lrm_task = task
         elif vlm in ("robometer_4b", "robometer_ft", "qwen35_ft"):
             # Robometer-family critics (progress + success heads, not
             # generative). All variants share one loader; only the
@@ -451,6 +494,18 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             self.prompt_vlm = None
             self.system_prompt = None
             self.prompt = None
+            # Interval-hop shaping for the Robometer family (mirrors the _rd/_lrm
+            # delivery): RBM_CALL_INTERVAL>0 activates _rbm_step_reward -- score the
+            # last RBM_LASTK frames every interval steps, decode condMean from the
+            # C51 bins, pay the potential hop prog_t - prog_{t-interval}; at
+            # truncation optionally add the sparse success-head anchor (the winning
+            # money-plot reward) when RBM_ANCHOR=1. 0 = disabled (default), all
+            # existing behavior untouched.
+            self._rbm_interval = int(os.environ.get("RBM_CALL_INTERVAL", "0") or 0)
+            self._rbm_lastk = int(os.environ.get("RBM_LASTK", "4") or 4)
+            self._rbm_anchor = os.environ.get("RBM_ANCHOR", "1") == "1"
+            self._rbm_weight = float(os.environ.get("RBM_DELTA_WEIGHT", "1") or 1)
+            self._rbm_log_n = 0
         elif vlm in ("gvl_qwen3_8b", "gvl_qwen3_32b"):
             self.vlm, self.processor = get_qwen3_8b() if vlm == "gvl_qwen3_8b" else get_qwen3()
             self.prompt_vlm = prompt_qwen
@@ -533,6 +588,192 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         arr = arr + np.random.normal(0.0, 255.0 * a * 0.5, arr.shape)
         return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
 
+    # ---- Robo-Dopamine (multi-view, dense, hop-based) reward path --------------
+    def _base_env(self):
+        """Return the MetaWorldEnv in the wrapper chain — its render() accepts
+        camera_name. Stop there; descending further reaches the raw gymnasium
+        MujocoEnv whose render() has no camera_name arg. (Robomimic port: replace
+        this check with whatever env exposes a per-camera render.)"""
+        e = self.env
+        while True:
+            if type(e).__name__ == "MetaWorldEnv" or hasattr(e, "_reward_cam_name"):
+                return e
+            if not hasattr(e, "env"):
+                return e
+            e = e.env
+
+    def _rd_render_views(self):
+        """Render the current state from the RoboDopamine multi-view cameras
+        (front + two wrist views) as PIL RGB. On-demand, so it costs nothing for
+        the (majority of) steps we don't score."""
+        base = self._base_env()
+        R = self._rd_res
+        return [Image.fromarray(base.render(camera_name=c, width=R, height=R))
+                for c in self._rd_cams]
+
+    def _rd_reset_episode(self):
+        """Build the per-episode GRM scorer: bind it to this run's reference-start
+        frame and the (task) goal image, and reset the accumulated-progress state."""
+        from env.robodopamine_utils import RoboDopamineScorer
+        start_views = self._rd_render_views()
+        if self._rd_goal_path and os.path.exists(self._rd_goal_path):
+            goal_img = Image.open(self._rd_goal_path).convert("RGB")
+        else:
+            # No goal supplied -> degenerate (start frame). Warn once; RL should set one.
+            if not getattr(self, "_rd_goal_warned", False):
+                print(f"[robodopamine] WARNING: no goal image at ROBODOPAMINE_GOAL="
+                      f"{self._rd_goal_path!r}; using start frame (weak).", flush=True)
+                self._rd_goal_warned = True
+            goal_img = start_views[0]
+        self._rd_scorer = RoboDopamineScorer(
+            self.vlm, self.processor, task=self._rd_task, goal_img=goal_img,
+            ref_start_img=start_views[0], eval_mode=self._rd_eval_mode)
+        self._rd_start_views = start_views
+        self._rd_prev_views = start_views
+        self._rd_prev_prog = 0.0
+        self._rd_step_i = 0
+
+    def _rd_step_reward(self, rl_obs, success, image_obs):
+        """Score every ROBODOPAMINE_STRIDE steps (and at the final step); deliver a
+        potential-based hop reward (progress(s_t) - progress(s_{t-stride})). This
+        telescopes to the final progress, is policy-invariant (the authors' shaping),
+        and keeps the GRM call count low. Non-autonomous: episodes run to the timeout."""
+        from env.robodopamine_utils import accumulate_progress
+        self._rd_step_i += 1
+        time_truncated = bool(self.most_recent_info["truncated"])
+        reward = 0.0
+        if self._rd_step_i % self._rd_stride == 0 or time_truncated:
+            after_views = self._rd_render_views()
+            before = (self._rd_start_views if self._rd_eval_mode == "forward"
+                      else self._rd_prev_views)
+            raw = self._rd_scorer.score(before, after_views)
+            if raw is not None:
+                prog = accumulate_progress(self._rd_eval_mode, raw, self._rd_prev_prog)
+                reward = prog - self._rd_prev_prog          # potential-based hop
+                self._rd_prev_prog = prog
+                self.episode_stats["vlm_robometer_progress_sum"] = prog  # log final progress
+            self._rd_prev_views = after_views
+        self.episode_stats["vlm_reward_counts"] += 1
+        # Non-autonomous: terminal only on the episode-length timeout (no GT leak).
+        return rl_obs, float(reward), bool(time_truncated), success, image_obs
+
+    # ---- LRM (Absolute Progress Reward) path -----------------------------------
+    def _lrm_render(self):
+        base = self._base_env()
+        return Image.fromarray(base.render(camera_name=self._lrm_cam,
+                                           width=self._lrm_res, height=self._lrm_res))
+
+    def _lrm_reset_episode(self):
+        """Bind the LRM scorer to this episode's frame-0 initial anchor (zero-shot)."""
+        from env.lrm_utils import LRMProgressScorer
+        init_img = self._lrm_render() if self._lrm_use_initial else None
+        self._lrm_scorer = LRMProgressScorer(self.vlm, self.processor,
+                                             task=self._lrm_task, initial_img=init_img)
+        self._lrm_held = 0.0
+        self._lrm_prev_prog = 0.0
+        self._lrm_step_i = 0
+
+    def _lrm_step_reward(self, rl_obs, success, image_obs):
+        """Query the single-frame progress every LRM_CALL_INTERVAL steps.
+        LRM_REWARD_MODE:
+          "hold"  = absolute progress held between calls (their PPO config/progress.yaml).
+          "delta" = potential-based progress increment (progress_t - progress_{t-interval}),
+                    0 between calls — the IBRL-appropriate form (same delivery as
+                    RoboDopamine's dense reward). Non-autonomous: runs to the timeout."""
+        self._lrm_step_i += 1
+        time_truncated = bool(self.most_recent_info["truncated"])
+        reward = self._lrm_held  # "hold" default carries the last value between calls
+        if self._lrm_step_i % self._lrm_interval == 0 or time_truncated:
+            prog = max(0.0, min(1.0, float(self._lrm_scorer.score(self._lrm_render()))))
+            if self._lrm_reward_mode == "delta":
+                reward = prog - self._lrm_prev_prog
+                self._lrm_prev_prog = prog
+            else:
+                self._lrm_held = prog
+                reward = prog
+            self.episode_stats["vlm_robometer_progress_sum"] = prog
+        elif self._lrm_reward_mode == "delta":
+            reward = 0.0  # delta pays out only at scored steps
+        self.episode_stats["vlm_reward_counts"] += 1
+        return rl_obs, float(reward), bool(time_truncated), success, image_obs
+
+    def _rbm_hop_term(self):
+        """Additive interval-hop shaping term (RBM_MODE=add, the default). Called at
+        the step() return sites so the stock reward path, including the autonomous
+        success protocol, runs untouched; on every RBM_CALL_INTERVAL-th step this
+        adds w*(condMean_lastK(t) - condMean_lastK(t-interval)), 0 between. Returns
+        0.0 when shaping is off or the VLM is not Robometer-family."""
+        if not getattr(self, "_rbm_interval", 0) or os.environ.get("RBM_MODE", "add") == "replace":
+            return 0.0
+        if not ("robometer" in self.vlm_name or self.vlm_name == "qwen35_ft"):
+            return 0.0
+        self._rbm_step_i += 1
+        if self._rbm_step_i % self._rbm_interval != 0 and not bool(self.most_recent_info["truncated"]):
+            return 0.0
+        out = self.scorer(self.current_video[-self._rbm_lastk:], task=self.task_description)
+        bins = out.get("prog_bins_final")
+        if bins:
+            _b = np.asarray(bins, dtype=float)
+            _c = np.linspace(0.0, 1.0, _b.shape[0])
+            _ev = float((_b * _c).sum())
+            _nz = max(1.0 - float(_b[0]), 1e-6)
+            prog = float(min(_ev / _nz, 1.0)) if _nz > 0.05 else _ev
+        else:
+            prog = float(out["progress_reward"])
+        hop = self._rbm_weight * (prog - self._rbm_prev_prog)
+        self._rbm_prev_prog = prog
+        if self._rbm_log_n < 12 or self._rbm_log_n % 500 == 0:
+            print(f"[RBM-HOP] add i={self._rbm_step_i} prog={prog:.4f} hop={hop:+.4f}", flush=True)
+        self._rbm_log_n += 1
+        return hop
+
+    def _rbm_step_reward(self, rl_obs, success, image_obs):
+        """Interval-scored potential hops from the Robometer progress head, condMean
+        decode over the last RBM_LASTK frames, optionally stacked on the sparse
+        success-head anchor at truncation (RBM_ANCHOR=1). Same delivery as _rd/_lrm:
+        score every RBM_CALL_INTERVAL steps (and at truncation), pay the hop
+        prog_t - prog_{t-interval} at scored steps, 0 between; the hops telescope to
+        the final progress and are policy-invariant. Non-autonomous: terminal only on
+        the episode timeout. current_video holds PIL images (the scorer returns
+        garbage on numpy arrays -- see the demo-anchor comment above)."""
+        self._rbm_step_i += 1
+        time_truncated = bool(self.most_recent_info["truncated"])
+        reward = 0.0
+        if self._rbm_step_i % self._rbm_interval == 0 or time_truncated:
+            out = self.scorer(self.current_video[-self._rbm_lastk:], task=self.task_description)
+            bins = out.get("prog_bins_final")
+            if bins:
+                _b = np.asarray(bins, dtype=float)
+                _c = np.linspace(0.0, 1.0, _b.shape[0])
+                _ev = float((_b * _c).sum())
+                _nz = max(1.0 - float(_b[0]), 1e-6)
+                prog = float(min(_ev / _nz, 1.0)) if _nz > 0.05 else _ev
+            else:
+                prog = float(out["progress_reward"])
+            reward = self._rbm_weight * (prog - self._rbm_prev_prog)
+            self._rbm_prev_prog = prog
+            self._last_progress = prog
+            self.episode_stats["vlm_robometer_progress_sum"] = prog
+            if self._rbm_log_n < 12 or self._rbm_log_n % 500 == 0:
+                print(f"[RBM-HOP] i={self._rbm_step_i} prog={prog:.4f} hop={reward:+.4f} "
+                      f"trunc={time_truncated}", flush=True)
+            self._rbm_log_n += 1
+        if time_truncated and self._rbm_anchor:
+            out = self.scorer(self.current_video, task=self.task_description,
+                              icl_frames=self.icl_frames)
+            sp = float(out["success_prob"])
+            self._last_success_prob = sp
+            anchor = sp * self.robometer_reward_scale
+            if self.robometer_threshold > 0:
+                anchor = 1.0 if anchor > self.robometer_threshold else 0.0
+            reward += anchor
+            self.episode_stats["vlm_robometer_success_prob_sum"] += sp
+            if self._rbm_log_n < 24 or self._rbm_log_n % 500 == 1:
+                print(f"[RBM-HOP] truncation anchor: succ={sp:.4f} -> +{anchor:.4f} "
+                      f"(total={reward:+.4f})", flush=True)
+        self.episode_stats["vlm_reward_counts"] += 1
+        return rl_obs, float(reward), bool(time_truncated), success, image_obs
+
     def reset(self):
         rl_obs, image_obs = super().reset()
         self.current_video = [self.fetch_img(image_obs)]
@@ -555,6 +796,13 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         self._consec_success = 0
         self._cur_ep_peak = 0.0
         self.vid_t = 1
+        if self.vlm_name == "robodopamine_4b":
+            self._rd_reset_episode()
+        if self.vlm_name == "lrm_progress_8b":
+            self._lrm_reset_episode()
+        if getattr(self, "_rbm_interval", 0):
+            self._rbm_prev_prog = 0.0
+            self._rbm_step_i = 0
         return rl_obs, image_obs
 
     def step(self, action):
@@ -562,6 +810,18 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         current_img = self.fetch_img(image_obs)
         self.current_video.append(current_img)
         self.vid_t += 1
+        if self.vlm_name == "robodopamine_4b":
+            # Robo-Dopamine has its own multi-view, dense, non-autonomous path.
+            return self._rd_step_reward(rl_obs, success, image_obs)
+        if self.vlm_name == "lrm_progress_8b":
+            return self._lrm_step_reward(rl_obs, success, image_obs)
+        if getattr(self, "_rbm_interval", 0) and os.environ.get("RBM_MODE", "add") == "replace" and (
+            "robometer" in self.vlm_name or self.vlm_name == "qwen35_ft"
+        ):
+            # replace-mode: hops + optional anchor INSTEAD of the stock reward path
+            # (no autonomous detection). Default RBM_MODE=add keeps the stock path,
+            # including the autonomous protocol, and adds the hop term at return.
+            return self._rbm_step_reward(rl_obs, success, image_obs)
         idx = past_frames_single_video(self.vid_t, self.past_len)
 
         if self.autonomous:
@@ -724,7 +984,7 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             # (Dropping the timeout here overflows the C++ replay buffer's
             # maxSeqLen_ when the model never fires; the train loop ends an
             # episode only on `terminal`.)
-            return rl_obs, out_reward, bool(ep_end), success, image_obs
+            return rl_obs, out_reward + self._rbm_hop_term(), bool(ep_end), success, image_obs
 
         if not self.end_on_success:
             truncated = self.most_recent_info["truncated"]
@@ -775,7 +1035,7 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
         else:
             vlm_terminal = terminal
 
-        return rl_obs, vlm_reward, vlm_terminal, success, image_obs
+        return rl_obs, vlm_reward + self._rbm_hop_term(), vlm_terminal, success, image_obs
 
     def vlm_reward(self, frames, debug=False):
         if "gvl" in self.vlm_name:
@@ -841,6 +1101,12 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             reward = roboreward_to_reward(critic_output)
         else:
             reward = response_to_reward(critic_output)
+            # Generative binary success detectors (Demo2Reward, VLM-SD) expose their
+            # 0/1 verdict as the detection signal so the AUTONOMOUS branch can
+            # terminate the episode on detected success (threshold ~0.5), exactly
+            # like the reward-head models. This is Demo2Reward's intended protocol:
+            # a frozen VLM success detector that fires the moment it sees success.
+            self._last_success_prob = float(reward)
         if debug:
             print("Reward =", reward)
         return reward

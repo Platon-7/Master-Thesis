@@ -1,0 +1,207 @@
+diff --git a/robometer/configs/experiment_configs.py b/robometer/configs/experiment_configs.py
+index d90c03b..a3b62ff 100755
+--- a/robometer/configs/experiment_configs.py
++++ b/robometer/configs/experiment_configs.py
+@@ -443,6 +443,14 @@ class LossConfig:
+         default=10,
+         metadata={"help": "Number of discrete bins for progress when using discrete loss (default: 10)"},
+     )
++    success_loss_type: str = field(
++        default="bce_balanced",
++        metadata={"help": "Success loss: 'bce_balanced' (upstream default) or 'bce_asymmetric' (lambda-damped positives)"},
++    )
++    asymmetric_lambda: float = field(
++        default=0.3,
++        metadata={"help": "Underestimation/positive-class damping for the asymmetric losses (c51_asymmetric, bce_asymmetric)"},
++    )
+ 
+ 
+ @dataclass
+diff --git a/robometer/trainers/rbm_heads_trainer.py b/robometer/trainers/rbm_heads_trainer.py
+index d51af82..ad6c8c7 100755
+--- a/robometer/trainers/rbm_heads_trainer.py
++++ b/robometer/trainers/rbm_heads_trainer.py
+@@ -928,7 +928,7 @@ class RBMHeadsTrainer(Trainer):
+         if len(ds_name) > 90:
+             ds_name = ds_name[:90] + "..."
+ 
+-        is_discrete_mode = self.config.loss.progress_loss_type.lower() == "discrete"
++        is_discrete_mode = self.config.loss.progress_loss_type.lower() in ("discrete", "c51_asymmetric")
+         num_bins = self.config.loss.progress_discrete_bins if is_discrete_mode else None
+ 
+         data_source = None
+@@ -1912,7 +1912,7 @@ class RBMHeadsTrainer(Trainer):
+                     # Include all frames for this trajectory in the mask
+                     quality_mask[i, :] = 1.0
+ 
+-        if self.config.loss.progress_loss_type.lower() == "discrete":
++        if self.config.loss.progress_loss_type.lower() in ("discrete", "c51_asymmetric"):
+             target_progress = convert_discrete_target_to_continuous(
+                 target_progress, num_bins=self.config.loss.progress_discrete_bins
+             )
+@@ -1930,45 +1930,68 @@ class RBMHeadsTrainer(Trainer):
+         # Clamp logits to prevent extreme values and gradient issues
+         success_logits = torch.clamp(success_logits, min=-50.0, max=50.0)
+ 
+-        # Compute class counts for balancing
+-        num_positives = (success_labels * combined_mask).sum()
+-        num_negatives = ((1 - success_labels) * combined_mask).sum()
+-
+-        # Compute per-sample weights to balance classes
+-        # Weight the minority class so both classes contribute equally to the loss
+-        # success_loss_weight = max(num_pos, num_neg) / min(num_pos, num_neg)
+-        # Applied to whichever class has fewer samples
+-        if num_positives > 0 and num_negatives > 0:
+-            if num_positives < num_negatives:
+-                # Positives are minority - weight them up
+-                success_loss_weight = (num_negatives / num_positives).detach()
+-                sample_weights = torch.where(
+-                    success_labels > 0.5,
+-                    success_loss_weight * combined_mask,
+-                    combined_mask,
+-                )
+-            else:
+-                # Negatives are minority (or equal) - weight them up
+-                success_loss_weight = (num_positives / num_negatives).detach()
+-                sample_weights = torch.where(
+-                    success_labels > 0.5,
+-                    combined_mask,
+-                    success_loss_weight * combined_mask,
+-                )
+-        else:
+-            success_loss_weight = torch.tensor(1.0, device=success_logits.device, dtype=success_logits.dtype)
+-            sample_weights = combined_mask
+-
+-        # Compute BCE loss with per-sample weights (includes combined_mask)
+-        loss = F.binary_cross_entropy_with_logits(
+-            success_logits,
+-            success_labels,
+-            weight=sample_weights,
+-            reduction="none",
+-        )
+         combined_mask_index = combined_mask.bool()
+-        loss = (loss * combined_mask) / (sample_weights + 1e-8)
+-        success_loss = loss[combined_mask_index].mean()
++        if getattr(self.config.loss, "success_loss_type", "bce_balanced").lower() == "bce_asymmetric":
++            # Asymmetric BCE (ported from RoboRef): raw per-element BCE, then
++            #   L_succ = mean(bce[neg]) + lambda * mean(bce[pos])
++            # with an empty-class guard. lambda < 1 damps the positive class so the
++            # model becomes reluctant to declare success -> fewer false positives.
++            lambda_val = float(getattr(self.config.loss, "asymmetric_lambda", 0.3))
++            loss = F.binary_cross_entropy_with_logits(
++                success_logits, success_labels, reduction="none"
++            )
++            loss = loss * combined_mask
++            mask_neg_bool = (success_labels == 0) & combined_mask_index
++            mask_pos_bool = (success_labels == 1) & combined_mask_index
++            zero = torch.tensor(0.0, device=success_logits.device, dtype=success_logits.dtype)
++            L_neg = loss[mask_neg_bool].mean() if mask_neg_bool.any() else zero
++            L_pos = loss[mask_pos_bool].mean() if mask_pos_bool.any() else zero
++            success_loss = L_neg + lambda_val * L_pos
++            sample_weights = torch.where(
++                success_labels > 0.5,
++                torch.full_like(success_labels, lambda_val),
++                torch.ones_like(success_labels),
++            ) * combined_mask
++            success_loss_weight = torch.tensor(
++                lambda_val, device=success_logits.device, dtype=success_logits.dtype
++            )
++        else:
++            # Compute class counts for balancing
++            num_positives = (success_labels * combined_mask).sum()
++            num_negatives = ((1 - success_labels) * combined_mask).sum()
++
++            # Compute per-sample weights to balance classes
++            # Weight the minority class so both classes contribute equally to the loss
++            if num_positives > 0 and num_negatives > 0:
++                if num_positives < num_negatives:
++                    # Positives are minority - weight them up
++                    success_loss_weight = (num_negatives / num_positives).detach()
++                    sample_weights = torch.where(
++                        success_labels > 0.5,
++                        success_loss_weight * combined_mask,
++                        combined_mask,
++                    )
++                else:
++                    # Negatives are minority (or equal) - weight them up
++                    success_loss_weight = (num_positives / num_negatives).detach()
++                    sample_weights = torch.where(
++                        success_labels > 0.5,
++                        combined_mask,
++                        success_loss_weight * combined_mask,
++                    )
++            else:
++                success_loss_weight = torch.tensor(1.0, device=success_logits.device, dtype=success_logits.dtype)
++                sample_weights = combined_mask
++
++            # Compute BCE loss with per-sample weights (includes combined_mask)
++            loss = F.binary_cross_entropy_with_logits(
++                success_logits,
++                success_labels,
++                weight=sample_weights,
++                reduction="none",
++            )
++            loss = (loss * combined_mask) / (sample_weights + 1e-8)
++            success_loss = loss[combined_mask_index].mean()
+ 
+         # Compute accuracy per sample
+         success_preds = (torch.sigmoid(success_logits) > 0.5).float()
+@@ -2093,7 +2116,7 @@ class RBMHeadsTrainer(Trainer):
+         masked_correct = None
+ 
+         # Set loss function based on loss type
+-        if loss_type == "discrete":
++        if loss_type in ("discrete", "c51_asymmetric"):
+             # Discrete loss: target progress is already binned in data sampling
+             num_bins = self.config.loss.progress_discrete_bins
+ 
+@@ -2145,6 +2168,31 @@ class RBMHeadsTrainer(Trainer):
+             # Compute cross-entropy loss per sample
+             loss_per_sample_flat = F.cross_entropy(progress_pred_flat, target_bins_flat, reduction="none")  # [B*T]
+ 
++            # ----- asymmetric weight (c51_asymmetric variant only; ported from RoboRef) -------
++            # weight[i] = 1.0 if the (detached) scalar prediction overestimates the scalar target,
++            #            = lambda < 1 if it underestimates.
++            # Multiplying CE by this damps the gradient on underestimation, so the model becomes
++            # reluctant to emit high-progress predictions -> fewer false positives downstream.
++            # Both scalars are detached so the weight is a routing signal, not a gradient path.
++            if loss_type == "c51_asymmetric":
++                lambda_val = float(getattr(self.config.loss, "asymmetric_lambda", 0.3))
++                bin_centers = torch.linspace(
++                    0.0, 1.0, num_bins,
++                    device=progress_pred.device, dtype=progress_pred.dtype,
++                )
++                p_hat = (F.softmax(progress_pred, dim=-1) * bin_centers).sum(-1).detach()  # [B, T]
++                if len(target_progress.shape) == 2:
++                    p_t = bin_centers[target_bins.long()]  # [B, T]
++                else:
++                    p_t = (target_progress * bin_centers).sum(-1).detach()  # [B, T]
++                asym_weight = torch.where(
++                    p_hat > p_t,
++                    torch.ones_like(p_hat),
++                    torch.full_like(p_hat, lambda_val),
++                ).detach()
++                loss_per_sample_flat = loss_per_sample_flat * asym_weight.flatten()
++            # ----------------------------------------------------------------------------------
++
+             # Compute accuracy: compare predicted bins (argmax) with target bins
+             pred_bins_flat = torch.argmax(progress_pred_flat, dim=-1)  # [B*T]
+             if len(target_bins_flat.shape) == 2:
+@@ -2170,7 +2218,7 @@ class RBMHeadsTrainer(Trainer):
+ 
+         # For discrete mode, convert predictions back to continuous for spearman correlation
+         # For L1/L2, use predictions as-is
+-        if loss_type == "discrete":
++        if loss_type in ("discrete", "c51_asymmetric"):
+             progress_pred_for_corr = convert_bins_to_continuous(progress_pred)
+             target_progress_for_corr = convert_discrete_target_to_continuous(target_progress, num_bins=num_bins)
+         else:
+@@ -2195,7 +2243,7 @@ class RBMHeadsTrainer(Trainer):
+         metrics = {"masked_loss": masked_loss, "masked_spearman_corr": masked_spearman_corr}
+ 
+         # Add progress accuracy for discrete mode
+-        if loss_type == "discrete" and masked_correct is not None:
++        if loss_type in ("discrete", "c51_asymmetric") and masked_correct is not None:
+             metrics["masked_progress_accuracy"] = masked_correct
+ 
+         return progress_loss, spearman_corr, metrics

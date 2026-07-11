@@ -1161,6 +1161,38 @@ class RBMBaseSampler:
             quality_label=traj.get("quality_label"),
         )
 
+        # --- Hindsight outcome targets (config.hindsight_outcome_targets: "final"|"max") ----
+        # Replace every frame's progress target with the trajectory's eventual outcome, so the
+        # progress head learns V(s) = E[outcome | prefix] (Monte Carlo value regression) instead
+        # of state progress. Placement matters:
+        #   * AFTER compute_success_labels — success labels stay identical to non-hindsight runs,
+        #     isolating the progress-target variable.
+        #   * BEFORE discretization; overridden later by the different-task zeroing in
+        #     progress.py (those clips never achieve the query task, outcome 0 is correct).
+        # Outcome per trajectory kind:
+        #   * curated failures (raw_frame_labels): outcome over the FULL episode's labels, not
+        #     the sampled window — the window may miss the ending.
+        #   * reverse/rewind synthetic clips: the clip itself is the "attempt"; its own target
+        #     curve already encodes the depicted ending ("final" ends regressed -> low outcome,
+        #     preserving the anti-regression signal).
+        #   * partial-success clips: the ramp is scaled to end at partial_success = the outcome.
+        #   * plain forward successes: eventual outcome 1.0 regardless of window position —
+        #     this is the hindsight part: an early prefix of a success is labeled 1.0.
+        _hin = str(getattr(self.config, "hindsight_outcome_targets", "none") or "none").lower()
+        if _hin in ("final", "max") and target_progress:
+            _pick = (lambda seq: float(seq[-1])) if _hin == "final" else (lambda seq: float(max(seq)))
+            if subsample_strategy in ("subsample_reverse", "subsample_rewind"):
+                _outcome = _pick(target_progress)
+            elif raw_frame_labels is not None:
+                _outcome = _pick(_frame_labels_to_decimals(list(raw_frame_labels)))
+            elif partial_success is not None and float(partial_success) < 1.0:
+                _outcome = float(partial_success)
+            elif traj.get("quality_label") == "successful":
+                _outcome = 1.0
+            else:
+                _outcome = _pick(target_progress)
+            target_progress = [_outcome] * len(target_progress)
+
         # Convert partial_success and target_progress to discrete bins if in discrete mode
         if self.config.progress_loss_type.lower() in ("discrete", "c51_asymmetric"):
             if partial_success is not None:

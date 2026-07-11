@@ -1,0 +1,22 @@
+{
+ "ev": {
+  "kendall_last": 0.2255,
+  "ranking_acc_last": 0.5978,
+  "ranking_acc_sum_NONREPRO": 0.6108
+ },
+ "median": {
+  "kendall_last": 0.0348,
+  "ranking_acc_last": 0.739,
+  "ranking_acc_sum_NONREPRO": 0.5574
+ },
+ "condmean": {
+  "kendall_last": 0.2287,
+  "ranking_acc_last": 0.5871,
+  "ranking_acc_sum_NONREPRO": 0.6181
+ },
+ "argmax": {
+  "kendall_last": 0.0049,
+  "ranking_acc_last": 0.8121,
+  "ranking_acc_sum_NONREPRO": 0.6048
+ }
+}

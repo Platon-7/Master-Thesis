@@ -1,0 +1,87 @@
+#!/bin/bash
+#SBATCH --job-name=abl_origdata
+#SBATCH --output=logs/abl_origdata_%j.out
+#SBATCH --error=logs/abl_origdata_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=spot-p4d-8gpu-a100,spot-p5-8gpu-h100-h200
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=8
+#SBATCH --cpus-per-task=96
+#SBATCH --exclusive
+#SBATCH --requeue
+# ============================================================================
+# Loss-vs-data ablation: UNMODIFIED upstream Robometer (Robometer-temp clone,
+# whose only diff is the ported asymmetric losses) trained on the authors' own
+# retained data (robometer_origdata_train cache: our additions removed, their
+# failures present but reaching the model only as preference pairs), with the
+# authors' data treatment ([1,0,0] preference-absorbed sampling, three heads,
+# both upstream defaults) while matching RUN2's protocol on everything else:
+# absolute_first_frame, 16 frames, 5000 steps, lr 1e-5 -- so a weak result
+# attributes to the data, not to the documented awt-x-asym interaction.
+# ARM=asym  -> c51_asymmetric + bce_asymmetric (lambda 0.3)  [the ablation]
+# ARM=std   -> upstream default losses                        [the twin control]
+# Optimization mirrors run2/run3 for comparability: 5000 steps, lr 1e-5, save 500.
+# ============================================================================
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="/shared/home/PKA4388/Master-Thesis/Robometer-FT"
+ROBOMETER_DIR="/shared/home/PKA4388/Master-Thesis/Robometer-temp"
+ENV_PREFIX="/shared/home/PKA4388/miniconda3/envs/robometer_gpu_fa2"
+PYTHON="$ENV_PREFIX/bin/python"; ACCELERATE="$ENV_PREFIX/bin/accelerate"
+[[ -x "$PYTHON" && -x "$ACCELERATE" ]] || { echo "env missing" >&2; exit 1; }
+export PATH="$ENV_PREFIX/bin:$PATH"
+export ROBOMETER_PROCESSED_DATASETS_PATH=/shared/home/PKA4388/robometer_frames_origdata_step2
+export HF_HUB_OFFLINE="${HF_HUB_OFFLINE:-0}" TRANSFORMERS_OFFLINE="${TRANSFORMERS_OFFLINE:-0}"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_FT}" WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+if [[ -z "${WANDB_MODE:-}" ]]; then grep -q 'api.wandb.ai' "$HOME/.netrc" 2>/dev/null && export WANDB_MODE=online || export WANDB_MODE=offline; fi
+export NCCL_ASYNC_ERROR_HANDLING=1 FI_PROVIDER=efa OMP_NUM_THREADS=1
+
+ARM="${ARM:-asym}"
+if [[ "$ARM" == "asym" ]]; then
+  LOSS_OVERRIDES="++loss.progress_loss_type=c51_asymmetric ++loss.success_loss_type=bce_asymmetric ++loss.asymmetric_lambda=0.3"
+else
+  LOSS_OVERRIDES=""
+fi
+EXP_NAME="robometer_abl_origdata_${ARM}"
+WEIGHTS_DIR="${WEIGHTS_DIR:-/shared/home/$USER/Robometer_FT_weights}"
+RUN_OUT="$WEIGHTS_DIR/abl_origdata_${ARM}"
+mkdir -p "$WEIGHTS_DIR"
+
+# auto-resume on spot requeue (same pattern as the FT jobs)
+CKPT_RESUME=""
+if [[ -d "$RUN_OUT" ]]; then
+  LATEST=-1
+  while IFS= read -r d; do s="${d##*/checkpoint-}"; [[ "$s" =~ ^[0-9]+$ ]] && (( s > LATEST )) && { LATEST=$s; CKPT_RESUME="$d"; }
+  done < <(find "$RUN_OUT" -maxdepth 3 -type d -name 'checkpoint-*' 2>/dev/null)
+  [[ -n "$CKPT_RESUME" ]] && echo "[auto-resume] $CKPT_RESUME"
+fi
+RESUME=""; [[ -n "$CKPT_RESUME" ]] && RESUME="++training.resume_from_checkpoint=$CKPT_RESUME"
+
+RDZV_PORT=$(( 10000 + ${SLURM_JOB_ID:-0} % 50000 ))
+HEAD_IP="$(hostname -I 2>/dev/null | awk '{print $1}')"; [[ -z "$HEAD_IP" ]] && HEAD_IP=127.0.0.1
+cd "$ROBOMETER_DIR"; export PYTHONPATH="$ROBOMETER_DIR"
+
+echo "==== ablation [$ARM] data=$ROBOMETER_PROCESSED_DATASETS_PATH out=$RUN_OUT ===="
+"$ACCELERATE" launch \
+  --config_file "$HERE/configs/distributed/fsdp.yaml" \
+  --num_machines=1 --num_processes=8 --machine_rank=0 \
+  --main_process_ip="$HEAD_IP" --main_process_port="$RDZV_PORT" \
+  train.py \
+  ++data.train_datasets=[robometer_origdata_train] \
+  ++data.eval_datasets=[/fsx/PKA4388/robometer_frames_hf_full/eval_robometer_raw/robometer_frames_eval_robometer] \
+  ++data.progress_pred_type=absolute_first_frame \
+  ++data.max_frames=16 \
+  $LOSS_OVERRIDES \
+  ++training.load_from_checkpoint=/shared/home/PKA4388/checkpoints/Robometer-4B \
+  ++training.max_steps=5000 ++training.save_steps=500 \
+  ++training.learning_rate=1e-5 \
+  ++training.per_device_train_batch_size=8 \
+  ++training.bf16=true ++training.gradient_checkpointing=true \
+  ++training.exp_name="$EXP_NAME" \
+  ++logging.wandb_project=Robometer_FT ++logging.wandb_entity=nlp-squad \
+  $RESUME \
+  training.output_dir="$RUN_OUT"
+echo "EXIT=$?"

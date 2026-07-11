@@ -353,9 +353,13 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
             # Zero for non-Robometer VLMs.
             "vlm_robometer_progress_sum": 0.0,
             "vlm_robometer_success_prob_sum": 0.0,
+            # Sum of the dense shaping term added per step (RPL_MW_SHAPING);
+            # 0.0 when shaping is disabled.
+            "vlm_shaping_sum": 0.0,
         }
         self._last_progress = 0.0
         self._last_success_prob = 0.0
+        self._shaping_prev_v = None
         self.vid_t = 1
         return rl_obs, image_obs
 
@@ -414,6 +418,45 @@ class VLMCritic_PixelMetaWorld(PixelMetaWorld):
                 vlm_terminal = True
         else:
             vlm_terminal = terminal
+
+        # ---- Dense progress shaping on top of the sparse anchor (stacking arms) ----
+        # RPL_MW_SHAPING=condmean|delta_condmean adds a per-step shaping term from the
+        # PROGRESS head to whatever the anchor above produced (typically the sparse
+        # success-head reward with reward_at_truncation=1). Applied AFTER the
+        # early-termination check so shaping can never fake an anchor success.
+        # Knobs (env vars, mirroring the LIBERO RPL_* study):
+        #   RPL_MW_LASTK        window of most-recent frames scored (default 4; the
+        #                       Markovian regime — reward lives in the critic's
+        #                       information set, see LIBERO lastk4 results)
+        #   RPL_MW_DELTA_SCALE  linear scale on the delta (default 1)
+        #   RPL_MW_SHAPING_WEIGHT  weight of the shaping term vs the anchor (default 1)
+        # condMean decode = EV/(1-P(bin0)): mean of the non-hedge mass; "delta_" pays
+        # V(t)-V(t-1) (potential-based, policy-invariant; loitering nets 0).
+        # NOTE: adds one scorer call per env step even in reward_at_truncation mode.
+        _shaping = os.environ.get("RPL_MW_SHAPING", "")
+        if _shaping and ("robometer" in self.vlm_name or self.vlm_name == "qwen35_ft"):
+            _k = int(os.environ.get("RPL_MW_LASTK", "4") or 4)
+            _out = self.scorer(self.current_video[-_k:], task=self.task_description)
+            _bins = _out.get("prog_bins_final")
+            if _bins:
+                _b = np.asarray(_bins, dtype=float)
+                _c = np.linspace(0.0, 1.0, _b.shape[0])
+                _ev = float((_b * _c).sum())
+                _nz = max(1.0 - float(_b[0]), 1e-6)
+                _v = float(min(_ev / _nz, 1.0)) if _nz > 0.05 else _ev
+            else:
+                _v = float(_out["progress_reward"])
+            if _shaping.startswith("delta"):
+                _d = (_v - self._shaping_prev_v) if self._shaping_prev_v is not None else 0.0
+                self._shaping_prev_v = _v
+                _v = _d * float(os.environ.get("RPL_MW_DELTA_SCALE", "1") or 1)
+            _w = float(os.environ.get("RPL_MW_SHAPING_WEIGHT", "1") or 1)
+            _sn = getattr(self, "_shaping_n", 0); self._shaping_n = _sn + 1
+            if _sn < 15 or _sn % 2000 == 0:
+                print(f"[MW-SHAPING] step~{_sn} mode={_shaping} K={_k} V/d={_v:+.4f} "
+                      f"w={_w:g} anchor={vlm_reward:.3f} -> reward={vlm_reward + _w * _v:.4f}")
+            vlm_reward = vlm_reward + _w * _v
+            self.episode_stats["vlm_shaping_sum"] += _w * _v
 
         return rl_obs, vlm_reward, vlm_terminal, success, image_obs
 

@@ -1,0 +1,52 @@
+#!/bin/bash
+#SBATCH --job-name=mw_rbmhop
+#SBATCH --output=logs/mw_rbmhop_%j.out
+#SBATCH --error=logs/mw_rbmhop_%j.err
+#SBATCH --time=12:00:00
+#SBATCH --account=rob-tme-gaia
+#SBATCH --partition=ondemand-g6e-1gpu-l40s
+#SBATCH --requeue
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=60G
+# MetaWorld stacking arms in vlm_ibrl_v3: sparse success-head anchor (money-plot
+# config) + interval-hop progress shaping via RBM_CALL_INTERVAL (the _rd/_lrm
+# delivery pattern applied to the Robometer family). Arm (c) control = same env
+# vars with VLM_NAME=robometer_4b.
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+unset PYTHONPATH 2>/dev/null || true
+export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_v3"
+ROBOMETER_DIR="$HERE/../Robometer"
+source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh
+conda deactivate 2>/dev/null || true
+conda activate "$IBRL_CONDA_ENV"
+source set_env.sh
+export PYTHONNOUSERSITE=1 PYTHONPATH="$HERE:$ROBOMETER_DIR" MUJOCO_GL=egl
+export WANDB_DISABLE_ARTIFACTS=true PYTHONFAULTHANDLER=1
+# Dual-render (MetaWorld v3): policy sees zoomed corner2, reward model sees
+# corner2_default -- the validated camera for Robometer-family scoring.
+export V3_CORNER2_ZOOM="${V3_CORNER2_ZOOM:-1}"
+export ROBOMETER_REWARD_CAMERA="${ROBOMETER_REWARD_CAMERA:-corner2_default}"
+export ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run2_noicl_ours_step4000}"
+export RBM_CALL_INTERVAL="${RBM_CALL_INTERVAL:-10}" RBM_LASTK="${RBM_LASTK:-4}"
+export RBM_ANCHOR="${RBM_ANCHOR:-1}" RBM_DELTA_WEIGHT="${RBM_DELTA_WEIGHT:-1}"
+
+BC_POLICY="${BC_POLICY:-coffeepush}"; VLM_NAME="${VLM_NAME:-robometer_ft}"; SEED="${SEED:-1}"
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-40000}"
+SAVE_DIR=/shared/home/$USER/vlm_ibrl_runs/rbmhop_${BC_POLICY}_${VLM_NAME}_s${SEED}_${SLURM_JOB_ID}
+mkdir -p "$SAVE_DIR"
+echo "[rbmhop] task=$BC_POLICY vlm=$VLM_NAME seed=$SEED steps=$NUM_TRAIN_STEP interval=$RBM_CALL_INTERVAL anchor=$RBM_ANCHOR ft=$ROBOMETER_FT_PATH"
+
+python mw_main/train_rl_vlm_mw.py \
+    --config_path release/cfgs/metaworld/ibrl_long.yaml \
+    --episode_length 200 \
+    --bc_policy "$BC_POLICY" --vlm "$VLM_NAME" \
+    --train_end_on_success 0 --reward_at_truncation 1 \
+    --num_warm_up_episode "${WARMUP_EP:-50}" \
+    --num_train_step "$NUM_TRAIN_STEP" --seed "$SEED" \
+    --use_wb "${USE_WB:-1}" \
+    --robometer_beta 0.0 --robometer_threshold 0.0 --robometer_reward_scale 1.0 \
+    --save_dir "$SAVE_DIR"
+echo "EXIT=$? save_dir=$SAVE_DIR"
