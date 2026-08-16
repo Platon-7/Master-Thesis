@@ -111,6 +111,9 @@ def main(cfg: DictConfig):
             success_detection_duration=cfg.reward_model.success_detection_duration
             if cfg.reward_model is not None
             else 2,
+            success_detection_min_ep_steps=cfg.reward_model.success_detection_min_ep_steps
+            if cfg.reward_model is not None
+            else 0,
             success_detection_threshold=cfg.reward_model.success_detection_threshold
             if cfg.reward_model is not None
             else 0.65,
@@ -238,6 +241,9 @@ def main(cfg: DictConfig):
             success_detection_duration=cfg.reward_model.success_detection_duration
             if hasattr(cfg, "reward_model") and cfg.reward_model is not None
             else 2,
+            success_detection_min_ep_steps=cfg.reward_model.success_detection_min_ep_steps
+            if hasattr(cfg, "reward_model") and cfg.reward_model is not None
+            else 0,
             success_detection_threshold=cfg.reward_model.success_detection_threshold
             if hasattr(cfg, "reward_model") and cfg.reward_model is not None
             else 0.65,

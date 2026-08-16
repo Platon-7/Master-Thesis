@@ -99,9 +99,16 @@ def collect(args) -> int:
                                               dtype=torch.float32)).numpy()
             else:
                 a = np.stack([env.single_action_space.sample()])
-            obs, _r, _term, _trunc, infos = env.step(a)
+            obs, _r, term, trunc, infos = env.step(a)
             if first_success < 0 and bool(extract_info_for_env(infos, 0, 1).get("success", False)):
                 first_success = t  # GT success occurred at this step
+            # STOP at the episode boundary. The vector env AUTO-RESETS on
+            # termination, so continuing would append frames from a FRESH episode
+            # while still labelling them positive ("success already happened").
+            # That contaminated the positive class badly enough to drag the
+            # baseline's measured separation from 0.86/0.32 down to 0.41/0.38.
+            if bool(term[0]) or bool(trunc[0]):
+                break
         frames.append(np.stack(ep_frames))
         succ_step.append(first_success)
         ep_success.append(first_success >= 0)
@@ -115,7 +122,12 @@ def collect(args) -> int:
 
     os.makedirs(CAL_DIR, exist_ok=True)
     out = os.path.join(CAL_DIR, f"{args.task}_trajs.npz")
-    np.savez_compressed(out, frames=np.stack(frames), succ_step=np.array(succ_step),
+    lengths = np.array([len(f) for f in frames])
+    n_max = int(lengths.max())
+    padded = np.zeros((len(frames), n_max, 224, 224, 3), dtype=np.uint8)
+    for i, f in enumerate(frames):
+        padded[i, : len(f)] = f
+    np.savez_compressed(out, frames=padded, lengths=lengths, succ_step=np.array(succ_step),
                         ep_success=np.array(ep_success), source=np.array(source),
                         instruction=instruction)
     print(f"\nwrote {out}")
@@ -141,6 +153,8 @@ def score(args) -> int:
     path = os.path.join(CAL_DIR, f"{args.task}_trajs.npz")
     z = np.load(path, allow_pickle=True)
     frames, succ_step = z["frames"], z["succ_step"]
+    # Episodes end at their own boundary; anything past `lengths[e]` is padding.
+    lengths = z["lengths"] if "lengths" in z.files else np.full(frames.shape[0], frames.shape[1])
     instruction = str(z["instruction"])
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -159,7 +173,7 @@ def score(args) -> int:
     probs, labels = [], []
     n_ep, n_steps = frames.shape[0], frames.shape[1]
     for e in range(n_ep):
-        for t in range(0, n_steps, args.step_stride):
+        for t in range(0, int(lengths[e]), args.step_stride):
             raw = dict(frames=frames[e][: t + 1], task=instruction, id=e,
                        metadata=dict(subsequence_length=t + 1),
                        video_embeddings=None, text_embedding=None)

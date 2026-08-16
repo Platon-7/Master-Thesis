@@ -339,6 +339,14 @@ class RewardModelConfig:
         default=2,
         metadata={"help": "Number of consecutive steps with high success probability to detect success"},
     )
+    success_detection_min_ep_steps: int = field(
+        default=0,
+        metadata={
+            "help": "Steps into an episode before success detection may fire. A crossing "
+            "earlier than this cannot be a real success (see vlm_ibrl ROBOMETER_MIN_EP_STEPS). "
+            "Set from the gate window reported by scripts/causal_calib_maniskill.py; 0 disables."
+        },
+    )
     success_detection_threshold: float = field(
         default=0.65, metadata={"help": "Success probability threshold for success detection"}
     )

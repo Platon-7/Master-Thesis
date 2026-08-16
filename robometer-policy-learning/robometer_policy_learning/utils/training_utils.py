@@ -332,6 +332,7 @@ def create_buffer(
     eval_server_timeout: float = 120.0,
     use_success_detection: bool = False,
     success_detection_duration: int = 2,
+    success_detection_min_ep_steps: int = 0,
     success_detection_threshold: float = 0.65,
     add_estimated_reward: bool = False,
     icl_demo_path: Optional[str] = None,
@@ -429,6 +430,7 @@ def create_buffer(
                     reward_relabeling_keys=reward_relabeling_keys,
                     use_success_detection=use_success_detection,
                     success_detection_duration=success_detection_duration,
+                    success_detection_min_ep_steps=success_detection_min_ep_steps,
                     success_detection_threshold=success_detection_threshold,
                     add_estimated_reward=add_estimated_reward,
                 )
@@ -457,6 +459,7 @@ def create_buffer(
                     reward_relabeling_keys=reward_relabeling_keys,
                     use_success_detection=use_success_detection,
                     success_detection_duration=success_detection_duration,
+                    success_detection_min_ep_steps=success_detection_min_ep_steps,
                     success_detection_threshold=success_detection_threshold,
                     add_estimated_reward=add_estimated_reward,
                     icl_demo_path=icl_demo_path,

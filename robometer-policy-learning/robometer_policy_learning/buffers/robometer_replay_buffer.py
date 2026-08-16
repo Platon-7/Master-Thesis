@@ -42,6 +42,7 @@ class RobometerReplayBuffer(ReplayBuffer):
         reward_relabeling_keys: List[str] = ["image"],
         use_success_detection: bool = False,
         success_detection_duration: int = 2,
+        success_detection_min_ep_steps: int = 0,
         success_detection_threshold: float = 0.65,
         add_estimated_reward: bool = False,
         icl_demo_path: Optional[str] = None,
@@ -56,6 +57,12 @@ class RobometerReplayBuffer(ReplayBuffer):
         self.reward_relabeling_keys = reward_relabeling_keys
         self.use_success_detection = use_success_detection
         self.success_detection_duration = success_detection_duration
+        # A fire before this many steps into the episode cannot be a real success --
+        # the same guard as vlm_ibrl's ROBOMETER_MIN_EP_STEPS. Set it between the
+        # latest "fake fire" and the earliest "real fire" reported by
+        # scripts/causal_calib_maniskill.py. 0 disables the gate.
+        self.success_detection_min_ep_steps = int(success_detection_min_ep_steps)
+        self._ep_step = 0
         self.success_detection_threshold = success_detection_threshold
         self.add_estimated_reward = add_estimated_reward
 
@@ -178,6 +185,42 @@ class RobometerReplayBuffer(ReplayBuffer):
         )
         sample.context_trajectory = icl_sample.trajectory
         return sample
+
+    def _pad_to_max_frames(self, frames: np.ndarray) -> np.ndarray:
+        """Front-pad a short clip up to ``max_frames`` by repeating the first frame.
+
+        The reward model is scored on a GROWING prefix, so early in an episode it
+        receives fewer frames than it was trained on. On LIBERO/Robomimic this is
+        harmless -- episodes run 200-400 steps, so after ~16 steps the prefix is
+        always long enough (their calibration simply starts at t=16). ManiSkill
+        episodes are 50 steps and succeed around step 7, so a prefix NEVER reaches
+        max_frames=16 for the fine-tuned checkpoints, and the heads collapse.
+
+        Measured on PullCube at the GT success step, run2 (max_frames=16):
+            7-11 frames  -> success_prob 0.053   (failures 0.024)
+            padded to 16 -> success_prob 0.369   (failures 0.024, unchanged)
+        Base (max_frames=8) is barely affected, since 7-11 frames already satisfies it
+        -- which is exactly why only the fine-tuned models looked broken.
+
+        Uses the SAME linspace-with-repeats rule as reward-model-study's ``sub16``
+        (the sampler behind the validated MetaWorld/Robomimic numbers):
+
+            idx = np.linspace(0, len(frames) - 1, max_frames).round()
+
+        Robometer's own collator only ever REDUCES -- ``linspace_subsample_frames``
+        returns the clip untouched when ``effective_total <= num_frames`` -- so the
+        upsampling has to happen here, before the collator sees it. Spreading the
+        repeats evenly matches how training clips were subsampled; front-padding with
+        frame 0 instead makes the clip look stuck at the start and biases progress
+        down (measured: run2 progress@success 0.203 -> 0.188).
+        """
+        if frames is None or len(frames) == 0:
+            return frames
+        n = int(len(frames))
+        if n >= int(self.max_frames):
+            return frames
+        idx = np.linspace(0, n - 1, int(self.max_frames)).round().astype(int)
+        return frames[idx]
 
     def _compute_reward_single(self, raw_data: Dict[str, Any]) -> Tuple[float, float]:
         """
@@ -329,12 +372,15 @@ class RobometerReplayBuffer(ReplayBuffer):
                         :, index * embeddings_per_key : (index + 1) * embeddings_per_key
                     ]
 
+                _frames = np.array(video_frames[key]) if video_frames[key] is not None else np.array([])
+                _frames = self._pad_to_max_frames(_frames)
+
                 raw_data = dict(
-                    frames=np.array(video_frames[key]) if video_frames[key] is not None else np.array([]),
+                    frames=_frames,
                     task=language_instruction,
                     id=kwargs.get("episode_id"),
                     metadata=dict(
-                        subsequence_length=len(video_frames[key]) if video_frames[key] is not None else 0,
+                        subsequence_length=int(len(_frames)),
                     ),
                     video_embeddings=video_embeddings_array,
                     text_embedding=text_emb,
@@ -393,17 +439,37 @@ class RobometerReplayBuffer(ReplayBuffer):
                 except Exception:
                     pass
             if self.use_success_detection:
+                self._ep_step += 1
                 # Check if the episode is done based on majority vote of success probabilities
                 vote = 0
                 for key in self.reward_relabeling_keys:
                     for success_prob in self.success_tracker[key]:
                         if success_prob > float(self.success_detection_threshold):
                             vote += 1
-                if vote > (len(self.reward_relabeling_keys) * self.success_detection_duration / 2):
+                gate_open = self._ep_step >= self.success_detection_min_ep_steps
+                if gate_open and vote > (
+                    len(self.reward_relabeling_keys) * self.success_detection_duration / 2
+                ):
                     kwargs["done"] = True
+                    # THE reward-hacking signal. A fire with gt_success=0 is a FALSE
+                    # termination: the policy got the episode ended (and the remaining
+                    # cost avoided) without solving the task. One line per fire, so a
+                    # run of "fired gt_success=0" at small step_in_ep means the
+                    # threshold is too low; no lines at all means it is too high and
+                    # TERMINATE=1 has silently degraded into TERMINATE=0.
+                    self._n_fire = getattr(self, "_n_fire", 0) + 1
+                    _gt_now = bool(kwargs.get("is_success") or kwargs.get("success"))
+                    self._n_fire_false = getattr(self, "_n_fire_false", 0) + (0 if _gt_now else 1)
+                    logger.info(
+                        f"[DETECT] fired ep={kwargs.get('episode_id')} "
+                        f"step_in_ep={self._ep_step} gt_success={int(_gt_now)} "
+                        f"n_fire={self._n_fire} n_false={self._n_fire_false} "
+                        f"false_rate={self._n_fire_false / max(1, self._n_fire):.2f}"
+                    )
                 if kwargs["done"] or kwargs["truncated"]:
                     for key in self.reward_relabeling_keys:
                         self.success_tracker[key].clear()
+                    self._ep_step = 0
 
         super()._add(**kwargs)
 
@@ -423,6 +489,7 @@ class RobometerH5ReplayBuffer(H5ReplayBuffer):
         reward_relabeling_keys: List[str] = ["image"],
         use_success_detection: bool = False,
         success_detection_duration: int = 2,
+        success_detection_min_ep_steps: int = 0,
         success_detection_threshold: float = 0.65,
         add_estimated_reward: bool = False,
         **kwargs,
@@ -434,6 +501,12 @@ class RobometerH5ReplayBuffer(H5ReplayBuffer):
         self.reward_relabeling_keys = reward_relabeling_keys
         self.use_success_detection = use_success_detection
         self.success_detection_duration = success_detection_duration
+        # A fire before this many steps into the episode cannot be a real success --
+        # the same guard as vlm_ibrl's ROBOMETER_MIN_EP_STEPS. Set it between the
+        # latest "fake fire" and the earliest "real fire" reported by
+        # scripts/causal_calib_maniskill.py. 0 disables the gate.
+        self.success_detection_min_ep_steps = int(success_detection_min_ep_steps)
+        self._ep_step = 0
         self.success_detection_threshold = success_detection_threshold
         self.add_estimated_reward = add_estimated_reward
 
