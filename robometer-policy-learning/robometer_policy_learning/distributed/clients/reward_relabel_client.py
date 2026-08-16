@@ -14,9 +14,30 @@ import grpc
 from robometer_policy_learning.distributed.grpc_utils import ndarray_to_bytes
 from loguru import logger
 
-from robometer_policy_learning.distributed.protos import reward_relabel_pb2 as pb
-from robometer_policy_learning.distributed.protos import reward_relabel_pb2_grpc as pb_grpc
-from robometer_policy_learning.distributed.protos import learner_pb2 as learner_pb
+# Generated protobuf modules are optional at import time.
+#
+# distributed/protos/__init__.py builds these from learner.proto and
+# reward_relabel.proto when they are first imported, but .gitignore excludes
+# "*.proto", so the sources are missing from a fresh clone and generation fails
+# with "protoc failed to generate learner protobufs". Importing this module then
+# becomes impossible, which in turn breaks `training_utils` and therefore
+# train.py -- even for runs that never touch distributed reward relabeling.
+#
+# These symbols are only dereferenced inside methods (RelabelRewardsRequest,
+# learner_pb.NDArray, ...), so the module imports cleanly without them and only
+# a real attempt to *use* the client fails. That failure is raised explicitly in
+# RewardRelabelClient.__init__ below, with the cause and the fix.
+try:
+    from robometer_policy_learning.distributed.protos import reward_relabel_pb2 as pb
+    from robometer_policy_learning.distributed.protos import reward_relabel_pb2_grpc as pb_grpc
+    from robometer_policy_learning.distributed.protos import learner_pb2 as learner_pb
+
+    _PROTOS_AVAILABLE = True
+    _PROTOS_IMPORT_ERROR = None
+except Exception as _exc:  # pragma: no cover - depends on repo/proto state
+    pb = pb_grpc = learner_pb = None
+    _PROTOS_AVAILABLE = False
+    _PROTOS_IMPORT_ERROR = _exc
 
 
 @dataclass
@@ -77,6 +98,16 @@ class RewardRelabelClient:
         retry_backoff_s: float = 0.5,
         max_retry_backoff_s: float = 5.0,
     ):
+        if not _PROTOS_AVAILABLE:
+            raise RuntimeError(
+                "RewardRelabelClient needs the generated protobuf modules, which could not be "
+                "built. distributed/protos/__init__.py generates them from learner.proto and "
+                "reward_relabel.proto, but .gitignore excludes '*.proto', so those sources are "
+                "absent from this checkout.\n"
+                f"  Original error: {_PROTOS_IMPORT_ERROR}\n"
+                "  Fix: restore the .proto sources (and un-ignore them), or leave distributed "
+                "reward relabeling disabled (buffer.distributed_reward_relabel.enabled=false)."
+            )
         self.address = address
         self.timeout = timeout
         self.flush_interval = flush_interval

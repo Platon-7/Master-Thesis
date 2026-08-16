@@ -1,0 +1,90 @@
+#!/bin/bash
+#SBATCH --job-name=ms_canary
+#SBATCH --output=logs/ms_canary_%j.out
+#SBATCH --error=logs/ms_canary_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=120G
+#
+# One node, both arm shapes, short. Exists because every failure so far cleared
+# a green preflight and then died inside the rollout loop -- config composition
+# and model loading are simply not where the bugs are. This runs the real
+# train.py through the real rollout worker for a few hundred steps: a GT arm
+# (fast, no reward model) and a reward-model arm (the VLM path). If both survive
+# and report throughput, the full 24h arms are worth launching.
+#
+#   sbatch jobs/maniskill_canary.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+mkdir -p logs
+
+TASK="${TASK:-PullCube-v1}"
+CANARY_STEPS="${CANARY_STEPS:-400}"
+REWARD_CKPT="${REWARD_CKPT:-/scratch-shared/$USER/roboref_checkpoints/run3_noicl_standard_step5000}"
+
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/maniskill_rl}"
+PYTHON="$ENV_PREFIX/bin/python"
+[[ -x "$PYTHON" ]] || { echo "ERROR: no python at $PYTHON" >&2; exit 1; }
+
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="${MS_ASSET_DIR:-/scratch-shared/$USER/maniskill_assets}"
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
+export TORCH_HOME="${TORCH_HOME:-/scratch-shared/$USER/torch_cache}"
+export TOKENIZERS_PARALLELISM=false
+export ROBOMETER_DISABLE_UNSLOTH=1
+export WANDB_MODE=offline   # canary results are throwaway; keep them out of W&B
+
+hostname; nvidia-smi --query-gpu=name --format=csv,noheader | head -1
+
+echo ""
+echo "########## [A] environment verification (incl. vectorized rollout path) ##########"
+timeout 1800 "$PYTHON" -u scripts/verify_maniskill_env.py --task "$TASK"
+RC_VERIFY=$?
+echo "RC_VERIFY=$RC_VERIFY"
+[[ $RC_VERIFY -eq 0 ]] || { echo "verification failed; not running training canaries" >&2; exit 3; }
+
+run_canary () {  # $1=label, extra hydra args follow
+    local label="$1"; shift
+    echo ""
+    echo "########## [$label] train.py for $CANARY_STEPS rollouts ##########"
+    local t0=$SECONDS
+    timeout 3000 "$PYTHON" -u scripts/train.py \
+        --config-path=../robometer_policy_learning/configs \
+        --config-name=maniskill_online_rl \
+        "env.env_name=maniskill/$TASK" \
+        algorithm@online_algorithm=sac \
+        alg.online_alg_name=sac \
+        training.num_rollouts="$CANARY_STEPS" \
+        training.seed=0 \
+        "logging.wandb_name=canary_${TASK}_${label}" \
+        "$@" 2>&1 | tail -40
+    local rc=${PIPESTATUS[0]}
+    echo "RC_${label}=$rc   wall=$((SECONDS - t0))s for $CANARY_STEPS rollouts"
+    return $rc
+}
+
+run_canary gt \
+    env.use_gt_rewards=true \
+    env.env_kwargs.reward_mode=normalized_dense
+RC_GT=$?
+
+run_canary prog \
+    reward_model=robometer \
+    "reward_model.model_path=$REWARD_CKPT" \
+    reward_model.use_success_detection=false \
+    reward_model.add_estimated_reward=true \
+    env.use_gt_rewards=false \
+    env.env_kwargs.reward_mode=sparse
+RC_PROG=$?
+
+echo ""
+echo "================ CANARY SUMMARY ================"
+echo "verify=$RC_VERIFY  gt=$RC_GT  prog=$RC_PROG"
+[[ $RC_GT -eq 0 && $RC_PROG -eq 0 ]] && echo "CANARY_OK" || echo "CANARY_FAILED"
+echo "==============================================="
+[[ $RC_GT -eq 0 && $RC_PROG -eq 0 ]] || exit 1
+exit 0

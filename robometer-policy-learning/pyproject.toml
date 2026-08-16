@@ -73,6 +73,14 @@ Repository = "https://github.com/ygtkorkmaz/rfm_rl"
 # running optional features. Install with `uv pip install .[dev]`
 # ==================================================================================
 [project.optional-dependencies]
+# ManiSkill3 downstream-RL benchmark (SAC from scratch). Kept out of the core
+# dependency list on purpose: the ManiSkill experiments do not need LIBERO,
+# openpi or unsloth, and forcing a full `uv sync` just to run them is the
+# fastest way to hit an unrelated build failure on a new cluster.
+#   uv pip install "mani-skill>=3.0.0"
+maniskill = [
+    "mani-skill>=3.0.0",
+]
 dev = [
     "pytest>=8.0.0",
     "ruff>=0.8.0",

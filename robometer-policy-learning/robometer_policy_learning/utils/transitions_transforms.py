@@ -102,6 +102,51 @@ class MonotonicRewardTransform(TransitionTransform):
     supports_batch = False
 
 
+class RewardShiftTransform(TransitionTransform):
+    """Add a constant to every step's reward (use a negative value for a step cost).
+
+    Why this exists
+    ---------------
+    ManiSkill's dense reward is POSITIVE (~+0.9/step near the goal) and the episode
+    ENDS on success, so finishing forfeits the remaining reward. With gamma=0.8 the
+    continuation value of loitering is ~0.9/(1-0.8) = 4.5 against ~1 for finishing,
+    and the policy takes the 4.5: measured on PullCube GT, episode return rose
+    4.71 -> 21.43 while eval success fell 56% -> 10%.
+
+    Shifting by -1 puts every step in [-1, 0]. Dense information is preserved (near
+    the goal costs -0.1/step, far costs -0.9/step), loitering now bleeds, and ending
+    the episode stops the bleeding. This is LIBERO's `reward -= 1` convention
+    (libero_pi0_wrapper.py:128) generalised from a sparse to a dense signal.
+
+    Two properties make it safe to apply everywhere:
+
+    * With NO early termination every episode has the same length, so the shift
+      subtracts a constant from every return and cannot change the optimal policy.
+    * With early termination episode lengths vary, so it penalises dithering --
+      exactly the regime that needs the fix.
+
+    It must be applied to the FINAL reward, i.e. AFTER RobometerReplayBuffer
+    replaces the env reward with the VLM score (add_estimated_reward=False).
+    LIBERO applied its shift in the env wrapper, so the reward model overwrote it
+    and only the ground-truth arm was ever protected.
+    """
+
+    def __init__(self, shift: float = -1.0, debug: bool = False):
+        self.shift = shift
+        self.debug = debug
+
+    def __call__(self, transition: Transition) -> Transition:
+        new_reward = transition.reward + self.shift
+        if self.debug:
+            print(f"RewardShiftTransform: {transition.reward} -> {new_reward}")
+        return transition.replace(reward=new_reward)
+
+    supports_batch = False
+
+    def __repr__(self):
+        return f"RewardShiftTransform(shift={self.shift})"
+
+
 class SuccessBonusTransform(TransitionTransform):
     """
     Transform that adds a bonus reward to successful episodes.

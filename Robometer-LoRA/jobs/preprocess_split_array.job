@@ -5,7 +5,6 @@
 #SBATCH --time=12:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
-#SBATCH --account=gusei17535
 #SBATCH --partition=staging
 
 # Parallel HF-cache builder for the full-pool training data.
@@ -55,14 +54,17 @@ fi
 source /etc/profile.d/lmod.sh 2>/dev/null || true
 module load 2025 Anaconda3/2025.06-1
 module load 2025 FFmpeg/7.1.1-GCCcore-14.2.0
-ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_gpu}"
+ENV_PREFIX="${ENV_PREFIX:-/home/$USER/.conda/envs/robometer_gpu}"
 PYTHON="$ENV_PREFIX/bin/python"
 if [[ ! -x "$PYTHON" ]]; then
     echo "ERROR: $PYTHON not executable" >&2
     exit 1
 fi
+# Put the env's ffmpeg on PATH (env ships imageio_ffmpeg; we symlink its binary to
+# $ENV_PREFIX/bin/ffmpeg). generate_hf_dataset shells out to `ffmpeg` to write MP4s.
+export PATH="$ENV_PREFIX/bin:$PATH"
 
-export ROBOMETER_DATASET_PATH="/projects/prjs1958/robometer_frame_dataset"
+export ROBOMETER_DATASET_PATH="${ROBOMETER_DATASET_PATH:-/projects/prjs1958/robometer_frame_dataset}"
 export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_OUT_DIR"
 export HF_DIR="$HF_OUT_DIR"
 export SPLIT  # for the preprocess YAML's ${oc.env:SPLIT}
@@ -81,6 +83,7 @@ echo "==================================================================="
 # Step 1: convert raw shards into a HuggingFace dataset (per-shard).
 "$PYTHON" -m dataset_upload.generate_hf_dataset \
   --config_path "$HERE/configs/dataset_frames.yaml" \
+  --dataset.dataset_path "$ROBOMETER_DATASET_PATH" \
   --dataset.dataset_name "robometer_frames_${OUTPUT_NAME}" \
   --dataset.pairs_index_path "$PAIRS_INDEX" \
   --output.output_dir "$HF_OUT_DIR/${OUTPUT_NAME}_raw" \

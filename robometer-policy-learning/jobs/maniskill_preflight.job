@@ -1,0 +1,43 @@
+#!/bin/bash
+#SBATCH --job-name=ms_preflight
+#SBATCH --output=logs/ms_preflight_%j.out
+#SBATCH --error=logs/ms_preflight_%j.err
+#SBATCH --time=00:30:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
+#
+# Front-load the two failures that killed the first six arms ~4 minutes in:
+# Hydra override parsing for the `gt` arm, and loading a checkpoint whose
+# config.yaml carries `use_unsloth: true`. One 30-minute job instead of six
+# doomed multi-hour ones.
+#
+#   sbatch --export=ALL,REWARD_CKPT=/path/to/ckpt jobs/maniskill_preflight.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+mkdir -p logs
+
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/maniskill_rl}"
+PYTHON="$ENV_PREFIX/bin/python"
+[[ -x "$PYTHON" ]] || { echo "ERROR: no python at $PYTHON" >&2; exit 1; }
+
+TASK="${TASK:-PullCube-v1}"
+REWARD_CKPT="${REWARD_CKPT:-/scratch-shared/$USER/roboref_checkpoints/run3_noicl_standard_step5000}"
+
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="${MS_ASSET_DIR:-/scratch-shared/$USER/maniskill_assets}"
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
+export TORCH_HOME="${TORCH_HOME:-/scratch-shared/$USER/torch_cache}"
+export TOKENIZERS_PARALLELISM=false
+export ROBOMETER_DISABLE_UNSLOTH=1
+
+hostname
+nvidia-smi --query-gpu=name --format=csv,noheader 2>&1 | head -1
+
+timeout 1500 "$PYTHON" -u scripts/preflight_reward_model.py --task "$TASK" --ckpt "$REWARD_CKPT"
+RC=$?
+echo "PREFLIGHT_RC=$RC"
+exit $RC

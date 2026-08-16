@@ -1,0 +1,38 @@
+#!/bin/bash
+#SBATCH --job-name=ms_calib
+#SBATCH --output=logs/ms_calib_%j.out
+#SBATCH --error=logs/ms_calib_%j.err
+#SBATCH --time=04:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=120G
+#
+# Calibrate success_detection_threshold per (model, task).
+#   PHASE=collect TASKS='...'                 -> labelled trajectories (no VLM)
+#   PHASE=score   TASKS='...' MODELS='tag=path;...'  -> success-head probabilities
+#   PHASE=fit     TASKS='...'                 -> thresholds.json at matched FPR
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+PYTHON="/scratch-shared/$USER/envs/maniskill_rl/bin/python"
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="/scratch-shared/$USER/maniskill_assets"
+export HF_HOME="/scratch-shared/$USER/hf_cache"
+export TOKENIZERS_PARALLELISM=false
+export ROBOMETER_DISABLE_UNSLOTH=1
+S="scripts/calibrate_success_threshold.py"
+for T in ${TASKS:?set TASKS}; do
+  echo ""; echo "########## $PHASE : $T ##########"
+  case "${PHASE:?set PHASE}" in
+    collect) timeout 3000 "$PYTHON" -u $S collect --task "$T" --episodes 40 --random-episodes 20 ;;
+    score)   IFS=';' read -ra MS <<< "${MODELS:?set MODELS}"
+             for m in "${MS[@]}"; do
+               tag="${m%%=*}"; path="${m#*=}"
+               echo "--- $tag ---"
+               timeout 3000 "$PYTHON" -u $S score --task "$T" --model "$path" --tag "$tag"
+             done ;;
+    fit)     timeout 600 "$PYTHON" -u $S fit --task "$T" --target-fpr 0.02 ;;
+  esac
+  echo "RC_${T}=$?"
+done

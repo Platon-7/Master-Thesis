@@ -3,13 +3,40 @@ Replay buffer wrapper that uses async reward relabeling service in "pre" mode.
 Rewards are relabeled before transitions are added to the underlying buffer.
 """
 
+from __future__ import annotations
+
 import threading
 from typing import Dict, Any, List, Optional, Callable
 import numpy as np
 from loguru import logger
 
 from robometer_policy_learning.buffers.base_replay_buffer import BaseReplayBuffer, Transition
-from robometer_policy_learning.distributed.clients.reward_relabel_client import RewardRelabelClient, PendingRelabel, PendingRelabelBatch
+
+# The distributed reward-relabel client is optional.
+#
+# Importing it pulls in generated protobuf modules, which
+# distributed/protos/__init__.py builds at import time from learner.proto and
+# reward_relabel.proto. Those .proto sources are excluded by .gitignore
+# ("*.proto"), so they are absent from a fresh clone and generation fails with
+# "protoc failed to generate learner protobufs". That made an unused feature a
+# hard import-time dependency of train.py.
+#
+# This class is only constructed when async/distributed relabeling is enabled
+# (buffer.distributed_reward_relabel.enabled), which the ManiSkill SAC runs do
+# not use. `from __future__ import annotations` above keeps the type hints below
+# lazy, so the module imports cleanly even when the symbols are unavailable.
+try:
+    from robometer_policy_learning.distributed.clients.reward_relabel_client import (
+        RewardRelabelClient,
+        PendingRelabel,
+        PendingRelabelBatch,
+    )
+
+    _RELABEL_CLIENT_AVAILABLE = True
+except Exception as _exc:  # pragma: no cover - depends on repo/proto state
+    RewardRelabelClient = PendingRelabel = PendingRelabelBatch = None
+    _RELABEL_CLIENT_IMPORT_ERROR = _exc
+    _RELABEL_CLIENT_AVAILABLE = False
 
 
 class AsyncRewardRelabelBuffer(BaseReplayBuffer):
@@ -38,6 +65,16 @@ class AsyncRewardRelabelBuffer(BaseReplayBuffer):
         post_transforms: List[Callable] = None,
         sampler=None,
     ):
+        if not _RELABEL_CLIENT_AVAILABLE:
+            raise RuntimeError(
+                "Async reward relabeling was requested, but the distributed client could not "
+                "be imported. The generated protobuf modules are built at import time from "
+                "learner.proto / reward_relabel.proto, and those sources are excluded by "
+                ".gitignore ('*.proto'), so they are missing from this checkout.\n"
+                f"  Original error: {_RELABEL_CLIENT_IMPORT_ERROR}\n"
+                "  Fix: restore the .proto sources (and drop them from .gitignore), or leave "
+                "buffer.distributed_reward_relabel.enabled=false."
+            )
         # Initialize base class
         super().__init__(
             obs_keys=obs_keys,

@@ -1,0 +1,82 @@
+#!/bin/bash
+#SBATCH --job-name=ms_smoke
+#SBATCH --output=logs/ms_smoke_%j.out
+#SBATCH --error=logs/ms_smoke_%j.err
+#SBATCH --time=00:25:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#
+# Verify the ManiSkill adapter on a GPU node. Rendering goes through SAPIEN,
+# which needs Vulkan -- the login node has no GPU, so this cannot be checked
+# interactively. Runs the adapter smoke test across several candidate tasks and
+# writes a sample frame per task for visual inspection.
+#
+#   sbatch jobs/maniskill_smoke.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+mkdir -p logs
+
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/maniskill_rl}"
+PYTHON="$ENV_PREFIX/bin/python"
+[[ -x "$PYTHON" ]] || { echo "ERROR: no python at $PYTHON" >&2; exit 1; }
+
+export MUJOCO_GL=egl
+export PYOPENGL_PLATFORM=egl
+export SAPIEN_HEADLESS=1
+# ManiSkill downloads task assets (e.g. YCB meshes) here; keep off the home quota.
+export MS_ASSET_DIR="${MS_ASSET_DIR:-/scratch-shared/$USER/maniskill_assets}"
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
+
+FRAMEDIR="${FRAMEDIR:-/scratch-shared/$USER/maniskill_smoke_frames}"
+mkdir -p "$FRAMEDIR"
+
+echo "=========== node / GPU ==========="
+hostname
+nvidia-smi --query-gpu=name,driver_version --format=csv,noheader 2>&1 || echo "nvidia-smi unavailable"
+echo "=========== versions ============="
+"$PYTHON" - <<'PY'
+import mani_skill, gymnasium, numpy, torch
+print("mani_skill", mani_skill.__version__)
+print("gymnasium ", gymnasium.__version__)
+print("numpy     ", numpy.__version__)
+print("torch     ", torch.__version__, "cuda:", torch.cuda.is_available())
+try:
+    import sapien
+    print("sapien    ", sapien.__version__)
+except Exception as e:
+    print("sapien import failed:", e)
+PY
+
+echo "=========== raw render probe ==========="
+# Isolates a Vulkan/driver failure from any bug in our wrapper.
+"$PYTHON" - <<'PY'
+import traceback
+try:
+    import gymnasium as gym, mani_skill.envs  # noqa: F401
+    e = gym.make("PullCube-v1", num_envs=1, obs_mode="state",
+                 render_mode="rgb_array", sim_backend="physx_cpu")
+    e.reset(seed=0)
+    img = e.render()
+    print("raw render OK:", type(img).__name__, getattr(img, "shape", None))
+    e.close()
+except Exception:
+    print("RAW RENDER FAILED -- likely Vulkan/driver, not our wrapper:")
+    traceback.print_exc()
+PY
+
+RC=0
+for TASK in PullCube-v1 PokeCube-v1 PickSingleYCB-v1 RollBall-v1 LiftPegUpright-v1; do
+    echo ""
+    echo "############ $TASK ############"
+    "$PYTHON" scripts/smoke_test_maniskill.py --task "$TASK" --num-envs 2 --save-frames "$FRAMEDIR" || RC=1
+done
+
+echo ""
+echo "frames written to: $FRAMEDIR"
+ls -la "$FRAMEDIR" 2>/dev/null
+echo "OVERALL_RC=$RC"
+exit $RC

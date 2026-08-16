@@ -1,0 +1,97 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_step2g
+#SBATCH --output=logs/step2_%j_%x.out
+#SBATCH --error=logs/step2_%j_%x.err
+#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
+#SBATCH --partition=staging
+
+# Gated step 2: same as step2_after_array.job but first VERIFIES every shard is
+# MP4-complete (arrow row count == present mp4 count). If any shard is missing
+# MP4s, it exits 1 WITHOUT running step 2 — so a corrupt/incomplete shard can
+# never silently drop trajectories from the final cache.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+
+SPLIT="${SPLIT:?set SPLIT=train|eval_*}"
+SPLITS_DIR="${SPLITS_DIR:?set SPLITS_DIR}"
+STEP1_DIR="${STEP1_DIR:?set STEP1_DIR (where _raw shards live)}"
+HF_OUT_DIR="${ROBOMETER_PROCESSED_DATASETS_PATH:?set ROBOMETER_PROCESSED_DATASETS_PATH}"
+N_SHARDS="${N_SHARDS:-16}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+ENV_PREFIX="${ENV_PREFIX:-/home/pkarageorgis1/.conda/envs/robometer_gpu}"
+PYTHON="$ENV_PREFIX/bin/python"
+
+export ROBOMETER_DATASET_PATH="${ROBOMETER_DATASET_PATH:-/projects/prjs1958/robometer_frame_dataset}"
+export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_OUT_DIR"
+export HF_DIR="$STEP1_DIR"
+export SPLIT
+
+echo "============================================================"
+echo "GATED step 2 for SPLIT=$SPLIT"
+echo "  STEP1_DIR (read MP4s)      : $STEP1_DIR"
+echo "  cache_dir (write NPZs)     : $HF_OUT_DIR"
+echo "============================================================"
+
+# ----- GATE: verify every shard is MP4-complete before doing anything --------
+if [[ "$SPLIT" == "train" ]]; then
+    echo "[gate] verifying all $N_SHARDS shards (arrow rows == present mp4s)..."
+    GATE_BAD=""
+    LAST=$(( N_SHARDS - 1 ))
+    for n in $(seq 0 "$LAST"); do
+        i=$(printf '%02d' "$n")
+        DSHARD="$STEP1_DIR/train_part${i}_raw/robometer_frames_train_part${i}"
+        ROWS=$("$PYTHON" -c "from datasets import load_from_disk; print(load_from_disk('$DSHARD').num_rows)" 2>/dev/null || echo "")
+        MP4=$(find "$STEP1_DIR/train_part${i}_raw" -name '*.mp4' 2>/dev/null | wc -l)
+        echo "  part${i}: rows=${ROWS:-MISSING} mp4=$MP4"
+        if [[ -z "$ROWS" || "$MP4" -lt "$ROWS" ]]; then GATE_BAD="$GATE_BAD ${i}"; fi
+    done
+    if [[ -n "$GATE_BAD" ]]; then
+        echo "[gate] FAILED — incomplete/missing shards:$GATE_BAD"
+        echo "[gate] refusing to run step 2 (would silently drop trajectories). Re-run those shards, then resubmit."
+        exit 1
+    fi
+    echo "[gate] PASSED — all $N_SHARDS shards complete; proceeding."
+fi
+
+# ----- (a) train: merge per-shard outputs INTO STEP1_DIR ---------------------
+if [[ "$SPLIT" == "train" ]]; then
+    echo "[step 2a] concatenating $N_SHARDS shards into $STEP1_DIR/train_raw/"
+    "$PYTHON" "$HERE/scripts/concat_split_shards.py" \
+        --hf-out-dir "$STEP1_DIR" \
+        --split train \
+        --n-shards "$N_SHARDS"
+fi
+
+# ----- (b) preprocess_datasets — reads STEP1_DIR, writes HF_OUT_DIR -----------
+TMP_PP_YAML="$(mktemp --suffix=.yaml)"
+trap 'rm -f "$TMP_PP_YAML"' EXIT
+sed -e "s|\${oc.env:HF_DIR}|$STEP1_DIR|g" \
+    -e "s|\${oc.env:SPLIT}|$SPLIT|g" \
+    -e "s|\${oc.env:ROBOMETER_PROCESSED_DATASETS_PATH}|$HF_OUT_DIR|g" \
+    "$HERE/configs/preprocess_split.yaml" > "$TMP_PP_YAML"
+echo "[step 2b] preprocess_datasets config:"
+cat "$TMP_PP_YAML"
+
+cd "$ROBOMETER_DIR"
+"$PYTHON" -m robometer.data.scripts.preprocess_datasets \
+    --config "$TMP_PP_YAML" \
+    --cache_dir "$HF_OUT_DIR"
+
+# ----- (c) short-name symlink the loader expects -----------------------------
+HASHED="${STEP1_DIR//\//_}_${SPLIT}_raw_robometer_frames_${SPLIT}"
+SHORT="robometer_frames_${SPLIT}"
+if [[ -d "$HF_OUT_DIR/$HASHED" ]]; then
+    ln -sfn "$HASHED" "$HF_OUT_DIR/$SHORT"
+    echo "[step 2c] linked $HF_OUT_DIR/$SHORT -> $HASHED"
+else
+    echo "[step 2c] WARN: expected hashed cache dir not found at $HF_OUT_DIR/$HASHED — skipping symlink"
+fi
+
+echo "[step 2] DONE for $SPLIT"

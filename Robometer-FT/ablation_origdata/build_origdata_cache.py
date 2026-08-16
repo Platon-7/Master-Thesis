@@ -13,8 +13,16 @@ datasets=[robometer_origdata_train].
 import json, os, shutil
 from datasets import load_from_disk
 
-SRC = "/shared/home/PKA4388/robometer_frames_hf_full_step2/_fsx_PKA4388_robometer_frames_hf_full_train_no_extras_raw_robometer_frames_train_no_extras"
-DST_ROOT = "/shared/home/PKA4388/robometer_frames_origdata_step2"
+DST_ROOT = "/scratch-shared/tmp.cwkV8vOvfY/robometer_frames_hf_full_step2"
+SRC = os.path.join(
+    DST_ROOT,
+    "_scratch-shared_tmp.cwkV8vOvfY_robometer_frames_hf_full_train_no_extras_raw_robometer_frames_train_no_extras",
+)
+# Written straight into the existing step2 root (not a separate cache dir) so
+# ROBOMETER_PROCESSED_DATASETS_PATH=DST_ROOT resolves both
+# data.train_datasets=[robometer_origdata_train] and the eval short-name
+# symlinks (robometer_frames_eval_robometer etc.) that already live there —
+# no cross-filesystem symlink trick needed, unlike the AWS /fsx vs /shared split.
 DST = os.path.join(DST_ROOT, "robometer_origdata_train")  # mangled == itself (no slashes)
 
 m = json.load(open(os.path.join(SRC, "index_mappings.json")))

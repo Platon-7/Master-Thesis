@@ -18,6 +18,10 @@
 
 data.train_datasets: [robometer_frames_train_no_extras]
 
+# Progress target parameterization — changed from the config.yaml default
+# (absolute_first_frame) to absolute_wrt_total_frames for this run.
+data.progress_pred_type: absolute_wrt_total_frames
+
 # Plain (non-asymmetric) discrete C51 + Robometer's class-balanced BCE.
 loss.progress_loss_type: discrete
 loss.success_loss_type: bce_balanced

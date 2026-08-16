@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --job-name=ms_actchk
+#SBATCH --output=logs/ms_actchk_%j.out
+#SBATCH --error=logs/ms_actchk_%j.err
+#SBATCH --time=00:40:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/maniskill_rl}"
+PYTHON="$ENV_PREFIX/bin/python"
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="${MS_ASSET_DIR:-/scratch-shared/$USER/maniskill_assets}"
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
+export ROBOMETER_DISABLE_UNSLOTH=1
+for T in ${TASKS:-PullCube-v1 PokeCube-v1}; do
+  echo ""; echo "################ $T ################"
+  timeout 900 "$PYTHON" -u scripts/verify_action_pipeline.py --task "$T"
+  echo "RC_$T=$?"
+done

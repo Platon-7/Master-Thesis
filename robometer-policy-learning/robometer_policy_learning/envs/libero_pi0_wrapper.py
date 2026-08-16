@@ -14,7 +14,20 @@ from sentence_transformers import SentenceTransformer
 import sys, os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "LIBERO"))
-from libero.libero.envs import OffScreenRenderEnv
+
+# LIBERO is optional. This symbol is not referenced anywhere in this module, but
+# importing it at module scope made LIBERO a hard dependency of an import chain
+# that has nothing to do with it:
+#   train.py -> serial_runner -> dsrl_rollout_worker -> dsrl_env_wrappers
+#           -> libero_pi0_wrapper -> libero
+# That killed every ManiSkill SAC run at startup on a machine where the LIBERO
+# submodule is not checked out. Kept importable for LIBERO users; absent
+# otherwise. setup_libero_env() imports LIBERO itself, lazily, when actually used.
+try:
+    from libero.libero.envs import OffScreenRenderEnv  # noqa: F401
+except ImportError:  # pragma: no cover - depends on environment
+    OffScreenRenderEnv = None
+
 from robometer_policy_learning.utils.pi0_integration import preprocess_obs_for_pi0
 from robometer.utils.embedding_utils import compute_text_embeddings
 

@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --job-name=ms_bench
+#SBATCH --output=logs/ms_bench_%j.out
+#SBATCH --error=logs/ms_bench_%j.err
+#SBATCH --time=01:30:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=120G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="/scratch-shared/$USER/maniskill_assets"
+export HF_HOME="/scratch-shared/$USER/hf_cache"
+# SAPIEN downloads its GPU PhysX blob into $HOME/.sapien by default; keep it off
+# the home quota, which we already filled once tonight.
+export SAPIEN_CACHE_DIR="${SAPIEN_CACHE_DIR:-/scratch-shared/$USER/sapien_cache}"
+PY=/scratch-shared/$USER/envs/maniskill_rl/bin/python
+T="${TASK:-PullCube-v1}"
+echo "task=$T"
+# one process per config -- GPU PhysX cannot follow CPU PhysX in the same interpreter
+timeout 600 $PY -u scripts/bench_maniskill_gpu.py --task "$T" --backend physx_cpu  --envs 4          2>&1 | grep -E "RESULT|Error" 
+for N in 16 64 256; do
+  timeout 900 $PY -u scripts/bench_maniskill_gpu.py --task "$T" --backend physx_cuda --envs $N       2>&1 | grep -E "RESULT|Error"
+done
+timeout 900 $PY -u scripts/bench_maniskill_gpu.py --task "$T" --backend physx_cuda --envs 256 --no-render 2>&1 | grep -E "RESULT|Error"
+echo "BENCH_RC=$?"

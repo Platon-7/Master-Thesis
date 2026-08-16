@@ -1,0 +1,29 @@
+#!/bin/bash
+#SBATCH --job-name=gpu_equiv
+#SBATCH --output=logs/gpu_equiv_%j.out
+#SBATCH --error=logs/gpu_equiv_%j.err
+#SBATCH --time=03:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=120G
+#
+# Per-task CPU vs GPU equivalence at 256 episodes/cell. One process per
+# (task, backend): PhysX refuses to switch backends inside an interpreter.
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="/scratch-shared/$USER/maniskill_assets"
+export HF_HOME="/scratch-shared/$USER/hf_cache" SAPIEN_CACHE_DIR="/scratch-shared/$USER/sapien_cache"
+PY=/scratch-shared/$USER/envs/maniskill_rl/bin/python
+S=scripts/verify_gpu_equivalence.py
+EP=${EPISODES:-256}
+for T in ${TASKS:-PullCube-v1 PokeCube-v1 LiftPegUpright-v1 RollBall-v1}; do
+  for BK in physx_cpu physx_cuda; do
+    timeout 2400 $PY -u $S run --task "$T" --backend "$BK" --episodes "$EP" --num-envs 16 2>&1 \
+      | grep -E "EQUIV|SKIP|Error|Traceback|Assertion" || echo "FAILED $T $BK"
+  done
+done
+echo ""
+timeout 600 $PY -u $S compare

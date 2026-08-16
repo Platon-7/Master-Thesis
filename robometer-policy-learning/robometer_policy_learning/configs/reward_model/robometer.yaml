@@ -18,6 +18,16 @@ use_relative_rewards: false
 # Whether to add estimated reward to the ground truth reward
 add_estimated_reward: false
 
+# In-context learning (run1 / RoboRef-ICL): path to an .npz demonstration bank.
+# When set, the replay buffer attaches a sampled demo as
+# sample.context_trajectory, and the collator emits
+# [demo frames] <|demo_end|> [query frames] -- the training-time ICL layout.
+# Declared here (not only on RewardModelConfig) because Hydra composes the arm
+# overrides against this yaml: an undeclared key makes
+# `reward_model.icl_demo_path=...` a composition error rather than an override.
+# null -> no in-context demo, i.e. the run2/run3/baseline arms.
+icl_demo_path: null
+
 # Eval server settings (used when model_path is None)
 eval_server_url: "http://localhost"  # Evaluation server URL
 eval_server_port: 8000  # Evaluation server port

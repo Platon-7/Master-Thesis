@@ -7,6 +7,59 @@ from robometer_policy_learning.rollouts.episode_data import EpisodeData
 from robometer_policy_learning.utils.gpu_utils import move_to_device, convert_to_tensor
 
 
+def extract_info_for_env(infos: Any, i: int, num_envs: int) -> Dict[str, Any]:
+    """Reduce a vector env's ``infos`` to the info dict of sub-environment ``i``.
+
+    Gymnasium's vector API returns infos in two shapes, and only one of them was
+    handled here before:
+
+    * a *list* of per-env dicts (what the LIBERO/Meta-World wrappers produce), and
+    * a *dict of batched arrays* -- ``{"success": array([...]), "_success":
+      array([...])}`` -- which is what ``SyncVectorEnv`` itself returns, where
+      ``_key`` is a per-env presence mask for ``key``.
+
+    The dict form used to be passed through whole to every sub-environment, so a
+    consumer reading ``info["success"]`` got an array of length ``num_envs``
+    rather than that env's own flag. The first thing to touch it,
+    ``is_success()``, then raised "truth value of an array ... is ambiguous".
+    LIBERO never hit this because it takes the list branch.
+
+    Values that are not batched (scalars, or arrays whose leading dimension is
+    not ``num_envs``) are passed through unchanged, so callers that really do
+    share one info dict across envs keep their previous behaviour.
+    """
+    if infos is None:
+        return {}
+    if isinstance(infos, (list, tuple)):
+        if i < len(infos) and infos[i] is not None:
+            return infos[i]
+        return {}
+    if not isinstance(infos, dict):
+        return {}
+
+    out: Dict[str, Any] = {}
+    for key, value in infos.items():
+        if isinstance(key, str) and key.startswith("_"):
+            continue  # presence mask; consumed via its owning key below
+        mask = infos.get(f"_{key}") if isinstance(key, str) else None
+        if mask is not None:
+            try:
+                if not bool(np.asarray(mask)[i]):
+                    continue  # this env has no value for `key` this step
+            except (IndexError, TypeError, ValueError):
+                pass
+        if isinstance(value, dict):
+            out[key] = extract_info_for_env(value, i, num_envs)
+        elif isinstance(value, np.ndarray) and value.ndim >= 1 and value.shape[0] == num_envs:
+            item = value[i]
+            out[key] = item.item() if isinstance(item, np.generic) else item
+        elif isinstance(value, (list, tuple)) and len(value) == num_envs:
+            out[key] = value[i]
+        else:
+            out[key] = value
+    return out
+
+
 class RolloutWorker:
     """
     Clean, simple rollout worker for collecting environment data.
@@ -111,12 +164,7 @@ class RolloutWorker:
                 truncated_i = bool(truncateds[i])
 
                 # Get info safely
-                info_i = {}
-                if infos is not None:
-                    if isinstance(infos, list) and i < len(infos):
-                        info_i = infos[i] if infos[i] is not None else {}
-                    elif isinstance(infos, dict):
-                        info_i = infos  # Single info dict for all envs
+                info_i = extract_info_for_env(infos, i, self.num_envs)
 
                 # Extract success info (if episode is done/truncated)
                 success_info = {}

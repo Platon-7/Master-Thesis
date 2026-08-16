@@ -68,6 +68,61 @@ class LanguageInstructionWrapper(gym.ObservationWrapper):
         return getattr(self.env, name)
 
 
+class VectorInstructionWrapper(gym_vector.VectorWrapper):
+    """Expose a task's language instruction without touching observations.
+
+    ``RobometerRolloutWorker`` calls ``env.get_language_instruction()`` on every
+    step, because the reward model is conditioned on the task text. The only
+    wrapper that provided it, ``LanguageInstructionVectorWrapper``, is attached
+    solely when a ``SentenceTransformer`` is available -- it exists to embed the
+    instruction into a 384-d ``obs["language"]`` vector. So a run with a reward
+    model but no sentence model (every ManiSkill SAC arm: the policy is a plain
+    MLP over image+state and has no language input) died with
+    ``'SyncVectorEnv' object has no attribute 'get_language_instruction'``.
+
+    Attaching the embedding wrapper regardless would be the wrong fix: it needs a
+    sentence model to compute the encoding, and it widens the observation space
+    with a key the policy is not built to consume. This wrapper carries the text
+    only -- the accessor plus ``info["language_instruction"]`` -- and leaves the
+    observation space untouched.
+    """
+
+    def __init__(self, env: gym_vector.VectorEnv, instruction: str):
+        super().__init__(env)
+        self.language_instruction = instruction
+
+    def _add_instruction(self, info, n: int):
+        if isinstance(info, dict):
+            info = dict(info)
+            info["language_instruction"] = [self.language_instruction] * n
+            return info
+        if isinstance(info, (list, tuple)):
+            return [
+                dict(x, language_instruction=self.language_instruction) if isinstance(x, dict) else x for x in info
+            ]
+        return info
+
+    def _num_envs(self, obs) -> int:
+        try:
+            return self.env.num_envs
+        except Exception:
+            return len(obs) if hasattr(obs, "__len__") else 1
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        return obs, self._add_instruction(info, self._num_envs(obs))
+
+    def step(self, action):
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        return obs, reward, terminated, truncated, self._add_instruction(info, self._num_envs(obs))
+
+    def get_language_instruction(self) -> str:
+        return self.language_instruction
+
+    def __getattr__(self, name):
+        return getattr(self.env, name)
+
+
 class LanguageInstructionVectorWrapper(gym_vector.VectorWrapper):
     """
     Vectorized version of LanguageInstructionWrapper for gymnasium.vector.VectorEnv.
@@ -75,10 +130,31 @@ class LanguageInstructionVectorWrapper(gym_vector.VectorWrapper):
     Also updates the observation space to include the 'language' key (shape=384).
     """
 
-    def __init__(self, env: gym_vector.VectorEnv, task_name: str = None, sentence_model: SentenceTransformer = None):
+    def __init__(
+        self,
+        env: gym_vector.VectorEnv,
+        task_name: str = None,
+        sentence_model: SentenceTransformer = None,
+        instruction: str = None,
+    ):
+        """
+        Args:
+            task_name: Meta-World task id, looked up in ``TASK_TO_LANG``.
+            instruction: Explicit instruction string. Takes precedence over
+                ``task_name`` so non-Meta-World suites (e.g. ManiSkill) can
+                supply their own text without registering it in the
+                Meta-World mapping.
+        """
         super().__init__(env)
-        print("Using language instruction: ", TASK_TO_LANG[task_name])
-        self.language_instruction = TASK_TO_LANG[task_name]
+        if instruction is None:
+            if task_name not in TASK_TO_LANG:
+                raise KeyError(
+                    f"No language instruction for task '{task_name}'. Either add it to "
+                    f"metaworld_utils.TASK_TO_LANG or pass instruction=... explicitly."
+                )
+            instruction = TASK_TO_LANG[task_name]
+        print("Using language instruction: ", instruction)
+        self.language_instruction = instruction
         enc = compute_text_embeddings(self.language_instruction, sentence_model)
         # Convert to numpy array for consistency with image embeddings
         self.language_encoding = enc.cpu().numpy().astype(np.float32)

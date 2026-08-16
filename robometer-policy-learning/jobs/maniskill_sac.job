@@ -1,0 +1,244 @@
+#!/bin/bash
+#SBATCH --job-name=ms_sac
+#SBATCH --output=logs/ms_sac_%j.out
+#SBATCH --error=logs/ms_sac_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --partition=gpu_a100   # overridden to gpu_h100 for ARM=icl (run1) at submit time
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=120G
+#
+# ManiSkill3 + SAC from scratch (no BC warm start), for the RoboRef downstream
+# RL benchmark that replaces LIBERO.
+#
+# Submit from robometer-policy-learning/:
+#   ARM=gt    TASK=PullCube-v1 sbatch jobs/maniskill_sac.job
+#   ARM=succ  TASK=PullCube-v1 sbatch jobs/maniskill_sac.job
+#   ARM=prog  TASK=PullCube-v1 sbatch jobs/maniskill_sac.job
+#
+# NOTE: inline `VAR=val sbatch ...` does NOT propagate on Snellius. Use
+#   sbatch --export=ALL,ARM=gt,TASK=PullCube-v1 jobs/maniskill_sac.job
+#
+# ARM meanings (run `gt` FIRST -- it bounds what the setup can reach; if the
+# ground-truth dense reward cannot train the task, no reward model can):
+#   gt   : ground-truth normalized dense reward, no reward model  (ceiling)
+#   succ : reward model, sparse success head                      (IBRL-like)
+#   prog : reward model, dense per-step progress head             (the new test)
+#   icl  : run1 / RoboRef-ICL -- progress head + in-context demo   (needs h100)
+#
+# Partitions: run1 (ARM=icl) needs gpu_h100; everything else runs on the
+# cheaper gpu_a100. Override at submit time:
+#   sbatch --partition=gpu_h100 --export=ALL,ARM=icl,... jobs/maniskill_sac.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+mkdir -p logs
+
+TASK="${TASK:-PullCube-v1}"
+ARM="${ARM:-gt}"
+SEED="${SEED:-0}"
+STEPS="${STEPS:-500000}"
+# Point this at the RoboRef checkpoint for the succ/prog arms.
+REWARD_CKPT="${REWARD_CKPT:-robometer/Robometer-4B}"
+# Which model the arm is scoring with (run2 | run3 | base | run1). ARM alone
+# names the reward *signal*, not the checkpoint, so without this every
+# prog arm logs to the same W&B run name regardless of which model produced it.
+MODEL_TAG="${MODEL_TAG:-$(basename "$REWARD_CKPT")}"
+
+# --- environment ------------------------------------------------------------
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/maniskill_rl}"
+if [[ ! -x "$ENV_PREFIX/bin/python" ]]; then
+    echo "ERROR: no python at $ENV_PREFIX/bin/python" >&2
+    echo "Create it first -- see jobs/README_maniskill.md" >&2
+    exit 1
+fi
+export PATH="$ENV_PREFIX/bin:$PATH"
+PYTHON="$ENV_PREFIX/bin/python"
+
+# Offscreen rendering. SAPIEN (ManiSkill's renderer) needs a working GPU
+# rasterizer; EGL is the headless path on a compute node.
+export MUJOCO_GL=egl
+export PYOPENGL_PLATFORM=egl
+export SAPIEN_HEADLESS=1
+# ManiSkill downloads task assets (e.g. YCB meshes) here; keep off the home quota.
+export MS_ASSET_DIR="${MS_ASSET_DIR:-/scratch-shared/$USER/maniskill_assets}"
+# Keep HF/torch caches off the home quota.
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
+export TORCH_HOME="${TORCH_HOME:-/scratch-shared/$USER/torch_cache}"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+# Every RoboRef checkpoint bakes `use_unsloth: true` into its config.yaml, and
+# load_model_from_hf replays that config -- so without this the reward-model arms
+# die at startup with "use_unsloth=True but the 'unsloth' package is not
+# installed". We only ever run the reward model in inference, which the plain
+# from_pretrained path serves identically (base_model_id is stock
+# Qwen/Qwen3-VL-4B-Instruct, no quantization, no PEFT).
+export ROBOMETER_DISABLE_UNSLOTH=1
+export WANDB_PROJECT="${WANDB_PROJECT:-roboref_maniskill}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+if [[ -z "${WANDB_MODE:-}" ]]; then
+    grep -q 'api.wandb.ai' "$HOME/.netrc" 2>/dev/null && export WANDB_MODE=online || export WANDB_MODE=offline
+fi
+
+# --- per-arm overrides ------------------------------------------------------
+#
+# Reward semantics, read off robometer_replay_buffer.py rather than the flag names,
+# which are misleading:
+#
+#   add_estimated_reward=False -> kwargs["reward"] = vlm_reward   (REPLACES env reward)
+#   add_estimated_reward=True  -> kwargs["reward"] += vlm_reward  (ADDS to env reward)
+#
+# So False is the *pure* reward-model regime. True mixes the environment's
+# ground-truth reward into the signal, which would leak a real success bonus into
+# an arm that is supposed to be driven by the model alone. Every reward-model arm
+# below therefore uses False.
+#
+# The reward itself is the PROGRESS head (extract_rewards_from_output); the SUCCESS
+# head (extract_success_probs_from_output) is used only by use_success_detection,
+# which sets done=True once enough of the last `success_detection_duration` steps
+# exceed `success_detection_threshold`. That is the TERMINATE knob below -- the same
+# distinction as the noterm/vlmterm arms of the LIBERO termination study.
+case "$ARM" in
+  gt)
+    # Ground-truth dense reward, no reward model. The reference/ceiling line.
+    # `null` is already the default reward_model group; passing reward_model=null
+    # on the CLI makes Hydra parse the bare word as None and raise
+    # "Config group override must be a string or a list. Got NoneType".
+    ARM_ARGS=(
+      "env.use_gt_rewards=true"
+      "env.env_kwargs.reward_mode=normalized_dense"
+    )
+    ;;
+  dense)
+    # Dense per-step reward from the progress head, replacing the env reward.
+    ARM_ARGS=(
+      "reward_model=robometer"
+      "reward_model.model_path=$REWARD_CKPT"
+      "reward_model.add_estimated_reward=false"
+      "env.use_gt_rewards=false"
+      "env.env_kwargs.reward_mode=sparse"
+    )
+    ;;
+  icl)
+    # run1 / RoboRef-ICL: dense progress reward PLUS an in-context demonstration.
+    # The bank is attached as sample.context_trajectory; the collator inserts
+    # <|demo_end|> between demo and query, matching the training-time layout.
+    ICL_BANK="${ICL_BANK:-/scratch-shared/$USER/maniskill_assets/icl_demos/${TASK}.npz}"
+    if [[ ! -f "$ICL_BANK" ]]; then
+        echo "ERROR: ICL demo bank not found: $ICL_BANK" >&2
+        echo "  Build it: python scripts/generate_maniskill_icl_demos.py --task $TASK" >&2
+        exit 4
+    fi
+    ARM_ARGS=(
+      "reward_model=robometer"
+      "reward_model.model_path=$REWARD_CKPT"
+      "reward_model.add_estimated_reward=false"
+      "reward_model.icl_demo_path=$ICL_BANK"
+      "env.use_gt_rewards=false"
+      "env.env_kwargs.reward_mode=sparse"
+    )
+    ;;
+  *)
+    echo "ERROR: ARM must be gt|dense|icl, got '$ARM'" >&2
+    exit 2
+    ;;
+esac
+
+# TERMINATE=1 -> the success head ends the episode as soon as it fires
+# (the "vlmterm" regime). TERMINATE=0 -> episodes run to their natural end
+# ("noterm"), which collects more dense reward per episode. Orthogonal to ARM.
+if [[ "$ARM" != "gt" ]]; then
+    if [[ "${TERMINATE:-0}" == "1" ]]; then
+        ARM_ARGS+=("reward_model.use_success_detection=true")
+    else
+        ARM_ARGS+=("reward_model.use_success_detection=false")
+    fi
+fi
+
+# Free-form extra Hydra overrides, space-separated, e.g.
+#   --export=ALL,...,EXTRA_ARGS='env.use_full_state=true model.dinov2_model=null'
+# Word-split deliberately: each token must arrive as its own argv entry.
+#
+# WARNING: sbatch --export splits its argument on COMMAS, so an override whose
+# value contains one (a Hydra list, `key=[a,b]`) arrives truncated -- Hydra then
+# fails with "no viable alternative at input '[a'". Keep EXTRA_ARGS comma-free
+# and express list overrides as a named knob below.
+read -r -a EXTRA_ARR <<< "${EXTRA_ARGS:-}"
+
+# STATE_ONLY=1: policy sees the state vector alone -- no DINO embedding, and the
+# raw image explicitly dropped from the policy's observation space. That last
+# part is not optional: training_utils only adds the image key to
+# remove_obs_keys when a DINO model is configured, so switching DINO off without
+# it feeds a flattened 224x224x3 uint8 image straight into the MLP.
+# The frame still reaches the buffer, so reward-model arms are unaffected.
+if [[ "${STATE_ONLY:-0}" == "1" ]]; then
+    EXTRA_ARR+=("model.dinov2_model=null" "env.extra_keys_to_drop=[language,image]")
+fi
+
+# Run artifacts (hydra output dir, checkpoints, wandb files) must NOT land in
+# $HOME: this repo lives on home4, whose 200 GiB quota filled during a 10-job
+# sweep and killed five runs mid-training -- once as an explicit
+# "[Errno 122] Disk quota exceeded" and, more confusingly, as torch.save
+# writing truncated files ("unexpected pos X vs Y"). Periodic checkpointing
+# (training.save_interval) makes this much easier to hit.
+RUN_DIR="${RUN_DIR:-/scratch-shared/$USER/roboref_runs/ms_${TASK}_${MODEL_TAG}_${ARM}_s${SEED}_$(date +%Y%m%d_%H%M%S)}"
+mkdir -p "$RUN_DIR"
+
+echo "==================== launch ===================="
+echo "EXTRA_ARGS  : ${EXTRA_ARGS:-<none>}"
+echo "RUN_DIR     : $RUN_DIR"
+echo "TASK        : $TASK"
+echo "ARM         : $ARM"
+echo "MODEL_TAG   : $MODEL_TAG"
+echo "REWARD_CKPT : $REWARD_CKPT"
+echo "SEED        : $SEED"
+echo "STEPS       : $STEPS"
+echo "ENV_PREFIX  : $ENV_PREFIX"
+echo "WANDB_MODE  : $WANDB_MODE"
+echo "ICL_BANK    : ${ICL_BANK:-<none>}"
+echo "==============================================="
+
+# Preflight. The adapter smoke test alone is NOT enough: it deliberately avoids
+# the RL stack, so it passed cleanly on six jobs that then died importing
+# train.py. Import the real training chain first -- that is what actually has
+# to work -- then verify the environment.
+echo "[preflight] importing the training stack"
+"$PYTHON" -c "
+from robometer_policy_learning.runners.serial_runner import SerialRunner
+from robometer_policy_learning.buffers.robometer_replay_buffer import RobometerReplayBuffer
+from robometer_policy_learning.algorithms.sac import SAC
+from robometer_policy_learning.utils.training_utils import setup_training, create_buffer
+print('training stack imports OK')
+" || {
+    echo "ERROR: training stack failed to import; not starting training." >&2
+    exit 3
+}
+
+echo "[preflight] verifying environment"
+"$PYTHON" scripts/verify_maniskill_env.py --task "$TASK" || {
+    echo "ERROR: environment verification failed; not starting training." >&2
+    exit 3
+}
+
+"$PYTHON" scripts/train.py \
+  --config-path=../robometer_policy_learning/configs \
+  --config-name=maniskill_online_rl \
+  "env.env_name=maniskill/$TASK" \
+  algorithm@online_algorithm=sac \
+  alg.online_alg_name=sac \
+  training.num_rollouts="$STEPS" \
+  training.seed="$SEED" \
+  logging.wandb_name="ms_${TASK}_${MODEL_TAG}_${ARM}_s${SEED}" \
+  logging.wandb_entity="$WANDB_ENTITY" \
+  "hydra.run.dir=$RUN_DIR" \
+  "logging.wandb_log_dir_base=$RUN_DIR/wandb" \
+  "${ARM_ARGS[@]}" \
+  "${EXTRA_ARR[@]}"
+RC=$?
+
+# Propagate the training exit code. Without this the trailing echo succeeds and
+# SLURM reports COMPLETED even when train.py crashed on startup -- which is
+# exactly how six dead jobs looked healthy in sacct.
+echo "EXIT=$RC"
+exit $RC

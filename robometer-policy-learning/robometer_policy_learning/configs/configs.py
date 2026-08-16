@@ -322,6 +322,15 @@ class RewardModelConfig:
         default_factory=lambda: ["image"],
         metadata={"help": "Observation keys to use for reward relabeling (e.g., ['image'] for images)"},
     )
+    icl_demo_path: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "Path to an in-context demonstration bank (.npz with 'frames' of shape "
+            "(N, T, H, W, 3)). When set, each query is scored with a demonstration attached "
+            "as sample.context_trajectory, which is what RoboRef-ICL (run1) expects. "
+            "Build one with scripts/generate_maniskill_icl_demos.py. Leave null for non-ICL models."
+        },
+    )
 
     use_success_detection: bool = field(
         default=False, metadata={"help": "Whether to use success detection"}

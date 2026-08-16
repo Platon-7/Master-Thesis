@@ -5,7 +5,6 @@
 #SBATCH --time=08:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64G
-#SBATCH --account=gusei17535
 #SBATCH --partition=staging
 
 # Materialise one of build_splits.py's splits into a Robometer HF dataset cache.
@@ -43,13 +42,13 @@ fi
 source /etc/profile.d/lmod.sh 2>/dev/null || true
 module load 2025 Anaconda3/2025.06-1
 module load 2025 FFmpeg/7.1.1-GCCcore-14.2.0
-PYTHON="/home/pkarageorgis1/.conda/envs/robometer_gpu/bin/python"
+PYTHON="${PYTHON:-/home/$USER/.conda/envs/robometer_gpu/bin/python}"
 if [[ ! -x "$PYTHON" ]]; then
     echo "ERROR: "$PYTHON" interpreter not executable at $PYTHON — likely an NFS-mount issue on this node" >&2
     exit 1
 fi
 
-export ROBOMETER_DATASET_PATH="/projects/prjs1958/robometer_frame_dataset"
+export ROBOMETER_DATASET_PATH="${ROBOMETER_DATASET_PATH:-/projects/prjs1958/robometer_frame_dataset}"
 export ROBOMETER_PROCESSED_DATASETS_PATH="$HF_OUT_DIR"
 export HF_DIR="$HF_OUT_DIR"
 export SPLIT  # exported so the preprocess YAML can interpolate ${oc.env:SPLIT}
@@ -60,8 +59,12 @@ cd "$ROBOMETER_DIR"
 echo "[preprocess_split] SPLIT=$SPLIT  pairs_index=$PAIRS_INDEX  out=$HF_OUT_DIR/${SPLIT}_raw"
 
 # Step 1: convert the raw shards into a HuggingFace dataset.
+# dataset.dataset_path must be overridden explicitly -- dataset_frames.yaml hardcodes a
+# stale AWS path (/shared/home/PKA4388/robometer_frame_dataset) and pyrallis doesn't expand
+# ${oc.env:...} for this field, so ROBOMETER_DATASET_PATH alone would NOT reach it.
 "$PYTHON" -m dataset_upload.generate_hf_dataset \
   --config_path "$HERE/configs/dataset_frames.yaml" \
+  --dataset.dataset_path "$ROBOMETER_DATASET_PATH" \
   --dataset.dataset_name "robometer_frames_${SPLIT}" \
   --dataset.pairs_index_path "$PAIRS_INDEX" \
   --output.output_dir "$HF_OUT_DIR/${SPLIT}_raw"

@@ -5,7 +5,18 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from transformers import AutoModel, AutoImageProcessor
 from typing import Optional, Tuple, List
-import metaworld
+
+# Meta-World is imported for its side effect of registering the "Meta-World/..."
+# gym env ids. It is deliberately optional: a ManiSkill-only or LIBERO-only
+# environment should not have to install MuJoCo/Meta-World just to import this
+# module. The Meta-World branch below raises a clear error if it is missing.
+try:
+    import metaworld  # noqa: F401  (registers Meta-World env ids)
+
+    _METAWORLD_AVAILABLE = True
+except ImportError:  # pragma: no cover - depends on environment
+    _METAWORLD_AVAILABLE = False
+
 from robometer_policy_learning.envs.action_wrappers import ActionChunkingWrapper, VectorActionChunkingWrapper
 from robometer_policy_learning.envs.obs_wrappers import FlatToDictObsWrapper, ImageDictObsWrapper
 from robometer_policy_learning.envs.language_wrappers import LanguageInstructionWrapper, LanguageInstructionVectorWrapper
@@ -79,6 +90,7 @@ def _make_env(
     terminate_on_success: bool = True,
     dino_image_keys: Optional[List[str]] = None,
     seed: Optional[int] = None,
+    env_kwargs: Optional[dict] = None,
 ) -> gym.Env:
     """
     Internal helper to create a single environment (vectorized or not) with appropriate wrappers.
@@ -98,6 +110,9 @@ def _make_env(
         terminate_on_success: Whether to terminate the environment when the goal is reached (only for Meta-World)
         dino_image_keys: List of dino image keys to use for DINO embedding wrapper
         seed: Seed for the environment
+        env_kwargs: Suite-specific extra kwargs. For ManiSkill these are forwarded
+            to ``make_maniskill_env`` (e.g. ``reward_mode``, ``control_mode``,
+            ``obs_mode``, ``sim_backend``, ``image_size``, ``instruction``).
     Returns:
         The created environment
     """
@@ -108,6 +123,11 @@ def _make_env(
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
     if "Meta-World" in env_name:
+        if not _METAWORLD_AVAILABLE:
+            raise ImportError(
+                "Meta-World is required for env_name='%s' but is not installed. "
+                "Install it, or select a different suite (e.g. 'maniskill/PullCube-v1')." % env_name
+            )
         task_suite, task_name = env_name.rsplit("/", 1)
 
         if vectorized:
@@ -171,9 +191,64 @@ def _make_env(
                                 dinov2_processor=dinov2_processor,
                                 sentence_model=sentence_model,
                                 device=device,
-                                max_episode_steps=max_episode_steps, 
-                                seed=seed, 
+                                max_episode_steps=max_episode_steps,
+                                seed=seed,
                                 )
+    elif env_name.lower().startswith("maniskill"):
+        # "maniskill/PullCube-v1" -> task id "PullCube-v1".
+        # Imported lazily so ManiSkill stays an optional dependency.
+        from robometer_policy_learning.envs.maniskill_wrapper import make_maniskill_env
+
+        _, task_id = env_name.split("/", 1)
+        ms_kwargs = dict(env_kwargs or {})
+
+        # GPU-parallel physics: ManiSkill simulates all envs as batched tensors, so
+        # there is no SyncVectorEnv and no per-env process. Selected by asking for
+        # the physx_cuda backend. Worth it for two reasons: sim stops being the
+        # bottleneck for GT runs, and N parallel envs give the reward model an
+        # N-sample batch per step instead of N sequential single-sample forwards.
+        if str(ms_kwargs.get("sim_backend", "")).lower() in ("physx_cuda", "gpu", "cuda"):
+            from robometer_policy_learning.envs.maniskill_gpu_wrapper import make_maniskill_gpu_env
+
+            ms_kwargs.pop("sim_backend", None)
+            env, _instruction = make_maniskill_gpu_env(
+                env_id=task_id,
+                num_envs=num_envs,
+                use_full_state=use_full_state,
+                terminate_on_success=terminate_on_success,
+                max_episode_steps=max_episode_steps,
+                seed=seed,
+                **ms_kwargs,
+            )
+            # Same wrapper stack the CPU path gets. DINO is NOT optional here: the
+            # policy observation must stay comparable to the LIBERO/IBRL setup
+            # (proprioception + DINO features), so the GPU path has to be able to
+            # produce it. The wrapper consumes obs["image"] as a batched (N,H,W,3)
+            # array, which is exactly what ManiSkillGPUVectorWrapper emits.
+            if dinov2_model is not None:
+                single_space = getattr(env, "single_observation_space", env.observation_space)
+                if isinstance(single_space, gym.spaces.Dict) and "image" in single_space.spaces:
+                    env = VectorDinoEmbeddingWrapper(
+                        env, dinov2_model, dinov2_processor, device=device, image_keys=dino_image_keys
+                    )
+            if chunk_size is not None:
+                env = VectorActionChunkingWrapper(env, chunk_size=chunk_size, n_action_steps=1)
+            return env
+        env, _instruction = make_maniskill_env(
+            env_id=task_id,
+            num_envs=num_envs,
+            use_full_state=use_full_state,
+            terminate_on_success=terminate_on_success,
+            max_episode_steps=max_episode_steps,
+            seed=seed,
+            sentence_model=sentence_model,
+            chunk_size=chunk_size,
+            dinov2_model=dinov2_model,
+            dinov2_processor=dinov2_processor,
+            dino_image_keys=dino_image_keys,
+            device=device,
+            **ms_kwargs,
+        )
     else:
         # Regular gym environment
         if vectorized:
@@ -235,6 +310,7 @@ def make_env(
     terminate_on_success: bool = True,
     dino_image_keys: Optional[List[str]] = None,
     seed: Optional[int] = None,
+    env_kwargs: Optional[dict] = None,
 ) -> Tuple[gym.Env, gym.Env]:
     """
     Create training and evaluation environments with appropriate wrappers.
@@ -269,6 +345,7 @@ def make_env(
         terminate_on_success=terminate_on_success,
         dino_image_keys=dino_image_keys,
         seed=seed,
+        env_kwargs=env_kwargs,
     )
 
     # Create evaluation environment (non-vectorized)
@@ -287,6 +364,7 @@ def make_env(
         terminate_on_success=terminate_on_success,
         dino_image_keys=dino_image_keys,
         seed=seed,
+        env_kwargs=env_kwargs,
     )
 
     return train_env, eval_env

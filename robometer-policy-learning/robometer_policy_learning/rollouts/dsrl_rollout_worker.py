@@ -16,7 +16,7 @@ from loguru import logger
 from robometer_policy_learning.utils.pi0_integration import Pi0Wrapper
 from robometer_policy_learning.utils.dsrl_utils import ActionQueue, format_obs_for_storage, resize_images
 
-from robometer_policy_learning.rollouts.rollout_worker import RolloutWorker
+from robometer_policy_learning.rollouts.rollout_worker import RolloutWorker, extract_info_for_env
 from robometer_policy_learning.modules.base.modeling_actor import BaseActor
 from robometer_policy_learning.envs.dsrl_env_wrappers import DummyDSRLEnv
 
@@ -88,12 +88,7 @@ class DSRLRolloutWorker(RolloutWorker):
                 truncated_i = bool(truncateds[i])
 
                 # Get info safely
-                info_i = {}
-                if infos is not None:
-                    if isinstance(infos, list) and i < len(infos):
-                        info_i = infos[i] if infos[i] is not None else {}
-                    elif isinstance(infos, dict):
-                        info_i = infos  # Single info dict for all envs
+                info_i = extract_info_for_env(infos, i, self.num_envs)
 
                 # Check for disconnection - don't add disconnection transitions to buffer
                 is_disconnected = info_i.get("disconnected", False)

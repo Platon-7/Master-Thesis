@@ -27,7 +27,7 @@ from transformers import AutoModel, AutoImageProcessor
 from sentence_transformers import SentenceTransformer
 from robometer.utils.save import load_model_from_hf
 from robometer_policy_learning.utils.env_utils import make_env
-from robometer_policy_learning.utils.transitions_transforms import SuccessBonusTransform
+from robometer_policy_learning.utils.transitions_transforms import SuccessBonusTransform, RewardShiftTransform
 from PIL import Image
 from rich import print as rprint
 from robometer.utils.logger import setup_loguru_logging, get_logger
@@ -302,6 +302,7 @@ class TrainingComponents:
 
     # Success bonus
     success_bonus_fn: Any = None
+    reward_shift_fn: Any = None
 
 
 def create_buffer(
@@ -333,6 +334,7 @@ def create_buffer(
     success_detection_duration: int = 2,
     success_detection_threshold: float = 0.65,
     add_estimated_reward: bool = False,
+    icl_demo_path: Optional[str] = None,
 ) -> Any:
     """
     Create a replay buffer for training.
@@ -457,6 +459,7 @@ def create_buffer(
                     success_detection_duration=success_detection_duration,
                     success_detection_threshold=success_detection_threshold,
                     add_estimated_reward=add_estimated_reward,
+                    icl_demo_path=icl_demo_path,
                 )
             else:
                 return ReplayBuffer(
@@ -577,6 +580,10 @@ def setup_training(
     else:
         env_name = cfg.env.env_name
 
+    # Suite-specific extras (currently ManiSkill: reward_mode, control_mode,
+    # obs_mode, sim_backend, image_size, instruction). Absent for other suites.
+    env_kwargs = OmegaConf.to_container(cfg.env.env_kwargs, resolve=True) if "env_kwargs" in cfg.env else None
+
     # Setup environments
     logger.info("Setting up environments")
     env, eval_env = make_env(
@@ -591,8 +598,13 @@ def setup_training(
         device=device,
         sentence_model=sentence_model,
         render_mode="rgb_array",
-        terminate_on_success=True,
+        # Config-driven. Must be False for dense-reward ManiSkill runs: ending the
+        # episode on success truncates the reward stream, so the policy earns more by
+        # loitering near the goal than by finishing (measured: return 4.71 -> 21.43
+        # while eval success fell 56% -> 10%).
+        terminate_on_success=OmegaConf.select(cfg, "env.terminate_on_success", default=True),
         seed=cfg.training.seed,
+        env_kwargs=env_kwargs,
     )
 
     # Get action and observation spaces
@@ -633,6 +645,14 @@ def setup_training(
     else:
         success_bonus_fn = None
 
+    # Constant per-step reward shift, applied to the FINAL reward (after any VLM
+    # relabeling). Negative values turn the task into a shortest-path problem so that
+    # ending the episode on success is not self-punishing. See RewardShiftTransform.
+    reward_shift_amount = float(OmegaConf.select(cfg, "env.reward_shift", default=0.0))
+    reward_shift_fn = RewardShiftTransform(reward_shift_amount) if reward_shift_amount != 0.0 else None
+    if reward_shift_fn is not None:
+        logger.info(f"Reward shift active: every step gets {reward_shift_amount:+g}")
+
     save_dir = f"{output_dir}/checkpoints"
     os.makedirs(save_dir, exist_ok=True)
 
@@ -662,4 +682,5 @@ def setup_training(
         wandb_logger=wandb_logger,
         save_dir=save_dir,
         success_bonus_fn=success_bonus_fn,
+        reward_shift_fn=reward_shift_fn,
     )

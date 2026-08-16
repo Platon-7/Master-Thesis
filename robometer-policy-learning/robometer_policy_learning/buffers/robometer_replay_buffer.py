@@ -44,6 +44,8 @@ class RobometerReplayBuffer(ReplayBuffer):
         success_detection_duration: int = 2,
         success_detection_threshold: float = 0.65,
         add_estimated_reward: bool = False,
+        icl_demo_path: Optional[str] = None,
+        icl_demo_seed: int = 0,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -92,6 +94,91 @@ class RobometerReplayBuffer(ReplayBuffer):
             key: deque(maxlen=self.success_detection_duration) for key in self.reward_relabeling_keys
         }
 
+        # --- in-context demonstrations (RoboRef-ICL / run1) -------------------
+        # A bank of successful same-task demonstrations, produced by
+        # scripts/generate_maniskill_icl_demos.py. When loaded, each query is
+        # scored with a demonstration attached as sample.context_trajectory,
+        # and the collator inserts <|demo_end|> between demo and query -- the
+        # same input layout the model saw at training time. Mirrors the proven
+        # path in vlm_ibrl_v3/env/robometer_utils.py.
+        self.icl_demos = None
+        self._icl_rng = np.random.default_rng(icl_demo_seed)
+        if icl_demo_path:
+            self._load_icl_demos(icl_demo_path)
+
+    def _load_icl_demos(self, path: str) -> None:
+        """Load a demo bank of shape (N, T, H, W, 3) uint8."""
+        if not os.path.exists(path):
+            raise FileNotFoundError(
+                f"icl_demo_path does not exist: {path}. Generate it with "
+                f"scripts/generate_maniskill_icl_demos.py --task <TASK>."
+            )
+        # Fail loudly if the installed robometer predates ICL support. The
+        # pinned submodule (upstream) has no context_trajectory field, so
+        # assigning one would raise an opaque pydantic error deep in a rollout
+        # instead of here, at startup, with a fix attached.
+        try:
+            from robometer.data.dataset_types import ProgressSample
+
+            if "context_trajectory" not in getattr(ProgressSample, "model_fields", {}):
+                raise ImportError
+        except ImportError as exc:
+            raise RuntimeError(
+                "The installed `robometer` package has no ProgressSample.context_trajectory, "
+                "so in-context demonstrations cannot be attached. This is the upstream "
+                "submodule, which predates ICL. Install the RoboRef fork instead, e.g.\n"
+                "    pip install -e /path/to/Master-Thesis/Robometer\n"
+                "(see jobs/README_maniskill.md)."
+            ) from exc
+
+        data = np.load(path, allow_pickle=True)
+        demos = np.asarray(data["frames"])
+        if demos.ndim != 5:
+            raise ValueError(f"ICL demo bank must be (N, T, H, W, 3); got {demos.shape} from {path}")
+        self.icl_demos = demos
+        instruction = str(data["instruction"]) if "instruction" in data else "<none>"
+        logger.info(
+            f"Loaded {demos.shape[0]} in-context demonstrations "
+            f"({demos.shape[1]} frames each) from {path} | instruction: {instruction!r}"
+        )
+        if demos.shape[1] != self.max_frames:
+            # Not fatal: raw_dict_to_sample resamples to max_frames. Still worth
+            # surfacing, since a mismatch usually means the bank was built for a
+            # different model.
+            logger.warning(
+                f"ICL demo bank has {demos.shape[1]} frames but the reward model expects "
+                f"{self.max_frames}; frames will be resampled."
+            )
+
+    def _sample_icl_demo(self) -> Optional[np.ndarray]:
+        """Draw one demonstration clip, or None if no bank is loaded."""
+        if self.icl_demos is None or len(self.icl_demos) == 0:
+            return None
+        return self.icl_demos[self._icl_rng.integers(len(self.icl_demos))]
+
+    def _attach_icl_context(self, sample, task: str, episode_id: int = 0):
+        """Attach a demonstration to ``sample`` as its context trajectory.
+
+        No-op when no demo bank is loaded, so the non-ICL arms are unaffected.
+        """
+        demo_frames = self._sample_icl_demo()
+        if demo_frames is None:
+            return sample
+        icl_raw = dict(
+            frames=np.asarray(demo_frames, dtype=np.uint8),
+            task=task,
+            # Offset the id so the demo cannot collide with the query's.
+            id=int(episode_id) + 1_000_000,
+            metadata=dict(subsequence_length=int(demo_frames.shape[0])),
+            video_embeddings=None,
+            text_embedding=None,
+        )
+        icl_sample = raw_dict_to_sample(
+            raw_data=icl_raw, max_frames=self.max_frames, sample_type="progress"
+        )
+        sample.context_trajectory = icl_sample.trajectory
+        return sample
+
     def _compute_reward_single(self, raw_data: Dict[str, Any]) -> Tuple[float, float]:
         """
         Compute reward for a single sample using either local reward model or eval_server.
@@ -108,6 +195,9 @@ class RobometerReplayBuffer(ReplayBuffer):
                 raw_data=raw_data,
                 max_frames=self.max_frames,
                 sample_type="progress",
+            )
+            sample = self._attach_icl_context(
+                sample, task=raw_data.get("task", ""), episode_id=raw_data.get("id", 0)
             )
 
             # Treat any C51 / discrete progress head as discrete-mode so its bin logits
@@ -159,10 +249,14 @@ class RobometerReplayBuffer(ReplayBuffer):
         if self.reward_model is not None:
             # Use local reward model
             samples = [
-                raw_dict_to_sample(
-                    raw_data=raw_data_item,
-                    max_frames=self.max_frames,
-                    sample_type="progress",
+                self._attach_icl_context(
+                    raw_dict_to_sample(
+                        raw_data=raw_data_item,
+                        max_frames=self.max_frames,
+                        sample_type="progress",
+                    ),
+                    task=raw_data_item.get("task", ""),
+                    episode_id=raw_data_item.get("id", 0),
                 )
                 for raw_data_item in batch_raw
             ]

@@ -31,6 +31,15 @@ from typing import Dict, List, Set
 PAIRS_DEFAULT = Path("/projects/prjs1958/robometer_frame_dataset/pairs_unified.jsonl")
 OUT_DEFAULT = Path("/scratch-shared/pkarageorgis1/robometer_frames_splits_full")
 
+# LIBERO-90 hold-out (matches build_splits.py's _LIBERO90_EXCLUDED_ARCHIVES exactly):
+# drop these two archives entirely (successes + failures) so LIBERO-90 never enters
+# train, eval, or partner lookup. The other LIBERO suites (10/object/spatial/goal)
+# are intentionally left untouched.
+_LIBERO90_EXCLUDED_ARCHIVES = {
+    "abraranwar_libero_rfm_libero256_90",             # libero_90 successes
+    "ykorkmaz_libero_failure_rfm_libero_90_failure",  # libero_90 failures
+}
+
 # Per-source eval target counts (number of QUERY episodes; partners are added on top).
 EVAL_TARGETS = {
     "droid":     500,
@@ -83,13 +92,23 @@ def main() -> int:
     print(f"[load] {args.pairs_jsonl}")
     rows_by_id: Dict[str, dict] = {}
     by_source: Dict[str, List[str]] = defaultdict(list)
+    n_libero90_dropped = 0
     for r in stream_jsonl(args.pairs_jsonl):
         eid = r.get("episode_id")
         if not eid:
             continue
+        # LIBERO-90 hold-out: skip rows outright so the suite never enters rows_by_id,
+        # by_source, train, eval, or partner lookup. Drop if either side of the pair
+        # is libero_90 (archive catches queries, partner_archive catches rows whose
+        # ICL partner is a libero_90 episode).
+        if (r.get("archive") in _LIBERO90_EXCLUDED_ARCHIVES
+                or r.get("partner_archive") in _LIBERO90_EXCLUDED_ARCHIVES):
+            n_libero90_dropped += 1
+            continue
         rows_by_id[eid] = r
         by_source[r.get("source") or "<None>"].append(eid)
     print(f"  total rows: {len(rows_by_id):,}")
+    print(f"  LIBERO-90 hold-out: dropped {n_libero90_dropped:,} rows from {sorted(_LIBERO90_EXCLUDED_ARCHIVES)}")
     print(f"  rows per source:")
     for src, eids in sorted(by_source.items(), key=lambda kv: -len(kv[1])):
         print(f"    {src:30s} {len(eids):>10,}")

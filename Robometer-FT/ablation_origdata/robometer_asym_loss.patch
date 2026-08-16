@@ -18,7 +18,7 @@ index d90c03b..a3b62ff 100755
  
  @dataclass
 diff --git a/robometer/trainers/rbm_heads_trainer.py b/robometer/trainers/rbm_heads_trainer.py
-index d51af82..ad6c8c7 100755
+index d51af82..c51a87c 100755
 --- a/robometer/trainers/rbm_heads_trainer.py
 +++ b/robometer/trainers/rbm_heads_trainer.py
 @@ -928,7 +928,7 @@ class RBMHeadsTrainer(Trainer):
@@ -44,8 +44,11 @@ index d51af82..ad6c8c7 100755
          success_logits = torch.clamp(success_logits, min=-50.0, max=50.0)
  
 -        # Compute class counts for balancing
--        num_positives = (success_labels * combined_mask).sum()
--        num_negatives = ((1 - success_labels) * combined_mask).sum()
++        combined_mask_index = combined_mask.bool()
++        # Needed unconditionally below (accuracy stats + returned metrics),
++        # not just by the bce_balanced branch that used to compute them.
+         num_positives = (success_labels * combined_mask).sum()
+         num_negatives = ((1 - success_labels) * combined_mask).sum()
 -
 -        # Compute per-sample weights to balance classes
 -        # Weight the minority class so both classes contribute equally to the loss
@@ -68,20 +71,6 @@ index d51af82..ad6c8c7 100755
 -                    combined_mask,
 -                    success_loss_weight * combined_mask,
 -                )
--        else:
--            success_loss_weight = torch.tensor(1.0, device=success_logits.device, dtype=success_logits.dtype)
--            sample_weights = combined_mask
--
--        # Compute BCE loss with per-sample weights (includes combined_mask)
--        loss = F.binary_cross_entropy_with_logits(
--            success_logits,
--            success_labels,
--            weight=sample_weights,
--            reduction="none",
--        )
-         combined_mask_index = combined_mask.bool()
--        loss = (loss * combined_mask) / (sample_weights + 1e-8)
--        success_loss = loss[combined_mask_index].mean()
 +        if getattr(self.config.loss, "success_loss_type", "bce_balanced").lower() == "bce_asymmetric":
 +            # Asymmetric BCE (ported from RoboRef): raw per-element BCE, then
 +            #   L_succ = mean(bce[neg]) + lambda * mean(bce[pos])
@@ -106,11 +95,20 @@ index d51af82..ad6c8c7 100755
 +            success_loss_weight = torch.tensor(
 +                lambda_val, device=success_logits.device, dtype=success_logits.dtype
 +            )
-+        else:
-+            # Compute class counts for balancing
-+            num_positives = (success_labels * combined_mask).sum()
-+            num_negatives = ((1 - success_labels) * combined_mask).sum()
-+
+         else:
+-            success_loss_weight = torch.tensor(1.0, device=success_logits.device, dtype=success_logits.dtype)
+-            sample_weights = combined_mask
+-
+-        # Compute BCE loss with per-sample weights (includes combined_mask)
+-        loss = F.binary_cross_entropy_with_logits(
+-            success_logits,
+-            success_labels,
+-            weight=sample_weights,
+-            reduction="none",
+-        )
+-        combined_mask_index = combined_mask.bool()
+-        loss = (loss * combined_mask) / (sample_weights + 1e-8)
+-        success_loss = loss[combined_mask_index].mean()
 +            # Compute per-sample weights to balance classes
 +            # Weight the minority class so both classes contribute equally to the loss
 +            if num_positives > 0 and num_negatives > 0:

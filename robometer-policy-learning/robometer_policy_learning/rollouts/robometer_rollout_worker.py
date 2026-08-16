@@ -6,7 +6,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from robometer_policy_learning.modules.base.modeling_actor import BaseActor
 from robometer_policy_learning.rollouts.episode_data import EpisodeData
 from robometer_policy_learning.utils.gpu_utils import move_to_device, convert_to_tensor
-from robometer_policy_learning.rollouts.rollout_worker import RolloutWorker
+from robometer_policy_learning.rollouts.rollout_worker import RolloutWorker, extract_info_for_env
 from robometer_policy_learning.rollouts.dsrl_rollout_worker import DSRLRolloutWorker
 
 from robometer_policy_learning.utils.pi0_integration import Pi0Wrapper
@@ -105,12 +105,7 @@ class RobometerRolloutWorker(RolloutWorker):
                 truncated_i = bool(truncateds[i])
 
                 # Get info safely
-                info_i = {}
-                if infos is not None:
-                    if isinstance(infos, list) and i < len(infos):
-                        info_i = infos[i] if infos[i] is not None else {}
-                    elif isinstance(infos, dict):
-                        info_i = infos  # Single info dict for all envs
+                info_i = extract_info_for_env(infos, i, self.num_envs)
 
                 # Extract success info (if episode is done/truncated)
                 success_info = {}
@@ -229,12 +224,7 @@ class DSRLwithRobometerRolloutWorker(DSRLRolloutWorker):
                 truncated_i = bool(truncateds[i])
 
                 # Get info safely
-                info_i = {}
-                if infos is not None:
-                    if isinstance(infos, list) and i < len(infos):
-                        info_i = infos[i] if infos[i] is not None else {}
-                    elif isinstance(infos, dict):
-                        info_i = infos  # Single info dict for all envs
+                info_i = extract_info_for_env(infos, i, self.num_envs)
 
                 # Check for disconnection - don't add disconnection transitions to buffer
                 is_disconnected = info_i.get("disconnected", False)

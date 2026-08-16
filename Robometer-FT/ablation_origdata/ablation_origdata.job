@@ -1,0 +1,242 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_abl_origdata
+#SBATCH --output=../logs/abl_origdata_%j.out
+#SBATCH --error=../logs/abl_origdata_%j.err
+#SBATCH --time=30:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=4
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=480G
+#
+# Loss-vs-data ablation, adapted from ablation_origdata_reference.md (AWS) for
+# Snellius. See ABLATION_HANDOFF.md for the full rationale.
+#
+# Snellius-vs-AWS job-format differences fixed here (this is the part that
+# isn't just path-swapping):
+#   * gpu_a100 nodes have 4 GPUs each (AWS p4d nodes have 8) -> 8 GPUs needs
+#     --nodes=2 --gpus-per-node=4, not a single 8-GPU node. Mirrors
+#     run3_noicl_standard.job's multi-node accelerate/FSDP rendezvous, the
+#     proven pattern on this cluster (run2/run3 did 5000 steps in ~8.5h on
+#     this exact 2x4 topology, but on gpu_h100; A100s are slower, hence the
+#     15h time budget here instead of 10h).
+#   * gpu_a100 caps --cpus-per-task at 72 (AWS reference used 96, exclusive);
+#     dropped --exclusive, using --cpus-per-task=16 (x2 tasks) like run3.
+#   * No --account line: gisr102108 is this account's sole/default
+#     association (confirmed via sacctmgr + recent run2/run3 jobs), matching
+#     run3_noicl_standard.job's convention of omitting --account.
+#   * WANDB entity/project default to nlp-squad/Robometer_FT (already valid
+#     for this account, unlike the AWS key that hit CommError on rbm-model).
+#
+# Usage:
+#   sbatch --export=ALL,ARM=asym jobs/ablation_origdata.job   (or run from ablation_origdata/)
+#   sbatch --export=ALL,ARM=std  jobs/ablation_origdata.job
+# NOTE: plain `ARM=asym sbatch ...` (inline env-var prefix) does NOT propagate
+# on this cluster — sbatch does not inherit the submitting shell's inline
+# environment by default here, so ARM silently falls back to the "asym"
+# default below. Confirmed via a throwaway staging-partition test job.
+# `--export=ALL,VAR=val` is required for ARM and any other one-off override.
+# Env overrides: ROBOMETER_DIR, ROBOMETER_PROCESSED_DATASETS_PATH, WEIGHTS_DIR,
+#                WANDB_PROJECT, WANDB_ENTITY, ENV_PREFIX, MAX_STEPS, EVAL_STEPS
+#
+# Smoke test (verify checkpoint weights actually save under our 2-node FSDP
+# setup before committing to a full ~15-20h run): use a small MAX_STEPS/
+# EVAL_STEPS and a throwaway WEIGHTS_DIR so it can't collide with or
+# auto-resume into the real run's output:
+#   sbatch --export=ALL,ARM=asym,MAX_STEPS=10,EVAL_STEPS=5,WEIGHTS_DIR=/scratch-shared/$USER/Robometer_FT_weights_smoketest jobs/ablation_origdata.job
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"
+HERE="$(pwd)"
+REPO_ROOT="$(realpath "$HERE/../..")"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$REPO_ROOT/Robometer-temp}"
+FSDP_CONFIG="$REPO_ROOT/Robometer-FT/configs/distributed/fsdp.yaml"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/robometer_gpu_fa2}"
+if [[ ! -x "$ENV_PREFIX/bin/python" ]]; then
+    echo "ERROR: ENV_PREFIX env not found at $ENV_PREFIX" >&2
+    exit 1
+fi
+PYTHON="$ENV_PREFIX/bin/python"
+ACCELERATE="$ENV_PREFIX/bin/accelerate"
+export PATH="$ENV_PREFIX/bin:$PATH"
+
+if [[ ! -d "$ROBOMETER_DIR" ]]; then
+    echo "ERROR: ROBOMETER_DIR not found at $ROBOMETER_DIR (clone+patch Robometer-temp first, see ABLATION_HANDOFF.md sec 3)" >&2
+    exit 1
+fi
+if [[ ! -f "$FSDP_CONFIG" ]]; then
+    echo "ERROR: missing $FSDP_CONFIG" >&2
+    exit 2
+fi
+
+export ROBOMETER_PROCESSED_DATASETS_PATH="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/tmp.cwkV8vOvfY/robometer_frames_hf_full_step2}"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export WANDB_PROJECT="${WANDB_PROJECT:-Robometer_FT}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+export WANDB_API_KEY="${WANDB_API_KEY:-}"
+if [[ -z "${WANDB_MODE:-}" ]]; then
+    grep -q 'api.wandb.ai' "$HOME/.netrc" 2>/dev/null && export WANDB_MODE=online || export WANDB_MODE=offline
+fi
+export NCCL_ASYNC_ERROR_HANDLING=1
+export OMP_NUM_THREADS=1
+
+ARM="${ARM:-asym}"
+if [[ "$ARM" == "asym" ]]; then
+    LOSS_OVERRIDES="++loss.progress_loss_type=c51_asymmetric ++loss.success_loss_type=bce_asymmetric ++loss.asymmetric_lambda=0.3"
+elif [[ "$ARM" == "std" ]]; then
+    LOSS_OVERRIDES=""
+else
+    echo "ERROR: ARM must be 'asym' or 'std', got '$ARM'" >&2
+    exit 2
+fi
+EXP_NAME="robometer_abl_origdata_${ARM}"
+
+WEIGHTS_DIR="${WEIGHTS_DIR:-/scratch-shared/$USER/Robometer_FT_weights}"
+RUN_OUT="$WEIGHTS_DIR/abl_origdata_${ARM}"
+mkdir -p "$WEIGHTS_DIR"
+
+# Auto-resume across resubmissions: stable per-arm output dir (no job-id
+# suffix). Upstream hardcodes training.save_strategy="no" by default -- HF's
+# standard periodic checkpointing never runs on its own. Our OWN working FT
+# jobs (e.g. run1_icl_ours_aws.job, via configs/train_base.yaml) explicitly
+# override this to training.save_strategy=steps, which re-enables HF's native,
+# FSDP-collective-safe checkpoint-<step> saving (full model+optimizer+
+# scheduler+RNG state) -- see the TRAIN_ARGS override below. The separate
+# on-evaluate SaveBestCallback (ckpt-{metric}=..._step=N dirs) is metric-
+# tracking only and, per run1_icl_ours_aws.job's own comment, is explicitly
+# NOT used for resume -- confirmed empirically here too: those dirs contained
+# zero model-weight files when custom_eval/save_strategy weren't set up right.
+# HF Trainer writes native checkpoints to $RUN_OUT/$EXP_NAME/checkpoint-<step>
+# (output_dir joined with run_name=exp_name), so search recursively.
+CKPT_RESUME=""
+if [[ -d "$RUN_OUT" ]]; then
+    LATEST=-1
+    while IFS= read -r d; do
+        s="${d##*/checkpoint-}"
+        [[ "$s" =~ ^[0-9]+$ ]] && (( s > LATEST )) && { LATEST=$s; CKPT_RESUME="$d"; }
+    done < <(find "$RUN_OUT" -maxdepth 3 -type d -name 'checkpoint-*' 2>/dev/null)
+    [[ -n "$CKPT_RESUME" ]] && echo "[auto-resume] found native HF checkpoint at step $LATEST: $CKPT_RESUME"
+fi
+EXP_DIR="$RUN_OUT/$EXP_NAME"
+if [[ -z "$CKPT_RESUME" && -d "$EXP_DIR" ]]; then
+    # No native checkpoint to resume from (e.g. a stale/partial dir from a
+    # prior crashed attempt before any save). Clean up here, once, from this
+    # single submitting process -- NOT via ++training.overwrite_output_dir=true
+    # unconditionally (what train_base.yaml/the AWS job do — safe there because
+    # that job is single-node/single-launcher). Our topology needs 2 nodes x 4
+    # GPUs (Snellius nodes only have 4 GPUs each) launched via 2 separate
+    # per-node srun processes; upstream's is_rank_0() check in train.py is
+    # satisfied on BOTH nodes' local rank 0 before the distributed group
+    # inits, so unconditional overwrite_output_dir=true races: both nodes
+    # concurrently call shutil.rmtree(output_dir) -> FileNotFoundError
+    # (observed on job 24565874). Doing it once here avoids that entirely.
+    echo "[cleanup] removing stale non-checkpoint dir: $EXP_DIR"
+    rm -rf "$EXP_DIR"
+fi
+RESUME_OVERRIDE=""
+[[ -n "$CKPT_RESUME" ]] && RESUME_OVERRIDE="++training.resume_from_checkpoint=$CKPT_RESUME"
+
+# ---------------- multi-node topology (2 nodes x 4 GPUs = 8, matches AWS's
+# single 8-GPU node; gpu_h100 nodes only have 4 GPUs each) ----------------
+NUM_NODES="${SLURM_NNODES:-1}"
+GPUS_PER_NODE="${GPUS_PER_NODE:-4}"
+TOTAL_PROCESSES=$(( NUM_NODES * GPUS_PER_NODE ))
+RDZV_PORT=$(( 10000 + ${SLURM_JOB_ID:-0} % 50000 ))
+NODE_LIST=( $(scontrol show hostnames "$SLURM_JOB_NODELIST") )
+HEAD_NODE="${NODE_LIST[0]}"
+HEAD_NODE_IP=$(srun --nodes=1 --ntasks=1 -w "$HEAD_NODE" hostname --ip-address | head -1)
+# ---------------------------------------------------------------------------
+
+cd "$ROBOMETER_DIR"
+export PYTHONPATH="$ROBOMETER_DIR:${PYTHONPATH:-}"
+export ROBOMETER_DIR
+
+echo "==================== launch summary ===================="
+echo "ARM                : $ARM"
+echo "Nodes              : $NUM_NODES  (${NODE_LIST[*]})"
+echo "Head node          : $HEAD_NODE  ($HEAD_NODE_IP)"
+echo "GPUs per node      : $GPUS_PER_NODE"
+echo "TOTAL_PROCESSES    : $TOTAL_PROCESSES"
+echo "ROBOMETER_DIR       : $ROBOMETER_DIR"
+echo "Data cache          : $ROBOMETER_PROCESSED_DATASETS_PATH"
+echo "WEIGHTS_DIR         : $WEIGHTS_DIR"
+echo "RUN_OUT              : $RUN_OUT"
+echo "CKPT_RESUME         : ${CKPT_RESUME:-<none>}"
+echo "LOSS_OVERRIDES       : $LOSS_OVERRIDES"
+echo "========================================================"
+
+MAX_STEPS="${MAX_STEPS:-5000}"
+EVAL_STEPS="${EVAL_STEPS:-500}"
+
+TRAIN_ARGS=(
+  ++data.train_datasets=[robometer_origdata_train]
+  ++data.eval_datasets=[robometer_frames_eval_robometer]
+  ++data.progress_pred_type=absolute_first_frame
+  ++data.max_frames=16
+  # Upstream's raw default custom_eval targets policy_ranking/confusion_matrix/
+  # reward_alignment on 'mw', which resolves to a dataset name
+  # (aliangdw_metaworld_metaworld_eval) that isn't in our cache -> crashes at
+  # eval time. Fix (mirrors Robometer-FT/configs/train_base.yaml, our own
+  # fork's working FT jobs): restrict to policy_ranking only (confusion_matrix/
+  # reward_alignment cost ~30h per round for redundant signal, per that file's
+  # comment) and point it at OUR short-name eval sets, which do exist in this
+  # cache. Also override save_best.metric_names -- upstream's default names
+  # reference the 5 LoRA-bake-off splits this pipeline never emits, so
+  # _compute_averaged_score always returned -inf and every checkpoint was
+  # tagged 0.0000 regardless of custom_eval. No ICL in this ablation, so use
+  # the unsuffixed (ICL-off) metric-key convention, not the *_iclon/*_icloff
+  # pairs train_base.yaml lists for ICL runs.
+  ++custom_eval.eval_types=[policy_ranking]
+  ++custom_eval.policy_ranking=[robometer_frames_eval_droid,robometer_frames_eval_robometer,robometer_frames_eval_metaworld,robometer_frames_eval_failsafe]
+  ++logging.save_best.metric_names=[eval_p_rank/kendall_last/robometer_frames_eval_droid,eval_p_rank/kendall_last/robometer_frames_eval_robometer,eval_p_rank/kendall_last/robometer_frames_eval_metaworld,eval_p_rank/kendall_last/robometer_frames_eval_failsafe]
+  ++logging.save_best.greater_is_better=[true,true,true,true]
+  ++training.load_from_checkpoint=robometer/Robometer-4B
+  ++training.max_steps=$MAX_STEPS
+  ++training.eval_steps=$EVAL_STEPS
+  ++training.custom_eval_steps=$EVAL_STEPS
+  # Upstream default is save_strategy="no" (HF's native periodic checkpointing
+  # never runs). This re-enables it -- see the auto-resume comment above for
+  # why this, not the SaveBestCallback dirs, is what we resume from.
+  ++training.save_strategy=steps
+  ++training.save_steps=$EVAL_STEPS
+  ++training.learning_rate=1e-5
+  ++training.per_device_train_batch_size=8
+  ++training.bf16=true
+  ++training.gradient_checkpointing=true
+  ++training.exp_name="$EXP_NAME"
+  ++logging.wandb_project="$WANDB_PROJECT"
+  ++logging.wandb_entity="$WANDB_ENTITY"
+)
+
+if [[ "$NUM_NODES" -le 1 ]]; then
+    "$ACCELERATE" launch \
+      --config_file "$FSDP_CONFIG" \
+      --num_machines=1 \
+      --num_processes="$TOTAL_PROCESSES" \
+      --machine_rank=0 \
+      --main_process_ip="$HEAD_NODE_IP" \
+      --main_process_port="$RDZV_PORT" \
+      train.py "${TRAIN_ARGS[@]}" $LOSS_OVERRIDES $RESUME_OVERRIDE \
+      training.output_dir="$RUN_OUT"
+else
+    srun --ntasks-per-node=1 --cpu-bind=none bash -c "
+        export PYTHONPATH=$ROBOMETER_DIR:\${PYTHONPATH:-}
+        export ROBOMETER_DIR=$ROBOMETER_DIR
+        cd $ROBOMETER_DIR
+        \"$ACCELERATE\" launch \\
+          --config_file $FSDP_CONFIG \\
+          --num_machines=$NUM_NODES \\
+          --num_processes=$TOTAL_PROCESSES \\
+          --machine_rank=\$SLURM_NODEID \\
+          --main_process_ip=$HEAD_NODE_IP \\
+          --main_process_port=$RDZV_PORT \\
+          train.py ${TRAIN_ARGS[*]} $LOSS_OVERRIDES $RESUME_OVERRIDE \\
+          training.output_dir=$RUN_OUT
+    "
+fi
+echo "EXIT=$?"

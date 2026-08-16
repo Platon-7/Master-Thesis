@@ -820,6 +820,16 @@ def setup_model_and_processor(
     # Check if unsloth should be used
     use_unsloth = cfg.use_unsloth and "Qwen" in cfg.base_model_id
 
+    # Escape hatch for inference-only consumers. `use_unsloth` is baked into every
+    # checkpoint's config.yaml at training time, and load_model_from_hf reads that
+    # config back verbatim -- so a checkpoint trained with unsloth cannot be loaded
+    # at all in an environment without it, even though (as the ImportError below
+    # says) inference needs only from_pretrained. The RL reward-model path never
+    # trains the VLM, so it sets this to load the same weights on the plain path.
+    if use_unsloth and os.environ.get("ROBOMETER_DISABLE_UNSLOTH", "0") == "1":
+        logger.info("ROBOMETER_DISABLE_UNSLOTH=1: loading via from_pretrained instead of unsloth")
+        use_unsloth = False
+
     if use_unsloth:
         logger.info("Unsloth mode enabled for faster training")
 

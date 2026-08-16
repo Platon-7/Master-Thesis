@@ -46,6 +46,18 @@ DEFAULT_OUTPUT_DIR = Path("/scratch-shared") / "robometer_frames_splits"
 _ORPHAN_SOURCE = "robometer_orphan_success"
 _OXE_DROID_ARCHIVE = "jesbu1_oxe_rfm_oxe_droid"
 
+# LIBERO-90 hold-out: drop these two archives entirely (successes + failures) so they never
+# enter ANY split. LIBERO-90 lives ONLY in these archives; the family/source fields are the
+# generic "libero"/"robometer" (shared with the other LIBERO suites), so `archive` is the only
+# field that isolates the 90 suite. Excluding at the reader removes them from rows_by_id and
+# every bucket, so they can't land in train, leak into eval_robometer (libero failures have
+# source=="robometer"/label=="failure"), or be pulled in as a partner. The other LIBERO suites
+# (10/object/spatial/goal) are intentionally left untouched.
+_LIBERO90_EXCLUDED_ARCHIVES = {
+    "abraranwar_libero_rfm_libero256_90",          # libero_90 successes
+    "ykorkmaz_libero_failure_rfm_libero_90_failure",  # libero_90 failures
+}
+
 
 def _stream_jsonl(path: Path) -> Iterable[Dict]:
     with path.open("r") as f:
@@ -99,8 +111,18 @@ def _bucket_by_source_and_label(pairs_path: Path) -> Dict[str, Dict]:
 
     n_total = 0
     n_with_partner = 0
+    n_libero90_dropped = 0
     for row in _stream_jsonl(pairs_path):
         n_total += 1
+        # LIBERO-90 hold-out: skip these rows outright so the suite never enters rows_by_id or
+        # any bucket (train, eval, or partner lookup). We drop a row if EITHER side of the pair
+        # is libero_90 — `archive` catches libero_90 queries, `partner_archive` catches rows
+        # whose in-context partner is a libero_90 episode (whose frames still physically exist
+        # in the raw dataset). See _LIBERO90_EXCLUDED_ARCHIVES above.
+        if (row.get("archive") in _LIBERO90_EXCLUDED_ARCHIVES
+                or row.get("partner_archive") in _LIBERO90_EXCLUDED_ARCHIVES):
+            n_libero90_dropped += 1
+            continue
         # rows_by_id holds EVERY episode so eval-side `_with_partners` can resolve a query's
         # partner even when that partner row's own `partner_episode_id` is None (e.g. droid
         # success rows are listed in pairs_unified but only the failure side carries the link).
@@ -126,6 +148,8 @@ def _bucket_by_source_and_label(pairs_path: Path) -> Dict[str, Dict]:
 
     print(f"\n[scan] {n_total:,} rows scanned, {n_with_partner:,} have partner_episode_id "
           f"(eligible as queries); all {len(rows_by_id):,} kept in rows_by_id for partner lookup")
+    print(f"[scan] LIBERO-90 hold-out: dropped {n_libero90_dropped:,} rows from "
+          f"{sorted(_LIBERO90_EXCLUDED_ARCHIVES)}")
     print(f"[scan] failures by family: " + ", ".join(f"{k}={len(v):,}" for k, v in failures_by_family.items()))
     print(f"[scan] successes by source: " + ", ".join(f"{k}={len(v):,}" for k, v in successes_by_source.items()))
     if orphan_by_archive:

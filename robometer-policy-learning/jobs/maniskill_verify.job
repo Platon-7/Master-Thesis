@@ -1,0 +1,66 @@
+#!/bin/bash
+#SBATCH --job-name=ms_verify
+#SBATCH --output=logs/ms_verify_%j.out
+#SBATCH --error=logs/ms_verify_%j.err
+#SBATCH --time=00:40:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
+#
+# Verify the ManiSkill + RoboRef environment on a COMPUTE node.
+#
+# Why not on the login node: the venv lives on GPFS, and `import transformers`
+# walks its whole package tree with isdir() calls to build its lazy-import
+# structure. On a shared login node those metadata stats are slow enough to
+# look like a hang. A compute node is both less contended and what actually
+# matters, so timings are measured here.
+#
+# Also stages the venv to node-local disk if GPFS proves too slow, which is the
+# standard fix for import-latency on a parallel filesystem.
+#
+#   sbatch jobs/maniskill_verify.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+mkdir -p logs
+
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/maniskill_rl}"
+PYTHON="$ENV_PREFIX/bin/python"
+[[ -x "$PYTHON" ]] || { echo "ERROR: no python at $PYTHON" >&2; exit 1; }
+
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="${MS_ASSET_DIR:-/scratch-shared/$USER/maniskill_assets}"
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
+export TOKENIZERS_PARALLELISM=false
+
+echo "=========== node ==========="
+hostname
+nvidia-smi --query-gpu=name --format=csv,noheader 2>&1 | head -1
+echo "local scratch: ${TMPDIR:-<unset>}"
+echo "============================"
+
+echo ""
+echo "=========== import timings from GPFS ==========="
+timeout 900 "$PYTHON" -u - <<'PY'
+import time
+for mod in ("numpy", "torch", "transformers", "mani_skill.envs", "robometer.data.dataset_types"):
+    t = time.time()
+    try:
+        __import__(mod)
+        print(f"  {mod:34s} {time.time()-t:7.1f}s")
+    except Exception as e:
+        print(f"  {mod:34s} FAILED: {type(e).__name__}: {e}")
+PY
+RC_IMPORT=$?
+echo "import stage rc=$RC_IMPORT"
+
+echo ""
+echo "=========== full environment verification ==========="
+timeout 1200 "$PYTHON" -u scripts/verify_maniskill_env.py --task PullCube-v1 --require-icl
+RC=$?
+
+echo ""
+echo "VERIFY_RC=$RC"
+exit $RC

@@ -1,0 +1,71 @@
+#!/bin/bash
+#SBATCH --job-name=ms_icl_demos
+#SBATCH --output=logs/ms_icl_demos_%j.out
+#SBATCH --error=logs/ms_icl_demos_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=48G
+#
+# Build in-context demonstration banks for RoboRef-ICL (run1) on ManiSkill.
+#
+# Rendering on a login node falls back to CPU and is far too slow (32 demos
+# per task times out). A GPU node renders through SAPIEN's CUDA path instead.
+# a100 is plenty -- this is rendering, not training.
+#
+#   sbatch jobs/maniskill_icl_demos.job
+#   sbatch --export=ALL,TASKS="PullCube-v1 PokeCube-v1",NUM_DEMOS=64 jobs/maniskill_icl_demos.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+mkdir -p logs
+
+ENV_PREFIX="${ENV_PREFIX:-/scratch-shared/$USER/envs/maniskill_rl}"
+PYTHON="$ENV_PREFIX/bin/python"
+[[ -x "$PYTHON" ]] || { echo "ERROR: no python at $PYTHON" >&2; exit 1; }
+
+export MUJOCO_GL=egl
+export PYOPENGL_PLATFORM=egl
+export SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="${MS_ASSET_DIR:-/scratch-shared/$USER/maniskill_assets}"
+
+TASKS="${TASKS:-PullCube-v1 PokeCube-v1 RollBall-v1 LiftPegUpright-v1 PullCubeTool-v1}"
+NUM_DEMOS="${NUM_DEMOS:-32}"
+
+echo "=========== node ==========="
+hostname
+nvidia-smi --query-gpu=name --format=csv,noheader 2>&1 || echo "no nvidia-smi"
+echo "tasks     : $TASKS"
+echo "num demos : $NUM_DEMOS"
+echo "asset dir : $MS_ASSET_DIR"
+echo "============================"
+
+RC=0
+for TASK in $TASKS; do
+    echo ""
+    echo "############ $TASK ############"
+    # Demos must be downloaded before they can be replayed.
+    if ! find "$MS_ASSET_DIR/demos/$TASK" -name "*.h5" 2>/dev/null | grep -q .; then
+        echo "[$TASK] no demos found locally; downloading"
+        "$PYTHON" -m mani_skill.utils.download_demo "$TASK" 2>&1 | tail -1
+    fi
+    "$PYTHON" scripts/generate_maniskill_icl_demos.py \
+        --task "$TASK" --num-demos "$NUM_DEMOS" \
+        2>&1 | grep -viE "^\[33|WARNING" | grep -E "demo file|replay is|successful episodes|verified-success|^wrote|ERROR" \
+        || RC=1
+done
+
+echo ""
+echo "=========== banks produced ==========="
+ls -la "$MS_ASSET_DIR/icl_demos/" 2>/dev/null
+"$PYTHON" - <<'PY'
+import glob, os, numpy as np
+d = os.path.join(os.environ["MS_ASSET_DIR"], "icl_demos")
+for p in sorted(glob.glob(os.path.join(d, "*.npz"))):
+    z = np.load(p, allow_pickle=True)
+    print(f"  {os.path.basename(p):26s} frames={z['frames'].shape}  instruction={str(z['instruction'])!r}")
+PY
+echo "OVERALL_RC=$RC"
+exit $RC

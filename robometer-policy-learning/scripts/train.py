@@ -100,7 +100,7 @@ def main(cfg: DictConfig):
             use_relative_rewards=use_relative_rewards,
             capacity=0,  # Not used for H5 buffers
             remove_obs_keys=remove_obs_keys,
-            post_transforms=[success_bonus_fn] if success_bonus_fn is not None else [],
+            post_transforms=[fn for fn in (success_bonus_fn, components.reward_shift_fn) if fn is not None],
             h5_paths=[cfg.env.h5_dataset_path],
             use_full_state=cfg.env.use_full_state,
             sentence_model=components.sentence_model,
@@ -117,6 +117,7 @@ def main(cfg: DictConfig):
             add_estimated_reward=cfg.reward_model.add_estimated_reward
             if cfg.reward_model is not None
             else False,
+            icl_demo_path=OmegaConf.select(cfg, "reward_model.icl_demo_path", default=None),
         )
 
         offline_algo_dict = OmegaConf.to_container(offline_algorithm_cfg)
@@ -221,7 +222,7 @@ def main(cfg: DictConfig):
             reward_model_exp_cfg=reward_model_exp_cfg,
             capacity=cfg.buffer.capacity,
             remove_obs_keys=remove_obs_keys,
-            post_transforms=[success_bonus_fn] if success_bonus_fn is not None else [],
+            post_transforms=[fn for fn in (success_bonus_fn, components.reward_shift_fn) if fn is not None],
             use_eval_server=components.use_eval_server if not use_async_reward_relabel else False,
             eval_server_url=components.eval_server_url if not use_async_reward_relabel else None,
             eval_server_timeout=components.eval_server_timeout if not use_async_reward_relabel else 120.0,
@@ -243,6 +244,7 @@ def main(cfg: DictConfig):
             add_estimated_reward=cfg.reward_model.add_estimated_reward
             if hasattr(cfg, "reward_model") and cfg.reward_model is not None
             else False,
+            icl_demo_path=OmegaConf.select(cfg, "reward_model.icl_demo_path", default=None),
         )
 
         if use_async_reward_relabel and reward_model is not None:
@@ -318,6 +320,14 @@ def main(cfg: DictConfig):
             },
             logger=wandb_logger,
             eval_on_first_step=cfg.eval.eval_on_first_step,
+            # Without these two, SerialRunner's periodic-checkpoint block is dead
+            # code: it is guarded on `self.save_dir is not None`, and save_dir
+            # defaulted to None here, so `training.save_interval` was read by
+            # nobody. Only the post-run save at the end of this function ever
+            # fired -- meaning a run killed by the wall clock (long RL arms come
+            # close) left no policy at all behind.
+            save_dir=save_dir,
+            save_interval=OmegaConf.select(cfg, "training.save_interval", default=None),
         )
 
         rprint(f"Starting training for {cfg.training.num_rollouts} rollouts...")
