@@ -1,0 +1,149 @@
+# Online SAC on ManiSkill3, from scratch (no BC / offline warm start).
+#
+# Why this config exists
+# ----------------------
+# The thesis' MetaWorld and Robomimic runs use IBRL, which bootstraps from a
+# behaviour-cloning policy and reads the *success* head as a sparse reward.
+# That setup cannot exercise the progress head. This config runs plain SAC with
+# no head start, so a dense per-step reward is the only thing that can carry
+# learning -- which is what makes it a real test of the progress head.
+#
+# Task choice: ManiSkill's PickCube / PushCube / StackCube families are OFF
+# LIMITS -- FailSafe contributed fault-injected versions of exactly those three
+# to the RoboRef training corpus, so they are in-distribution. The tasks in
+# envs/maniskill_utils.py are all outside that set, and the constraint is
+# enforced in code (assert_task_allowed), not just by convention.
+#
+# Three arms to run per task:
+#   1. GT dense control (ceiling):
+#        reward_model=null env.use_gt_rewards=true \
+#        env.env_kwargs.reward_mode=normalized_dense
+#   2. Reward model, sparse success head:
+#        reward_model=robometer reward_model.use_success_detection=true \
+#        reward_model.add_estimated_reward=false env.use_gt_rewards=false
+#   3. Reward model, dense progress head (the point of this benchmark):
+#        reward_model=robometer reward_model.use_success_detection=false \
+#        reward_model.add_estimated_reward=true env.use_gt_rewards=false
+#
+# Run arm 1 FIRST. If GT dense reward cannot train the task in the step budget,
+# no reward model can, and the task is unusable as a benchmark.
+
+defaults:
+  - algorithm@offline_algorithm: null   # no offline phase: training is from scratch
+  - algorithm@online_algorithm: sac
+  - reward_model: null                  # null | robometer
+  - policy@policy: mlp
+  - value_function@value_function: mlp
+
+debug: false
+
+# Environment configuration
+env:
+  # "maniskill/<ManiSkill env id>". Shortlist in envs/maniskill_utils.py:
+  #   PullCube-v1 (easiest, pull), PokeCube-v1 (push), PickSingleYCB-v1
+  #   (pick-and-place with object diversity), RollBall-v1, LiftPegUpright-v1,
+  #   PlaceSphere-v1, PullCubeTool-v1 (hardest).
+  env_name: "maniskill/PullCube-v1"
+  task_id: 0                # unused by ManiSkill; kept for config compatibility
+  max_episode_steps: 50     # PullCube-v1 default; raise for pick-and-place tasks
+  use_full_state: false     # false -> proprioceptive (robot qpos) + DINO image features
+  use_gt_rewards: true      # flip to false when a reward model is attached
+  # Do NOT end the episode when the task succeeds. ManiSkill's default does, which
+  # with a dense per-step reward makes finishing the task COST reward: succeeding at
+  # step 10 forfeits the remaining 40 steps of reward. Measured on PullCube GT:
+  # episode return climbed 4.71 -> 21.43 while eval success collapsed 56% -> 10% and
+  # the entropy coefficient fell to 0.002 as the policy committed to loitering.
+  # Success is still recorded in info; eval measures success_once across the episode.
+  terminate_on_success: true
+  # Constant shift added to EVERY step's final reward (after any VLM relabeling).
+  # ManiSkill's dense reward is positive (~+0.9/step) and the episode ends on
+  # success, so finishing forfeits the rest of the episode's reward: measured on
+  # PullCube GT, return rose 4.71 -> 21.43 while eval success fell 56% -> 10%.
+  # Shifting by -1 puts every step in [-1, 0]: the dense gradient survives (near the
+  # goal = -0.1/step, far = -0.9/step) but loitering now bleeds and ending the
+  # episode stops it. Same convention as LIBERO's `reward -= 1`, generalised from a
+  # sparse to a dense signal -- and applied to the FINAL reward, which is where
+  # LIBERO's version failed to protect the reward-model arms.
+  # No-op when episodes never end early (constant offset on a fixed horizon).
+  reward_shift: -1.0
+  dino_image_keys: ["image"]        # also the frames sent to the reward model
+  extra_keys_to_drop: ["language"]  # constant for single-task runs
+  success_bonus_amount: 0.0
+
+  # ManiSkill-specific, forwarded to envs/maniskill_wrapper.make_maniskill_env.
+  env_kwargs:
+    # sparse -> env reward is 0/1 on success (what the reward-model arms want,
+    # since the model supplies the reward). Use normalized_dense for arm 1.
+    reward_mode: "sparse"
+    # pd_ee_delta_pos = 3-DoF end-effector translation + gripper. Easiest to
+    # learn from scratch. Per-task defaults live in maniskill_utils.py; setting
+    # this to null uses them.
+    control_mode: null
+    obs_mode: "state"
+    # CPU sim keeps one env per process, which is what SyncVectorEnv (and the
+    # rest of this codebase) assumes. GPU-parallel ManiSkill returns batched
+    # torch tensors and would need a different rollout path.
+    sim_backend: "physx_cpu"
+    image_size: 224
+    instruction: null       # null -> the task's default instruction
+
+# Training configuration
+training:
+  num_envs: 4               # CPU sim; raise if the node has spare cores
+  num_rollouts: 500_000     # env steps
+  chunk_size: null
+  use_rnn: false
+  num_offline_steps: 0      # no offline phase
+  load_dir: null
+  save_interval: 25000
+  continue_training: false
+  seed: 0
+
+# Replay buffer configuration
+buffer:
+  capacity: 300_000
+  sample_ratio: 0.5
+  use_success_fail_buffer: false
+  success_fail_sample_ratio: 0.5
+  # Only used when the reward model drives success detection (arm 2).
+  success_detection_duration: 2
+  success_detection_threshold: 0.65
+  distributed_reward_relabel:
+    enabled: false
+    server_address: "localhost:50052"
+    max_queue_size: 100
+    timeout: 60.0
+    flush_interval: 0.1
+
+# Logging configuration
+logging:
+  wandb_project: roboref_maniskill
+  wandb_entity: nlp-squad
+  wandb_offline: false
+  wandb_log_dir_base: logs/wandb
+  wandb_name: "maniskill_sac"
+  log_level: "INFO"
+
+# Algorithm configuration
+alg:
+  offline_alg_name: null
+  online_alg_name: sac
+
+# Evaluation configuration
+eval:
+  eval_freq: 10000
+  eval_num_episodes: 20
+  eval_record_video: true
+  eval_on_first_step: false
+
+# Model configuration
+model:
+  dinov2_model: "facebook/dinov2-base"
+  sentence_model: null
+
+# SAC settings tuned for a cold start (no BC policy in the buffer).
+online_algorithm:
+  learning_starts: 5000     # pure random exploration before the first update
+  num_critic_updates_per_actor_update: 1
+  critic_optimizer_lr: 3e-4
+  actor_optimizer_lr: 3e-4
