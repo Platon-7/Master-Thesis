@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH --job-name=randprobe
+#SBATCH --output=/scratch-shared/pkarageorgis/roboref_results/randprobe_%j.out
+#SBATCH --error=/scratch-shared/pkarageorgis/roboref_results/randprobe_%j.err
+#SBATCH --time=03:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=120G
+# Does the success head fire on a RANDOM policy? The calibration ladder starts at
+# 25k steps -- already purposeful -- so it never sampled the flailing that a
+# from-scratch RL run produces in its first thousands of steps. If base fires on
+# random motion, its TERMINATE=1 arm is degenerate from step one.
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+export MUJOCO_GL=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="/scratch-shared/$USER/maniskill_assets"
+export HF_HOME="/scratch-shared/$USER/hf_cache" SAPIEN_CACHE_DIR="/scratch-shared/$USER/sapien_cache"
+export TOKENIZERS_PARALLELISM=false ROBOMETER_DISABLE_UNSLOTH=1
+PY=/scratch-shared/$USER/envs/maniskill_rl/bin/python
+CK=/scratch-shared/$USER/roboref_checkpoints
+for M in "run2=$CK/run2_noicl_ours_step4000" "run3=$CK/run3_noicl_standard_step5000" "base=robometer/Robometer-4B"; do
+  tag="${M%%=*}"; path="${M#*=}"
+  echo ""; echo "######## RANDOM POLICY / $tag ########"
+  timeout 3000 $PY -u scripts/causal_calib_maniskill.py \
+    --task PullCube-v1 --model "$path" --tag "random_$tag" \
+    --actor-dir /dev/null --random-policy --episodes 12 --image-size 224
+done
+echo RANDOM_PROBE_DONE

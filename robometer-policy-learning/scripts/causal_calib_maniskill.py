@@ -132,7 +132,8 @@ def rollout_and_score(args) -> int:
     )
     INSTR = env.get_language_instruction()
 
-    ckpts = pick_actor_checkpoints(args.actor_dir, args.n_checkpoints)
+    ckpts = [(-1, None)] if args.random_policy else pick_actor_checkpoints(
+        args.actor_dir, args.n_checkpoints)
     print(f"[calib] task={args.task} model={args.tag} res={args.image_size} "
           f"max_frames={max_frames}", flush=True)
     print(f"[calib] policy ladder: {[s for s, _ in ckpts]}", flush=True)
@@ -143,19 +144,24 @@ def rollout_and_score(args) -> int:
     episodes = []
     eps_per_ckpt = max(1, args.episodes // len(ckpts))
     for step, cdir in ckpts:
-        actor = torch.load(os.path.join(cdir, "actor.pt"), map_location=dev, weights_only=False)
-        actor.eval()
+        actor = None
+        if cdir is not None:
+            actor = torch.load(os.path.join(cdir, "actor.pt"), map_location=dev, weights_only=False)
+            actor.eval()
         for e in range(eps_per_ckpt):
             obs, _ = env.reset(seed=7000 + 100 * len(episodes) + e)
             video, sps, prs, gt, gt_step = [], [], [], 0, -1
             for t in range(1, spec.max_episode_steps + 1):
                 video.append(np.asarray(obs["image"]).reshape(args.image_size, args.image_size, 3)
                              .astype(np.uint8))
-                with torch.no_grad():
-                    from robometer_policy_learning.utils.gpu_utils import convert_to_tensor, move_to_device
-                    ot = move_to_device(convert_to_tensor(obs), dev)
-                    a, _ = actor.act(ot, actor_state=None, deterministic=True)
-                a = a.detach().cpu().numpy()
+                if actor is None:
+                    a = np.stack([env.single_action_space.sample()])
+                else:
+                    with torch.no_grad():
+                        from robometer_policy_learning.utils.gpu_utils import convert_to_tensor, move_to_device
+                        ot = move_to_device(convert_to_tensor(obs), dev)
+                        a, _ = actor.act(ot, actor_state=None, deterministic=True)
+                    a = a.detach().cpu().numpy()
                 obs, _r, term, trunc, infos = env.step(a)
                 sp, pr = score(video)
                 sps.append(sp); prs.append(pr)
@@ -240,6 +246,11 @@ if __name__ == "__main__":
     ap.add_argument("--actor-dir", required=True, help="a run's checkpoints/ dir")
     ap.add_argument("--episodes", type=int, default=32)
     ap.add_argument("--n-checkpoints", type=int, default=8, help="policies spanning the arc")
+    ap.add_argument("--random-policy", action="store_true",
+                    help="ignore --actor-dir and act uniformly at random. The checkpoint "
+                         "ladder starts at 25k, already past the random phase, so it does "
+                         "NOT cover what a from-scratch RL run looks like in its first "
+                         "thousands of steps. This does.")
     ap.add_argument("--image-size", type=int, default=224)  # robosuite_wrapper.py uses 224
     ap.add_argument("--out-dir", default=os.path.join(
         os.environ.get("MS_ASSET_DIR", "/tmp"), "causal_calib"))
