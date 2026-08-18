@@ -1,8 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=ms_sac
-#SBATCH --output=logs/ms_sac_%j.out
-#SBATCH --error=logs/ms_sac_%j.err
-#SBATCH --time=24:00:00
+#SBATCH --output=/scratch-shared/pkarageorgis/roboref_results/ms_sac_%j.out
+#SBATCH --error=/scratch-shared/pkarageorgis/roboref_results/ms_sac_%j.err
+#SBATCH --time=10:00:00   # sized to STEPS; SLURM RESERVES walltime x GPUs against the
+#                         # budget, so an oversized limit can block submissions even
+#                         # though you are billed only for actual runtime. ~5 steps/s
+#                         # with the VLM in the loop: 150k ~ 8h, 500k ~ 28h.
 #SBATCH --partition=gpu_a100   # overridden to gpu_h100 for ARM=icl (run1) at submit time
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1

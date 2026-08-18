@@ -347,6 +347,22 @@ class RewardModelConfig:
             "Set from the gate window reported by scripts/causal_calib_maniskill.py; 0 disables."
         },
     )
+    normalize_reward: bool = field(
+        default=False,
+        metadata={"help": "Map the reward model output onto [0,1] via running p1/p99 "
+                          "before the -1 cost shift, so the agent sees a full-range "
+                          "cost rather than a model-specific narrow band."},
+    )
+    normalize_warmup: int = field(default=1000, metadata={"help": "Raw pass-through until this many samples."})
+    normalize_window: int = field(default=10000, metadata={"help": "Sliding window for the percentiles."})
+    progress_as_potential: bool = field(
+        default=False,
+        metadata={"help": "Reward the CHANGE in progress (gamma*Phi(s')-Phi(s)) rather "
+                          "than the progress level, which a policy can farm by parking "
+                          "in a high-progress state."},
+    )
+    potential_gamma: float = field(default=0.99, metadata={"help": "gamma used in the shaping term."})
+    potential_scale: float = field(default=1.0, metadata={"help": "Scale on the shaped reward."})
     success_detection_threshold: float = field(
         default=0.65, metadata={"help": "Success probability threshold for success detection"}
     )

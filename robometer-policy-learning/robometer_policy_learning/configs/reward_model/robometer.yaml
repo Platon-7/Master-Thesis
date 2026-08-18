@@ -9,6 +9,24 @@ model_path: "rewardfm/ant-rfm-rewind-bs1024-oxe-mw-prog-mw-0.1"
 # Success detection related
 use_success_detection: false
 success_detection_duration: 1
+# Steps into an episode before success detection may fire (vlm_ibrl's
+# ROBOMETER_MIN_EP_STEPS). 0 = off; it and the majority vote are remedies for
+# reward hacking, not defaults -- turning them on early hides whether the
+# threshold itself is right.
+success_detection_min_ep_steps: 0
+# Use the progress head as a POTENTIAL (Ng et al. shaping: gamma*Phi(s')-Phi(s))
+# instead of as the reward level. The level is farmable -- measured on PullCube,
+# progress rose 7x while GT success stayed at 0-2%. Within episodes the heads track
+# true progress well (Kendall tau 0.63-0.74), so they make good potentials.
+# Map the reward model's output onto [0,1] with running p1/p99 BEFORE the -1 cost
+# shift. Without it the agent sees a model-specific constant offset (measured:
+# -0.90 for run2, -0.25 for base) with the success signal only ~7% of the magnitude.
+normalize_reward: false
+normalize_warmup: 1000
+normalize_window: 10000
+progress_as_potential: false
+potential_gamma: 0.99
+potential_scale: 1.0
 success_detection_threshold: 0.65
 
 # Whether to use relative rewards (r = r_t - r_t-1)

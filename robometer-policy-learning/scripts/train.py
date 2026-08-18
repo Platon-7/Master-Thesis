@@ -114,6 +114,24 @@ def main(cfg: DictConfig):
             success_detection_min_ep_steps=cfg.reward_model.success_detection_min_ep_steps
             if cfg.reward_model is not None
             else 0,
+            normalize_reward=cfg.reward_model.normalize_reward
+            if cfg.reward_model is not None
+            else False,
+            normalize_warmup=cfg.reward_model.normalize_warmup
+            if cfg.reward_model is not None
+            else 1000,
+            normalize_window=cfg.reward_model.normalize_window
+            if cfg.reward_model is not None
+            else 10000,
+            progress_as_potential=cfg.reward_model.progress_as_potential
+            if cfg.reward_model is not None
+            else False,
+            potential_gamma=cfg.reward_model.potential_gamma
+            if cfg.reward_model is not None
+            else 0.99,
+            potential_scale=cfg.reward_model.potential_scale
+            if cfg.reward_model is not None
+            else 1.0,
             success_detection_threshold=cfg.reward_model.success_detection_threshold
             if cfg.reward_model is not None
             else 0.65,
@@ -244,6 +262,24 @@ def main(cfg: DictConfig):
             success_detection_min_ep_steps=cfg.reward_model.success_detection_min_ep_steps
             if hasattr(cfg, "reward_model") and cfg.reward_model is not None
             else 0,
+            normalize_reward=cfg.reward_model.normalize_reward
+            if hasattr(cfg, "reward_model") and cfg.reward_model is not None
+            else False,
+            normalize_warmup=cfg.reward_model.normalize_warmup
+            if hasattr(cfg, "reward_model") and cfg.reward_model is not None
+            else 1000,
+            normalize_window=cfg.reward_model.normalize_window
+            if hasattr(cfg, "reward_model") and cfg.reward_model is not None
+            else 10000,
+            progress_as_potential=cfg.reward_model.progress_as_potential
+            if hasattr(cfg, "reward_model") and cfg.reward_model is not None
+            else False,
+            potential_gamma=cfg.reward_model.potential_gamma
+            if hasattr(cfg, "reward_model") and cfg.reward_model is not None
+            else 0.99,
+            potential_scale=cfg.reward_model.potential_scale
+            if hasattr(cfg, "reward_model") and cfg.reward_model is not None
+            else 1.0,
             success_detection_threshold=cfg.reward_model.success_detection_threshold
             if hasattr(cfg, "reward_model") and cfg.reward_model is not None
             else 0.65,
@@ -289,6 +325,18 @@ def main(cfg: DictConfig):
             if cfg.training.load_dir is not None:
                 logger.info(f"Loading checkpoint from {cfg.training.load_dir}")
                 load_checkpoint(algorithm, cfg.training.load_dir)
+                # Algorithm.load() REBINDS its components (setattr(self, "actor", ...)),
+                # so `algorithm.actor` is now a different object from the local `actor`
+                # created at setup. The rollout worker and runner below are handed the
+                # LOCAL one -- so without re-binding here, a "resumed" run collects and
+                # evaluates with the UNTRAINED policy while training the restored one.
+                # Measured: run2's 150k checkpoint scores 10% GT success when evaluated
+                # directly, but the resumed run scored 0/80 in the episodes before
+                # learning_starts. log_ent_coef hid this, because it restores via an
+                # in-place `.data` assignment and so looked correctly resumed (0.0007).
+                actor = algorithm.actor
+                if hasattr(algorithm, "critic"):
+                    critic = algorithm.critic
                 logger.info(f"Resuming from checkpoint")
 
         logger.info(f"Buffer capacity: {cfg.buffer.capacity}")

@@ -43,6 +43,12 @@ class RobometerReplayBuffer(ReplayBuffer):
         use_success_detection: bool = False,
         success_detection_duration: int = 2,
         success_detection_min_ep_steps: int = 0,
+        normalize_reward: bool = False,
+        normalize_warmup: int = 1000,
+        normalize_window: int = 10000,
+        progress_as_potential: bool = False,
+        potential_gamma: float = 0.99,
+        potential_scale: float = 1.0,
         success_detection_threshold: float = 0.65,
         add_estimated_reward: bool = False,
         icl_demo_path: Optional[str] = None,
@@ -62,7 +68,18 @@ class RobometerReplayBuffer(ReplayBuffer):
         # latest "fake fire" and the earliest "real fire" reported by
         # scripts/causal_calib_maniskill.py. 0 disables the gate.
         self.success_detection_min_ep_steps = int(success_detection_min_ep_steps)
-        self._ep_step = 0
+        self._ep_steps = {}
+        # Running-percentile normalization of the reward model output (see _add).
+        self.normalize_reward = bool(normalize_reward)
+        self.normalize_warmup = int(normalize_warmup)
+        self._norm_buf = deque(maxlen=int(normalize_window))
+        self._norm_lo = None
+        self._norm_hi = None
+        # Potential-based shaping of the progress reward (see _add).
+        self.progress_as_potential = bool(progress_as_potential)
+        self.potential_gamma = float(potential_gamma)
+        self.potential_scale = float(potential_scale)
+        self._phi_prev = {}
         self.success_detection_threshold = success_detection_threshold
         self.add_estimated_reward = add_estimated_reward
 
@@ -185,6 +202,45 @@ class RobometerReplayBuffer(ReplayBuffer):
         )
         sample.context_trajectory = icl_sample.trajectory
         return sample
+
+    def _ep_key(self, kwargs):
+        """Per-episode key. `episode_id` is a GLOBAL counter shared by all num_envs
+        concurrent episodes, so keying on it alone merges every env's episode into one:
+        with num_envs=4 the accumulators summed 4x50 steps and reported len=201, then
+        len=1 three times as the other envs' episodes ended against a popped entry.
+        """
+        # env_idx ALONE is the right key: each env has exactly one episode in flight.
+        # Including episode_id breaks mid-episode, because self.total_episodes is a
+        # global counter that increments whenever ANY env finishes -- which fragmented
+        # accumulation into 45 len=1 entries against 14 real len=51 episodes.
+        return kwargs.get("env_idx")
+
+    def _normalize_reward(self, r: float) -> float:
+        """Map the reward-model output onto [0,1] using running percentiles.
+
+        The cost formulation r = r_hat - 1 assumes r_hat SPANS [0,1]. Measured on
+        PullCube it does not: run2 lives in ~[0.05, 0.28] and the baseline in
+        ~[0.69, 0.95]. The agent therefore sees a large constant offset (-0.90 and
+        -0.25 respectively) with the actual signal riding on top of it -- for run3 the
+        success-vs-failure gap is 0.050/step against an offset of -0.72, i.e. 7% of the
+        magnitude. It also makes arms incomparable, since each model's offset differs.
+
+        p1/p99 over a sliding window rather than min/max, so one outlier frame cannot
+        set the scale, and the window tracks the policy as it changes. Before warmup
+        the raw value passes through unchanged.
+        """
+        self._norm_buf.append(float(r))
+        if len(self._norm_buf) < self.normalize_warmup:
+            return float(r)
+        # Recompute the percentiles occasionally; doing it per step is pure overhead.
+        self._norm_n = getattr(self, "_norm_n", 0) + 1
+        if self._norm_lo is None or self._norm_n % 500 == 0:
+            arr = np.fromiter(self._norm_buf, dtype=np.float64)
+            self._norm_lo, self._norm_hi = np.percentile(arr, [1.0, 99.0])
+        span = float(self._norm_hi - self._norm_lo)
+        if span < 1e-6:
+            return float(r)
+        return float(np.clip((float(r) - self._norm_lo) / span, 0.0, 1.0))
 
     def _pad_to_max_frames(self, frames: np.ndarray) -> np.ndarray:
         """Front-pad a short clip up to ``max_frames`` by repeating the first frame.
@@ -389,6 +445,24 @@ class RobometerReplayBuffer(ReplayBuffer):
                 reward, success_prob = self._compute_reward_single(raw_data)
                 self.success_tracker[key].append(success_prob)
 
+                # SUCCESS-HEAD VISIBILITY. Nothing else logs success_prob during
+                # training: the rollout worker's ep_*_success_prob stats need
+                # info["env_reward"], which only the async relabel wrapper populates.
+                # Without this we cannot tell "threshold too high" from "detector
+                # never sees a high value", and a TERMINATE=1 run silently degrades
+                # into TERMINATE=0. Also records whether the embeddings the buffer
+                # passes (and the calibration script does not) are actually present.
+                self._sp_n = getattr(self, "_sp_n", 0) + 1
+                self._sp_ep_max = max(getattr(self, "_sp_ep_max", 0.0), float(success_prob))
+                if self._sp_n <= 40 or self._sp_n % 500 == 0:
+                    logger.info(
+                        f"[SP] n={self._sp_n} key={key} frames={len(_frames)} "
+                        f"success_prob={float(success_prob):.4f} thr={float(self.success_detection_threshold):.3f} "
+                        f"prog={float(reward):.4f} "
+                        f"vid_emb={'Y' if raw_data.get('video_embeddings') is not None else 'N'} "
+                        f"txt_emb={'Y' if raw_data.get('text_embedding') is not None else 'N'}"
+                    )
+
                 # Apply relative rewards if enabled
                 if self.use_relative_rewards:
                     current_reward = reward
@@ -406,7 +480,7 @@ class RobometerReplayBuffer(ReplayBuffer):
             # label. Lets us measure whether the RM reward separates success from
             # failure on the live online distribution (no offline dataset needed).
             if os.environ.get("RPL_LOG_DISCRIM"):
-                eid = kwargs.get("episode_id")
+                eid = self._ep_key(kwargs)
                 if not hasattr(self, "_disc_acc"):
                     self._disc_acc, self._disc_succ, self._disc_len = {}, {}, {}
                 self._disc_acc[eid] = self._disc_acc.get(eid, 0.0) + float(avg_reward)
@@ -422,6 +496,41 @@ class RobometerReplayBuffer(ReplayBuffer):
                     self._disc_acc.pop(eid, None); self._disc_succ.pop(eid, None); self._disc_len.pop(eid, None)
 
             _gt_in = kwargs.get("reward")
+
+            # Normalize onto [0,1] BEFORE the -1 cost shift (a post_transform), so the
+            # agent sees a full-range cost in [-1, 0] as intended, rather than a narrow
+            # band offset by however high that particular model's outputs happen to sit.
+            if self.normalize_reward:
+                avg_reward = self._normalize_reward(avg_reward)
+
+            # POTENTIAL-BASED SHAPING (progress_as_potential=true).
+            #
+            # Using the progress LEVEL as the reward is farmable: a policy can park in
+            # a high-progress state and collect it forever without finishing. Measured
+            # on PullCube at 150k steps, that is exactly what happened -- mean progress
+            # rose 7x (0.056 -> 0.425 for run3) while GT success stayed at 0-2%, and
+            # successful and failed episodes accumulated indistinguishable totals
+            # (episode-level AUROC 0.50).
+            #
+            # The heads are good POTENTIALS though: within episodes they track true
+            # progress with Kendall tau 0.63-0.74 (Pearson ~0.86) on PullCube. Ng et al.
+            # (1999): F = gamma*Phi(s') - Phi(s) leaves the optimal policy unchanged and
+            # cannot be farmed -- standing still yields zero.
+            #
+            # Phi is the per-key mean progress; we keep the previous value per episode.
+            if self.progress_as_potential:
+                _eid_p = self._ep_key(kwargs)
+                _prev = self._phi_prev.get(_eid_p)
+                _phi = float(avg_reward)
+                if _prev is None:
+                    shaped = 0.0            # no transition into the first state yet
+                else:
+                    shaped = self.potential_gamma * _phi - _prev
+                self._phi_prev[_eid_p] = _phi
+                if kwargs.get("done") or kwargs.get("truncated"):
+                    self._phi_prev.pop(_eid_p, None)
+                avg_reward = shaped * self.potential_scale
+
             if self.add_estimated_reward:
                 kwargs["reward"] += avg_reward
             else:
@@ -439,14 +548,16 @@ class RobometerReplayBuffer(ReplayBuffer):
                 except Exception:
                     pass
             if self.use_success_detection:
-                self._ep_step += 1
+                _eid = self._ep_key(kwargs)
+                self._ep_steps[_eid] = self._ep_steps.get(_eid, 0) + 1
+                _ep_step = self._ep_steps[_eid]
                 # Check if the episode is done based on majority vote of success probabilities
                 vote = 0
                 for key in self.reward_relabeling_keys:
                     for success_prob in self.success_tracker[key]:
                         if success_prob > float(self.success_detection_threshold):
                             vote += 1
-                gate_open = self._ep_step >= self.success_detection_min_ep_steps
+                gate_open = _ep_step >= self.success_detection_min_ep_steps
                 if gate_open and vote > (
                     len(self.reward_relabeling_keys) * self.success_detection_duration / 2
                 ):
@@ -462,14 +573,22 @@ class RobometerReplayBuffer(ReplayBuffer):
                     self._n_fire_false = getattr(self, "_n_fire_false", 0) + (0 if _gt_now else 1)
                     logger.info(
                         f"[DETECT] fired ep={kwargs.get('episode_id')} "
-                        f"step_in_ep={self._ep_step} gt_success={int(_gt_now)} "
+                        f"step_in_ep={_ep_step} gt_success={int(_gt_now)} "
                         f"n_fire={self._n_fire} n_false={self._n_fire_false} "
                         f"false_rate={self._n_fire_false / max(1, self._n_fire):.2f}"
                     )
                 if kwargs["done"] or kwargs["truncated"]:
+                    logger.info(
+                        f"[SP-EP] ep={_eid} len={_ep_step} "
+                        f"max_success_prob={getattr(self, '_sp_ep_max', 0.0):.4f} "
+                        f"thr={float(self.success_detection_threshold):.3f} "
+                        f"fired={int(bool(kwargs.get('done')))} "
+                        f"gt_success={int(bool(kwargs.get('is_success') or kwargs.get('success')))}"
+                    )
+                    self._sp_ep_max = 0.0
                     for key in self.reward_relabeling_keys:
                         self.success_tracker[key].clear()
-                    self._ep_step = 0
+                    self._ep_steps.pop(_eid, None)
 
         super()._add(**kwargs)
 
@@ -490,6 +609,12 @@ class RobometerH5ReplayBuffer(H5ReplayBuffer):
         use_success_detection: bool = False,
         success_detection_duration: int = 2,
         success_detection_min_ep_steps: int = 0,
+        normalize_reward: bool = False,
+        normalize_warmup: int = 1000,
+        normalize_window: int = 10000,
+        progress_as_potential: bool = False,
+        potential_gamma: float = 0.99,
+        potential_scale: float = 1.0,
         success_detection_threshold: float = 0.65,
         add_estimated_reward: bool = False,
         **kwargs,
@@ -506,7 +631,18 @@ class RobometerH5ReplayBuffer(H5ReplayBuffer):
         # latest "fake fire" and the earliest "real fire" reported by
         # scripts/causal_calib_maniskill.py. 0 disables the gate.
         self.success_detection_min_ep_steps = int(success_detection_min_ep_steps)
-        self._ep_step = 0
+        self._ep_steps = {}
+        # Running-percentile normalization of the reward model output (see _add).
+        self.normalize_reward = bool(normalize_reward)
+        self.normalize_warmup = int(normalize_warmup)
+        self._norm_buf = deque(maxlen=int(normalize_window))
+        self._norm_lo = None
+        self._norm_hi = None
+        # Potential-based shaping of the progress reward (see _add).
+        self.progress_as_potential = bool(progress_as_potential)
+        self.potential_gamma = float(potential_gamma)
+        self.potential_scale = float(potential_scale)
+        self._phi_prev = {}
         self.success_detection_threshold = success_detection_threshold
         self.add_estimated_reward = add_estimated_reward
 
