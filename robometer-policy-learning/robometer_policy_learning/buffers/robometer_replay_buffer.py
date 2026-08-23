@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Dict, Optional, Any, Tuple
 import os
+import json
 import hashlib
 import pickle
 import torch
@@ -53,6 +54,8 @@ class RobometerReplayBuffer(ReplayBuffer):
         add_estimated_reward: bool = False,
         icl_demo_path: Optional[str] = None,
         icl_demo_seed: int = 0,
+        progress_beta: float = 1.0,
+        progress_binarize_threshold: Optional[float] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -82,6 +85,31 @@ class RobometerReplayBuffer(ReplayBuffer):
         self._phi_prev = {}
         self.success_detection_threshold = success_detection_threshold
         self.add_estimated_reward = add_estimated_reward
+        # beta * progress + (1 - beta) * success_prob, per vlm_ibrl/env/vlm_envs.py's
+        # robometer_beta. 1.0 (default) is pure progress -- unchanged behavior. 0.0 is
+        # pure success_prob (the MetaWorld/Robomimic recipe). Mixed BEFORE
+        # normalize_reward/progress_as_potential, same as the reference implementation.
+        self.progress_beta = float(progress_beta)
+        self.progress_binarize_threshold = progress_binarize_threshold
+
+        # ---- on-policy episode instrumentation (RPL_EPISODE_LOG) -------------
+        # Per-episode JSONL for the reward-hacking analysis. Deliberately NOT
+        # gated on use_success_detection: the dense no-termination regime, where
+        # every headline ManiSkill run sits, never fires a detector, and that is
+        # exactly the regime whose overoptimisation we need to quantify.
+        # Detector fields are recorded when available and are null otherwise.
+        _elp = os.environ.get("RPL_EPISODE_LOG")
+        if _elp and os.path.isdir(_elp):
+            _elp = os.path.join(_elp, "episodes.jsonl")
+        self._eplog_path = _elp
+        self._eplog = {}          # env_key -> per-step accumulator
+        self._eplog_n = 0
+        self._eplog_threshold_source = os.environ.get(
+            "RPL_THRESHOLD_SOURCE", "config:reward_model.success_detection_threshold"
+        )
+        if self._eplog_path:
+            os.makedirs(os.path.dirname(self._eplog_path) or ".", exist_ok=True)
+            logger.info(f"[EPLOG] per-episode records -> {self._eplog_path}")
 
         # Set max_frames once from config
         if reward_model_config is not None:
@@ -399,6 +427,85 @@ class RobometerReplayBuffer(ReplayBuffer):
         success_probs_batch = extract_success_probs_from_output(outputs)
         return rewards_batch.tolist(), success_probs_batch.tolist()
 
+
+    # ------------------------------------------------------------------
+    # On-policy episode instrumentation
+    # ------------------------------------------------------------------
+    def _eplog_step(self, eid, *, prog, sp, reward, gt_now):
+        """Accumulate one env-step of an episode. Cheap no-op when disabled."""
+        if not self._eplog_path:
+            return
+        e = self._eplog.get(eid)
+        if e is None:
+            e = self._eplog[eid] = {
+                "prog": [], "sp": [], "r": [], "gt": [],
+                "fired": False, "fire_step": None, "gt_solved_at_fire": None,
+                "gate_suppressed": False,
+            }
+        e["prog"].append(round(float(prog), 5))
+        e["sp"].append(round(float(sp), 5))
+        e["r"].append(round(float(reward), 5))
+        e["gt"].append(int(bool(gt_now)))
+
+    def _eplog_mark_fire(self, eid, *, step, gt_now, suppressed=False):
+        """Record a detector fire, or a fire blocked by the min-episode gate."""
+        if not self._eplog_path:
+            return
+        e = self._eplog.get(eid)
+        if e is None:
+            return
+        if suppressed:
+            e["gate_suppressed"] = True
+        elif not e["fired"]:
+            e["fired"] = True
+            e["fire_step"] = int(step)
+            e["gt_solved_at_fire"] = int(bool(gt_now))
+
+    def _eplog_flush(self, eid):
+        """Write one episode record and drop its accumulator."""
+        if not self._eplog_path:
+            return
+        e = self._eplog.pop(eid, None)
+        if e is None or not e["r"]:
+            return
+        gt = e["gt"]
+        solved_any = any(gt)
+        rec = {
+            "ep": self._eplog_n,
+            "env_key": str(eid),
+            "episode_len": len(e["r"]),
+            # --- mandatory for the dense/no-termination metrics ---
+            "vlm_return": round(float(sum(e["r"])), 5),
+            "vlm_return_mean": round(float(sum(e["r"]) / len(e["r"])), 5),
+            "gt_solved_anytime": int(solved_any),
+            "gt_first_solve_step": (gt.index(1) if solved_any else None),
+            "score_per_step": e["prog"],      # raw progress head, pre-mix/normalise
+            "sp_per_step": e["sp"],           # raw success head
+            "reward_per_step": e["r"],        # what the agent actually received
+            "gt_per_step": gt,                # lets any metric be recomputed offline
+            "score_max": max(e["prog"]) if e["prog"] else None,
+            "sp_max": max(e["sp"]) if e["sp"] else None,
+            # --- detector fields: present only if detection is on ---
+            "detection_enabled": bool(self.use_success_detection),
+            "fired": (int(e["fired"]) if self.use_success_detection else None),
+            "fire_step": (e["fire_step"] if self.use_success_detection else None),
+            "gt_solved_at_fire": (e["gt_solved_at_fire"] if self.use_success_detection else None),
+            "gate_suppressed": (int(e["gate_suppressed"]) if self.use_success_detection else None),
+            # --- threshold provenance: false_rate is uninterpretable without it ---
+            "threshold": float(self.success_detection_threshold),
+            "threshold_source": self._eplog_threshold_source,
+            "min_ep_steps": int(self.success_detection_min_ep_steps),
+            "duration": int(self.success_detection_duration),
+            "progress_beta": float(self.progress_beta),
+            "binarize_threshold": self.progress_binarize_threshold,
+        }
+        self._eplog_n += 1
+        try:
+            with open(self._eplog_path, "a") as f:
+                f.write(json.dumps(rec) + "\n")
+        except Exception as exc:  # never let logging kill a run
+            logger.warning(f"[EPLOG] write failed: {exc}")
+
     def _add(
         self,
         language_instruction=None,
@@ -414,6 +521,10 @@ class RobometerReplayBuffer(ReplayBuffer):
             # Ensure dino_embeddings is a numpy array
             dino_embeddings = convert_to_numpy(dino_embeddings)
             avg_reward = 0.0
+            # RAW head outputs for the episode log, captured before beta-mix /
+            # binarisation / normalisation / potential shaping so the recorded
+            # scores can be re-thresholded offline without a re-run.
+            _raw_prog_sum, _raw_sp_max = 0.0, 0.0
             for index, key in enumerate(self.reward_relabeling_keys):
                 # Convert embeddings to proper format (common for both paths)
                 if isinstance(dino_embeddings, list) and len(dino_embeddings) > 0:
@@ -444,6 +555,19 @@ class RobometerReplayBuffer(ReplayBuffer):
 
                 reward, success_prob = self._compute_reward_single(raw_data)
                 self.success_tracker[key].append(success_prob)
+                _raw_prog_sum += float(reward)
+                _raw_sp_max = max(_raw_sp_max, float(success_prob))
+
+                # BETA-MIX (progress_beta != 1.0). success_tracker above already got the
+                # RAW success_prob -- use_success_detection's termination gate must stay
+                # keyed on the actual success head, not this mixed training reward.
+                if self.progress_beta != 1.0:
+                    reward = self.progress_beta * reward + (1.0 - self.progress_beta) * success_prob
+                # vlm_ibrl binarizes the mix (`reward = 1.0 if mixed > threshold else 0.0`)
+                # before it reaches the buffer; beta=0 + binarize IS the MetaWorld /
+                # Robomimic / LIBERO recipe. null (default) keeps the raw continuous mix.
+                if self.progress_binarize_threshold is not None:
+                    reward = 1.0 if reward > float(self.progress_binarize_threshold) else 0.0
 
                 # SUCCESS-HEAD VISIBILITY. Nothing else logs success_prob during
                 # training: the rollout worker's ep_*_success_prob stats need
@@ -535,6 +659,17 @@ class RobometerReplayBuffer(ReplayBuffer):
                 kwargs["reward"] += avg_reward
             else:
                 kwargs["reward"] = avg_reward
+
+            # ON-POLICY EPISODE LOG: one record per step, flushed per episode at
+            # the end of _add. Runs in EVERY regime, including dense
+            # no-termination where no detector ever fires.
+            self._eplog_step(
+                self._ep_key(kwargs),
+                prog=_raw_prog_sum / len(self.reward_relabeling_keys),
+                sp=_raw_sp_max,
+                reward=kwargs["reward"],
+                gt_now=bool(kwargs.get("is_success") or kwargs.get("success")),
+            )
             # REWARD-SOURCE PROOF (RPL_LOG_REWARD=1): first ~30 steps, show the env/GT
             # reward coming in, the VLM reward, and the final reward SAC trains on. If
             # final == vlm and != gt_in, the GT reward is overwritten (no leak).
@@ -558,9 +693,15 @@ class RobometerReplayBuffer(ReplayBuffer):
                         if success_prob > float(self.success_detection_threshold):
                             vote += 1
                 gate_open = _ep_step >= self.success_detection_min_ep_steps
-                if gate_open and vote > (
+                _vote_crossed = vote > (
                     len(self.reward_relabeling_keys) * self.success_detection_duration / 2
-                ):
+                )
+                if not gate_open and _vote_crossed:
+                    # The score DID cross threshold; only the min-episode-length
+                    # rule stopped the fire. Logging this separately keeps the
+                    # gate from silently hiding the model's real FP behaviour.
+                    self._eplog_mark_fire(_eid, step=_ep_step, gt_now=False, suppressed=True)
+                if gate_open and _vote_crossed:
                     kwargs["done"] = True
                     # THE reward-hacking signal. A fire with gt_success=0 is a FALSE
                     # termination: the policy got the episode ended (and the remaining
@@ -571,6 +712,7 @@ class RobometerReplayBuffer(ReplayBuffer):
                     self._n_fire = getattr(self, "_n_fire", 0) + 1
                     _gt_now = bool(kwargs.get("is_success") or kwargs.get("success"))
                     self._n_fire_false = getattr(self, "_n_fire_false", 0) + (0 if _gt_now else 1)
+                    self._eplog_mark_fire(_eid, step=_ep_step, gt_now=_gt_now)
                     logger.info(
                         f"[DETECT] fired ep={kwargs.get('episode_id')} "
                         f"step_in_ep={_ep_step} gt_success={int(_gt_now)} "
@@ -589,6 +731,14 @@ class RobometerReplayBuffer(ReplayBuffer):
                     for key in self.reward_relabeling_keys:
                         self.success_tracker[key].clear()
                     self._ep_steps.pop(_eid, None)
+
+        # Episode-end flush for the on-policy instrumentation. Deliberately OUTSIDE
+        # `if self.use_success_detection` and outside the reward-model branch: the
+        # dense no-termination regime never fires a detector, and that regime is
+        # exactly where the overoptimisation metrics (d'_onpolicy, farm_ratio, rho)
+        # have to be measured. No-op when RPL_EPISODE_LOG is unset.
+        if getattr(self, "_eplog_path", None) and (kwargs.get("done") or kwargs.get("truncated")):
+            self._eplog_flush(self._ep_key(kwargs))
 
         super()._add(**kwargs)
 

@@ -33,6 +33,17 @@ success_detection_threshold: 0.65
 # This is an extension to EvalServerConfig
 use_relative_rewards: false
 
+# beta * progress + (1 - beta) * success_prob, mixed before normalize_reward /
+# progress_as_potential. Reference: vlm_ibrl/env/vlm_envs.py's robometer_beta.
+# 1.0 (default) = pure progress head, unchanged from before this knob existed.
+# 0.0 = pure success_prob (the MetaWorld/Robomimic recipe).
+progress_beta: 1.0
+
+# Binarize the (possibly beta-mixed) reward: reward = 1.0 if r > thr else 0.0,
+# exactly as vlm_ibrl/env/vlm_envs.py does. null = off (continuous reward).
+# beta=0.0 + this set IS the MetaWorld/Robomimic/LIBERO recipe.
+progress_binarize_threshold: null
+
 # Whether to add estimated reward to the ground truth reward
 add_estimated_reward: false
 

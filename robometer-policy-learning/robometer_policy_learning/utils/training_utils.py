@@ -342,6 +342,8 @@ def create_buffer(
     success_detection_threshold: float = 0.65,
     add_estimated_reward: bool = False,
     icl_demo_path: Optional[str] = None,
+    progress_beta: float = 1.0,
+    progress_binarize_threshold: Optional[float] = None,
 ) -> Any:
     """
     Create a replay buffer for training.
@@ -481,6 +483,8 @@ def create_buffer(
                     success_detection_threshold=success_detection_threshold,
                     add_estimated_reward=add_estimated_reward,
                     icl_demo_path=icl_demo_path,
+                    progress_beta=progress_beta,
+                    progress_binarize_threshold=progress_binarize_threshold,
                 )
             else:
                 return ReplayBuffer(

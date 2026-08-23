@@ -287,6 +287,8 @@ def main(cfg: DictConfig):
             if hasattr(cfg, "reward_model") and cfg.reward_model is not None
             else False,
             icl_demo_path=OmegaConf.select(cfg, "reward_model.icl_demo_path", default=None),
+            progress_beta=OmegaConf.select(cfg, "reward_model.progress_beta", default=1.0),
+            progress_binarize_threshold=OmegaConf.select(cfg, "reward_model.progress_binarize_threshold", default=None),
         )
 
         if use_async_reward_relabel and reward_model is not None:
