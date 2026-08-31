@@ -139,9 +139,9 @@
                 \vspace{1cm}
 
                 \begin{minipage}[t]{.5\textwidth}
-                        Supervisor: \@dailysupervisor \hfill\\
-                        \ifdefempty{\@uvasupervisor}{}{University Supervisor: \@uvasupervisor \hfill\\}
-                        \ifdefempty{\@addsupervisor}{}{Additional Supervisor: \@addsupervisor \hfill\\}
+                        Main Supervisor: \@dailysupervisor \hfill\\
+                        \ifdefempty{\@uvasupervisor}{}{Additional Supervisors: \@uvasupervisor \hfill\\}
+                        \ifdefempty{\@addsupervisor}{}{External Supervisor: \@addsupervisor \hfill\\}
 
 
                         ~\hfill Examiner: \@examiner

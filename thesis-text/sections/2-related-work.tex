@@ -1,10 +1,62 @@
 \chapter{Related Work}
-\label{sec:related_work}
-% Your work needs to be grounded and compared to earlier work and the state-of-the-art. Start the section with announcing the research gap and also end with the research gap. Consider using hypotheses. 
-Write about your related work here. Make clear to which key papers you will compare your eventual results. This can be done from the perspective of methods used, the task at hand and the addressed domain.
+\label{sec:related-work}
 
-% The related work section is not a a background section. If you want to explain techniques, it is possible to have a background section after the Related Work section. Background should only be added when it has benefit for an informed audience. It is not common to use a background section. 
+Our work belongs in an interdisciplinary area. We learn a reward instead of designing one, we follow the recent wave of vision-language reward models for robots, we prioritize the use of failure data, we borrow in-context learning techniques, and we draw on the study of reward hacking. We review each in turn and say where RoboRef departs from it.
 
-Remember: a related works section is not a ``laundry list'' of references, cited for the sake of citing papers: they are the support and motivation for your research gap and research question that you are going to address.
+\section{Learned rewards for reinforcement learning}
 
-If you stick with Use \verb|\cite{}| for reference that is part of the sentence, and \verb|\citep{}| for references in parenthesis. For example, \cite{viola1997alignment} is awesome. Also, this is a citation~\citep{viola1997alignment}.
+Reinforcement learning needs a reward, and a long line of work tries to obtain that reward from data instead of writing it by hand. Inverse reinforcement learning recovers a reward function from expert demonstrations \citep{ng_algorithms_2000, abbeel_apprenticeship_2004}, while reward shaping adds guidance to a sparse reward without changing which policy is optimal \citep{ng_policy_1999}. A second strand drops the need for demonstrations and learns from human preferences over pairs of trajectory segments \citep{christiano_deep_2017}, an idea that later aligned large language models through reinforcement learning from human feedback \citep{ouyang_training_2022}. Most recently, foundation models have themselves become the source of feedback. RL-VLM-F, for instance, asks a VLM which of two images better satisfies a task and trains a reward from its answers \citep{wang_rl-vlm-f_2024}. 
+
+Across all of these, the reward is no longer hand-written but learned, which is the setting we work in. Learning the reward brings a risk that a carefully designed reward does not. A learned reward can be wrong in structured, repeatable ways, and a policy that optimizes against it can find and exploit those mistakes. We return to this risk in Section~\ref{sec:reward-hacking}, since it is central to why our objective is built the way it is.
+
+\section{Vision-language reward models for robotics}
+\label{sec:related-vlm}
+
+The most direct precursors to our work are VLMs trained specifically to score robot behavior. They take a video of a robot attempting a task together with a language description, and they return a reward that estimates its progress. They differ in what exactly they output, in how they use failure data, and in whether and how they are tested as an actual reward inside reinforcement learning. Table~\ref{tab:vlm-reward-models} summarizes the most prominent ones.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption[Vision-language reward models compared]{Vision-language reward models for robot manipulation. The last column reports whether the model was tested as the reward inside an RL loop, in which domain, and whether the tested reward was the released model used without in-domain adaptation.}
+\label{tab:vlm-reward-models}
+\begin{tabular}{@{}p{2.0cm}p{1.9cm}p{2.3cm}p{2.9cm}p{2.0cm}p{3.2cm}@{}}
+\toprule
+Model & Backbone & Training data & Reward output & Failure data & Downstream RL \\
+\midrule
+Robometer \citep{robometer} & Qwen3-VL-4B & $>$1M trajectories, 21 embodiments & dense per-frame progress and success, plus a comparison head & yes, through trajectory comparisons & real-world (zero-shot); simulation only with an in-domain LoRA variant \\
+\addlinespace
+RoboReward \citep{roboreward} & Qwen3-VL, 4B and 8B & $\sim$54k examples (Open X, RoboArena) & a single discrete 1--5 score for the whole episode &synthetic, from clipped or relabeled successes & real-world, zero-shot; simulation only as a baseline-VLM reward-type study \\
+\addlinespace
+Robo-Dopamine \citep{robodopamine} & RoboBrain 2.0 (Qwen2.5-VL), 3B and 8B & $\sim$100k trajectories, 3.4k hours of video & dense signed progress; needs a goal image and multi-view & no, expert successes only & simulation and real, after one-shot in-domain adaptation \\
+\addlinespace
+Large Reward Models \citep{TRI-reward-model} & Qwen3-VL-8B (LoRA) & multi-source, total size not reported & dense progress, a completion flag, and a contrastive term & indirect, via temporal ordering & simulation, zero-shot online (PPO); real-world via offline self-improvement \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Robometer \citep{robometer} is the model we build on, and we describe it in Chapter~\ref{sec:robometer}. It predicts dense per-frame progress and success and learns from failure data through trajectory comparisons. RoboReward \citep{roboreward} instead returns a discrete score from one to five for the whole episode, and it builds the negatives it needs by clipping successful videos short or relabeling them across tasks, so its failures are artifacts of editing, not genuine failed attempts. Robo-Dopamine \citep{robodopamine} produces a dense, signed progress signal, but it requires a goal image and multiple camera views as inputs, and it trains on expert successes instead of failures. Large Reward Models \citep{TRI-reward-model} combine a dense progress estimate with a binary completion flag and a contrastive term learned from the temporal order of frames. One recent model sits outside our table because it is not built on a VLM. The World Value Model \citep{wang_world_2026} breaks from the shared assumption of the others by building its value estimator on a pretrained video world model, and not a VLM, on the argument that the temporal priors of a world model suit progress estimation better than the static-image representations behind VLMs. It predicts dense per-frame progress and, closest to our own concerns, targets suboptimal execution directly, introducing a small-scale benchmark of human-labeled suboptimal trajectories with dense per-frame values.
+
+Two patterns in Table~\ref{tab:vlm-reward-models} matter for this thesis. The first is that not every model is tested in downstream RL with its final, released reward. Robometer's only simulated RL run uses a variant fine-tuned in-domain on LIBERO and not the released model. RoboReward tests its trained model in the real world only. Robo-Dopamine adapts its reward to each task from a single demonstration before learning. Large Reward Models is the clean case, driving simulated reinforcement learning zero-shot with its trained, frozen model. Yet even in this case, the analysis behind the RL performance remains shallow. A foundation reward model should justify its training cost with strong results in simulated and real-world RL alike, in-distribution and out of distribution (OOD). These models instead report headline success rates without examining the offline-to-online gap or the reward exploitation we find at its center. The second pattern is failure. Only some of these models train on failure data at all, and none assembles a large training corpus of genuine failed attempts with dense, per-frame progress labels, which is the gap our dataset fills. World Value Model is the closest, but its dense labels form a small, human-annotated evaluation benchmark, not a training set at scale.
+
+A number of related reward and value models share our motivation without being direct points of comparison. VLAC \citep{zhai_vision-language-action-critic_2025} predicts a dense progress delta and a done signal for real-world RL, and transfers to new tasks from a single in-context example. GVL \citep{ma_vision_2025} casts value estimation as ordering shuffled frames and reads values out of a vision-language model in context, with no training at all. ReWiND \citep{zhang_rewind_2025} learns a language-conditioned reward from a small set of demonstrations and then adapts to unseen tasks with little further interaction. Together these show how much can be done with a frozen or lightly trained foundation model, but none of them confronts the failure-labeling and reward-exploitation problems that we focus on.
+
+\section{Learning from failure data}
+
+Most reward and policy learning for robots leans on expert or successful data, and failure, when it is used at all, is treated as something to detect, not something to measure progress within. This is beginning to change. RoboFAC builds a large dataset of erroneous trajectories with question-answer annotations and uses it to analyze and correct robot failures \citep{lu_robofac_2025}, and FailSafe generates failure cases together with recovery actions so that vision-language-action models can notice and undo their mistakes \citep{lin_failsafe_2025}. Generalist robot policies have begun to use failure directly as well. $\pi_{0.7}$ trains on large amounts of suboptimal and failed robot data and conditions the policy on mistake labels that humans annotate by hand, so that it can be steered away from those mistakes at test time \citep{pi07_2026}. These efforts show that a failure carries information a success does not. Failure data is scarce and expensive to label, though, which is why most reward models avoid it.
+
+Our use of failure is different. We do not label failures in order to detect or recover from them. We give them dense, per-frame progress, so the same heads that score a success learn what partial and aborted progress looks like, and a model queried on an OOD scene where the robot has drifted off the task, knocking over an object mid-grasp for instance, can still flag the failure. To our knowledge no existing robot dataset provides this at training scale.
+
+\section{In-context learning}
+
+In-context learning is the ability of a large pretrained model to perform a task from examples placed in its input, without any change to its weights \citep{brown_language_2020}. While it has become one of the most studied properties for improving few-shot generalization across language and general multimodal tasks \citep{dong_survey_2024, wang_qwen2-vl_2024}, its application in embodied AI and robotics is still emerging. Most robotic applications of in-context learning focus on policy generation or high-level planning; its use inside robot reward models remains unexplored.
+
+The closest examples in the reward modeling space either avoid training or avoid visual grounding. GVL reads values out of a vision-language model conditioned on in-context information, but it does so entirely zero-shot without any training \citep{ma_vision_2025}. Conversely, Demo2Reward optimizes the language instruction of a reward model at test time by using demonstrations, but focuses on textual prompt tuning instead of visual in-context learning \citep{gumbsch_demonstrations_2026}. Neither approach trains a foundation reward model to natively process visual demonstrations as part of its evaluative forward pass.
+
+We bring in-context learning directly into the training loop of a robot reward model, so that a single model serves both modes, scoring a trajectory on its own or next to a successful demonstration of the same task. When a demonstration is present, the model no longer depends on the task description alone; the example shows it what success looks like in that scene and embodiment. As far as we can tell, no earlier robot reward model has trained with demonstrations in the loop this way.
+
+\section{Reward hacking in reward models}
+\label{sec:reward-hacking}
+
+Because a learned reward function serves as a surrogate objective for the true underlying task, optimizing a policy strictly against this proxy often introduces objective misalignment. The phenomenon where an agent exploits flaws in a learned reward function was identified early as a critical safety challenge \citep{amodei_concrete_2016}. It has since been extensively documented in reinforcement learning from human feedback (RLHF) for language models, where optimizing a policy beyond a certain threshold degrades actual performance even as the proxy reward score continues to climb \citep{gao_scaling_2023}. This vulnerability is equally pervasive in robotic manipulation; a policy can actively find and exploit states that the reward model mistakenly scores as successful.
+
+This issue is particularly acute for a reward driving reinforcement learning, where a false positive misleads an optimizing policy far more than a false negative \citep{gumbsch_demonstrations_2026}. This observation directly motivates our asymmetric training objective, which explicitly penalizes over-prediction more severely than under-prediction, and it anticipates our broader finding that strong offline validation does not guarantee a reward stays robust under online policy optimization.

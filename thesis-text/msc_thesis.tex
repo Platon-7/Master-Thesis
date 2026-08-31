@@ -14,37 +14,69 @@
 \usepackage{amsthm}
 
 \usepackage{natbib}
+\usepackage{booktabs} % nicer table rules
+\usepackage{subcaption} % sub-figures (a)/(b)
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, fit, backgrounds}
+\usepackage{pgfplots} % vector plots as code (no raster PNGs)
+\pgfplotsset{compat=1.18}
+\usepackage{listings} % verbatim prompts in the appendix
+\lstset{basicstyle=\footnotesize\ttfamily, breaklines=true, breakindent=0pt,
+  columns=fullflexible, keepspaces=true, frame=single, framesep=4pt,
+  xleftmargin=3pt, aboveskip=4pt, belowskip=2pt}
+\usepackage[most]{tcolorbox} % styled prompt boxes (appendix)
+% teal box = vision-language model prompt; amber box = language model prompt
+\newtcblisting{vlmprompt}[1]{breakable, enhanced, sharp corners,
+  colframe=teal!55!black, colback=teal!4, coltitle=white,
+  colbacktitle=teal!55!black, fonttitle=\bfseries\small, title={#1},
+  listing only, listing options={basicstyle=\footnotesize\ttfamily,
+  breaklines=true, breakindent=0pt, columns=fullflexible, keepspaces=true},
+  boxrule=0.6pt, left=5pt, right=4pt, top=2pt, bottom=2pt}
+\newtcblisting{llmprompt}[1]{breakable, enhanced, sharp corners,
+  colframe=orange!75!black, colback=orange!6, coltitle=white,
+  colbacktitle=orange!75!black, fonttitle=\bfseries\small, title={#1},
+  listing only, listing options={basicstyle=\footnotesize\ttfamily,
+  breaklines=true, breakindent=0pt, columns=fullflexible, keepspaces=true},
+  boxrule=0.6pt, left=5pt, right=4pt, top=2pt, bottom=2pt}
+
+% Reduce overfull lines in the narrow two-column layout: as a last resort, allow
+% TeX to add up to 3em of extra stretch to hard-to-break lines rather than let
+% text spill past the column edge.
+\emergencystretch=3em
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DOCUMENT METADATA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Thesis related entries
-\title{Master AI thesis template:\\ A tale of computers}
+\title{RoboRef: A Foundation Reward Model for Robot Reinforcement Learning}
 % \subtitle{A tale of computers}
 
 % Date on which your thesis is submitted
-\date{2026/06/19}
+\date{2026/07/17}
 
-\author{Student \textsc{van Naam}}
-\studentnumber{314159265}
-\period{2026/01/05 -- 2026/06/19}
+\author{Student \textsc{Platon Karageorgis}}
+\studentnumber{15552055}
+\period{2026/01/05 -- 2026/07/17}
 \credits{36 ECTS}
-\examiner{Pr. E. Xaminer}
-\dailysupervisor{M. Entor}
-\uvasupervisor{Dr U. Vasupervisor}  % Only if different from daily supervisor, leave empty otherwise
-\addsupervisor{Ir. E. N. Gineer}  % Optional
+\examiner{Pascal Mettes}
+\dailysupervisor{Christian Gumbsch}
+\uvasupervisor{Leonardo Barcellona, Stratis Gavves}  % Only if different from daily supervisor, leave empty otherwise
+\addsupervisor{Rahaf Aljundi}  % Optional
 
 \begin{document}
 \maketitle
 
 \frontmatter
         \chapter*{Abstract}
-                % TODO: convert the plain-text parentheticals "(Liang et al.)" and
-                % "(Gumbsch et al., 2026)" to \citep{} once the bibliography is assembled.
                 \begin{adjustwidth}{4cm}{4cm}
-                        Defining a reward is a long-standing problem in robot reinforcement learning (RL). Prior work has engineered complicated reward functions and heuristics, yet no single solution delivers both strong performance and generalization. The recent surge of vision-language models (VLMs), with impressive performance across domains, raises a key question: can state-of-the-art VLMs provide meaningful rewards and resolve the reward-definition bottleneck in robot RL? A handful of recent papers investigate this question, with Robometer (Liang et al.) demonstrating the most competitive performance, yet the field remains largely unexplored. We introduce RoboRef, which builds on Robometer and introduces several innovations. First, we identify that their dataset lacks failure trajectories conveying physical understanding, and re-curate it to fill this gap. Second, we incorporate in-context demonstrations to sharpen the model's notion of task success. Finally, following prior work (Gumbsch et al., 2026), we argue that VLM reward models are overconfident in predicting success and propose an alternative loss that penalizes false positives to enforce conservatism. We evaluate RoboRef on offline metrics and downstream RL across two simulators. We find that state-of-the-art reward models excel offline yet struggle as reward signals in downstream RL. RoboRef outperforms baselines in both regimes, making it, to our knowledge, the state-of-the-art VLM reward model for robot RL.
+                        Defining a reward is a long-standing problem in robot reinforcement learning (RL). Prior work has engineered complicated reward functions and heuristics, yet no single solution delivers both strong performance and generalization. The recent surge of vision-language models (VLMs), with impressive performance across domains, raises a key question: can state-of-the-art VLMs provide meaningful rewards and resolve the reward-definition bottleneck in robot RL? A handful of recent papers finetune state-of-the-art VLMs on large robotic datasets to investigate this question, with Robometer \citep{robometer} demonstrating the most competitive performance, yet the field remains largely unexplored. We introduce RoboRef, which builds on Robometer and introduces several innovations. First, we identify that its dataset lacks annotated failure trajectories conveying physical understanding, and re-curate it to fill this gap. Second, we incorporate in-context demonstrations to sharpen the model's notion of task success. Finally, because false positives mislead an optimizing policy far more than false negatives \citep{gumbsch_demonstrations_2026}, we propose an alternative loss that penalizes them to enforce conservatism. We evaluate RoboRef on offline metrics and downstream RL across three simulated benchmarks. We find that state-of-the-art reward models excel at offline reward metrics yet struggle as reward signals in downstream RL. RoboRef, in contrast, trains policies on tasks where the off-the-shelf baselines never learn at all and delivers the strongest overall downstream performance of any reward model we test, making it, to our knowledge, the state-of-the-art vision-language reward model.
                 \end{adjustwidth}
+
+\chapter*{Acknowledgements}
+        \begin{adjustwidth}{4cm}{4cm}
+                This thesis was made possible by the ELLIS Honours program, whose funding supported the work and opened the collaboration with Toyota Motor Europe (TME). I am grateful to my supervisors, Leonardo Barcellona, Rahaf Aljundi, Stratis Gavves, and Christian Gumbsch, for their guidance throughout the project, and to Pascal Mettes for examining this thesis. I want to add a special thank you to Christian for pushing me to my limits, helping me grow as a researcher, and supporting me with his positive mindset.
+        \end{adjustwidth}
 
 \tableofcontents
 
@@ -61,17 +93,18 @@
 \mainmatter
         \include{sections/1-introduction}
         \include{sections/2-related-work}
-        \include{sections/3-methodology}
-        \include{sections/4-results}
-        \include{sections/5-discussion}
-        \include{sections/6-conclusion}
+        \include{sections/3-background}
+        \include{sections/4-methodology}
+        \include{sections/5-results}
+        \include{sections/6-discussion}
+        \include{sections/7-conclusion}
 
 \bibliographystyle{ACM-Reference-Format}
-\bibliography{bibliographies/references}
+\bibliography{bibliographies/references_filtered}
 
 % \newpage
 \appendix
-        \include{sections/7-appendix}
+        \include{sections/8-appendix}
 
 \end{document}
 
