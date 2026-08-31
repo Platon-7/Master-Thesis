@@ -7,7 +7,12 @@
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=120G
+#SBATCH --mem=47G
+# HPC policy (Faculty HPC Community Council 2025-06-02): claim resources
+# FRACTIONALLY to GPUs -- l4: 16 cores/47GB per GPU; performance: 32 cores/96GB;
+# fp64: 48 cores/128GB. capacity: <=256 cores over <=2 servers. Measured peak RSS
+# of these runs is ~21GB, so 47G is ample; the previous 120G silently forced a
+# 42-core allocation and capped us at 6 concurrent jobs instead of 16.
 #
 # M1 in WAKEUP_PLAN.md. Hipster port of jobs/causal_calib.job.
 #
@@ -52,7 +57,10 @@ TAG="${TAG:-run2}"
 EPISODES="${EPISODES:-32}"
 NCK="${NCK:-8}"
 
-AD=$(ls -d /scratch/$USER/roboref_runs/ms_${TASK}_gt_gt_sanity_s0_*/checkpoints 2>/dev/null | head -1)
+# ACTOR_DIR lets you point at any GT run's checkpoints/ dir; otherwise fall back
+# to the gt_sanity naming, then to any GT run for this task.
+AD="${ACTOR_DIR:-}"
+[[ -d "$AD" ]] || AD=$(ls -d /scratch/$USER/roboref_runs/ms_${TASK}_gt_*_s0_*/checkpoints 2>/dev/null | head -1)
 [[ -d "$AD" ]] || { echo "ERROR: no GT actor checkpoints dir for $TASK" >&2; exit 2; }
 
 echo "==================== M1 causal calib ===================="

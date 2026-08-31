@@ -104,6 +104,9 @@ class RobometerReplayBuffer(ReplayBuffer):
         self._eplog_path = _elp
         self._eplog = {}          # env_key -> per-step accumulator
         self._eplog_n = 0
+        self._eplog_window = []   # rolling (vlm_return, gt_solved) for the W&B view
+        self._eplog_window_n = int(os.environ.get("RPL_WANDB_WINDOW", "500"))
+        self._eplog_every = int(os.environ.get("RPL_WANDB_EVERY", "50"))
         self._eplog_threshold_source = os.environ.get(
             "RPL_THRESHOLD_SOURCE", "config:reward_model.success_detection_threshold"
         )
@@ -505,6 +508,59 @@ class RobometerReplayBuffer(ReplayBuffer):
                 f.write(json.dumps(rec) + "\n")
         except Exception as exc:  # never let logging kill a run
             logger.warning(f"[EPLOG] write failed: {exc}")
+        self._eplog_wandb(rec)
+
+    def _eplog_wandb(self, rec):
+        """Push the overoptimisation metrics to W&B over a rolling episode window.
+
+        These live only in episodes.jsonl otherwise, which means they are invisible
+        in the run dashboard and lost if /scratch is purged. Everything here is
+        recomputable from the jsonl -- this is a convenience view, so it must never
+        be able to break training.
+        """
+        try:
+            import wandb
+            if wandb.run is None:
+                return
+        except Exception:
+            return
+        w = self._eplog_window
+        w.append((float(rec["vlm_return"]), int(rec["gt_solved_anytime"])))
+        if len(w) > self._eplog_window_n:
+            del w[: len(w) - self._eplog_window_n]
+        if self._eplog_n % self._eplog_every != 0 or len(w) < 20:
+            return
+        try:
+            import statistics as _st
+
+            rets = [x[0] for x in w]
+            gts = [x[1] for x in w]
+            sol = [r for r, g in zip(rets, gts) if g]
+            uns = [r for r, g in zip(rets, gts) if not g]
+            out = {
+                "rhack/episodes": self._eplog_n,
+                "rhack/gt_success_rate": sum(gts) / len(gts),
+                "rhack/vlm_return_mean": _st.mean(rets),
+            }
+            if len(sol) >= 2 and len(uns) >= 2:
+                sd = ((_st.pvariance(sol) + _st.pvariance(uns)) / 2.0) ** 0.5
+                if sd > 0:
+                    out["rhack/d_prime_onpolicy"] = (_st.mean(sol) - _st.mean(uns)) / sd
+                out["rhack/mean_return_solved"] = _st.mean(sol)
+                out["rhack/mean_return_unsolved"] = _st.mean(uns)
+                med = _st.median(sol)
+                if med:
+                    q = sorted(uns)
+                    p95 = q[min(len(q) - 1, max(0, int(round(0.95 * (len(q) - 1)))))]
+                    out["rhack/farm_ratio"] = p95 / med
+                # AUROC of vlm_return vs GT -- the statistic that predicted PullCube
+                # (0.923 -> 92%) and PokeCube (0.60 -> ~10%)
+                out["rhack/auroc_onpolicy"] = sum(
+                    (a > b) + 0.5 * (a == b) for a in sol for b in uns
+                ) / (len(sol) * len(uns))
+            wandb.log(out, commit=False)
+        except Exception as exc:
+            logger.warning(f"[EPLOG] wandb push failed (ignored): {exc}")
 
     def _add(
         self,

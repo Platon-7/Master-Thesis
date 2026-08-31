@@ -89,12 +89,35 @@ def main(cfg: DictConfig):
                 chunk_size=cfg.training.chunk_size, obs_as_sequence=False, gamma=offline_algorithm_cfg.gamma
             )
         logger.info(f"Offline Sampler: {sampler.__class__.__name__}")
+        # A BC warm start clones (obs, action) and uses no reward at all -- the DENSE
+        # VLM progress head drives the online phase that follows. Passing the reward
+        # model here would relabel every demo frame (thousands of VLM calls) for a
+        # signal BC never reads.
+        # Skip reward relabelling when the demo file already carries rewards. Our
+        # ManiSkill demos are pre-relabelled with the VLM progress head
+        # (scripts/relabel_demo_rewards.py writes rewards_source=vlm_progress_head),
+        # so re-scoring them would cost thousands of VLM calls, demand a
+        # sentence_model the offline phase has no use for, and overwrite nothing.
+        _h5 = cfg.env.h5_dataset_path
+        _offline_is_bc = str(cfg.alg.offline_alg_name).lower() == "bc"
+        try:
+            import h5py as _h5py
+            with _h5py.File(_h5, "r") as _f:
+                _d = _f["data"]
+                _k = next(iter(_d.keys()))
+                _has_rewards = "rewards" in _d[_k]
+                _src = _f.attrs.get("rewards_source", "<unset>")
+            if _has_rewards:
+                logger.info(f"Offline demos already carry rewards (source={_src}); skipping relabelling")
+                _offline_is_bc = True   # route to the plain H5 loader
+        except Exception as _exc:
+            logger.warning(f"Could not inspect {_h5} for stored rewards: {_exc}")
         offline_buffer = create_buffer(
             sampler=sampler,
-            use_eval_server=components.use_eval_server,
+            use_eval_server=False if _offline_is_bc else components.use_eval_server,
             eval_server_url=components.eval_server_url,
             eval_server_timeout=components.eval_server_timeout,
-            reward_model=reward_model,
+            reward_model=None if _offline_is_bc else reward_model,
             reward_model_exp_cfg=reward_model_exp_cfg,
             use_gt_rewards=use_gt_rewards,
             use_relative_rewards=use_relative_rewards,
@@ -323,6 +346,54 @@ def main(cfg: DictConfig):
         # Copy components from offline algorithm if it exists
         if offline_algo is not None:
             algorithm.copy_components(offline_algo)
+            # copy_components() transfers the OPTIMISER OBJECTS from the offline algo,
+            # not just their learning rates -- so the online phase inherits Adam's
+            # accumulated moments from a completely different objective (IQL's
+            # advantage-weighted regression, or BC's MSE).
+            #
+            # Adam steps by lr * g / (sqrt(v)+eps). Measured on a real 20k-step IQL
+            # actor_optimizer checkpoint: 42% of the actor's parameters have
+            # sqrt(v) < 1e-8 (AWR never sent them a gradient) and 58% are below 1e-6,
+            # so the median amplification 1/(sqrt(v)+eps) is 1.6e7 -- a unit gradient
+            # moves a weight by ~160 at lr=1e-5 and ~4.8e3 at lr=3e-4.
+            #
+            # NOTE on what this does and does not fix: rebuilding the optimisers did
+            # NOT stop the warm-start collapse (measured A/B: stale vs fresh both went
+            # 14-18% -> 0.0% at the first post-update eval). What stops the collapse is
+            # the KL trust region, online_algorithm.train_actor_with_kl_divergence=true,
+            # which anchors the online actor to old_actor -- set by copy_components to
+            # the offline policy. sac.yaml ships that flag disabled; turn it on for any
+            # offline->online run. This block is kept because inheriting another
+            # objective's curvature estimates is wrong on its own terms.
+            #
+            # Fresh optimisers are the correct handoff: keep the learned weights, drop
+            # the stale curvature estimates.
+            _oc = online_algo_config
+            algorithm.actor_optimizer = torch.optim.Adam(
+                algorithm.actor.parameters(),
+                lr=_oc.actor_optimizer_lr,
+                eps=_oc.actor_optimizer_eps,
+                weight_decay=_oc.actor_optimizer_weight_decay,
+            )
+            if hasattr(algorithm, "critic") and getattr(algorithm, "critic_optimizer", None) is not None:
+                algorithm.critic_optimizer = torch.optim.Adam(
+                    list(algorithm.critic.parameters()),
+                    lr=_oc.critic_optimizer_lr,
+                    betas=_oc.critic_optimizer_betas,
+                    eps=_oc.critic_optimizer_eps,
+                    weight_decay=_oc.critic_optimizer_weight_decay,
+                )
+            logger.info(
+                f"OFFLINE->ONLINE: rebuilt FRESH actor/critic optimisers "
+                f"(actor_lr={_oc.actor_optimizer_lr}, critic_lr={_oc.critic_optimizer_lr}); "
+                f"stale Adam moments from the offline objective discarded"
+            )
+            # Same rebinding hazard as the resume path: copy_components uses setattr,
+            # so algorithm.actor may no longer be the local `actor` the runner holds.
+            actor = algorithm.actor
+            if hasattr(algorithm, "critic"):
+                critic = algorithm.critic
+
         else:
             if cfg.training.load_dir is not None:
                 logger.info(f"Loading checkpoint from {cfg.training.load_dir}")

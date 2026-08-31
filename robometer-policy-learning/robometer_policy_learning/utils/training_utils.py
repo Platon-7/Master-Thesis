@@ -419,8 +419,13 @@ def create_buffer(
     def _create_single_buffer():
         """Helper to create a single buffer instance."""
         if h5_paths is not None:
-            # Offline buffer (from H5 dataset)
-            if not use_full_state:
+            # Offline buffer (from H5 dataset).
+            # Relabelling only makes sense when a reward model / eval server is actually
+            # supplied. A BC warm start is supervised on (obs, action) and needs neither
+            # rewards nor language embeddings, so routing it through the Robometer buffer
+            # would demand a sentence_model it has no use for (and burn VLM calls on
+            # every demo frame). Fall through to the plain loader in that case.
+            if not use_full_state and (reward_model is not None or use_eval_server):
                 return RobometerH5ReplayBuffer(
                     reward_model=reward_model,
                     reward_model_config=reward_model_exp_cfg,
@@ -449,7 +454,8 @@ def create_buffer(
                     add_estimated_reward=add_estimated_reward,
                 )
             else:
-                assert use_gt_rewards, "use_gt_rewards must be True when use_full_state is True"
+                if use_full_state:
+                    assert use_gt_rewards, "use_gt_rewards must be True when use_full_state is True"
                 return H5ReplayBuffer(
                     h5_paths=h5_paths,
                     sampler=sampler,

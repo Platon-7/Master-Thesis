@@ -166,14 +166,15 @@ class RolloutWorker:
                 # Get info safely
                 info_i = extract_info_for_env(infos, i, self.num_envs)
 
-                # Extract success info (if episode is done/truncated)
+                # Success on EVERY step -- see robometer_rollout_worker for why:
+                # with terminate_on_success=false the terminal step is not where
+                # success necessarily is, so gating on done/truncated silently
+                # under-reports it to the buffer.
                 success_info = {}
-                if done_i or truncated_i:
-                    # Pass success indicators from info to buffer
-                    if "is_success" in info_i:
-                        success_info["is_success"] = info_i["is_success"]
-                    elif "success" in info_i:
-                        success_info["success"] = info_i["success"]
+                if "is_success" in info_i:
+                    success_info["is_success"] = info_i["is_success"]
+                elif "success" in info_i:
+                    success_info["success"] = info_i["success"]
 
                 # Add to buffer
                 # Extract step_in_episode from info if available (from async reward relabel wrapper)
@@ -293,8 +294,13 @@ class EpisodeTracker:
         self.total_steps += actual_env_steps if actual_env_steps is not None else 1
         self.current_rewards[env_idx] += reward
 
-        # Check for success indicators (check both done and truncated for real robot compatibility)
-        if (done or truncated) and self.is_success(info):
+        # Latch success on ANY step, not just the terminal one. With
+        # terminate_on_success=false the episode always runs the full horizon, so an
+        # episode solved at step ~15 whose object is later disturbed reports
+        # is_success=False at the final step and was scored a failure here -- while
+        # evaluation_worker, which ORs across steps, scored the same episode a success.
+        # This is the metrics-side twin of the buffer-side fix in _collect_step.
+        if self.is_success(info):
             self.current_successes[env_idx] = True
 
         # Track env_reward, relabeled_reward, and success_prob if available

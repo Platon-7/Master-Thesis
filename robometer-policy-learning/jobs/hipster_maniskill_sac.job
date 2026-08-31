@@ -7,7 +7,12 @@
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=120G
+#SBATCH --mem=47G
+# HPC policy (Faculty HPC Community Council 2025-06-02): claim resources
+# FRACTIONALLY to GPUs -- l4: 16 cores/47GB per GPU; performance: 32 cores/96GB;
+# fp64: 48 cores/128GB. capacity: <=256 cores over <=2 servers. Measured peak RSS
+# of these runs is ~21GB, so 47G is ample; the previous 120G silently forced a
+# 42-core allocation and capped us at 6 concurrent jobs instead of 16.
 #
 # Hipster-cluster adaptation of maniskill_sac.job (Snellius original). Same
 # ARM/TASK/SEED/STEPS/REWARD_CKPT/TERMINATE/EXTRA_ARGS/STATE_ONLY interface;
@@ -145,6 +150,57 @@ ARM_ARGS+=(
   "online_algorithm.learning_starts=${LEARNING_STARTS:-4000}"
 )
 
+# --- offline -> online (the codebase's own recipe) --------------------------
+# configs/libero_online_rl.yaml is this repo's reference for offline->online RL:
+#   offline_alg_name: iql | bc      num_offline_steps: 100_000
+#   buffer.sample_ratio: 0.5        env.h5_dataset_path: <demos>
+# IQL is the default there, and the reason matters: its component_names include
+# critic and critic_target, so SAC inherits a TRAINED critic. BC transfers only the
+# actor, leaving SAC to optimise a cloned policy against a random critic -- which
+# destroys it (measured on LiftPeg: 30% warm start -> 0/704 episodes). IQL also
+# carries its own conservatism (policy_extraction=awr, ddpg_bc_weight=0.1).
+OFFLINE_ALG="${OFFLINE_ALG:-iql}"
+if [[ -n "${DEMO_H5:-}" ]]; then
+    if [[ ! -f "$DEMO_H5" ]]; then
+        echo "ERROR: DEMO_H5 not found: $DEMO_H5" >&2; exit 6
+    fi
+    ARM_ARGS+=(
+      "algorithm@offline_algorithm=${OFFLINE_ALG}"
+      "alg.offline_alg_name=${OFFLINE_ALG}"
+      "+env.h5_dataset_path=$DEMO_H5"
+      "training.num_offline_steps=${OFFLINE_STEPS:-100000}"
+      "buffer.sample_ratio=${SAMPLE_RATIO:-0.5}"
+    )
+    echo "OFFLINE->ONLINE: ${OFFLINE_ALG}, ${OFFLINE_STEPS:-100000} steps, "\
+         "sample_ratio ${SAMPLE_RATIO:-0.5}, demos $(basename "$DEMO_H5")"
+fi
+
+# --- checkpointing / resume -------------------------------------------------
+# Checkpoints hold actor+critic+critic_target+optimizers+log_ent_coef (~98 MB each).
+# The REPLAY BUFFER is deliberately NOT saved: obs include the raw 224x224x3 image
+# (the actor has a Linear(150528,384) on it, so it cannot be dropped without
+# changing the architecture), which puts a 300k-capacity dump at tens of GB per
+# job -- untenable on a /scratch that is 92% full and shared. A resume therefore
+# restores the POLICY and CRITIC but refills the buffer from scratch.
+SAVE_INTERVAL="${SAVE_INTERVAL:-50000}"     # 1.5M/50k = 30 ckpts ~ 2.9 GB per run
+ARM_ARGS+=("training.save_interval=${SAVE_INTERVAL}")
+# RESUME_FROM=/path/to/run/checkpoints/<env_step>   (dir name IS the env step)
+if [[ -n "${RESUME_FROM:-}" ]]; then
+    if [[ ! -f "$RESUME_FROM/actor.pt" ]]; then
+        echo "ERROR: RESUME_FROM has no actor.pt: $RESUME_FROM" >&2; exit 5
+    fi
+    ARM_ARGS+=("training.load_dir=$RESUME_FROM")
+    echo "RESUMING from $RESUME_FROM (buffer NOT restored; STEPS should be the REMAINING budget)"
+fi
+
+# Match SAC's entropy target to that sigma, otherwise the tuner inflates the noise
+# straight back up (auto = -dim(A) implies sigma ~0.09 only after a long collapse).
+# H = d*(ln(sigma) + 0.5*ln(2*pi*e)); sigma=0.15 -> -1.91 (4-D), -3.35 (7-D).
+if [[ -n "${TARGET_ENTROPY:-}" ]]; then
+    ARM_ARGS+=("online_algorithm.target_entropy=${TARGET_ENTROPY}")
+    echo "TARGET_ENTROPY: ${TARGET_ENTROPY}"
+fi
+
 read -r -a EXTRA_ARR <<< "${EXTRA_ARGS:-}"
 
 if [[ "${STATE_ONLY:-0}" == "1" ]]; then
@@ -178,6 +234,9 @@ echo "MODEL_TAG   : $MODEL_TAG"
 echo "REWARD_CKPT : $REWARD_CKPT"
 echo "SEED        : $SEED"
 echo "STEPS       : $STEPS"
+echo "SAVE_INTERVAL: $SAVE_INTERVAL"
+echo "RESUME_FROM : ${RESUME_FROM:-<none>}"
+echo "DEMO_H5     : ${DEMO_H5:-<none, from scratch>}"
 echo "TERMINATE   : ${TERMINATE:-1}"
 echo "ENV_PREFIX  : $ENV_PREFIX"
 echo "WANDB_MODE  : $WANDB_MODE"
