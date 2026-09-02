@@ -107,6 +107,71 @@ print(torch.__version__, mani_skill.__version__, sapien.__version__, robometer._
 The Snellius-built wheels run here unmodified: hipster has glibc 2.28 vs RHEL9's 2.34,
 but torch 2.13+cu130 and sapien 3.0.3 are manylinux_2_28 and import fine.
 
+## Rebuilding the Vulkan stack (SAPIEN will not render without it)
+
+**The scratch purge took this too**, and it is not in the venv -- the job scripts
+point `LD_LIBRARY_PATH` / `VK_ICD_FILENAMES` at `/scratch/$USER/{vulkan_loader,nvidia_driver}`,
+so if those are gone every run dies at the first render. Neither directory can be
+regenerated from the tar; rebuild both:
+
+Why it is needed: hipster's compute-node image ships CUDA-only NVIDIA userspace --
+no Vulkan/GLX libs, no `/usr/share/vulkan/icd.d`, no system Mesa. So we supply the
+ICD ourselves from an *extracted* (never installed) driver .run, and pair it with a
+newer loader, because SAPIEN's bundled loader (1.3.224) cannot negotiate with this
+driver's ICD interface -- it fails with `Could not get vkCreateInstance via
+vk_icdGetInstanceProcAddr`. Loader 1.4.357 can.
+
+```bash
+# 1. NVIDIA driver, extracted only. The version must match the nodes' driver
+#    (check with `nvidia-smi --query-gpu=driver_version --format=csv,noheader`
+#    inside a GPU job); 610.43.02 is what these nodes ran.
+mkdir -p /scratch/$USER/nvidia_driver && cd /scratch/$USER/nvidia_driver
+curl -sSL -o NVIDIA-driver.run \
+  "https://download.nvidia.com/XFree86/Linux-x86_64/610.43.02/NVIDIA-Linux-x86_64-610.43.02.run"
+chmod +x NVIDIA-driver.run
+./NVIDIA-driver.run --extract-only --target /scratch/$USER/nvidia_driver/extracted
+
+# 2. SONAME symlinks. The extracted tree has only libFoo.so.610.43.02 files, but
+#    the loader dlopens by SONAME (libFoo.so.0), so every lib needs its link or
+#    libGLX_nvidia fails to resolve its own dependencies at dlopen time.
+cd /scratch/$USER/nvidia_driver/extracted
+for f in *.so.610.43.02; do
+  soname=$(readelf -d "$f" 2>/dev/null | grep SONAME | grep -oP '\[\K[^\]]+')
+  [ -n "$soname" ] && [ ! -e "$soname" ] && ln -sf "$f" "$soname"
+done
+ln -sf libGLX_nvidia.so.610.43.02 libGLX_nvidia.so.0
+ln -sf libEGL_nvidia.so.610.43.02 libEGL_nvidia.so.0
+
+# 3. ICD manifest with an ABSOLUTE library_path. The driver ships nvidia_icd.json
+#    with a bare filename, which the loader cannot find outside a system dir.
+cat > /scratch/$USER/nvidia_driver/nvidia_icd_abs.json <<EOF
+{
+    "file_format_version" : "1.0.1",
+    "ICD": {
+        "library_path": "/scratch/$USER/nvidia_driver/extracted/libGLX_nvidia.so.0",
+        "api_version" : "1.4.341"
+    }
+}
+EOF
+
+# 4. Modern Vulkan loader from conda-forge (note: `tar --zstd` does not exist here).
+mkdir -p /scratch/$USER/vulkan_loader && cd /scratch/$USER/vulkan_loader
+curl -sSL -o loader.conda \
+  "https://api.anaconda.org/download/conda-forge/libvulkan-loader/1.4.357.0/linux-64/libvulkan-loader-1.4.357.0-h5279c79_0.conda"
+unzip -o -q loader.conda
+mkdir -p extracted
+zstd -dc pkg-libvulkan-loader-1.4.357.0-h5279c79_0.tar.zst | tar -xf - -C extracted
+```
+
+Verify on a GPU node (never the login node -- there is no GPU there):
+
+```bash
+sbatch jobs/hipster_verify.job     # expect a real render, torch.Size([1, 512, 512, 3])
+```
+
+Order matters in `LD_LIBRARY_PATH`: the loader directory must precede the driver
+directory, which is what `hipster_maniskill_sac.job` already does.
+
 ## When SLURM commands fail on the login node
 
 Seen on `hipster-l1` for ~36 h (31 Aug - 2 Sept). Symptom:
