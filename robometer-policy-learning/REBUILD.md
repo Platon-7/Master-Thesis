@@ -70,6 +70,73 @@ Expect all checks PASS, including "robometer not shadowed" and "vectorized rollo
 
 ---
 
+# Rebuilding ON hipster (AlmaLinux 8.10, L4) — added 2026-09-02
+
+The instructions above target Snellius. Restoring this env on **hipster** needs four
+extra steps, learned the hard way after `/scratch/$USER/envs` was purged on 1 Sept
+(scratch was at 96% full; `maniskill_assets/` and `roboref_runs/` survived, the venv
+did not). Budget ~10 minutes.
+
+```bash
+# 1. tar has no --zstd on this cluster (GNU tar 1.30). Pipe it instead.
+mkdir -p /scratch/$USER/envs
+zstd -dc /home/$USER/Master-Thesis-transfer/env/maniskill_rl.tar.zst \
+  | tar -xf - -C /scratch/$USER/envs
+
+# 2. bin/python3 is a symlink to Snellius' Anaconda, which does not exist here.
+#    Repoint it at the system 3.12 and rewrite pyvenv.cfg.
+cd /scratch/$USER/envs/maniskill_rl
+ln -sf /usr/bin/python3.12 bin/python3
+printf 'home = /usr/bin\ninclude-system-site-packages = false\nversion = 3.12.12\nexecutable = /usr/bin/python3.12\n' > pyvenv.cfg
+
+# 3. Do NOT `pip install -e` the two packages: their pyproject pins
+#    ==3.10.* / ==3.11.* and pip refuses on 3.12. The tar already contains the
+#    editable hooks -- just repoint the .pth files at your checkout.
+SP=/scratch/$USER/envs/maniskill_rl/lib/python3.12/site-packages
+sed -i "s|/gpfs/home4/pkarageorgis/DAS-5/Master-Thesis|/home/$USER/Master-Thesis|g" \
+  $SP/_editable_impl_robometer.pth \
+  $SP/_editable_impl_robometer_policy_learning.pth \
+  $SP/_editable_impl_openpi_client.pth
+
+# 4. Verify
+/scratch/$USER/envs/maniskill_rl/bin/python -c "
+import torch, mani_skill, sapien, robometer, robometer.data.dataset_types
+print(torch.__version__, mani_skill.__version__, sapien.__version__, robometer.__file__)"
+```
+
+The Snellius-built wheels run here unmodified: hipster has glibc 2.28 vs RHEL9's 2.34,
+but torch 2.13+cu130 and sapien 3.0.3 are manylinux_2_28 and import fine.
+
+## When SLURM commands fail on the login node
+
+Seen on `hipster-l1` for ~36 h (31 Aug - 2 Sept). Symptom:
+
+```
+squeue: error: resolve_ctls_from_dns_srv: res_nsearch error: Unknown host
+squeue: fatal: Could not establish a configuration source
+```
+
+Three simultaneous faults, `munge` being the root one:
+
+* `systemctl is-active munge` -> `inactive`, `/var/run/munge/munge.socket.2` missing,
+  `munge -n` fails. Nothing can authenticate to SLURM.
+* `host -t SRV _slurmctld._tcp` -> NXDOMAIN. There is no local `/etc/slurm/slurm.conf`;
+  this is a configless setup, so clients have no way to find the controller.
+  `SLURM_CONF_SERVER=hipster` (and 146.50.10.111-114) also fails.
+* TCP 146.50.10.114:6817 unreachable.
+
+Running jobs are unaffected (slurmd on the compute nodes, shared filesystem) -- check
+liveness with `ls -l --time-style=full-iso logs/*.err` rather than `squeue`. There is
+nothing to fix from userspace: mail feiog@uva.nl. `hipster-l0/l2/l3` exist and accept
+SSH, so try `ssh hipster-l2 squeue` before escalating.
+
+## Do not put anything you cannot regenerate on /scratch
+
+The purge took the venv with no warning. `maniskill_assets/` (demos, relabelled
+demo files, PPO checkpoints) and `roboref_runs/` survived, but treat that as luck.
+The tar in `Master-Thesis-transfer/env/` is the only copy of the environment.
+
+
 # What changed since this tar was built
 
 Work continued on a second cluster ("hipster": AlmaLinux 8.10, L4 GPUs). **None of
