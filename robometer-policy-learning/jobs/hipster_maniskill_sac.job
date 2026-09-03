@@ -184,6 +184,26 @@ fi
 # restores the POLICY and CRITIC but refills the buffer from scratch.
 SAVE_INTERVAL="${SAVE_INTERVAL:-50000}"     # 1.5M/50k = 30 ckpts ~ 2.9 GB per run
 ARM_ARGS+=("training.save_interval=${SAVE_INTERVAL}")
+# CHAIN=1: resume from the newest checkpoint of the newest run dir matching this
+# arm, so a long budget can be split into short chunks. Short chunks are the only
+# way to get scheduled here: the partition binds 16 CPUs per GPU and nodes usually
+# have <16 idle, so a job only starts when a full slot opens AND the walltime fits
+# the gap. A 24h request needs a 24h gap and effectively never backfills.
+if [[ "${CHAIN:-0}" == "1" && -z "${RESUME_FROM:-}" ]]; then
+    _rd=$(ls -1dt "/scratch/$USER/roboref_runs/"*"_${MODEL_TAG}_${VARIANT}_"* 2>/dev/null | head -1)
+    if [[ -n "$_rd" && -d "$_rd/checkpoints" ]]; then
+        _ck=$(ls -1d "$_rd"/checkpoints/[0-9]* 2>/dev/null | sort -t/ -k+0 -n | awk -F/ '{print $NF" "$0}' | sort -n | tail -1 | cut -d" " -f2-)
+        if [[ -n "$_ck" && -f "$_ck/actor.pt" ]]; then
+            RESUME_FROM="$_ck"
+            echo "CHAIN: resuming from $RESUME_FROM"
+        else
+            echo "CHAIN: no checkpoint yet under $_rd -- starting fresh"
+        fi
+    else
+        echo "CHAIN: no prior run dir for ${VARIANT} -- starting fresh"
+    fi
+fi
+
 # RESUME_FROM=/path/to/run/checkpoints/<env_step>   (dir name IS the env step)
 if [[ -n "${RESUME_FROM:-}" ]]; then
     if [[ ! -f "$RESUME_FROM/actor.pt" ]]; then
