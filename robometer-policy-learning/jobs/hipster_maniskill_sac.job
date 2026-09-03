@@ -67,7 +67,7 @@ export CPATH="/cvmfs/software.eessi.io/versions/2025.06/software/linux/x86_64/am
 # SAPIEN Vulkan fix -- see jobs/hipster_verify.job for the full explanation.
 # Extracted NVIDIA driver ICD + modern conda-forge vulkan loader (SAPIEN's own
 # bundled 1.3.224 loader cannot negotiate with this driver's ICD interface).
-export LD_LIBRARY_PATH="/scratch/$USER/vulkan_loader/extracted/lib:/scratch/$USER/nvidia_driver/extracted:${LD_LIBRARY_PATH:-}"
+export LD_LIBRARY_PATH="/scratch/$USER/vulkan_loader/extracted/lib:/scratch/$USER/nvidia_driver/extracted:$ENV_PREFIX/lib64/python3.12/site-packages/sapien/oidn_library:${LD_LIBRARY_PATH:-}"
 export VK_ICD_FILENAMES="/scratch/$USER/nvidia_driver/nvidia_icd_abs.json"
 export MUJOCO_GL=egl
 export PYOPENGL_PLATFORM=egl
