@@ -57,8 +57,8 @@ VLM_BATCH_SIZE = int(os.environ.get("VLM_BATCH_SIZE", "32"))
 # ────────────────────────────────────────────────────────────────────────────
 # Import prompts and helpers from score_keyframes.py
 # ────────────────────────────────────────────────────────────────────────────
-# score_keyframes.py lives one directory up in droid_failures/
-_DROID_DIR = Path(__file__).parent.parent / "droid_failures"
+# score_keyframes.py lives in the sibling Droid-Failures/ folder
+_DROID_DIR = Path(__file__).parent.parent / "Droid-Failures"
 sys.path.insert(0, str(_DROID_DIR))
 
 try:

@@ -49,7 +49,7 @@ pip install "mani-skill>=3.0.0" torch torchvision gymnasium numpy \
 # "moviepy not found, videos cannot be logged" at the first eval interval, which
 # is far enough into a run (minutes, after model load) to waste a node.
 # the reward model itself:
-pip install -e ./robometer
+pip install -e ../Robometer
 ```
 
 ### Task assets

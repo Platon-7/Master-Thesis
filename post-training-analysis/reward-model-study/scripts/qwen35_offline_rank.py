@@ -40,7 +40,8 @@ for t, c in clips.items(): print(f"  {t}: success clip = {len(c)} frames", flush
 
 names = list(TASKS)
 print("\n=== success_prob matrix: rows = clip (true success), cols = prompt fed ===")
-print(f"{'clip \\ prompt':<14}" + "".join(f"{n:>12}" for n in names))
+_hdr = "clip \\ prompt"          # backslash kept out of the f-string (needs Python < 3.12 too)
+print(f"{_hdr:<14}" + "".join(f"{n:>12}" for n in names))
 diag, offdiag = [], []
 for ct in names:
     row = []

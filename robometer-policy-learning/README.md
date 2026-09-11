@@ -54,7 +54,7 @@ A flexible reinforcement \ imitation learning framework supporting multiple algo
 
 
 
-**Note that this repo assumes robometer is installed as a git submodule and located at `./robometer`. If you made any changes to robometer/have your own robometer fork, replace the submodule** 
+**Note:** in this repository `robometer` is the sibling folder `../Robometer` (the core reward-model library), installed in editable mode through `pyproject.toml`. Changes to it are picked up directly.
 
 ---
 

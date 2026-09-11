@@ -94,9 +94,9 @@ dev = [
     "pygame>=2.1.0",
 ]
 
-# Paths match git submodules (see .gitmodules). The PyPI name "openpi" is installed from the dsrl_openpi checkout.
+# openpi installs from the dsrl_openpi submodule checkout; robometer is the sibling ../Robometer folder of this repo.
 [tool.uv.sources]
-robometer = { path = "./robometer", editable = true }
+robometer = { path = "../Robometer", editable = true }
 libero = { path = "./LIBERO", editable = true }
 openpi = { path = "./dsrl_openpi", editable = true }
 
