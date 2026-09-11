@@ -1,9 +1,6 @@
-# RoboReward baseline (rubric 1-5 over the clip, delivered as VIDEO).
-# Served by utils/baseline_reward_adapters.py -- the Robometer loader 404s on it
-# because teetone/RoboReward-* has no Robometer config.yaml.
-# use_relative_rewards=false: it is a rubric level, not a progress trace. On
-# ManiSkill it is scored every step (denser than its RAT=1 reward-at-end form
-# on MetaWorld/Robomimic) -- a deliberate, baseline-favouring deviation.
+# LRM (TRI/USC-PSI) absolute-progress baseline, Qwen3-VL-8B ('progress' subfolder).
+# Served by utils/baseline_reward_adapters.py. use_relative_rewards=true because
+# vlm_ibrl runs it in delta mode by default (robosuite_vlm_env.py:733-735).
 # Key set mirrors robometer.yaml so no config read can KeyError.
 
 add_estimated_reward: false
@@ -13,8 +10,8 @@ eval_server_timeout: 120.0
 eval_server_url: http://localhost
 icl_demo_path: null
 max_workers: 1
-model_path: teetone/RoboReward-4B
-model_type: roboreward
+model_path: USC-PSI-Lab/LRM-models
+model_type: lrm
 normalize_reward: false
 normalize_warmup: 1000
 normalize_window: 10000
@@ -27,5 +24,5 @@ progress_binarize_threshold: null
 success_detection_duration: 1
 success_detection_min_ep_steps: 0
 success_detection_threshold: 0.65
-use_relative_rewards: false
+use_relative_rewards: true
 use_success_detection: false

@@ -1,0 +1,38 @@
+#!/bin/bash
+#SBATCH --job-name=test_eplog
+#SBATCH --output=/scratch-shared/%u/roboref_results/test_eplog_%j.out
+#SBATCH --error=/scratch-shared/%u/roboref_results/test_eplog_%j.err
+#SBATCH --time=00:10:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+
+set -euo pipefail
+
+ENV_PREFIX=/scratch-shared/$USER/envs/maniskill_rl
+REPO=/gpfs/home3/$USER/Master-Thesis
+RPL_DIR=$REPO/robometer-policy-learning
+
+mkdir -p /scratch-shared/$USER/roboref_results
+
+export ROBOMETER_DISABLE_UNSLOTH=1
+export HF_HOME=/scratch-shared/$USER/hf_cache
+export PYTHONPATH=$RPL_DIR:$REPO/Robometer:${PYTHONPATH:-}
+
+echo "=== TRAP 3: robometer shadow check ==="
+$ENV_PREFIX/bin/python -c "
+import robometer, robometer.data.dataset_types as d
+print('robometer path:', robometer.__file__)
+assert 'Master-Thesis/Robometer' in robometer.__file__, 'FAIL: wrong robometer!'
+print('PASS')
+"
+
+echo ""
+echo "=== tests/test_episode_log.py ==="
+cd $RPL_DIR
+$ENV_PREFIX/bin/python tests/test_episode_log.py -v
+
+echo ""
+echo "=== DONE ==="

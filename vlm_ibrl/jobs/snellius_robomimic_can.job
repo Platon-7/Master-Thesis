@@ -1,0 +1,151 @@
+#!/bin/bash
+#SBATCH --job-name=rm_can
+#SBATCH --output=logs/rm_can_%j.out
+#SBATCH --error=logs/rm_can_%j.err
+#SBATCH --time=5-00:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=80G
+#
+# Robomimic PickPlace-Can, autonomous VLM-reward IBRL, on SNELLIUS.
+#
+# Port of jobs/rung5_vlm_autonomous.job, which targeted the Toyota cluster
+# (account rob-tme-gaia, spot/ondemand L40S partitions, conda under
+# /shared/home/PKA4388). Three things change here:
+#
+#   1. Snellius scheduler + module system, and the conda env that actually
+#      exists on this account (~/.conda/envs/demo2reward -- robosuite 1.4.1,
+#      mujoco 3.1.3 + mujoco-py 2.1.2.14, torch 2.4.0+cu121).
+#   2. W&B is ON by default and pointed at the nlp-squad entity. The Toyota
+#      runs defaulted to --use_wb 0, which is why none of them are on W&B.
+#      common_utils/py/multi_counter.py calls wandb.init() WITHOUT an entity
+#      argument, so the run silently lands in whatever entity the API key
+#      defaults to (perceiver_team). WANDB_ENTITY overrides that without
+#      touching the code. The project stays "IBRL" because run_cfg.py passes
+#      project= explicitly, which beats WANDB_PROJECT.
+#   3. The reward checkpoint defaults to run2 (RoboRef-Asym), not run1 (ICL).
+#
+#   sbatch --export=ALL,SEED=2,THR=0.82 jobs/snellius_robomimic_can.job
+#   sbatch --export=ALL,SEED=3,THR=0.82 jobs/snellius_robomimic_can.job
+#
+# Smoke (a few minutes, proves the env + W&B wiring):
+#   sbatch --export=ALL,SEED=99,THR=0.82,NUM_TRAIN_STEP=2000,WARMUP=3,EVAL_EP=3,SMOKE=1 \
+#          jobs/snellius_robomimic_can.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+
+TASK="${TASK:-can}"
+# MODEL selects the reward checkpoint AND the --vlm name:
+#   run2 = RoboRef-Asym (asymmetric loss, no ICL)   <- the headline model
+#   run3 = RoboRef-Std  (standard loss, no ICL)
+#   base = released Robometer-4B, loaded from the HF cache
+# Each has its OWN calibrated threshold; THR is required, never defaulted.
+MODEL="${MODEL:-run2}"
+CKPT_ROOT=/projects/prjs1958/Robometer_FT_consolidated
+case "$MODEL" in
+  run2) VLM="${VLM:-robometer_ft}"; ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-$CKPT_ROOT/run2_noicl_ours_step4000}" ;;
+  run3) VLM="${VLM:-robometer_ft}"; ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-$CKPT_ROOT/run3_noicl_standard_step5000}" ;;
+  base) VLM="${VLM:-robometer_4b}"; ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-}" ;;
+  *)    echo "ERROR: MODEL must be run2|run3|base, got '$MODEL'" >&2; exit 2 ;;
+esac
+THR="${THR:?set THR -- the success-head detection threshold for this model+task}"
+CONSEC="${CONSEC:-1}"
+SEED="${SEED:-2}"
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-750000}"
+WARMUP="${WARMUP:-40}"       # can_ibrl.yaml default
+EVAL_EP="${EVAL_EP:-50}"     # can_ibrl.yaml default
+# Robomimic used the FULL demonstration length, not MetaWorld's 80%: at the
+# lower setting success signals fired before the task was physically solvable
+# and the policies farmed them.
+MIN_EP_STEPS="${MIN_EP_STEPS:-120}"
+
+TAG="${TAG:-${TASK}_${MODEL}_thr${THR}_min${MIN_EP_STEPS}_seed${SEED}}"
+SAVE_BASE="${SAVE_BASE:-/projects/prjs1958/$USER/vlm_ibrl_robomimic}"
+SAVE_DIR="${SAVE_DIR:-$SAVE_BASE/$TAG}"
+mkdir -p "$SAVE_DIR"
+
+# ---- environment (Snellius) ----
+unset PYTHONPATH 2>/dev/null || true
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+MUJOCO_PATH="${MUJOCO_PATH:-$HOME/.mujoco/mujoco210}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+
+export PYTHONNOUSERSITE=1
+export IBRL_CONDA_ENV="$ENV_NAME"
+export MUJOCO_PATH="$MUJOCO_PATH"
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export MUJOCO_GL=egl
+
+# Keep HF cache off the home quota; the reward model is loaded from a local path.
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
+export ROBOMETER_DISABLE_UNSLOTH=1
+
+# ---- W&B ----
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+# Checkpoint artifacts hung wandb.finish() for hours on earlier runs; the
+# checkpoints are already on /projects. Scalars still sync.
+export WANDB_DISABLE_ARTIFACTS=true
+USE_WB="${USE_WB:-1}"
+
+# ---- autonomous protocol ----
+export AUTONOMOUS_SUCCESS=1
+export ROBOMETER_DETECT_HEAD=success
+export ROBOMETER_SUCCESS_THRESHOLD="$THR"
+export ROBOMETER_SUCCESS_CONSECUTIVE="$CONSEC"
+export ROBOMETER_MIN_EP_STEPS="$MIN_EP_STEPS"
+# RoboRef-Asym = run2 (asymmetric loss, no ICL). run1 is the ICL model,
+# run3 the standard-loss one.
+export ROBOMETER_FT_PATH
+if [[ "$MODEL" != "base" && ! -d "$ROBOMETER_FT_PATH" ]]; then
+    echo "ERROR: reward checkpoint not found: $ROBOMETER_FT_PATH" >&2; exit 4
+fi
+
+echo "==================== robomimic can ===================="
+echo "host        : $(hostname)   job: ${SLURM_JOB_ID:-local}"
+echo "TASK/MODEL  : $TASK / $MODEL  (vlm=$VLM)"
+echo "THR         : $THR  (consec=$CONSEC, min_ep_steps=$MIN_EP_STEPS)"
+echo "SEED        : $SEED   STEPS: $NUM_TRAIN_STEP"
+echo "CKPT        : ${ROBOMETER_FT_PATH:-<HF: robometer/Robometer-4B>}"
+echo "SAVE_DIR    : $SAVE_DIR"
+echo "WANDB       : entity=$WANDB_ENTITY use_wb=$USE_WB"
+echo "python      : $(which python)"
+nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1
+echo "======================================================="
+
+# Warm-start from the last checkpoint if this SAVE_DIR already has one, so a
+# requeue or a manual resubmit continues instead of restarting. NOTE partial
+# resume: global_step restarts at 0 and the replay is rebuilt from warmup;
+# actor+critic weights carry over.
+RESUME_ARGS=""
+if [ -f "$SAVE_DIR/latest.pt" ]; then
+    echo "[resume] warm-starting from $SAVE_DIR/latest.pt"
+    RESUME_ARGS="--load_pretrained_agent $SAVE_DIR/latest.pt --load_policy_only 0"
+fi
+
+python train_vlm_rl.py \
+    $RESUME_ARGS \
+    --config_path "release/cfgs/robomimic_rl/${TASK}_ibrl.yaml" \
+    --seed "$SEED" \
+    --vlm "$VLM" \
+    --robometer_beta 0.0 \
+    --robometer_threshold 0.0 \
+    --reward_at_truncation 1 \
+    --num_train_step "$NUM_TRAIN_STEP" \
+    --num_warm_up_episode "$WARMUP" \
+    --num_eval_episode "$EVAL_EP" \
+    --mp_eval 0 \
+    --use_wb "$USE_WB" \
+    --log_per_step "${LOG_PER_STEP:-5000}" \
+    --save_dir "$SAVE_DIR"
+RC=$?
+echo "EXIT=$RC  save_dir=$SAVE_DIR"
+exit $RC

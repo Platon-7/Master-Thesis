@@ -6,6 +6,7 @@ This class provides a unified interface for loading RBM/ReWiND models from check
 and computing progress and preference predictions.
 """
 
+import os
 import time
 import torch
 import numpy as np
@@ -17,11 +18,40 @@ from robometer.data.dataset_types import ProgressSample, PreferenceSample
 from robometer.data.datasets.helpers import create_trajectory_from_dict
 from robometer.evals.eval_server import forward_model
 from robometer.utils.logger import get_logger, setup_loguru_logging
-from robometer.models.utils import convert_bins_to_continuous
+from robometer.models.utils import convert_bins_to_continuous, convert_bins_to_continuous_hard
 
 logger = get_logger()
 
 setup_loguru_logging("TRACE")
+
+
+def _progress_readout(bin_logits):
+    """Collapse the progress head's bin distribution to a scalar per frame.
+
+    Default is upstream's expectation over bin centres. RBM_READOUT=conditional_mean
+    drops the lowest bin and renormalises before taking the expectation, the readout
+    Appendix G shows is the one that survives out of distribution: OOD the model puts
+    a large, outcome-independent mass on bin 0, and the plain expectation scales every
+    score by one minus that mass, which shuffles the ranking.
+
+    The default branch calls upstream unchanged, so behaviour is bit-identical unless
+    the env var is set.
+    """
+    mode = os.environ.get("RBM_READOUT", "expectation")
+    if mode == "hard":
+        # Argmax bin centre. The expectation over 10 bins is a mean of a broad
+        # distribution and collapses toward the middle: on RoboRewardBench it
+        # compresses every clip into [0.39, 0.75], so round(v*4) puts 77% of them
+        # in bins 2-3 and MAE blows up. The argmax keeps the head's full range.
+        return convert_bins_to_continuous_hard(bin_logits)
+    if mode != "conditional_mean":
+        return convert_bins_to_continuous(bin_logits)
+    x = bin_logits.float()
+    probs = x if bool((x.sum(dim=-1) == 1).all()) else torch.softmax(x, dim=-1)
+    centers = torch.linspace(0.0, 1.0, probs.shape[-1], device=probs.device, dtype=probs.dtype)
+    tail = probs[..., 1:]
+    denom = tail.sum(dim=-1, keepdim=True).clamp_min(1e-8)
+    return ((tail / denom) * centers[1:]).sum(dim=-1)
 
 
 class RBMModel:
@@ -278,7 +308,7 @@ class RBMModel:
                     progress_values = progress_tensor[i].cpu().tolist()
             elif progress_tensor.ndim == 3:
                 # Multiple values per sample, discrete multiple bins, convert to continuous
-                progress_values = convert_bins_to_continuous(progress_tensor[i]).cpu().tolist()
+                progress_values = _progress_readout(progress_tensor[i]).cpu().tolist()
             else:
                 # Unexpected shape
                 raise ValueError(f"Unexpected progress_tensor shape: {progress_tensor.shape}")

@@ -1,0 +1,139 @@
+#!/bin/bash
+#SBATCH --job-name=rm_scorer
+#SBATCH --output=logs/rm_scorer_%j.out
+#SBATCH --error=logs/rm_scorer_%j.err
+#SBATCH --time=5-00:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=80G
+#
+# Robomimic PickPlace-Can, NON-AUTONOMOUS scorer baselines, on SNELLIUS.
+# Port of jobs/run_scorer_vlm.job (Toyota: rob-tme-gaia, /shared/home/PKA4388).
+#
+# These three run in the form their own authors intend, which is NOT our
+# autonomous success-detector protocol -- the episode always runs to its natural
+# end and no reward model may terminate it:
+#
+#   roboreward_4b    rubric 1-5 over the whole rollout, one reward at the end
+#                    -> RAT=1 (reward at truncation, sparse)
+#   robodopamine_4b  dense per-frame progress, multi-view, anchored on a GOAL
+#                    IMAGE -> RAT=0 (dense delta)
+#   lrm_progress_8b  dense per-frame progress anchored on the episode's frame 0
+#                    -> RAT=0 (dense delta)
+#
+# RAT defaults per model below; override only deliberately.
+#
+#   sbatch --export=ALL,VLM=roboreward_4b,SEED=2   jobs/snellius_robomimic_scorer.job
+#   sbatch --export=ALL,VLM=robodopamine_4b,SEED=2 jobs/snellius_robomimic_scorer.job
+#   sbatch --export=ALL,VLM=lrm_progress_8b,SEED=2 jobs/snellius_robomimic_scorer.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+
+TASK="${TASK:-can}"
+VLM="${VLM:?set VLM -- roboreward_4b | robodopamine_4b | lrm_progress_8b}"
+SEED="${SEED:-2}"
+NUM_TRAIN_STEP="${NUM_TRAIN_STEP:-750000}"
+# Matched to the run2 seeds so every run in this batch is mutually comparable.
+WARMUP="${WARMUP:-40}"
+EVAL_EP="${EVAL_EP:-50}"
+
+case "$VLM" in
+  roboreward_4b)   RAT="${RAT:-1}" ;;   # single reward at episode end
+  robodopamine_4b) RAT="${RAT:-0}" ;;   # dense delta
+  lrm_progress_8b) RAT="${RAT:-0}" ;;   # dense delta
+  *) echo "ERROR: VLM must be roboreward_4b|robodopamine_4b|lrm_progress_8b, got '$VLM'" >&2; exit 2 ;;
+esac
+
+TAG="${TAG:-${TASK}_${VLM}_rat${RAT}_seed${SEED}}"
+SAVE_BASE="${SAVE_BASE:-/projects/prjs1958/$USER/vlm_ibrl_robomimic}"
+SAVE_DIR="${SAVE_DIR:-$SAVE_BASE/$TAG}"
+mkdir -p "$SAVE_DIR"
+
+# ---- environment (Snellius) ----
+unset PYTHONPATH 2>/dev/null || true
+ENV_NAME="${IBRL_CONDA_ENV:-demo2reward}"
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+MUJOCO_PATH="${MUJOCO_PATH:-$HOME/.mujoco/mujoco210}"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+export IBRL_CONDA_ENV="$ENV_NAME"
+export MUJOCO_PATH="$MUJOCO_PATH"
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "$ENV_NAME"
+source set_env.sh
+export PYTHONPATH="$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
+export MUJOCO_GL=egl
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
+export ROBOMETER_DISABLE_UNSLOTH=1
+
+# ---- W&B ----
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+export WANDB_DISABLE_ARTIFACTS=true
+USE_WB="${USE_WB:-1}"
+
+# ---- scorer protocol: full episode, model may NOT terminate ----
+export AUTONOMOUS_SUCCESS=0
+
+# RoboDopamine takes a goal image as its reference-END anchor, and the published
+# Can run used one. No committed job script sets ROBODOPAMINE_GOAL for Robomimic
+# (only vlm_ibrl_v3/jobs/robodopamine_rl_array.job does, for MetaWorld) because it
+# was passed at submit time via --export, which leaves no trace in the repo.
+# Generate the image with jobs/snellius_can_goal.job and pass it here; without it
+# the code silently falls back to the start frame, which it calls "weak".
+if [[ "$VLM" == "robodopamine_4b" ]]; then
+    export ROBODOPAMINE_STRIDE="${ROBODOPAMINE_STRIDE:-16}"
+    if [[ -z "${ROBODOPAMINE_GOAL:-}" ]]; then
+        echo "ERROR: robodopamine_4b needs ROBODOPAMINE_GOAL (build it with" >&2
+        echo "       jobs/snellius_can_goal.job). Set ALLOW_NO_GOAL=1 to override." >&2
+        [[ "${ALLOW_NO_GOAL:-0}" == "1" ]] || exit 4
+    else
+        [[ -f "$ROBODOPAMINE_GOAL" ]] || { echo "ERROR: ROBODOPAMINE_GOAL not found: $ROBODOPAMINE_GOAL" >&2; exit 4; }
+        export ROBODOPAMINE_GOAL
+        echo "ROBODOPAMINE_GOAL : $ROBODOPAMINE_GOAL"
+    fi
+fi
+if [[ "$VLM" == "lrm_progress_8b" ]]; then
+    export LRM_CALL_INTERVAL="${LRM_CALL_INTERVAL:-10}"
+    export LRM_REWARD_MODE="${LRM_REWARD_MODE:-delta}"
+fi
+
+echo "==================== robomimic scorer ===================="
+echo "host      : $(hostname)   job: ${SLURM_JOB_ID:-local}"
+echo "TASK/VLM  : $TASK / $VLM   RAT=$RAT (1=sparse@end, 0=dense delta)"
+echo "SEED      : $SEED   STEPS: $NUM_TRAIN_STEP"
+echo "SAVE_DIR  : $SAVE_DIR"
+echo "WANDB     : entity=$WANDB_ENTITY use_wb=$USE_WB"
+echo "python    : $(which python)"
+nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1
+echo "=========================================================="
+
+RESUME_ARGS=""
+if [ -f "$SAVE_DIR/latest.pt" ]; then
+    echo "[resume] warm-starting from $SAVE_DIR/latest.pt"
+    RESUME_ARGS="--load_pretrained_agent $SAVE_DIR/latest.pt --load_policy_only 0"
+fi
+
+python train_vlm_rl.py \
+    $RESUME_ARGS \
+    --config_path "release/cfgs/robomimic_rl/${TASK}_ibrl.yaml" \
+    --seed "$SEED" \
+    --vlm "$VLM" \
+    --train_end_on_success 0 \
+    --robometer_beta 0.0 \
+    --robometer_threshold 0.0 \
+    --reward_at_truncation "$RAT" \
+    --num_train_step "$NUM_TRAIN_STEP" \
+    --num_warm_up_episode "$WARMUP" \
+    --num_eval_episode "$EVAL_EP" \
+    --mp_eval 0 \
+    --use_wb "$USE_WB" \
+    --log_per_step "${LOG_PER_STEP:-5000}" \
+    --save_dir "$SAVE_DIR"
+RC=$?
+echo "EXIT=$RC  save_dir=$SAVE_DIR"
+exit $RC

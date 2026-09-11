@@ -16,6 +16,9 @@ from robometer_policy_learning.utils.robometer_utils import (
     extract_success_probs_from_output,
     extract_rewards_from_server_output,
 )
+from robometer_policy_learning.utils.baseline_reward_adapters import (
+    BASELINE_MODEL_TYPES as _BASELINE_TYPES,
+)
 from robometer_policy_learning.utils.gpu_utils import convert_to_numpy
 from robometer.evals.eval_utils import raw_dict_to_sample, build_payload, post_batch_npy
 from robometer.evals.eval_server import process_batch_helper
@@ -120,7 +123,15 @@ class RobometerReplayBuffer(ReplayBuffer):
         else:
             self.max_frames = 16
 
-        if self.reward_model is not None:
+        if getattr(self.reward_model, "model_type", None) in _BASELINE_TYPES:
+            # RoboDopamine / LRM / RoboReward carry their own processor and prompt and
+            # never touch the Robometer collator. They also have no exp-config, so the
+            # config-driven setup below would raise on None. Skip it entirely.
+            self.reward_model_config = None
+            self.processor = getattr(reward_model, "processor", None)
+            self.tokenizer = getattr(self.processor, "tokenizer", None)
+            self.batch_collator = None
+        elif self.reward_model is not None:
             self.reward_model_config = reward_model_config
             self.processor = getattr(reward_model, "processor", None)
             self.tokenizer = getattr(reward_model, "tokenizer", None)
@@ -319,6 +330,17 @@ class RobometerReplayBuffer(ReplayBuffer):
         Returns:
             Reward value as float
         """
+        if getattr(self.reward_model, "model_type", None) in _BASELINE_TYPES:
+            # RoboDopamine / LRM: not Robometer-family, so they bypass
+            # process_batch_helper entirely (see baseline_reward_adapters).
+            # frames are already _pad_to_max_frames'd upstream (see _add); the
+            # adapter caps long clips itself, mirroring raw_dict_to_sample's
+            # downsample on the Robometer path.
+            return self.reward_model.score_clip(
+                raw_data.get("frames"), raw_data.get("task", ""),
+                episode_id=raw_data.get("id"),
+            )
+
         if self.reward_model is not None:
             # Use local reward model
             sample = raw_dict_to_sample(
@@ -376,6 +398,18 @@ class RobometerReplayBuffer(ReplayBuffer):
         Returns:
             Tuple of (List of reward values as floats, List of success probabilities as floats)
         """
+        if getattr(self.reward_model, "model_type", None) in _BASELINE_TYPES:
+            # RoboDopamine / LRM score one clip at a time (each call rebuilds its
+            # own per-episode anchors), so a "batch" is just a loop. Same contract.
+            _r, _s = [], []
+            for _raw in batch_raw:
+                _ri, _si = self.reward_model.score_clip(
+                    _raw.get("frames"), _raw.get("task", ""),
+                    episode_id=_raw.get("id"),
+                )
+                _r.append(float(_ri)); _s.append(float(_si))
+            return _r, _s
+
         if self.reward_model is not None:
             # Use local reward model
             samples = [
@@ -859,7 +893,15 @@ class RobometerH5ReplayBuffer(H5ReplayBuffer):
             self.max_frames = 16
 
         self.reward_model = reward_model
-        if self.reward_model is not None:
+        if getattr(self.reward_model, "model_type", None) in _BASELINE_TYPES:
+            # RoboDopamine / LRM / RoboReward carry their own processor and prompt and
+            # never touch the Robometer collator. They also have no exp-config, so the
+            # config-driven setup below would raise on None. Skip it entirely.
+            self.reward_model_config = None
+            self.processor = getattr(reward_model, "processor", None)
+            self.tokenizer = getattr(self.processor, "tokenizer", None)
+            self.batch_collator = None
+        elif self.reward_model is not None:
             self.reward_model_config = reward_model_config
             self.processor = getattr(reward_model, "processor", None)
             self.tokenizer = getattr(reward_model, "tokenizer", None)

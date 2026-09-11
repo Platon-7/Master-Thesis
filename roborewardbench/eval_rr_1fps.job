@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --job-name=rrb_rr1fps
+#SBATCH --output=logs/rrb_rr1fps_%j.out
+#SBATCH --error=logs/rrb_rr1fps_%j.err
+#SBATCH --time=08:00:00
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=80G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+ENV_PREFIX="${ENV_PREFIX:-/home/$USER/.conda/envs/robometer_gpu_fa2}"
+PYTHON="$ENV_PREFIX/bin/python"; export PATH="$ENV_PREFIX/bin:$PATH"
+export PYTHONPATH="$HERE/../Robometer:${PYTHONPATH:-}"
+export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
+export ROBOMETER_DISABLE_UNSLOTH=1 TOKENIZERS_PARALLELISM=false
+ARGS=(--out "${OUTDIR:?set OUTDIR}" --model "${RRMODEL:-teetone/RoboReward-4B}")
+[[ -n "${LIMIT:-}" && "${LIMIT}" != "0" ]] && ARGS+=(--limit "$LIMIT")
+echo "1-FPS RoboReward reproduction | model=${RRMODEL:-teetone/RoboReward-4B} | out=$OUTDIR"
+exec "$PYTHON" "$HERE/score_roboreward_1fps.py" "${ARGS[@]}"

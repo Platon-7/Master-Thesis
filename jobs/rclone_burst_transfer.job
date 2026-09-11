@@ -1,0 +1,45 @@
+#!/bin/bash
+#SBATCH --job-name=rclone_burst
+#SBATCH --output=/scratch-shared/%u/rclone_burst_%j.out
+#SBATCH --error=/scratch-shared/%u/rclone_burst_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=4G
+
+set -uo pipefail
+
+SRC='myonedrive:Master-Thesis-transfer'
+DST='robometer_dataset:Robo-Ref'
+RCLONE_FLAGS="--transfers 2 --checkers 2 --tpslimit 2 --drive-chunk-size 64M"
+BURST_DURATION="6m"
+SLEEP_SECS=1800   # 30 minutes
+
+iteration=0
+
+while true; do
+    iteration=$((iteration + 1))
+    echo ""
+    echo "========================================"
+    echo "Iteration $iteration — $(date)"
+    echo "========================================"
+
+    # Check if anything remains to transfer
+    echo "[check] comparing source vs destination..."
+    if rclone check "$SRC" "$DST" $RCLONE_FLAGS --one-way 2>&1; then
+        echo "[done] Source and destination are in sync. Transfer complete!"
+        exit 0
+    fi
+
+    echo "[copy] Running rclone burst (max $BURST_DURATION)..."
+    rclone copy "$SRC" "$DST" $RCLONE_FLAGS \
+        --max-duration "$BURST_DURATION" \
+        --progress \
+        --log-level INFO \
+        2>&1 || true   # --max-duration exits 0 but we tolerate any exit code here
+
+    echo "[sleep] Throttle window — sleeping ${SLEEP_SECS}s (30 min)..."
+    sleep "$SLEEP_SECS"
+done

@@ -1,0 +1,88 @@
+#!/bin/bash
+#SBATCH --job-name=rbm_fix_mw
+#SBATCH --output=logs/fix_mw_%j.out
+#SBATCH --error=logs/fix_mw_%j.err
+#SBATCH --time=04:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
+#SBATCH --partition=staging
+
+# Rebuild the eval_metaworld split from source keyframes.
+#
+# WHY: /projects/prjs1958/robometer_frames_hf_full/eval_metaworld_raw kept its
+# Arrow index but lost its batch_0000/ MP4 directory, so every one of its 572
+# trajectories fails to open ("No such file or directory") and step 2 dies with
+# "No datasets were successfully processed". The other three eval splits are
+# intact (droid 963, robometer 3865, failsafe 555 clips all present).
+#
+# The source is untouched: 42G of metaworld keyframes under
+# $ROBOMETER_DATASET_PATH and a 572-row pairs index, exactly the 572 the Arrow
+# index lists, so this reproduces the same split.
+#
+# Regenerates BOTH the raw (step 1) and the cache (step 2) so the Arrow index
+# and the MP4s it points at are consistent with each other. The new raw goes to
+# scratch, not /projects, because the project is over its inode quota; the
+# short-name symlink is what the loader actually resolves, so location is free.
+
+set -euo pipefail
+cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
+
+ROBOMETER_DIR="${ROBOMETER_DIR:-$HERE/../Robometer}"
+SPLIT=eval_metaworld
+RAW_ROOT="${RAW_ROOT:-/scratch-shared/$USER/robometer_frames_hf_rebuild}"
+CACHE="${ROBOMETER_PROCESSED_DATASETS_PATH:-/scratch-shared/$USER/robometer_frames_hf_full_step2}"
+PAIRS="${PAIRS:-/projects/prjs1958/robometer_frames_splits_full/pairs_index_${SPLIT}.jsonl}"
+
+[[ -f "$PAIRS" ]] || { echo "ERROR: no pairs index at $PAIRS" >&2; exit 2; }
+echo "pairs index rows: $(wc -l < "$PAIRS")   (expect 572)"
+
+source /etc/profile.d/lmod.sh 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+module load 2025 FFmpeg/7.1.1-GCCcore-14.2.0
+PYTHON="${PYTHON:-/home/$USER/.conda/envs/robometer_gpu/bin/python}"
+[[ -x "$PYTHON" ]] || { echo "ERROR: no python at $PYTHON" >&2; exit 1; }
+
+export ROBOMETER_DATASET_PATH="${ROBOMETER_DATASET_PATH:-/projects/prjs1958/robometer_frame_dataset}"
+export ROBOMETER_PROCESSED_DATASETS_PATH="$CACHE"
+mkdir -p "$RAW_ROOT" "$CACHE"
+cd "$ROBOMETER_DIR"
+
+echo "=============== step 1: regenerate the raw split ==============="
+"$PYTHON" -m dataset_upload.generate_hf_dataset \
+    --config_path "$HERE/configs/dataset_frames.yaml" \
+    --dataset.dataset_path "$ROBOMETER_DATASET_PATH" \
+    --dataset.dataset_name "robometer_frames_${SPLIT}" \
+    --dataset.pairs_index_path "$PAIRS" \
+    --output.output_dir "$RAW_ROOT/${SPLIT}_raw" \
+    --hub.push_to_hub=False
+
+N=$(find "$RAW_ROOT/${SPLIT}_raw" -name '*.mp4' | wc -l)
+echo "regenerated clips: $N"
+[[ "$N" -eq 572 ]] || { echo "ERROR: expected 572 clips, got $N" >&2; exit 3; }
+
+echo "=============== step 2: preprocess into the cache ==============="
+TMP="$(mktemp --suffix=.yaml)"; trap 'rm -f "$TMP"' EXIT
+cat > "$TMP" <<YAML
+train_datasets:
+  - $RAW_ROOT/${SPLIT}_raw
+train_subsets:
+  - ["robometer_frames_${SPLIT}"]
+eval_datasets: []
+eval_subsets: []
+max_frames_for_preprocessing: 16
+video_frame_sampling: "uniform"
+num_proc: 1
+num_threads: 16
+force_reprocess: false
+cache_dir: $CACHE
+precompute_embeddings: false
+YAML
+cat "$TMP"
+"$PYTHON" -m robometer.data.scripts.preprocess_datasets --config "$TMP" --cache_dir "$CACHE"
+
+HASHED="${RAW_ROOT//\//_}_${SPLIT}_raw_robometer_frames_${SPLIT}"
+SHORT="robometer_frames_${SPLIT}"
+[[ -d "$CACHE/$HASHED" ]] || { echo "ERROR: cache dir missing: $CACHE/$HASHED" >&2; exit 4; }
+ln -sfn "$HASHED" "$CACHE/$SHORT"
+echo "linked $CACHE/$SHORT -> $HASHED"
+echo "FIX DONE"

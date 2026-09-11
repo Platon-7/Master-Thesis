@@ -26,6 +26,10 @@ from robometer_policy_learning.distributed.clients.reward_relabel_client import 
 from transformers import AutoModel, AutoImageProcessor
 from sentence_transformers import SentenceTransformer
 from robometer.utils.save import load_model_from_hf
+from robometer_policy_learning.utils.baseline_reward_adapters import (
+    BASELINE_MODEL_TYPES,
+    load_baseline_reward_model,
+)
 from robometer_policy_learning.utils.env_utils import make_env
 from robometer_policy_learning.utils.transitions_transforms import SuccessBonusTransform, RewardShiftTransform
 from PIL import Image
@@ -596,11 +600,24 @@ def setup_training(
             eval_server_url = f"{reward_model_cfg.get('eval_server_url', 'http://localhost')}:{reward_model_cfg.get('eval_server_port', 8000)}"
             logger.info(f"Using eval_server at {eval_server_url} for reward computation")
         else:
-            # Load model locally
-            reward_model_exp_cfg, tokenizer, processor, reward_model = load_model_from_hf(
-                model_path=model_path,
-                device=device,
-            )
+            # RoboDopamine and LRM are not Robometer-family models: they have their
+            # own loaders and prompts and cannot go through load_model_from_hf /
+            # process_batch_helper. Route them to the baseline adapters instead.
+            _model_type = str(
+                OmegaConf.select(reward_model_cfg, "model_type", default="robometer")
+            ).lower()
+            if _model_type in BASELINE_MODEL_TYPES:
+                reward_model_exp_cfg, tokenizer, processor, reward_model = (
+                    load_baseline_reward_model(
+                        model_type=_model_type, model_path=model_path, device=device
+                    )
+                )
+            else:
+                # Load model locally
+                reward_model_exp_cfg, tokenizer, processor, reward_model = load_model_from_hf(
+                    model_path=model_path,
+                    device=device,
+                )
             logger.info(f"Loaded reward model locally from {model_path}")
     else:
         use_gt_rewards = True

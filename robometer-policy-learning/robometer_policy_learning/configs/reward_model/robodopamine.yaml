@@ -1,0 +1,32 @@
+# Robo-Dopamine GRM baseline. Served by utils/baseline_reward_adapters.py:
+# it is not a Robometer-family model and bypasses process_batch_helper.
+# use_relative_rewards=true because vlm_ibrl delivers it as a shaped INCREMENT
+# (reward = prog - prev_prog, robosuite_vlm_env.py:706), not a level.
+# Needs ROBODOPAMINE_GOAL in the environment (reference-END anchor).
+# Every key below robometer.yaml's is kept so no config read can KeyError:
+# the code reads success_detection_*, normalize_*, potential_*, async_* even
+# when the features are off.
+
+add_estimated_reward: false
+batch_size: 4
+eval_server_port: 8000
+eval_server_timeout: 120.0
+eval_server_url: http://localhost
+icl_demo_path: null
+max_workers: 1
+model_path: tanhuajie2001/Robo-Dopamine-GRM-2.0-4B-Preview
+model_type: robodopamine
+normalize_reward: false
+normalize_warmup: 1000
+normalize_window: 10000
+num_gpus: 1
+potential_gamma: 0.99
+potential_scale: 1.0
+progress_as_potential: false
+progress_beta: 1.0
+progress_binarize_threshold: null
+success_detection_duration: 1
+success_detection_min_ep_steps: 0
+success_detection_threshold: 0.65
+use_relative_rewards: true
+use_success_detection: false

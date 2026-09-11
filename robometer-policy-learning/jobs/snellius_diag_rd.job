@@ -1,0 +1,18 @@
+#!/bin/bash
+#SBATCH --job-name=diag_rd
+#SBATCH --output=/scratch-shared/pkarageorgis1/roboref_results/diag_rd_%j.out
+#SBATCH --error=/scratch-shared/pkarageorgis1/roboref_results/diag_rd_%j.err
+#SBATCH --time=00:25:00
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=90G
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+ENV_PREFIX=/scratch-shared/$USER/envs/maniskill_rl
+export PATH="$ENV_PREFIX/bin:$PATH" MUJOCO_GL=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR=/scratch-shared/$USER/maniskill_assets HF_HOME=/scratch-shared/$USER/hf_cache
+export ROBOMETER_DISABLE_UNSLOTH=1 TOKENIZERS_PARALLELISM=false
+"$ENV_PREFIX/bin/python" -u scripts/diag_robodopamine_live.py
+echo "EXIT=$?"

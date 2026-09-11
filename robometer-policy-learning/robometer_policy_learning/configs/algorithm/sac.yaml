@@ -15,6 +15,13 @@ pooled_critic_features: true
 train_critic_with_entropy: false
 train_actor_with_entropy: true
 train_actor_with_kl_divergence: false
+# How often (in actor updates) to move the KL reference onto the current actor.
+# 0 = never, which makes the KL a PERMANENT tether to whatever old_actor was set
+# to -- for an offline->online run that is the warm start, so the policy cannot
+# improve at any coefficient. A positive value makes it a real trust region.
+# Declared here (not only on SACConfig) so `online_algorithm.kl_ref_refresh_interval=N`
+# is an override rather than a Hydra composition error needing a `+` prefix.
+kl_ref_refresh_interval: 0
 
 actor_optimizer_lr: 1e-5
 actor_optimizer_eps: 1.0e-8
