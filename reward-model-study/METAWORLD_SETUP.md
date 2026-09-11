@@ -7,7 +7,7 @@ spec + the interval-hop shaping addition of the same date.
 
 ## Repo / env
 
-- **Working dir:** `/shared/home/PKA4388/Master-Thesis/vlm_ibrl_v3`
+- **Working dir:** `/shared/home/PKA4388/Master-Thesis/vlm_ibrl`
   (NOT `vlm_ibrl` — that is the older MetaWorld-**v2** / mujoco-py branch kept for
   IBRL's original assumptions. v3 uses Farama MetaWorld v3 on new mujoco bindings.)
 - **Conda env:** `/shared/home/PKA4388/miniconda3/envs/demo2reward_v3`

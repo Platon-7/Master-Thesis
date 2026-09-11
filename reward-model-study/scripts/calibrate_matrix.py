@@ -16,7 +16,7 @@ import numpy as np
 
 _REPO = os.environ.get("MT_REPO",
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-for sub in ("MetaWorld/metaworld_repo", "MetaWorld", "vlm_ibrl_v3", "Robometer"):
+for sub in ("MetaWorld/metaworld_repo", "MetaWorld", "vlm_ibrl", "Robometer"):
     sys.path.insert(0, os.path.join(_REPO, sub))
 
 import h5py
@@ -41,7 +41,7 @@ MAXT = int(os.environ.get("CALIB_MAXT", "240"))
 STRIDE = int(os.environ.get("CALIB_STRIDE", "10"))
 MINWIN = 6                       # smallest streaming window to score
 ICL_DEMO_IDX = int(os.environ.get("CALIB_ICL_DEMO_IDX", "0"))
-DATA_DIR = os.path.join(_REPO, "vlm_ibrl_v3", "release", "data", "metaworld")
+DATA_DIR = os.path.join(_REPO, "vlm_ibrl", "release", "data", "metaworld")
 THRS = np.round(np.arange(0.05, 0.96, 0.05), 2)
 OUT = os.environ.get("CALIB_OUT", f"/shared/home/PKA4388/vlm_ibrl_runs/calib_matrix_{MODEL}.json")
 

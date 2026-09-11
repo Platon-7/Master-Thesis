@@ -48,7 +48,7 @@ export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache_rbm_eval}"
 export HF_HUB_CACHE="$HF_HOME/hub"
 mkdir -p "$HF_HOME"
 
-unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+unset WANDB_PROJECT WANDB_ENTITY
 export WANDB_MODE=disabled
 
 # Robometer's data loader requires a directory containing the preprocessed

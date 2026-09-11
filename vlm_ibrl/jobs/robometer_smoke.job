@@ -35,7 +35,7 @@ export PYTHONNOUSERSITE=1
 export IBRL_CONDA_ENV="$ENV_NAME"
 export MUJOCO_PATH="$MUJOCO_PATH"
 export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
-unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+unset WANDB_PROJECT WANDB_ENTITY
 export WANDB_MODE=disabled
 
 source "$(conda info --base)/etc/profile.d/conda.sh"

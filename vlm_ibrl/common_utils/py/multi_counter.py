@@ -129,7 +129,10 @@ class MultiCounter:
 
         if self.use_wandb:
             to_log = {f"{prefix}{k}": v.mean() for k, v in self.stats.items() if v.counter > 0}
-            wandb.log(to_log)
+            # Key wandb's x-axis to the env step (global_counter), not wandb's
+            # auto-incrementing _step. Without this the x-axis is the eval count
+            # (0,1,2,...) so runs appear to "end at step 5" instead of 30000/40000.
+            wandb.log(to_log, step=int(global_counter))
 
         if reset:
             self.reset()

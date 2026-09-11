@@ -31,7 +31,7 @@ source set_env.sh   # activates env, sets LD_LIBRARY_PATH for mujoco_py
 
 # Path priority: Qwen35-FT first so its scorer/setup_utils wins
 export PYTHONPATH="$QWEN35_FT_DIR:$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
-unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+unset WANDB_PROJECT WANDB_ENTITY
 export WANDB_MODE=disabled
 
 echo "==================== diag summary ===================="

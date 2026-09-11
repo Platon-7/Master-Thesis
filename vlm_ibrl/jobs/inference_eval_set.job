@@ -48,7 +48,7 @@ source set_env.sh
 export PYTHONPATH="$PYTHONPATH:$ROBOMETER_DIR"
 
 # This script does no wandb logging.
-unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+unset WANDB_PROJECT WANDB_ENTITY
 export WANDB_MODE=disabled
 
 if [[ -z "${MODEL_PATH:-}" ]]; then

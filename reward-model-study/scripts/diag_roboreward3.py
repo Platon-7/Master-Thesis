@@ -6,7 +6,7 @@ import numpy as np
 
 _REPO = os.environ.get("MT_REPO",
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-for sub in ("MetaWorld/metaworld_repo", "MetaWorld", "vlm_ibrl_v3", "Robometer"):
+for sub in ("MetaWorld/metaworld_repo", "MetaWorld", "vlm_ibrl", "Robometer"):
     sys.path.insert(0, os.path.join(_REPO, sub))
 
 from env.metaworld_wrapper import MetaWorldEnv

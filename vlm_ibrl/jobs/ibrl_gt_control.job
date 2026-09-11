@@ -53,7 +53,7 @@ timeout --kill-after=30s --signal=TERM "$TRAIN_TIMEOUT" \
     python mw_main/train_rl_mw.py \
         --config_path release/cfgs/metaworld/ibrl_long.yaml \
         --bc_policy coffeepush \
-        --train_end_on_success 0 \
+        --train_end_on_success ${TRAIN_END_ON_SUCCESS:-0} \
         --reward_at_truncation "$REWARD_AT_TRUNC" \
         --num_train_step "$NUM_TRAIN_STEP" \
         --seed "$SEED" \

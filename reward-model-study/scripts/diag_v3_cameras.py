@@ -1,7 +1,7 @@
 """v3 counterpart of diag_v2_cameras.py — the decisive domain-match test.
 
 Roll out MetaWorld **v3** CoffeePush (scripted oracle -> successes; noisy ->
-failures) in the new vlm_ibrl_v3 env, render each state from the curated-data
+failures) in the new vlm_ibrl env, render each state from the curated-data
 cameras (corner2/corner3/gripperPOV) the EXACT way the reward model's training
 data was rendered (gymnasium MujocoRenderer.camera_id + vertical flip), then
 score each camera with Robometer-FT.
@@ -25,8 +25,8 @@ import os
 import sys
 import numpy as np
 
-# vlm_ibrl_v3 (the v3 port) provides the env; Robometer/ provides the scorer pkg.
-V3_ROOT = "/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl_v3"
+# vlm_ibrl (the v3 port) provides the env; Robometer/ provides the scorer pkg.
+V3_ROOT = "/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl"
 sys.path.insert(0, V3_ROOT)
 sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/Robometer")
 

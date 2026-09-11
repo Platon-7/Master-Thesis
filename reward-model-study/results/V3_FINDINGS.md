@@ -15,7 +15,7 @@ success_prob to ~0.30 — reproducing the IBRL on-policy failure.
   clone of `demo2reward` + gymnasium 0.29.1 + mujoco 3.1.1 + Farama MetaWorld v3
   (pin 58e32b4d, `MetaWorld/metaworld_repo`); mujoco-py removed. transformers
   stays 4.57.2 so one env both renders v3 AND scores the Qwen3-VL Robometer-FT.
-- **folder** `vlm_ibrl_v3/`: copy of `vlm_ibrl/` with `env/metaworld_wrapper.py`
+- **folder** `vlm_ibrl/`: copy of `vlm_ibrl/` with `env/metaworld_wrapper.py`
   ported v2->v3 (MT1 + gymnasium 5-tuple->4-tuple + `SawyerCoffeePushV3Policy`).
   Render path: `env.mujoco_renderer.render("rgb_array", camera_name=cam)[::-1]`.
 
@@ -129,7 +129,7 @@ The seed-1 on-policy runs (FT 0.83, baseline 0.77, GT-floor 0.43) used the **sim
 ground-truth success** for detection / termination / reward-gating — NOT the reward model.
 The model only supplied the reward *magnitude*. So these runs do NOT yet validate the
 paper's autonomous-RL protocol (Robometer App. E-2: terminate when the model's
-success_prob > 0.6). Mechanism, in `vlm_ibrl_v3/env/vlm_envs.py`:
+success_prob > 0.6). Mechanism, in `vlm_ibrl/env/vlm_envs.py`:
 
 - L167 `reward_at_truncation = kwargs.pop(...)` — popped by VLMCritic, NOT forwarded to the
   base env -> base `PixelMetaWorld` reward = `SparseRewardWrapper` = `float(info["success"])`

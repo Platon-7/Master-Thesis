@@ -16,5 +16,5 @@ export PYTHONNOUSERSITE=1
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate /gpfs/scratch1/shared/pkarageorgis1/envs/demo2reward_v3
 export MUJOCO_GL=egl
-export PYTHONPATH="/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl_v3:${PYTHONPATH:-}"
+export PYTHONPATH="/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl:${PYTHONPATH:-}"
 python -u /gpfs/home3/pkarageorgis1/Master-Thesis/reward-model-study/scripts/verify_dualrender_v3.py

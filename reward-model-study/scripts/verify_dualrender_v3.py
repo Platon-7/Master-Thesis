@@ -11,7 +11,7 @@ import sys
 import numpy as np
 
 os.environ.setdefault("V3_CORNER2_ZOOM", "1")
-sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl_v3")
+sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl")
 from env.metaworld_wrapper import MetaWorldEnv
 import datasets, imageio.v3 as iio
 from PIL import Image

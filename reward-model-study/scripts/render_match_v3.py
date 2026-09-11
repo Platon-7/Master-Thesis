@@ -11,7 +11,7 @@ import os
 import sys
 import numpy as np
 
-sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl_v3")
+sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl")
 import mujoco
 import metaworld
 from PIL import Image

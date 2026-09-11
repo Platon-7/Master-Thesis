@@ -9,7 +9,7 @@ from PIL import Image
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, "/shared/home/PKA4388/Master-Thesis/vlm_ibrl_v3")
+sys.path.insert(0, "/shared/home/PKA4388/Master-Thesis/vlm_ibrl")
 os.environ["V3_CORNER2_ZOOM"] = "1"                 # match the RL runs
 from env.metaworld_wrapper import MetaWorldEnv
 

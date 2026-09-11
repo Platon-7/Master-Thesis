@@ -4,11 +4,11 @@ import numpy as np
 import collections
 
 try:
-    import gym
-    import metaworld
-    import metaworld.policies
+    import gym  # old gym (0.26): the IBRL wrapper stack below subclasses gym.Env / gym.Wrapper
+    import metaworld  # Farama MetaWorld v3 (gymnasium-based); see MetaWorld/setup_env.sh pin 58e32b4d
+    import metaworld.policies as mw_policies
 except Exception as e:
-    print("warning: failed to import metaworld")
+    print("warning: failed to import metaworld (v3)")
     print("========================================", e)
     print("========================================")
 
@@ -60,10 +60,31 @@ PROP_IDXS = {
 PROP_SHAPE = {env_name: (len(PROP_IDXS[env_name]),) for env_name in STATE_IDXS.keys()}
 
 
+# MetaWorld VERSION NOTE: this wrapper targets Farama MetaWorld **v3**
+# (gymnasium + the modern `mujoco` bindings) — the rendering domain the
+# Robometer reward model was trained/evaluated on (curated ids
+# `metaworld_*_v3_*`). It is a port of the original v2 wrapper (rlworkgroup
+# metaworld 0.1.0 / mujoco_py / mujoco210); the v2->v3 swap fixes the
+# rendering-domain mismatch documented in the IBRL investigation. Only this
+# class talks to gymnasium/v3 — every wrapper further down stays on the
+# old-gym 4-tuple interface, so MetaWorldEnv translates the gymnasium 5-tuple
+# (obs, reward, terminated, truncated, info) back to (obs, reward, done, info)
+# at this single boundary.
+
+_V3_MT1_SEED = 42  # only fixes which train_tasks MT1 generates; per-reset goal
+                   # randomization comes from `_freeze_rand_vec = False` below.
+
+
 class MetaWorldEnv(gym.Env):
     """
-    Fully-observable state-only (noimage) MetaWorld environment
+    Fully-observable state-only (noimage) MetaWorld **v3** environment.
     `camera_name`, `width`, and `height` only affect the output of `render`.
+
+    Rendering replicates the curated-data pipeline exactly
+    (MetaWorld/generate_failures.py::render_all_cameras): point the gymnasium
+    MujocoRenderer's `camera_id` at the requested camera, render the env's
+    native rgb buffer, flip it vertically, then resize to (width, height).
+    Matching this keeps on-policy frames in the reward model's training domain.
     """
 
     def __init__(
@@ -75,33 +96,71 @@ class MetaWorldEnv(gym.Env):
     ):
         self.env_name = env_name
 
-        # Convert, e.g., CoffeePush to coffee-push
-        env_id = re.sub(r"([a-z])([A-Z])", r"\1-\2", self.env_name).lower()
-        env_id = f"{env_id}-v2-goal-observable"
-        # for x in metaworld.envs.ALL_V2_ENVIRONMENTS_GOAL_OBSERVABLE:
-        #     print(x)
-        env_cls = metaworld.envs.ALL_V2_ENVIRONMENTS_GOAL_OBSERVABLE[env_id]
-        self.env = env_cls()
+        # Convert, e.g., CoffeePush -> coffee-push-v3
+        task_id = re.sub(r"([a-z])([A-Z])", r"\1-\2", self.env_name).lower()
+        task_id = f"{task_id}-v3"
+        self.task_id = task_id
 
-        # Ensures that every time `reset` is called, the goal position is randomized
+        # Build via the MT1 benchmark API — the same entrypoint the v3 dataset
+        # generator used (MetaWorld/generate_dataset.py). MT1 yields the env
+        # class + a list of tasks (each task = a frozen object/goal rand_vec).
+        self._mt1 = metaworld.MT1(task_id, seed=_V3_MT1_SEED)
+        env_cls = self._mt1.train_classes[task_id]
+        self._tasks = list(self._mt1.train_tasks)
+
+        self.env = env_cls(render_mode="rgb_array", camera_name=camera_name)
+        # Seed an initial task, then unfreeze so every `reset` re-randomizes the
+        # object/goal placement (mirrors the v2 wrapper's `_freeze_rand_vec =
+        # False`; without this, set_task pins a single layout forever).
+        self.env.set_task(self._tasks[0])
         self.env._freeze_rand_vec = False
 
-        # Set the heuristic (scripted) policy
-        policy_name = "Sawyer" + env_cls.__name__.replace("GoalObservable", "") + "Policy"
-        self.heuristic_policy = vars(metaworld.policies)[policy_name]()
+        # DUAL-RENDER support. The v2-trained BC policy expects the v2 wrapper's
+        # zoomed-in corner2 (Seo/Hansen cam_pos) and is out-of-domain under v3's
+        # *default* corner2 (empirically: BC success 0.40 zoomed vs 0.00 default).
+        # The reward model is the opposite — it was trained on the DEFAULT corner2
+        # (render_match_v3 pixel-match). So:
+        #   - V3_CORNER2_ZOOM=1 zooms the real `corner2` camera -> the POLICY's
+        #     rl_camera="corner2" obs (and the corner2_image BC demos) are in-domain.
+        #   - the pseudo-camera "corner2_default" renders corner2's DEFAULT view ->
+        #     the REWARD model's reward_camera is in-domain.
+        # Point ROBOMETER_REWARD_CAMERA=corner2_default so policy and reward are
+        # BOTH in-domain in the same v3 episode (no BC retrain needed).
+        #
+        # IMPLEMENTATION NOTE: gymnasium 0.29.1's cached offscreen viewer does NOT
+        # pick up cam_pos changes made *after* the first render (a runtime swap
+        # gave byte-identical frames), but it DOES honor changes made at INIT
+        # (that is why the BC zoom works). So we configure a spare world-fixed
+        # camera ("corner", unused by the IBRL pipeline) to hold corner2's DEFAULT
+        # extrinsics/intrinsics at init, and render *that* for "corner2_default".
+        import os as _os
+        import mujoco as _mj
+        _CAM = _mj.mjtObj.mjOBJ_CAMERA
+        m = self.env.model
+        self._corner2_id = _mj.mj_name2id(m, _CAM, "corner2")
+        self._corner2_zoom = _os.environ.get("V3_CORNER2_ZOOM") == "1"
+        # Spare camera that mirrors corner2's DEFAULT view (set BEFORE zooming corner2).
+        self._reward_cam_name = "corner"  # world-fixed, otherwise unused
+        _sid = _mj.mj_name2id(m, _CAM, self._reward_cam_name)
+        m.cam_pos[_sid] = np.array(m.cam_pos[self._corner2_id]).copy()
+        m.cam_quat[_sid] = np.array(m.cam_quat[self._corner2_id]).copy()
+        m.cam_fovy[_sid] = float(m.cam_fovy[self._corner2_id])
+        m.cam_mode[_sid] = int(m.cam_mode[self._corner2_id])
+        m.cam_bodyid[_sid] = int(m.cam_bodyid[self._corner2_id])
+        if self._corner2_zoom:
+            m.cam_pos[self._corner2_id] = np.array([0.75, 0.075, 0.7])
 
-        # Redefine corner2 camera to be zoomed in, as in Seo et al. 2022 and Hansen et al. 2022
-        index = self.env.model.camera_name2id("corner2")
-        # self.env.model.cam_fovy[index] = 22  # FOV
-        # self.env.model.cam_pos[index][0] = 1.5  # X
-        # self.env.model.cam_pos[index][1] = -0.4  # Y
-        # self.env.model.cam_pos[index][2] = 1.1  # Z
-        self.env.model.cam_pos[index] = [0.75, 0.075, 0.7]
+        # Scripted (oracle) policy, e.g. SawyerCoffeePushV3Policy.
+        self.heuristic_policy = getattr(mw_policies, f"Sawyer{self.env_name}V3Policy")()
 
         self.camera_name = camera_name
-
         self.width = width
         self.height = height
+
+        # Latest raw 39-d observation (fed to the scripted policy each call).
+        self._last_obs = None
+        # camera-name -> mujoco camera id, looked up lazily.
+        self._cam_id_cache = {}
 
     @property
     def action_space(self):
@@ -109,18 +168,22 @@ class MetaWorldEnv(gym.Env):
 
     def reset(self, **kwargs):
         self.env.reset(**kwargs)
-        obs, _, _, _ = self.env.step(np.zeros_like(self.env.action_space.sample()))
+        # Match the v2 wrapper: take one zero-action step so the returned obs is
+        # the settled post-reset state. gymnasium returns a 5-tuple.
+        obs, _, _, _, _ = self.env.step(np.zeros_like(self.env.action_space.sample()))
+        self._last_obs = obs
         obs = np.take(obs, STATE_IDXS[self.env_name])
         return dict(state=obs)
 
     def step(self, action):
-        obs, reward, done, info = self.env.step(action)
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        self._last_obs = obs
+        done = bool(terminated or truncated)
         obs = dict(state=obs)
         return obs, reward, done, info
 
     def get_heuristic_action(self, clip_action=True):
-        state_obs = self.env._get_obs()
-        action = self.heuristic_policy.get_action(state_obs)
+        action = self.heuristic_policy.get_action(self._last_obs)
         if clip_action:
             action = action.clip(-1, 1)
         return action
@@ -133,12 +196,33 @@ class MetaWorldEnv(gym.Env):
         width = width or self.width
         height = height or self.height
 
-        img = self.env.render(
-            offscreen=True,
-            camera_name=camera_name,
-            resolution=(width, height),
-        )
+        # Render the named camera via gymnasium MujocoRenderer's *argument* API
+        # (renderer.render(..., camera_name=cam)) — the same path env.render()
+        # uses internally. NOTE: the v3 dataset generator
+        # (MetaWorld/generate_failures.py::render_all_cameras) tried to swap
+        # cameras by setting a `renderer.camera_id` ATTRIBUTE, which this
+        # gymnasium (0.29.1) ignores — its MujocoRenderer has no such attribute,
+        # so that code always fell through to its `except: env.render()` branch.
+        # The net effect: every curated frame is the env's construction camera
+        # (corner2) rendered via env.render() and vertically flipped. We
+        # reproduce that exactly here (camera_name + `[::-1]`) so on-policy
+        # frames sit in the reward model's training domain. corner2 is the
+        # in-domain camera; other names still render correctly but were never
+        # seen by the reward model.
+        #
+        # Pseudo-camera "corner2_default" -> the spare camera configured at init
+        # to hold corner2's DEFAULT (un-zoomed) view (the reward model's in-domain
+        # view in the dual-render setup). It is an init-time config because
+        # runtime cam_pos swaps do NOT propagate through gymnasium's cached
+        # offscreen viewer (verified: a runtime swap produced byte-identical
+        # frames).
+        real_name = self._reward_cam_name if camera_name == "corner2_default" else camera_name
+        img = self.env.mujoco_renderer.render("rgb_array", camera_name=real_name)
+        img = img[::-1].copy()
 
+        if img.shape[0] != height or img.shape[1] != width:
+            from PIL import Image
+            img = np.asarray(Image.fromarray(img).resize((width, height), Image.BILINEAR))
         return img
 
 

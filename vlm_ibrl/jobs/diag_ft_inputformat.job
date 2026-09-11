@@ -30,7 +30,7 @@ source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate "$ENV_NAME"
 source set_env.sh
 export PYTHONPATH="$PYTHONPATH:$HERE/../Robometer"
-unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+unset WANDB_PROJECT WANDB_ENTITY
 export WANDB_MODE=disabled
 
 echo "==================== ft input-format diag ===================="

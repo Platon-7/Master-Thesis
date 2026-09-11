@@ -27,7 +27,7 @@ _REPO = os.environ.get(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
 sys.path.insert(0, os.path.join(_REPO, "MetaWorld"))
-sys.path.insert(0, os.path.join(_REPO, "vlm_ibrl_v3"))
+sys.path.insert(0, os.path.join(_REPO, "vlm_ibrl"))
 sys.path.insert(0, os.path.join(_REPO, "Robometer"))
 # Farama MetaWorld v3 package source. The env's editable install points at the
 # old Snellius /gpfs path (dead on this cluster); putting metaworld_repo on

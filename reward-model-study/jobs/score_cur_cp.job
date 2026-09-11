@@ -20,6 +20,6 @@ source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate /gpfs/scratch1/shared/pkarageorgis1/envs/demo2reward_v3
 export PYTHONNOUSERSITE=1
 export MUJOCO_GL=egl                       # new-mujoco EGL offscreen render (needs GPU)
-export PYTHONPATH="/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl_v3:/gpfs/home3/pkarageorgis1/Master-Thesis/Robometer:${PYTHONPATH:-}"
+export PYTHONPATH="/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl:/gpfs/home3/pkarageorgis1/Master-Thesis/Robometer:${PYTHONPATH:-}"
 nvidia-smi --query-gpu=name --format=csv,noheader | head -1
 python -u /gpfs/home3/pkarageorgis1/Master-Thesis/reward-model-study/scripts/score_curated_coffeepush.py

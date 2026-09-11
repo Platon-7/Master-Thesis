@@ -11,7 +11,7 @@ from PIL import Image
 
 _REPO = os.environ.get("MT_REPO",
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-for sub in ("vlm_ibrl_v3", "Robometer"):
+for sub in ("vlm_ibrl", "Robometer"):
     sys.path.insert(0, os.path.join(_REPO, sub))
 from env.robometer_utils import get_robometer_4b
 

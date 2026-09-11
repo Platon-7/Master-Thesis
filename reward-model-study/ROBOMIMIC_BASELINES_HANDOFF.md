@@ -1,7 +1,7 @@
 # Running the VLM Reward-Model Baselines on Robomimic — Hand-off Guide
 
 This is a hand-off from the MetaWorld baseline runs. Everything below was learned
-building these on MetaWorld (`vlm_ibrl_v3/env/vlm_envs.py` + `metaworld_wrapper.py`).
+building these on MetaWorld (`vlm_ibrl/env/vlm_envs.py` + `metaworld_wrapper.py`).
 On Robomimic you plug the same scorers into `env/robosuite_vlm_env.py` +
 `robosuite_wrapper.py`. Tasks: Lift / PickPlaceCan / NutAssemblySquare (etc.).
 

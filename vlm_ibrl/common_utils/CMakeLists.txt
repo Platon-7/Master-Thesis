@@ -23,7 +23,23 @@ execute_process(
   OUTPUT_VARIABLE TorchPath
 )
 list(APPEND CMAKE_PREFIX_PATH ${TorchPath})
-find_package(Torch REQUIRED)
+
+# Manual libtorch linkage — deliberately NOT using find_package(Torch).
+# find_package(Torch) pulls in torch's Caffe2 CUDA cmake, which fails on this
+# cluster: the env's torch is built for CUDA 12.1 but the system CUDA toolkit is
+# 13.0 and not reliably present on every node. It hunts for CUDA-12-era files
+# that CUDA 13 removed (nvToolsExt / libnvToolsExt) and for a full toolkit
+# (nvcc, cudart, headers) we don't need. `rela` has NO CUDA sources of its own,
+# so it only needs libtorch's headers + libs to build; any CUDA tensor ops
+# resolve at RUNTIME via libtorch's bundled CUDA libraries. So set the paths by
+# hand and skip the toolkit machinery entirely.
+set(TORCH_INCLUDE_DIRS
+  "${TorchPath}/include"
+  "${TorchPath}/include/torch/csrc/api/include")
+file(GLOB TORCH_LIBRARIES
+  "${TorchPath}/lib/libtorch.so"
+  "${TorchPath}/lib/libtorch_cpu.so"
+  "${TorchPath}/lib/libc10.so")
 set(TORCH_PYTHON_LIBRARIES "${TorchPath}/lib/libtorch_python.so")
 
 message("---------------------")

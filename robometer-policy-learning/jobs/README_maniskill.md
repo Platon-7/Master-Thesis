@@ -158,7 +158,7 @@ easier task or raise `STEPS` before spending compute on arms 2 and 3.
   (`robometer/data/dataset_types.py`) carries a demonstration, and the collator
   (`robometer/data/collators/rbm_heads.py`) emits
   `[demo frames] <|demo_end|> [query frames]` when it is populated — the same
-  layout used at training time. `vlm_ibrl_v3/env/robometer_utils.py` is a
+  layout used at training time. `vlm_ibrl/env/robometer_utils.py` is a
   working reference call site.
 
   **The catch:** the pinned `robometer` *submodule* is upstream and has **zero**

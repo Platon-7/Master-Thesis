@@ -29,7 +29,7 @@ _REPO = os.environ.get(
 )
 sys.path.insert(0, os.path.join(_REPO, "MetaWorld", "metaworld_repo"))
 sys.path.insert(0, os.path.join(_REPO, "MetaWorld"))
-sys.path.insert(0, os.path.join(_REPO, "vlm_ibrl_v3"))
+sys.path.insert(0, os.path.join(_REPO, "vlm_ibrl"))
 sys.path.insert(0, os.path.join(_REPO, "Robometer"))
 
 from env.metaworld_wrapper import MetaWorldEnv

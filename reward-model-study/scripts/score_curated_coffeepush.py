@@ -15,7 +15,7 @@ import os
 import sys
 import numpy as np
 
-sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl_v3")
+sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/vlm_ibrl")
 sys.path.insert(0, "/gpfs/home3/pkarageorgis1/Master-Thesis/Robometer")
 
 from env.robometer_utils import get_robometer_4b

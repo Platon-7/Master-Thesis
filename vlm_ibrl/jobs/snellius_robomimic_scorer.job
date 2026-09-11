@@ -81,7 +81,7 @@ export AUTONOMOUS_SUCCESS=0
 
 # RoboDopamine takes a goal image as its reference-END anchor, and the published
 # Can run used one. No committed job script sets ROBODOPAMINE_GOAL for Robomimic
-# (only vlm_ibrl_v3/jobs/robodopamine_rl_array.job does, for MetaWorld) because it
+# (only vlm_ibrl/jobs/robodopamine_rl_array.job does, for MetaWorld) because it
 # was passed at submit time via --export, which leaves no trace in the repo.
 # Generate the image with jobs/snellius_can_goal.job and pass it here; without it
 # the code silently falls back to the start frame, which it calls "weak".

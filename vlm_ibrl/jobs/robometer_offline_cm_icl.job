@@ -39,7 +39,7 @@ export MUJOCO_PATH="$MUJOCO_PATH"
 source "$(conda info --base)/etc/profile.d/conda.sh"
 source set_env.sh
 export PYTHONPATH="$QWEN35_FT_DIR:$HERE:$ROBOMETER_DIR:${PYTHONPATH:-}"
-unset WANDB_PROJECT WANDB_API_KEY WANDB_ENTITY
+unset WANDB_PROJECT WANDB_ENTITY
 export WANDB_MODE=disabled
 
 TASK="${TASK:-CoffeePush}"

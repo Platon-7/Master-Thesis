@@ -166,7 +166,7 @@ class RobometerReplayBuffer(ReplayBuffer):
         # scored with a demonstration attached as sample.context_trajectory,
         # and the collator inserts <|demo_end|> between demo and query -- the
         # same input layout the model saw at training time. Mirrors the proven
-        # path in vlm_ibrl_v3/env/robometer_utils.py.
+        # path in vlm_ibrl/env/robometer_utils.py.
         self.icl_demos = None
         self._icl_rng = np.random.default_rng(icl_demo_seed)
         if icl_demo_path:
