@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --job-name=closelid_calib
+#SBATCH --output=logs/calib_%x_%j.out
+#SBATCH --error=logs/calib_%x_%j.err
+#SBATCH --time=04:00:00
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=80G
+# Real-world close-lid calibration: score every growing prefix of the 30 episodes.
+#   sbatch --export=ALL,MODEL=roboref   score_prefixes.job
+#   sbatch --export=ALL,MODEL=robometer score_prefixes.job
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+MODEL="${MODEL:?set MODEL=roboref|robometer}"
+TASK="${TASK:-Close the lid of the pot.}"
+unset PYTHONPATH 2>/dev/null || true
+module load 2025 Anaconda3/2025.06-1
+export PYTHONNOUSERSITE=1
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate demo2reward
+export PYTHONPATH="$HOME/Master-Thesis/vlm_ibrl:$HOME/Master-Thesis/Robometer"
+# same cache as the sim scorer jobs; no offline flags (offline mode breaks the Qwen processor load)
+export HF_HOME="/scratch-shared/$USER/hf_cache"
+nvidia-smi --query-gpu=name --format=csv,noheader
+ICL_ARGS=""; [ -n "${ICL_DEMO:-}" ] && ICL_ARGS="--icl_demo $ICL_DEMO"
+python score_prefixes.py --model "$MODEL" --task "$TASK" --stride 1 $ICL_ARGS --out "scores_${MODEL}.json"
