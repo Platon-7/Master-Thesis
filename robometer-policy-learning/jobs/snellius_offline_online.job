@@ -1,0 +1,168 @@
+#!/bin/bash
+#SBATCH --job-name=ms_offon
+#SBATCH --output=/scratch-shared/pkarageorgis1/roboref_results/ms_offon_%j.out
+#SBATCH --error=/scratch-shared/pkarageorgis1/roboref_results/ms_offon_%j.err
+#SBATCH --time=24:00:00
+#SBATCH --partition=gpu_a100
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=120G
+#
+# Offline (IQL) warm start -> online SAC with a KL TRUST REGION, on ManiSkill.
+#
+# The bug this exists to test around
+# ---------------------------------
+# train_actor_with_kl_divergence replaces SAC's entropy term with
+#   actor_loss = ent_coef * KL(pi || old_actor) - Q
+# but update_old_actor() was only ever called from __init__ and copy_components,
+# never during training. In an offline->online run copy_components sets old_actor
+# to the IQL warm start, so the KL penalised TOTAL DISPLACEMENT from that warm
+# start forever: the policy was confined to one KL ball around its starting point
+# and could not improve at any coefficient. Observed exactly that way --
+# ent_coef=0.01 collapsed to 0%, and 0.1/1/10 froze at the warm-start level
+# (10-26%, no trend over 60k steps).
+#
+# 73edf0e added kl_ref_refresh_interval: every N actor updates the reference
+# advances onto the current actor, so the KL bounds each STEP rather than the
+# distance travelled. THIS IS STILL UNVALIDATED -- it is the leading hypothesis,
+# not a verified fix.
+#
+# Two things that must come with it
+# ---------------------------------
+#  * the *_bc_clip.h5 demos, not the raw converted ones. 23-27% of demo action
+#    components sit at |a| = 1-1e-6, needing a pre-tanh mean of atanh(0.999999)
+#    = 7.25, which a tanh-Gaussian actor cannot represent -- NLL-based BC/IQL
+#    then structurally underfits (0-8% / ~20%, vs 55-60% for an MSE clone).
+#    Build them with jobs/snellius_prep_demos.job.
+#  * 300k+ steps. LiftPeg's GT policy does not leave 0% until ~110k; every run
+#    behind the original diagnosis was 20k-60k, far too short to conclude from.
+#
+# Success criterion: final_eval - step0_eval > 0 AND final >= 50%. A run that
+# ends where it started is a failure even at 50% -- the point is that run2's
+# reward drives the improvement, not the demos. eval.eval_on_first_step is
+# forced on below so that step-0 number actually exists to compare against.
+#
+#   sbatch --export=ALL,TASK=LiftPegUpright-v1,SEED=0,KL_REFRESH=1000 jobs/snellius_offline_online.job
+#   sbatch --export=ALL,TASK=LiftPegUpright-v1,SEED=0,KL_REFRESH=200  jobs/snellius_offline_online.job
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"; mkdir -p logs
+
+TASK="${TASK:-LiftPegUpright-v1}"
+SEED="${SEED:-0}"
+STEPS="${STEPS:-300000}"
+MODEL="${MODEL:-run2}"
+RUN2_PATH="/projects/prjs1958/Robometer_FT_consolidated/run2_noicl_ours_step4000"
+case "$MODEL" in
+  run2) REWARD_CKPT="${REWARD_CKPT:-$RUN2_PATH}" ;;
+  base) REWARD_CKPT="${REWARD_CKPT:-robometer/Robometer-4B}" ;;
+  *)    REWARD_CKPT="${REWARD_CKPT:-$MODEL}" ;;
+esac
+
+OFFLINE_ALG="${OFFLINE_ALG:-iql}"
+OFFLINE_STEPS="${OFFLINE_STEPS:-20000}"
+SAMPLE_RATIO="${SAMPLE_RATIO:-0.5}"
+ENT_COEF="${ENT_COEF:-0.1}"
+KL_REFRESH="${KL_REFRESH:-1000}"
+ACTOR_LR="${ACTOR_LR:-1e-5}"
+LOG_STD_MIN="${LOG_STD_MIN:--5.0}"
+
+# /scratch-shared purges files not accessed for ~2 weeks and ATE this venv on
+# 2026-09-07 (numpy/tqdm/wandb lost their .py files mid-campaign). The venv now
+# lives on /projects, which is permanent.
+ENV_PREFIX="${ENV_PREFIX:-/projects/prjs1958/$USER/envs/maniskill_rl}"
+PY="$ENV_PREFIX/bin/python"
+export PATH="$ENV_PREFIX/bin:$PATH"
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="/scratch-shared/$USER/maniskill_assets"
+export HF_HOME="/scratch-shared/$USER/hf_cache"
+export TORCH_HOME="/scratch-shared/$USER/torch_cache"
+export SAPIEN_CACHE_DIR="/scratch-shared/$USER/sapien_cache"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export TOKENIZERS_PARALLELISM=false ROBOMETER_DISABLE_UNSLOTH=1
+export WANDB_PROJECT="${WANDB_PROJECT:-roboref_maniskill}"
+export WANDB_ENTITY="${WANDB_ENTITY:-nlp-squad}"
+if [[ -z "${WANDB_MODE:-}" ]]; then
+    grep -q 'api.wandb.ai' "$HOME/.netrc" 2>/dev/null && export WANDB_MODE=online || export WANDB_MODE=offline
+fi
+
+DEMO_H5="${DEMO_H5:-$MS_ASSET_DIR/demos_converted/${TASK}_bc_clip.h5}"
+if [[ ! -f "$DEMO_H5" ]]; then
+    echo "ERROR: demos not found: $DEMO_H5" >&2
+    echo "  Build them: sbatch --export=ALL,TASK=$TASK jobs/snellius_prep_demos.job" >&2
+    exit 6
+fi
+# Refuse the unclipped file by accident -- it is the single most expensive
+# mistake available here, and it fails silently as a merely-mediocre warm start.
+if [[ "$DEMO_H5" != *_clip.h5 ]]; then
+    echo "WARNING: $DEMO_H5 is not a *_clip.h5 file. NLL-based IQL underfits" >&2
+    echo "         tanh-saturated demo actions. Set ALLOW_UNCLIPPED=1 to proceed." >&2
+    [[ "${ALLOW_UNCLIPPED:-0}" == "1" ]] || exit 6
+fi
+
+TAG="${TAG:-offon_${OFFLINE_ALG}_kl${ENT_COEF}_r${KL_REFRESH}}"
+RUN_DIR="${RUN_DIR:-/scratch-shared/$USER/roboref_runs/ms_${TASK}_${MODEL}_${TAG}_s${SEED}_$(date +%Y%m%d_%H%M%S)}"
+mkdir -p "$RUN_DIR"
+export RPL_EPISODE_LOG="$RUN_DIR"
+
+echo "==================== launch ===================="
+echo "JOB         : ${SLURM_JOB_ID:-<none>} on $(hostname)"
+echo "TASK        : $TASK   SEED: $SEED   STEPS: $STEPS"
+echo "REWARD_CKPT : $REWARD_CKPT"
+echo "DEMO_H5     : $DEMO_H5"
+echo "OFFLINE     : $OFFLINE_ALG  ${OFFLINE_STEPS} steps  sample_ratio=$SAMPLE_RATIO"
+echo "KL          : ent_coef=$ENT_COEF  refresh=$KL_REFRESH  actor_lr=$ACTOR_LR  log_std_min=$LOG_STD_MIN"
+echo "RUN_DIR     : $RUN_DIR"
+echo "==============================================="
+
+echo "[preflight] importing the training stack"
+"$PY" -c "
+from robometer_policy_learning.algorithms.sac import SAC
+from robometer_policy_learning.algorithms.iql import IQL
+from robometer_policy_learning.algorithms.sac.configuration_sac import SACConfig
+assert hasattr(SACConfig, 'kl_ref_refresh_interval'), 'KL trust-region fix missing'
+print('training stack imports OK (incl. kl_ref_refresh_interval)')
+" || { echo "ERROR: training stack failed to import." >&2; exit 3; }
+
+echo "[preflight] verifying environment"
+"$PY" scripts/verify_maniskill_env.py --task "$TASK" || {
+    echo "ERROR: environment verification failed." >&2; exit 3; }
+
+"$PY" scripts/train.py \
+  --config-path=../robometer_policy_learning/configs \
+  --config-name=maniskill_online_rl \
+  "env.env_name=maniskill/$TASK" \
+  algorithm@online_algorithm=sac alg.online_alg_name=sac \
+  "algorithm@offline_algorithm=$OFFLINE_ALG" "alg.offline_alg_name=$OFFLINE_ALG" \
+  "+env.h5_dataset_path=$DEMO_H5" \
+  "training.num_offline_steps=$OFFLINE_STEPS" \
+  "buffer.sample_ratio=$SAMPLE_RATIO" \
+  training.num_rollouts="$STEPS" \
+  training.seed="$SEED" \
+  reward_model=robometer \
+  "reward_model.model_path=$REWARD_CKPT" \
+  reward_model.add_estimated_reward=false \
+  reward_model.use_success_detection=false \
+  env.use_gt_rewards=false \
+  env.env_kwargs.reward_mode=sparse \
+  online_algorithm.train_actor_with_kl_divergence=true \
+  "online_algorithm.ent_coef=$ENT_COEF" \
+  "online_algorithm.kl_ref_refresh_interval=$KL_REFRESH" \
+  "online_algorithm.actor_optimizer_lr=$ACTOR_LR" \
+  "policy.log_std_min=$LOG_STD_MIN" \
+  online_algorithm.gamma=0.95 \
+  online_algorithm.tau=0.01 \
+  online_algorithm.batch_size=1024 \
+  online_algorithm.learning_starts=4000 \
+  env.terminate_on_success=false \
+  env.reward_shift=0.0 \
+  training.num_envs=4 \
+  eval.eval_on_first_step=true \
+  logging.wandb_name="ms_${TASK}_${MODEL}_${TAG}_s${SEED}" \
+  logging.wandb_entity="$WANDB_ENTITY" \
+  "hydra.run.dir=$RUN_DIR" \
+  "logging.wandb_log_dir_base=$RUN_DIR/wandb"
+RC=$?
+echo "EXIT=$RC"
+exit $RC

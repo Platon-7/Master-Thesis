@@ -91,13 +91,23 @@ MANISKILL_TASKS: Dict[str, ManiSkillTaskSpec] = {
     # Grasp a peg lying flat and stand it upright. Simple, single-object.
     "LiftPegUpright-v1": ManiSkillTaskSpec(
         instruction="Lift the peg and stand it upright",
-        max_episode_steps=100,
+        max_episode_steps=50,  # ManiSkill registers 50, not 100,
         control_mode="pd_ee_delta_pose",
+    ),
+    # Push a T-shaped block onto a matching outline. Success is 90% AREA OVERLAP
+    # between block and target, which makes it the most visually-legible success
+    # criterion of the shortlist -- and its camera sits closest to the scene
+    # (0.64 m vs PullCube's 0.96 m). Uses the panda_stick agent (no gripper), so
+    # the action space is 3-D.
+    "PushT-v1": ManiSkillTaskSpec(
+        instruction="Push the T-shaped block onto the target outline",
+        max_episode_steps=100,
+        control_mode="pd_ee_delta_pos",
     ),
     # Place a sphere into a shallow bin.
     "PlaceSphere-v1": ManiSkillTaskSpec(
         instruction="Place the sphere into the bin",
-        max_episode_steps=80,
+        max_episode_steps=50,  # ManiSkill registers 50, not 80,
         control_mode="pd_ee_delta_pose",
     ),
 }

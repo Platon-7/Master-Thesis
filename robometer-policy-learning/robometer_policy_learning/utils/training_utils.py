@@ -26,6 +26,10 @@ from robometer_policy_learning.distributed.clients.reward_relabel_client import 
 from transformers import AutoModel, AutoImageProcessor
 from sentence_transformers import SentenceTransformer
 from robometer.utils.save import load_model_from_hf
+from robometer_policy_learning.utils.baseline_reward_adapters import (
+    BASELINE_MODEL_TYPES,
+    load_baseline_reward_model,
+)
 from robometer_policy_learning.utils.env_utils import make_env
 from robometer_policy_learning.utils.transitions_transforms import SuccessBonusTransform, RewardShiftTransform
 from PIL import Image
@@ -342,6 +346,8 @@ def create_buffer(
     success_detection_threshold: float = 0.65,
     add_estimated_reward: bool = False,
     icl_demo_path: Optional[str] = None,
+    progress_beta: float = 1.0,
+    progress_binarize_threshold: Optional[float] = None,
 ) -> Any:
     """
     Create a replay buffer for training.
@@ -417,8 +423,13 @@ def create_buffer(
     def _create_single_buffer():
         """Helper to create a single buffer instance."""
         if h5_paths is not None:
-            # Offline buffer (from H5 dataset)
-            if not use_full_state:
+            # Offline buffer (from H5 dataset).
+            # Relabelling only makes sense when a reward model / eval server is actually
+            # supplied. A BC warm start is supervised on (obs, action) and needs neither
+            # rewards nor language embeddings, so routing it through the Robometer buffer
+            # would demand a sentence_model it has no use for (and burn VLM calls on
+            # every demo frame). Fall through to the plain loader in that case.
+            if not use_full_state and (reward_model is not None or use_eval_server):
                 return RobometerH5ReplayBuffer(
                     reward_model=reward_model,
                     reward_model_config=reward_model_exp_cfg,
@@ -447,7 +458,8 @@ def create_buffer(
                     add_estimated_reward=add_estimated_reward,
                 )
             else:
-                assert use_gt_rewards, "use_gt_rewards must be True when use_full_state is True"
+                if use_full_state:
+                    assert use_gt_rewards, "use_gt_rewards must be True when use_full_state is True"
                 return H5ReplayBuffer(
                     h5_paths=h5_paths,
                     sampler=sampler,
@@ -481,6 +493,8 @@ def create_buffer(
                     success_detection_threshold=success_detection_threshold,
                     add_estimated_reward=add_estimated_reward,
                     icl_demo_path=icl_demo_path,
+                    progress_beta=progress_beta,
+                    progress_binarize_threshold=progress_binarize_threshold,
                 )
             else:
                 return ReplayBuffer(
@@ -586,11 +600,24 @@ def setup_training(
             eval_server_url = f"{reward_model_cfg.get('eval_server_url', 'http://localhost')}:{reward_model_cfg.get('eval_server_port', 8000)}"
             logger.info(f"Using eval_server at {eval_server_url} for reward computation")
         else:
-            # Load model locally
-            reward_model_exp_cfg, tokenizer, processor, reward_model = load_model_from_hf(
-                model_path=model_path,
-                device=device,
-            )
+            # RoboDopamine and LRM are not Robometer-family models: they have their
+            # own loaders and prompts and cannot go through load_model_from_hf /
+            # process_batch_helper. Route them to the baseline adapters instead.
+            _model_type = str(
+                OmegaConf.select(reward_model_cfg, "model_type", default="robometer")
+            ).lower()
+            if _model_type in BASELINE_MODEL_TYPES:
+                reward_model_exp_cfg, tokenizer, processor, reward_model = (
+                    load_baseline_reward_model(
+                        model_type=_model_type, model_path=model_path, device=device
+                    )
+                )
+            else:
+                # Load model locally
+                reward_model_exp_cfg, tokenizer, processor, reward_model = load_model_from_hf(
+                    model_path=model_path,
+                    device=device,
+                )
             logger.info(f"Loaded reward model locally from {model_path}")
     else:
         use_gt_rewards = True

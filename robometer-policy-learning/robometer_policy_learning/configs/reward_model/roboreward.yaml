@@ -1,21 +1,31 @@
-# RoboReward baseline model configuration
-# RoboReward predicts discrete progress scores (1-5) for task completion
+# RoboReward baseline (rubric 1-5 over the clip, delivered as VIDEO).
+# Served by utils/baseline_reward_adapters.py -- the Robometer loader 404s on it
+# because teetone/RoboReward-* has no Robometer config.yaml.
+# use_relative_rewards=false: it is a rubric level, not a progress trace. On
+# ManiSkill it is scored every step (denser than its RAT=1 reward-at-end form
+# on MetaWorld/Robomimic) -- a deliberate, baseline-favouring deviation.
+# Key set mirrors robometer.yaml so no config read can KeyError.
 
-# Model type
-model_type: "roboreward"
-
-# Model path (HuggingFace model ID)
-# Options: "teetone/RoboReward-8B" (better quality) or "teetone/RoboReward-4B" (faster)
-model_path: "teetone/RoboReward-8B"
-
-# RoboReward-specific settings
-roboreward_max_new_tokens: 128  # Max tokens for generation
-roboreward_use_unsloth: false   # Use unsloth for faster inference (requires unsloth package)
-
-# Note: RoboReward does not use the following settings (they are for Robometer only):
-# - use_relative_rewards
-# - eval_server_*
-# - num_gpus
-# - max_workers
-# - batch_size
-
+add_estimated_reward: false
+batch_size: 4
+eval_server_port: 8000
+eval_server_timeout: 120.0
+eval_server_url: http://localhost
+icl_demo_path: null
+max_workers: 1
+model_path: teetone/RoboReward-4B
+model_type: roboreward
+normalize_reward: false
+normalize_warmup: 1000
+normalize_window: 10000
+num_gpus: 1
+potential_gamma: 0.99
+potential_scale: 1.0
+progress_as_potential: false
+progress_beta: 1.0
+progress_binarize_threshold: null
+success_detection_duration: 1
+success_detection_min_ep_steps: 0
+success_detection_threshold: 0.65
+use_relative_rewards: false
+use_success_detection: false

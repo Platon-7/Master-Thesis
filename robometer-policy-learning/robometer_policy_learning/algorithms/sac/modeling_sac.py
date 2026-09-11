@@ -455,6 +455,16 @@ class SAC(BaseAlgorithm):
 
             actor_log_pis.append(log_prob.mean().item())
 
+            # Advance the KL reference so the constraint bounds the step, not the
+            # total displacement from the warm start (see kl_ref_refresh_interval).
+            _kl_ref_every = int(getattr(self.config, "kl_ref_refresh_interval", 0))
+            if (
+                self.config.train_actor_with_kl_divergence
+                and _kl_ref_every > 0
+                and (update_step + 1) % _kl_ref_every == 0
+            ):
+                self.update_old_actor(self.actor)
+
         self._n_updates += gradient_steps
 
         metrics_dict = {

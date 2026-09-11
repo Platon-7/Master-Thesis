@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH --job-name=relabel
+#SBATCH --partition=capacity
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=47G
+#SBATCH --time=06:00:00
+#SBATCH --output=/home/15552055/Master-Thesis/robometer-policy-learning/logs/relabel_%j.out
+#SBATCH --error=/home/15552055/Master-Thesis/robometer-policy-learning/logs/relabel_%j.err
+cd /home/15552055/Master-Thesis/robometer-policy-learning
+export ROBOMETER_DISABLE_UNSLOTH=1
+export MUJOCO_GL=egl
+/scratch/15552055/envs/maniskill_rl/bin/python scripts/relabel_demo_rewards.py \
+  --demo-h5 "$DEMO_H5" --model "$MODEL" --task "$TASK"

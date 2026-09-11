@@ -58,6 +58,14 @@ class SACConfig(BaseAlgorithmConfig):
     ent_coef_lr: float = 3e-4
 
     train_actor_with_kl_divergence: bool = True
+    # How often (in actor updates) to move the KL reference onto the current
+    # actor. 0 = never, which makes the KL a PERMANENT tether to whatever policy
+    # old_actor was set to -- for an offline->online run that is the warm start,
+    # so the policy can never travel more than one KL ball from it and cannot
+    # improve no matter the coefficient. A positive value turns the term into a
+    # real trust region: it bounds each STEP rather than the total displacement,
+    # so the policy can walk while still never lurching far in one update.
+    kl_ref_refresh_interval: int = 0
 
     # Optional gradient clipping for stability
     clip_grad_norm: Optional[float] = None  # Set to e.g. 1.0 to enable gradient clipping

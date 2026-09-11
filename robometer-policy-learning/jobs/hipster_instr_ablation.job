@@ -1,0 +1,53 @@
+#!/bin/bash
+#SBATCH --job-name=instr_abl
+#SBATCH --output=logs/hipster_instrabl_%j.out
+#SBATCH --error=logs/hipster_instrabl_%j.err
+#SBATCH --time=06:00:00
+#SBATCH --partition=capacity
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=47G
+# HPC policy (Faculty HPC Community Council 2025-06-02): claim resources
+# FRACTIONALLY to GPUs -- l4: 16 cores/47GB per GPU; performance: 32 cores/96GB;
+# fp64: 48 cores/128GB. capacity: <=256 cores over <=2 servers. Measured peak RSS
+# of these runs is ~21GB, so 47G is ample; the previous 120G silently forced a
+# 42-core allocation and capped us at 6 concurrent jobs instead of 16.
+#
+# Re-scores ONE set of cached GT rollouts under several task phrasings, to test
+# whether the reward model is reading the instruction at all. See the docstring of
+# scripts/instruction_ablation_maniskill.py for how to read the result.
+
+set -uo pipefail
+cd "$SLURM_SUBMIT_DIR"
+mkdir -p logs
+export USER="${USER:-$(whoami)}"
+export PYTHONSAFEPATH=1
+export CPATH="/cvmfs/software.eessi.io/versions/2025.06/software/linux/x86_64/amd/zen4/software/Python/3.12.3-GCCcore-13.3.0/include/python3.12:${CPATH:-}"
+export LD_LIBRARY_PATH="/scratch/$USER/vulkan_loader/extracted/lib:/scratch/$USER/nvidia_driver/extracted:${LD_LIBRARY_PATH:-}"
+export VK_ICD_FILENAMES="/scratch/$USER/nvidia_driver/nvidia_icd_abs.json"
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
+export MS_ASSET_DIR="${MS_ASSET_DIR:-/scratch/$USER/maniskill_assets}"
+export HF_HOME="${HF_HOME:-/scratch/$USER/hf_cache}"
+export TORCH_HOME="${TORCH_HOME:-/scratch/$USER/torch_cache}"
+export SAPIEN_CACHE_DIR="${SAPIEN_CACHE_DIR:-/scratch/$USER/sapien_cache}"
+export TOKENIZERS_PARALLELISM=false ROBOMETER_DISABLE_UNSLOTH=1
+
+PY=/scratch/$USER/envs/maniskill_rl/bin/python
+[[ -x "$PY" ]] || { echo "ERROR: no python at $PY" >&2; exit 1; }
+
+TASK="${TASK:-LiftPegUpright-v1}"
+MODEL="${MODEL:-$HOME/Master-Thesis-transfer/checkpoints/Robometer_FT_consolidated/run2_noicl_ours_step4000}"
+TAG="${TAG:-run2}"
+EPISODES="${EPISODES:-24}"
+NCK="${NCK:-6}"
+
+AD="${ACTOR_DIR:-}"
+[[ -d "$AD" ]] || AD=$(ls -d /scratch/$USER/roboref_runs/ms_${TASK}_gt_*_s0_*/checkpoints 2>/dev/null | tail -1)
+[[ -d "$AD" ]] || { echo "ERROR: no GT actor checkpoints for $TASK" >&2; exit 2; }
+
+echo "task=$TASK model=$MODEL actor-dir=$AD episodes=$EPISODES"
+"$PY" -u scripts/instruction_ablation_maniskill.py \
+  --task "$TASK" --model "$MODEL" --tag "$TAG" --actor-dir "$AD" \
+  --episodes "$EPISODES" --n-checkpoints "$NCK" --image-size 224
+echo "INSTR_ABLATION_DONE rc=$?"

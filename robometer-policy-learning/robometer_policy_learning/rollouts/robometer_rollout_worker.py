@@ -107,14 +107,19 @@ class RobometerRolloutWorker(RolloutWorker):
                 # Get info safely
                 info_i = extract_info_for_env(infos, i, self.num_envs)
 
-                # Extract success info (if episode is done/truncated)
+                # Pass the success flag on EVERY step, not only the terminal one.
+                # These tasks run with terminate_on_success=false for the full horizon,
+                # so a policy that solves at step 20 and is disturbed by step 50 was
+                # being recorded as a failure by the buffer while evaluation_worker --
+                # which ORs success across all steps -- called it a success. That gap
+                # is why the same BC policy measured 18-31% in eval and 7.5% in
+                # rollouts, and it made gt_solved_anytime mean "solved on the LAST
+                # step" rather than "solved at any point".
                 success_info = {}
-                if done_i or truncated_i:
-                    # Pass success indicators from info to buffer
-                    if "is_success" in info_i:
-                        success_info["is_success"] = info_i["is_success"]
-                    elif "success" in info_i:
-                        success_info["success"] = info_i["success"]
+                if "is_success" in info_i:
+                    success_info["is_success"] = info_i["is_success"]
+                elif "success" in info_i:
+                    success_info["success"] = info_i["success"]
 
                 # Add to buffer
                 language_instruction = self.env.get_language_instruction()

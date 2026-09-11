@@ -131,3 +131,7 @@ MUJOCO_LOG.TXT
 # C/C++ build artifacts
 **/common_utils/build/
 *.err
+
+# RoboRewardBench run outputs and runtime caches
+roborewardbench/logs/
+**/unsloth_compiled_cache/

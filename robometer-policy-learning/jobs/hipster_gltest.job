@@ -1,0 +1,29 @@
+#!/bin/bash
+#SBATCH --job-name=gltest
+#SBATCH --output=logs/gltest_%j.out
+#SBATCH --error=logs/gltest_%j.err
+#SBATCH --time=00:05:00
+#SBATCH --partition=capacity
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=47G
+# Deliberately tiny so the backfill scheduler can slot it into any gap: our
+# fairshare is ~0.04 and the full verify job (40min/16cpu/47G) estimates 5 days out.
+set -u
+E=/scratch/$USER/envs/maniskill_rl
+export LD_LIBRARY_PATH="/scratch/$USER/vulkan_loader/extracted/lib:/scratch/$USER/nvidia_driver/extracted:$E/lib64/python3.12/site-packages/sapien/oidn_library:${LD_LIBRARY_PATH:-}"
+export VK_ICD_FILENAMES="/scratch/$USER/nvidia_driver/nvidia_icd_abs.json"
+export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1 PYTHONSAFEPATH=1
+export MS_ASSET_DIR=/scratch/$USER/maniskill_assets HF_HOME=/scratch/$USER/hf_cache
+export SAPIEN_CACHE_DIR=/scratch/$USER/sapien_cache ROBOMETER_DISABLE_UNSLOTH=1
+echo "node=$(hostname)"
+echo "libGL on node: $(ls /lib64/libGL.so.1 2>/dev/null || echo ABSENT)"
+$E/bin/python -c "
+import ctypes; ctypes.CDLL('libGL.so.1'); print('libGL.so.1 OK')
+import cv2; print('cv2', cv2.__version__)
+import mani_skill.envs; print('mani_skill.envs OK')
+import gymnasium as gym
+e=gym.make('PullCube-v1',num_envs=1,obs_mode='state',render_mode='rgb_array',sim_backend='physx_cpu')
+e.reset(seed=0); img=e.render(); print('RENDER OK', tuple(img.shape)); e.close()
+"
+echo "RC=$?"

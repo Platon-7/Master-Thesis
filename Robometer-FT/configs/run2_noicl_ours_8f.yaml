@@ -1,0 +1,63 @@
+# Run 2 (8 frames) — the frame-budget ablation arm for RoboRef-Asym.
+# Byte-identical to run2_noicl_ours.yaml except for the three lines flagged
+# below. Section 5.2 of the thesis ran this ablation on run1 (the in-context
+# model); this is the same ablation on run2, the deployed no-ICL model.
+#
+# The step-2 cache stores 16 keyframes per episode
+# (max_frames_for_preprocessing: 16). data.max_frames subsamples from those at
+# sample time via linspace (samplers/base.py:1102), so the SAME cache serves
+# both arms — nothing about the data pipeline changes here.
+
+data.train_datasets: [robometer_frames_train_no_extras]
+
+# DELTA 1 — the whole point of this run: 8 query frames instead of 16.
+# use_icl is false, so this is 8 query + 0 demo = 8 images per sample.
+data.max_frames: 8
+
+# DELTA 2 — train_base.yaml carries the AWS path (it was rewritten for the
+# research-partner cluster in 8b43e2d, after run2 had already trained). This
+# restores the value the deployed 16-frame run actually used, so the two arms
+# read the same ICL pair index. Concatenated after train_base.yaml, so it wins.
+data.pairs_index_path: /projects/prjs1958/robometer_frames_splits_full/pairs_index_train.jsonl
+
+# Loss 2.
+loss.progress_loss_type: c51_asymmetric
+loss.success_loss_type: bce_asymmetric
+loss.progress_discrete_bins: 10
+loss.asymmetric_lambda: 0.3
+
+# KL anchor.
+loss.failure_kl_weight: 0.0
+loss.failure_kl_buffer_size: 10
+loss.failure_kl_apply_when_buffer_below_size: true
+loss.failure_kl_apply_every_n_success: 1
+loss.failure_kl_concat_batch: false
+loss.failure_kl_detach_backbone: false
+
+# Heads.
+model.train_progress_head: true
+model.train_success_head: true
+model.train_preference_head: false
+
+# Sampler.
+data.sample_type_ratio: [0,1,0]
+data.stratified_batch_balance: false
+data.failure_oversample_factor: 1.89    # → 30% failure batch-fraction (natural 18.5%)
+# Per-source SUCCESS boost — see run1 yaml for rationale.
+data.success_oversample_per_source.metaworld: 13.0
+data.failure_oversample_per_source.droid: 3.0      # boost droid failures (6k vs 155k succ → succ:fail within droid 91:9 → 64:36)
+data.warmup_steps: 0
+data.failure_label_smoothing: linear
+
+# Keep orphan-task failures (tasks with no successful demo).
+data.keep_orphan_task_failures: true
+
+# ICL OFF.
+data.use_icl: false
+data.icl_prob: 0.0
+
+training.learning_rate: 1.0e-5
+
+# DELTA 3 — distinct exp_name so the W&B run and the on-disk subdir do not
+# collide with the 16-frame run2.
+training.exp_name: robometer_ft_run2_noicl_ours_8f

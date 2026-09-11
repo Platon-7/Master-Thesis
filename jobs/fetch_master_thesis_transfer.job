@@ -1,0 +1,59 @@
+#!/bin/bash
+#SBATCH --job-name=fetch_mt_transfer
+#SBATCH --output=logs/fetch_master_thesis_transfer_%j.out
+#SBATCH --error=logs/fetch_master_thesis_transfer_%j.err
+#SBATCH --partition=capacity
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=04:00:00
+
+# Pull Master-Thesis-transfer from OneDrive (onedrive: remote), skipping the
+# checkpoints subfolders that are not needed:
+#   - checkpoints/Qwen35_FT_phase1_consolidated
+#   - checkpoints/abl_origdata_asym_checkpoint-4500
+# Keeps: env/, release/, checkpoints/Robometer_FT_consolidated/
+# Source folder: ~57.4 GiB (env 8.6G + release 0.7G + Robometer_FT_consolidated 48.1G)
+
+set -euo pipefail
+
+export PATH="$HOME/.local/bin:$PATH"
+
+DEST="$HOME/Master-Thesis-transfer"
+REMOTE="onedrive:Master-Thesis-transfer"
+
+echo "============================================================"
+echo "Fetch Master-Thesis-transfer from OneDrive"
+echo "  Job ID:   $SLURM_JOB_ID"
+echo "  Node:     $(hostname)"
+echo "  Dest:     $DEST"
+echo "  Date:     $(date)"
+echo "============================================================"
+
+rclone --version | head -1
+
+RCLONE_OPTS=(
+    --transfers 8
+    --checkers 16
+    --stats 30s
+    --stats-one-line
+    --retries 5
+    --low-level-retries 10
+    --log-level INFO
+)
+
+echo "--- env/ ---"
+rclone copy "$REMOTE/env" "$DEST/env" "${RCLONE_OPTS[@]}"
+
+echo "--- release/ ---"
+rclone copy "$REMOTE/release" "$DEST/release" "${RCLONE_OPTS[@]}"
+
+echo "--- checkpoints/Robometer_FT_consolidated/ ---"
+rclone copy "$REMOTE/checkpoints/Robometer_FT_consolidated" "$DEST/checkpoints/Robometer_FT_consolidated" "${RCLONE_OPTS[@]}"
+
+RC=$?
+echo "============================================================"
+echo "rclone exit code: $RC"
+echo "Done at: $(date)"
+du -sh "$DEST" 2>/dev/null || true
+echo "============================================================"
+exit $RC
