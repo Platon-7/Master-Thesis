@@ -44,5 +44,5 @@ echo "tasks=$CALIB_TASKS models=$CALIB_MODELS N=${CALIB_N_SUCC}s/${CALIB_N_FAIL}
 echo "FT=$ROBOMETER_FT_PATH  out=$CALIB_OUT  MUJOCO_GL=$MUJOCO_GL"
 echo "============================================================="
 
-python ../reward-model-study/scripts/calibrate_threshold_multitask.py
+python ../post-training-analysis/reward-model-study/scripts/calibrate_threshold_multitask.py
 echo "==================== calibrate done (exit $?) ===================="

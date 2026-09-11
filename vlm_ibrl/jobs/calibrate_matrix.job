@@ -48,5 +48,5 @@ export CALIB_N_FAIL="${CALIB_N_FAIL:-8}"
 export CALIB_STRIDE="${CALIB_STRIDE:-18}"
 export CALIB_MAXT="${CALIB_MAXT:-160}"
 echo "=== calib matrix: model=$CALIB_MODEL out=$CALIB_OUT ==="
-python ../reward-model-study/scripts/calibrate_matrix.py
+python ../post-training-analysis/reward-model-study/scripts/calibrate_matrix.py
 echo "=== calib matrix done (exit $?) ==="

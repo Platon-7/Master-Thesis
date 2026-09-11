@@ -29,5 +29,5 @@ python -c "import torch, transformers; print('[env] imports OK; torch',torch.__v
 
 export QWEN35_FT_PATH="${QWEN35_FT_PATH:-/shared/home/PKA4388/checkpoints/Qwen35_FT_phase1_consolidated/run4_step6500}"
 echo "[probe] QWEN35_FT_PATH=$QWEN35_FT_PATH"
-python ../reward-model-study/scripts/qwen35_diag.py
+python ../post-training-analysis/reward-model-study/scripts/qwen35_diag.py
 echo "=== probe done (exit $?) ==="

@@ -16,7 +16,7 @@ set -uo pipefail
 cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"; mkdir -p logs
 CKPT="${CKPT:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run2_noicl_ours_step4000}"
 TAG="${TAG:-robometer_run2_noicl}"
-DUMP="$HERE/../reward-model-study/results/robomimic/rollouts_can.npz"
+DUMP="$HERE/../post-training-analysis/reward-model-study/results/robomimic/rollouts_can.npz"
 unset PYTHONPATH 2>/dev/null || true
 export IBRL_CONDA_ENV="/shared/home/PKA4388/miniconda3/envs/demo2reward_robomimic"
 source /shared/home/PKA4388/miniconda3/etc/profile.d/conda.sh

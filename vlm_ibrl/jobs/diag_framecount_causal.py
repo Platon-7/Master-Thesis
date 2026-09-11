@@ -29,7 +29,7 @@ def main():
 
     # ===================== PHASE A: frame-count sensitivity =====================
     print("\n##### PHASE A: frame-count freak-out test #####", flush=True)
-    npz = "../reward-model-study/results/robomimic/rollouts_can.npz"
+    npz = "../post-training-analysis/reward-model-study/results/robomimic/rollouts_can.npz"
     if os.path.exists(npz):
         d = np.load(npz, allow_pickle=True)
         labels = d["labels"]

@@ -452,13 +452,13 @@ def main(cfg: GenerateConfig):
             cfg.hub.hub_repo_id = username + "/" + cfg.hub.hub_repo_id
 
     # Import the appropriate dataset loader and trajectory creator.
-    # The Robometer-LoRA keyframe dataset (Master-Thesis/Robometer-LoRA) routes here when the
+    # The Robometer-LoRA keyframe dataset (Master-Thesis/post-training-analysis/Robometer-LoRA) routes here when the
     # dataset name starts with `robometer_frames_`. Loader lives in the sibling repo, so we
     # add it to sys.path on demand. The default location matches a clone alongside Robometer.
     if cfg.dataset.dataset_name and "robometer_frames" in cfg.dataset.dataset_name:
         import sys as _sys
         from pathlib import Path as _Path
-        _ROBOMETER_LORA = _Path(__file__).resolve().parents[2] / "Robometer-LoRA" / "data_adapters"
+        _ROBOMETER_LORA = _Path(__file__).resolve().parents[2] / "post-training-analysis" / "Robometer-LoRA" / "data_adapters"
         if str(_ROBOMETER_LORA) not in _sys.path:
             _sys.path.insert(0, str(_ROBOMETER_LORA))
         from robometer_frames_loader import (

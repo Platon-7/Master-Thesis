@@ -21,5 +21,5 @@ export PYTHONPATH="$PYTHONPATH:$HERE/../Robometer"; export MUJOCO_GL=egl
 export ROBOMETER_FT_PATH="/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run2_noicl_ours_step4000"
 export DEMO_DIR="/shared/home/PKA4388/Master-Thesis/vlm_ibrl/release/data/metaworld/CoffeePush_frame_stack_1_224x224_end_on_success/demonstrations/mw-coffee-push/frames"
 export TASK_DESC="Push a mug under a coffee machine."
-python ../reward-model-study/scripts/demo_score_probe.py
+python ../post-training-analysis/reward-model-study/scripts/demo_score_probe.py
 echo "=== done ($?) ==="

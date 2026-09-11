@@ -15,7 +15,7 @@
 # AUC>=~0.8 => task x model worth a GPU-day of IBRL; ~0.5 => drop. See [[robomimic-eval-setup]].
 set -uo pipefail
 cd "$SLURM_SUBMIT_DIR"; HERE="$(pwd)"
-mkdir -p logs "$HERE/../reward-model-study/results/robomimic"
+mkdir -p logs "$HERE/../post-training-analysis/reward-model-study/results/robomimic"
 
 TASK="${TASK:-can}"
 export NUM_GAME="${NUM_GAME:-50}"
@@ -23,7 +23,7 @@ export DUMP_FRAMES="${DUMP_FRAMES:-32}"
 export EVAL_SEED="${EVAL_SEED:-1}"
 FT_CKPT="${FT_CKPT:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000}"
 B4_CKPT="${B4_CKPT:-/shared/home/PKA4388/checkpoints/Robometer-4B}"
-DUMP="$HERE/../reward-model-study/results/robomimic/rollouts_${TASK}.npz"
+DUMP="$HERE/../post-training-analysis/reward-model-study/results/robomimic/rollouts_${TASK}.npz"
 
 # ---- environment ----
 unset PYTHONPATH 2>/dev/null || true

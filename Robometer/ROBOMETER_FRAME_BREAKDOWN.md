@@ -9,7 +9,7 @@ ICL-debug audit found roboreward was missing from the unified pairing pipeline).
 
 For the *upstream* archive-level audit (the 93-archive `robometer_full_dataset/` scan
 that classifies humanoid / human-hand / standard-arm), see the sibling document
-`Real-World-Failures/Robometer/ROBOMETER_BREAKDOWN.md`.
+`real-world-data-generation/Robometer/ROBOMETER_BREAKDOWN.md`.
 
 ---
 

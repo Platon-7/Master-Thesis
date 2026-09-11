@@ -31,5 +31,5 @@ export CALIB_N_SUCC="${CALIB_N_SUCC:-15}"
 export CALIB_N_FAIL="${CALIB_N_FAIL:-15}"
 export CALIB_OUT="${CALIB_OUT:-/shared/home/PKA4388/vlm_ibrl_runs/calib_roboreward_4b_${CALIB_TASKS}.json}"
 echo "=== RoboReward-4B calib: task=$CALIB_TASKS out=$CALIB_OUT ==="
-python ../reward-model-study/scripts/diag_lrm2.py
+python ../post-training-analysis/reward-model-study/scripts/diag_lrm2.py
 echo "=== rr calib done (exit $?) ==="

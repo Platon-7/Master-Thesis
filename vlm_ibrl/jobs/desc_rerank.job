@@ -26,5 +26,5 @@ export MUJOCO_GL="${MUJOCO_GL:-egl}"
 python -c "import torch,transformers; print('[env] torch',torch.__version__,'tf',transformers.__version__)" || { echo "[env] FAIL"; exit 1; }
 export ROBOMETER_FT_PATH="${ROBOMETER_FT_PATH:-/shared/home/PKA4388/checkpoints/Robometer_FT_consolidated/run1_icl_ours_step4000}"
 echo "[desc] ckpt=$ROBOMETER_FT_PATH"
-python ../reward-model-study/scripts/desc_rerank.py
+python ../post-training-analysis/reward-model-study/scripts/desc_rerank.py
 echo "=== done (exit $?) ==="

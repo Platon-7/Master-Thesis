@@ -14,7 +14,7 @@ Two source modes:
 
 * ``--source packed`` — loads from the 16-frame JPEG keyframes already
   staged at ``$eval_root/keyframes{,_success,_orphan_success}/<family>/shard-*.tar``
-  (produced by your ``RoboReward/Real-World-Failures/Robometer/rbm-1m-ood-pipeline/``
+  (produced by your ``real-world-data-generation/Robometer/rbm-1m-ood-pipeline/``
   scripts; each episode = 16 JPEGs + meta.json, where the 16 frames were
   picked by ``linspace(0, 31, 16)`` on the raw mp4). The scorer then does
   ``linspace(16, max_frames)`` internally.
