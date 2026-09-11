@@ -1,1 +1,4 @@
-/shared/home/PKA4388/Master-Thesis/Robometer/robometer/trainers/__init__.py
+from .rewind_trainer import ReWiNDTrainer
+from .rbm_heads_trainer import RBMHeadsTrainer
+
+__all__ = ["RBMHeadsTrainer", "ReWiNDTrainer"]
