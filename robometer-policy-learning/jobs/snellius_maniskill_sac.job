@@ -31,9 +31,17 @@
 #   sbatch --export=ALL,ARM=gt,SEED=0,STEPS=300000               jobs/snellius_maniskill_sac.job
 #
 # Set RECIPE=0 to opt out of the baked recipe (then you own every knob).
+#
+# On another cluster, override partition, logs and paths at submit time:
+#   sbatch -p <partition> -t 48:00:00 -o logs/ms_sac_%j.out -e logs/ms_sac_%j.err \
+#     --export=ALL,SCRATCH_ROOT=/scratch/$USER,ENV_PREFIX=/scratch/$USER/envs/maniskill_rl,CKPT_ROOT=<dir>,VULKAN_FIX=1,SAFEPATH=1,ARM=gt,SEED=0 \
+#     jobs/snellius_maniskill_sac.job
+# See MANISKILL_HANDOFF.md section 8.
 
 set -uo pipefail
 cd "$SLURM_SUBMIT_DIR"
+# SLURM does not always propagate $USER (seen on hipster), and set -u would abort.
+export USER="${USER:-$(whoami)}"
 mkdir -p logs
 
 TASK="${TASK:-PullCube-v1}"
@@ -43,7 +51,7 @@ STEPS="${STEPS:-300000}"
 
 # --- which reward model -----------------------------------------------------
 # MODEL is the short name; REWARD_CKPT can still be given directly to override.
-CKPT_ROOT="/projects/prjs1958/Robometer_FT_consolidated"
+CKPT_ROOT="${CKPT_ROOT:-/projects/prjs1958/Robometer_FT_consolidated}"
 MODEL="${MODEL:-run2}"
 if [[ -z "${REWARD_CKPT:-}" ]]; then
     case "$MODEL" in
@@ -81,11 +89,22 @@ fi
 export PATH="$ENV_PREFIX/bin:$PATH"
 PYTHON="$ENV_PREFIX/bin/python"
 
+# Other clusters: SCRATCH_ROOT moves every cache and run dir. VULKAN_FIX=1 applies the
+# extracted-driver Vulkan setup from REBUILD.md (nodes without Vulkan userspace, e.g.
+# hipster). SAFEPATH=1 stops the in-repo robometer/ submodule shadowing the real fork
+# (REBUILD.md trap 3). All three default to the Snellius behaviour.
+SCRATCH_ROOT="${SCRATCH_ROOT:-/scratch-shared/$USER}"
+if [[ "${VULKAN_FIX:-0}" == "1" ]]; then
+    export LD_LIBRARY_PATH="$SCRATCH_ROOT/vulkan_loader/extracted/lib:$SCRATCH_ROOT/nvidia_driver/extracted:$ENV_PREFIX/lib64/python3.12/site-packages/sapien/oidn_library:${LD_LIBRARY_PATH:-}"
+    export VK_ICD_FILENAMES="$SCRATCH_ROOT/nvidia_driver/nvidia_icd_abs.json"
+fi
+[[ "${SAFEPATH:-0}" == "1" ]] && export PYTHONSAFEPATH=1
+
 export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl SAPIEN_HEADLESS=1
-export MS_ASSET_DIR="${MS_ASSET_DIR:-/scratch-shared/$USER/maniskill_assets}"
-export HF_HOME="${HF_HOME:-/scratch-shared/$USER/hf_cache}"
-export TORCH_HOME="${TORCH_HOME:-/scratch-shared/$USER/torch_cache}"
-export SAPIEN_CACHE_DIR="${SAPIEN_CACHE_DIR:-/scratch-shared/$USER/sapien_cache}"
+export MS_ASSET_DIR="${MS_ASSET_DIR:-$SCRATCH_ROOT/maniskill_assets}"
+export HF_HOME="${HF_HOME:-$SCRATCH_ROOT/hf_cache}"
+export TORCH_HOME="${TORCH_HOME:-$SCRATCH_ROOT/torch_cache}"
+export SAPIEN_CACHE_DIR="${SAPIEN_CACHE_DIR:-$SCRATCH_ROOT/sapien_cache}"
 export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
 # Every RoboRef checkpoint bakes use_unsloth:true into config.yaml; we only ever
 # run the reward model in inference, which plain from_pretrained serves.
@@ -150,7 +169,7 @@ if [[ -n "${RESUME_FROM:-}" ]]; then
     echo "RESUMING from $RESUME_FROM (STEPS=$STEPS is the REMAINING budget)"
 fi
 
-RUN_DIR="${RUN_DIR:-/scratch-shared/$USER/roboref_runs/ms_${TASK}_${MODEL_TAG}_${ARM}_s${SEED}_$(date +%Y%m%d_%H%M%S)}"
+RUN_DIR="${RUN_DIR:-$SCRATCH_ROOT/roboref_runs/ms_${TASK}_${MODEL_TAG}_${ARM}_s${SEED}_$(date +%Y%m%d_%H%M%S)}"
 mkdir -p "$RUN_DIR"
 # Per-episode instrumentation -> $RUN_DIR/episodes.jsonl (REBUILD.md).
 export RPL_EPISODE_LOG="$RUN_DIR"

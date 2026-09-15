@@ -225,8 +225,9 @@ nothing ManiSkill runs at all. The instrumentation branch adds the rest below.
 
 `maniskill_online_rl.yaml` still inherits `algorithm/sac.yaml`'s LIBERO-tuned
 values: **gamma=0.99, tau=0.005, batch_size=128, learning_starts=5000**. The
-numbers in `MANISKILL_HANDOFF.md` ("canonical recipe") were passed as CLI
-overrides at submit time and were never written into the config.
+canonical recipe was passed as CLI overrides at submit time and was never written
+into the config. `jobs/snellius_maniskill_sac.job` bakes it in (see
+`MANISKILL_HANDOFF.md` section 2).
 
 `jobs/maniskill_sac.job` does **not** add them either. So unless you pass them
 explicitly you are running a different algorithm from every published result:

@@ -4,7 +4,7 @@ Scripts that turn experiment outputs into the paper's figures and tables. They r
 
 | Folder | Produces |
 |---|---|
-| `reward-hacking/` | The on-policy false-positive analysis on ManiSkill (Table 3): per-step AUROC and FP rate from the training episodes. |
+| `reward-hacking/` | On-policy reward hacking on ManiSkill. `goodhart_steps.py` reproduces Table 3's FP column and draws it over training; `goodhart_curves.py` is the per-episode-peak version plus the per-seed scatter; `onpolicy_fp.py` pools per-episode peaks. Set `ROBOREF_RUNS` to the extracted runs. |
 | `maniskill-figure/` | The dense-reward ManiSkill figure: stitches the Robo-Dopamine runs and draws the curves. |
 | `metaworld-figure/` | Converts the MetaWorld bands from standard deviation to standard error. |
 | `robomimic-figure/` | The Robomimic curves. `build_robomimic_panel.py` writes RoboRef's mean and standard-error band over the chosen seeds into the sparse-reward figure. |

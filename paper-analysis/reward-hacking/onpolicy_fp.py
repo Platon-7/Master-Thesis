@@ -20,7 +20,7 @@ AUROC and FPR@95TPR are.
 import glob, json, os, re
 import numpy as np
 
-R = "/scratch-shared/pkarageorgis1/roboref_runs"
+R = os.environ.get("ROBOREF_RUNS", "/scratch-shared/pkarageorgis1/roboref_runs")
 # Seed sets matching the paper figure. run2 drew from a larger pool; the rest are 0-4.
 SEEDS = {"run2": [3, 9, 0, 1, 2]}
 DEFAULT = [0, 1, 2, 3, 4]
